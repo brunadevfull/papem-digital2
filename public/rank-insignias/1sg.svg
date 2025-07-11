@@ -1,0 +1,12 @@
+<svg width="80" height="40" viewBox="0 0 80 40" xmlns="http://www.w3.org/2000/svg">
+  <!-- Primeiro-Sargento: Três galões -->
+  <rect width="80" height="40" fill="#003366" stroke="#FFD700" stroke-width="2"/>
+  
+  <!-- Galões em V invertido -->
+  <path d="M 20 15 L 25 25 L 30 15" stroke="#FFD700" stroke-width="3" fill="none"/>
+  <path d="M 32 15 L 37 25 L 42 15" stroke="#FFD700" stroke-width="3" fill="none"/>
+  <path d="M 44 15 L 49 25 L 54 15" stroke="#FFD700" stroke-width="3" fill="none"/>
+  
+  <!-- Texto -->
+  <text x="40" y="35" text-anchor="middle" fill="#FFD700" font-family="Arial" font-size="7" font-weight="bold">1º SG</text>
+</svg>

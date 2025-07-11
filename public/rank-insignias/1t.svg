@@ -1,0 +1,11 @@
+<svg width="80" height="40" viewBox="0 0 80 40" xmlns="http://www.w3.org/2000/svg">
+  <!-- Primeiro-Tenente: Uma estrela -->
+  <rect width="80" height="40" fill="#003366" stroke="#FFD700" stroke-width="2"/>
+  
+  <!-- Estrela central -->
+  <polygon points="40,12 42,18 48,18 43,22 45,28 40,24 35,28 37,22 32,18 38,18" 
+           fill="#FFD700" stroke="#FFD700" stroke-width="0.5"/>
+  
+  <!-- Texto -->
+  <text x="40" y="35" text-anchor="middle" fill="#FFD700" font-family="Arial" font-size="7" font-weight="bold">1º TEN</text>
+</svg>

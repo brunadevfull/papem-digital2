@@ -1,0 +1,35 @@
+const militaryPersonnel = [
+  { name: "CT (IM) YAGO", rank: "ct", specialty: "im" },
+  { name: "CT (IM) MATEUS BARBOSA", rank: "ct", specialty: "im" },
+  { name: "1T (RM2-T) LARISSA CASTRO", rank: "1t", specialty: "rm2-t" },
+  { name: "1T (IM) ALEXANDRIA", rank: "1t", specialty: "im" },
+  { name: "1T (QC-IM) TAMIRES", rank: "1t", specialty: "qc-im" },
+  { name: "1T (RM2-T) KARINE", rank: "1t", specialty: "rm2-t" },
+  { name: "1T (AA) RONALD CHAVES", rank: "1t", specialty: "aa" },
+  { name: "1T (RM2-T) PINA TRIGO", rank: "1t", specialty: "rm2-t" },
+  { name: "1T (IM) LEONARDO ANDRADE", rank: "1t", specialty: "im" },
+  { name: "1T (IM) ELIEZER", rank: "1t", specialty: "im" },
+  { name: "2T (AA) MARCIO MARTINS", rank: "2t", specialty: "aa" },
+  { name: "2T (AA) MACHADO", rank: "2t", specialty: "aa" }
+];
+
+// Insignia Database
+const insigniaDatabase = [
+  { id: 1, descricao: "CMG (IM)", imagem: "imagens/cmg_im.png", rank: "cmg", specialty: "im" },
+  { id: 2, descricao: "CF (IM)", imagem: "imagens/cf_im.png", rank: "cf", specialty: "im" },
+  { id: 3, descricao: "CF (T)", imagem: "imagens/cf_t.png", rank: "cf", specialty: "t" },
+  { id: 4, descricao: "CC (T)", imagem: "imagens/cc_t.png", rank: "cc", specialty: "t" },
+  { id: 5, descricao: "CC (IM)", imagem: "imagens/cc_im.png", rank: "cc", specialty: "im" },
+  { id: 6, descricao: "CT (T)", imagem: "imagens/ct_t.png", rank: "ct", specialty: "t" },
+  { id: 7, descricao: "CT (IM)", imagem: "imagens/ct_im.png", rank: "ct", specialty: "im" },
+  { id: 8, descricao: "CT (QC-IM)", imagem: "imagens/ct_qc_im.png", rank: "ct", specialty: "qc-im" },
+  { id: 9, descricao: "CT (RM2-T)", imagem: "imagens/ct_rm2_t.png", rank: "ct", specialty: "rm2-t" },
+  { id: 10, descricao: "1T (RM2-T)", imagem: "imagens/1t_c.png", rank: "1t", specialty: "rm2-t" },
+  { id: 11, descricao: "1T (T)", imagem: "imagens/1t_t.png", rank: "1t", specialty: "t" },
+  { id: 12, descricao: "1T (IM)", imagem: "imagens/1t_im.png", rank: "1t", specialty: "im" },
+  { id: 13, descricao: "2T (RM2-T)", imagem: "imagens/2t_c.png", rank: "2t", specialty: "rm2-t" },
+  { id: 14, descricao: "2T (AA)", imagem: "imagens/2t_aa.png", rank: "2t", specialty: "aa" },
+  { id: 15, descricao: "CMG (RM1-T)", imagem: "imagens/CMG_T_RM1.png", rank: "cmg", specialty: "rm1-t" },
+  { id: 16, descricao: "CF (RM1-T)", imagem: "imagens/CF_T_RM1.png", rank: "cf", specialty: "rm1-t" },
+  { id: 17, descricao: "CC (RM1-T)", imagem: "imagens/CC_T_RM1.png", rank: "cc", specialty: "rm1-t" }
+];

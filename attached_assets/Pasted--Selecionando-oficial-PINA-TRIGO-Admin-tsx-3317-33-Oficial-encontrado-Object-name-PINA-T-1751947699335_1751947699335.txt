@@ -1,0 +1,79 @@
+🔄 Selecionando oficial: PINA TRIGO Admin.tsx:3317:33
+👮 Oficial encontrado: 
+Object { name: "PINA TRIGO", rank: "1t", specialty: "RM2-T", fullRankName: "Primeiro-Tenente" }
+Admin.tsx:3319:33
+🔄 Novo estado dos oficiais: 
+Object { officerName: "1T (RM2-T) PINA TRIGO", officerRank: "1t", masterName: "1SG (ES) DA SILVA", masterRank: "3sg" }
+Admin.tsx:3326:33
+🔄 Convertendo para display: 1T (RM2-T) PINA TRIGO tipo: officer Admin.tsx:134:13
+✅ Formato já correto: 
+Object { rank: "1T", specialty: undefined, name: "(RM2-T) PINA TRIGO" }
+Admin.tsx:139:15
+🔄 Convertendo para display: 1SG (ES) DA SILVA tipo: master Admin.tsx:134:13
+✅ Formato já correto: 
+Object { rank: "1SG", specialty: "ES", name: "DA SILVA" }
+Admin.tsx:139:15
+🌐 Admin: Detectado Replit, usando mesmo origin: https://1f8faedd-56a9-4fd2-a9c8-53add674d89f-00-2tf8n5fh0bu4h.riker.replit.dev 2 Admin.tsx:481:15
+🔄 Convertendo para display: 1T (RM2-T) PINA TRIGO tipo: officer Admin.tsx:134:13
+✅ Formato já correto: 
+Object { rank: "1T", specialty: undefined, name: "(RM2-T) PINA TRIGO" }
+Admin.tsx:139:15
+🔄 Convertendo para display: 1SG (ES) DA SILVA tipo: master Admin.tsx:134:13
+✅ Formato já correto: 
+Object { rank: "1SG", specialty: "ES", name: "DA SILVA" }
+Admin.tsx:139:15
+🌐 Admin: Detectado Replit, usando mesmo origin: https://1f8faedd-56a9-4fd2-a9c8-53add674d89f-00-2tf8n5fh0bu4h.riker.replit.dev 2 Admin.tsx:481:15
+🔄 Selecionando contramestre: ANA BEATHRIZ Admin.tsx:3392:33
+⚓ Contramestre encontrado: 
+Object { name: "ANA BEATHRIZ", rank: "3sg", specialty: "AD", fullRankName: "Terceiro-Sargento" }
+Admin.tsx:3394:33
+🔄 Convertendo para display: 1T (RM2-T) PINA TRIGO tipo: officer Admin.tsx:134:13
+✅ Formato já correto: 
+Object { rank: "1T", specialty: undefined, name: "(RM2-T) PINA TRIGO" }
+Admin.tsx:139:15
+🔄 Convertendo para display: 3SG (AD) ANA BEATHRIZ tipo: master Admin.tsx:134:13
+✅ Formato já correto: 
+Object { rank: "3SG", specialty: "AD", name: "ANA BEATHRIZ" }
+Admin.tsx:139:15
+🌐 Admin: Detectado Replit, usando mesmo origin: https://1f8faedd-56a9-4fd2-a9c8-53add674d89f-00-2tf8n5fh0bu4h.riker.replit.dev 2 Admin.tsx:481:15
+💾 Salvando oficiais: 
+Object { officerName: "1T (RM2-T) PINA TRIGO", officerRank: "1t", masterName: "3SG (AD) ANA BEATHRIZ", masterRank: "3sg" }
+Admin.tsx:600:15
+📝 Dados sendo enviados: 
+Object { officerName: "1T (RM2-T) PINA TRIGO", masterName: "3SG (AD) ANA BEATHRIZ", officerRank: "1t", masterRank: "3sg" }
+Admin.tsx:607:15
+🌐 Admin: Detectado Replit, usando mesmo origin: https://1f8faedd-56a9-4fd2-a9c8-53add674d89f-00-2tf8n5fh0bu4h.riker.replit.dev Admin.tsx:481:15
+🔄 Convertendo para display: 1T (RM2-T) PINA TRIGO tipo: officer Admin.tsx:134:13
+✅ Formato já correto: 
+Object { rank: "1T", specialty: undefined, name: "(RM2-T) PINA TRIGO" }
+Admin.tsx:139:15
+🔄 Convertendo para display: 3SG (AD) ANA BEATHRIZ tipo: master Admin.tsx:134:13
+✅ Formato já correto: 
+Object { rank: "3SG", specialty: "AD", name: "ANA BEATHRIZ" }
+Admin.tsx:139:15
+🌐 Admin: Detectado Replit, usando mesmo origin: https://1f8faedd-56a9-4fd2-a9c8-53add674d89f-00-2tf8n5fh0bu4h.riker.replit.dev 2 Admin.tsx:481:15
+✅ Resposta do servidor: 
+Object { success: true, officers: {…}, message: "Oficiais de serviço atualizados com sucesso", timestamp: "2025-07-08T04:08:11.503Z" }
+Admin.tsx:619:15
+🌐 Admin: Detectado Replit, usando mesmo origin: https://1f8faedd-56a9-4fd2-a9c8-53add674d89f-00-2tf8n5fh0bu4h.riker.replit.dev Admin.tsx:481:15
+🔄 Convertendo para display: 1T (RM2-T) PINA TRIGO tipo: officer Admin.tsx:134:13
+✅ Formato já correto: 
+Object { rank: "1T", specialty: undefined, name: "(RM2-T) PINA TRIGO" }
+Admin.tsx:139:15
+🔄 Convertendo para display: 3SG (AD) ANA BEATHRIZ tipo: master Admin.tsx:134:13
+✅ Formato já correto: 
+Object { rank: "3SG", specialty: "AD", name: "ANA BEATHRIZ" }
+Admin.tsx:139:15
+🌐 Admin: Detectado Replit, usando mesmo origin: https://1f8faedd-56a9-4fd2-a9c8-53add674d89f-00-2tf8n5fh0bu4h.riker.replit.dev 2 Admin.tsx:481:15
+👮 Dados carregados do servidor: 
+Object { id: 1, officerId: 16, masterId: 24, officerName: "1T (IM) ELIEZER", masterName: "1SG (ES) DA SILVA", updatedAt: "2025-07-08T04:08:11.473Z" }
+Admin.tsx:575:17
+🔄 Convertendo para display: 1T (IM) ELIEZER tipo: officer Admin.tsx:134:13
+✅ Formato já correto: 
+Object { rank: "1T", specialty: "IM", name: "ELIEZER" }
+Admin.tsx:139:15
+🔄 Convertendo para display: 1SG (ES) DA SILVA tipo: master Admin.tsx:134:13
+✅ Formato já correto: 
+Object { rank: "1SG", specialty: "ES", name: "DA SILVA" }
+Admin.tsx:139:15
+🌐 Admin: Detectado Replit, usando mesmo origin: https://1f8faedd-56a9-4fd2-a9c8-53add674d89f-00-2tf8n5fh0bu4h.riker.replit.dev 2 Admin.tsx:481:15

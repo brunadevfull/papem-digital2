@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Limpar Cache - Sistema Marinha</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 600px;
+            margin: 50px auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #003366;
+            text-align: center;
+        }
+        button {
+            background-color: #ff4444;
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            font-size: 16px;
+            border-radius: 5px;
+            cursor: pointer;
+            width: 100%;
+            margin: 10px 0;
+        }
+        button:hover {
+            background-color: #cc3333;
+        }
+        .success {
+            background-color: #d4edda;
+            color: #155724;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 15px 0;
+            display: none;
+        }
+        .info {
+            background-color: #e7f3ff;
+            color: #004085;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 15px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🧹 Limpeza de Cache</h1>
+        <h2>Sistema de Display da Marinha</h2>
+        
+        <div class="info">
+            <strong>Quando usar:</strong>
+            <ul>
+                <li>Documentos não carregam corretamente</li>
+                <li>Erros de CORS (cross-origin)</li>
+                <li>URLs antigas (porta 3001) ainda aparecem</li>
+                <li>Sistema não conecta com o servidor</li>
+            </ul>
+        </div>
+
+        <button onclick="limparTudo()">🗑️ Limpar Todo o Cache</button>
+        <button onclick="limparDocumentos()">📄 Limpar Apenas Documentos</button>
+        <button onclick="verificarCache()">🔍 Verificar Cache Atual</button>
+        
+        <div id="resultado" class="success"></div>
+        <div id="info-cache"></div>
+    </div>
+
+    <script>
+        function limparTudo() {
+            try {
+                localStorage.clear();
+                sessionStorage.clear();
+                mostrarSucesso('✅ Todo o cache foi limpo com sucesso!');
+                setTimeout(() => {
+                    window.location.href = 'http://localhost:5000';
+                }, 2000);
+            } catch (error) {
+                mostrarSucesso('❌ Erro ao limpar cache: ' + error.message);
+            }
+        }
+
+        function limparDocumentos() {
+            try {
+                localStorage.removeItem('display-context');
+                mostrarSucesso('✅ Cache de documentos limpo! Recarregue a página principal.');
+            } catch (error) {
+                mostrarSucesso('❌ Erro ao limpar documentos: ' + error.message);
+            }
+        }
+
+        function verificarCache() {
+            const infoDiv = document.getElementById('info-cache');
+            const displayContext = localStorage.getItem('display-context');
+            
+            if (displayContext) {
+                try {
+                    const data = JSON.parse(displayContext);
+                    let info = '<h3>📋 Cache Atual:</h3>';
+                    info += `<p><strong>PLASA:</strong> ${data.plasaDocuments?.length || 0} documentos</p>`;
+                    info += `<p><strong>Escala:</strong> ${data.escalaDocuments?.length || 0} documentos</p>`;
+                    info += `<p><strong>Última atualização:</strong> ${data.lastUpdate || 'N/A'}</p>`;
+                    
+                    // Verificar URLs problemáticas
+                    let urlsProblema = 0;
+                    if (data.plasaDocuments) {
+                        urlsProblema += data.plasaDocuments.filter(doc => doc.url?.includes(':3001')).length;
+                    }
+                    if (data.escalaDocuments) {
+                        urlsProblema += data.escalaDocuments.filter(doc => doc.url?.includes(':3001')).length;
+                    }
+                    
+                    if (urlsProblema > 0) {
+                        info += `<p style="color: red;"><strong>⚠️ URLs com problema:</strong> ${urlsProblema} (porta 3001)</p>`;
+                        info += '<p><em>Recomendado: Limpar cache de documentos</em></p>';
+                    } else {
+                        info += '<p style="color: green;"><strong>✅ URLs corretas</strong></p>';
+                    }
+                    
+                    infoDiv.innerHTML = info;
+                } catch (error) {
+                    infoDiv.innerHTML = '<p style="color: red;">❌ Cache corrompido - Limpe todo o cache</p>';
+                }
+            } else {
+                infoDiv.innerHTML = '<p>💡 Cache vazio - Sistema iniciará limpo</p>';
+            }
+        }
+
+        function mostrarSucesso(mensagem) {
+            const div = document.getElementById('resultado');
+            div.innerHTML = mensagem;
+            div.style.display = 'block';
+            setTimeout(() => {
+                div.style.display = 'none';
+            }, 5000);
+        }
+
+        // Verificar automaticamente ao carregar
+        window.onload = () => {
+            verificarCache();
+        };
+    </script>
+</body>
+</html>

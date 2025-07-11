@@ -1,0 +1,38 @@
+# Diretório de Insígnias Militares
+
+Este diretório contém as imagens das insígnias militares organizadas por graduação e especialidade.
+
+## Estrutura de Nomenclatura:
+- `1t_im.png` - Primeiro-Tenente Intendência da Marinha
+- `ct_im.png` - Capitão-Tenente Intendência da Marinha  
+- `1sg_pd.png` - Primeiro-Sargento Praticante de Depósito
+- `2sg_cl.png` - Segundo-Sargento Calafate
+
+## Graduações Suportadas:
+### Oficiais:
+- CMG (Capitão de Mar e Guerra)
+- CF (Capitão de Fragata)
+- CC (Capitão de Corveta)  
+- CT (Capitão-Tenente)
+- 1T (Primeiro-Tenente)
+- 2T (Segundo-Tenente)
+
+### Praças:
+- 1SG (Primeiro-Sargento)
+- 2SG (Segundo-Sargento)
+- 3SG (Terceiro-Sargento)
+
+## Especialidades Suportadas:
+- IM (Intendência da Marinha)
+- T (Técnico)
+- QC-IM (Quadro Complementar - Intendência)
+- RM2-T (Reserva da Marinha 2ª Classe - Técnico)
+- AA (Administração e Apoio)
+- PD (Praticante de Depósito)
+- CL (Calafate)
+- ES (Especialista)
+- EP (Especialista de Proa)
+- PL (Especialista de Popa)
+- QI (Quadro de Informações)
+
+Para adicionar uma nova insígnia, coloque o arquivo PNG correspondente neste diretório seguindo a nomenclatura: `[graduacao]_[especialidade].png`

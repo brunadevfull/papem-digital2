@@ -1,0 +1,105 @@
+Download the React DevTools for a better development experience: https://reactjs.org/link/react-devtools chunk-WERSD76P.js:21551:25
+🔧 Admin carregado, avisos serão carregados do servidor Admin.tsx:198:13
+📋 Nenhuma escala ativa DisplayContext.tsx:421:15
+🚀 Inicializando DisplayContext... DisplayContext.tsx:520:15
+📥 Dados encontrados no localStorage DisplayContext.tsx:526:21
+🌐 DisplayContext Backend URL (Local): localhost:5000 DisplayContext.tsx:63:15
+✅ 1 documentos PLASA carregados DisplayContext.tsx:538:25
+🌐 DisplayContext Backend URL (Local): localhost:5000 DisplayContext.tsx:63:15
+✅ 1 documentos Escala carregados DisplayContext.tsx:552:25
+📢 Carregando avisos do servidor... DisplayContext.tsx:110:15
+🌐 DisplayContext Backend URL (Local): localhost:5000 DisplayContext.tsx:63:15
+📢 URL do backend: http://localhost:5000/api/notices DisplayContext.tsx:113:15
+📋 Apenas uma escala ativa, sem alternância DisplayContext.tsx:419:15
+📢 Resposta do servidor: 200 OK Admin.tsx:139:15
+📢 Resposta do servidor: 200 OK DisplayContext.tsx:121:15
+📢 Resposta do servidor: 200 OK Admin.tsx:139:15
+📢 Dados recebidos: 
+Object { success: true, notices: [], count: 0, timestamp: "2025-06-27T21:33:37.293Z" }
+DisplayContext.tsx:124:17
+📢 0 avisos carregados do servidor DisplayContext.tsx:127:19
+🔄 Carregando documentos do servidor... DisplayContext.tsx:488:15
+🌐 DisplayContext Backend URL (Local): localhost:5000 DisplayContext.tsx:63:15
+📄 Documentos do servidor: 3 DisplayContext.tsx:492:17
+🌐 DisplayContext Backend URL (Local): localhost:5000 DisplayContext.tsx:63:15
+📁 Auto-adicionando documento do servidor: Escala - 27/06/2025 DisplayContext.tsx:508:23
+📄 Adicionando documento: 
+Object { id: "1751060018440-8m41i5tqm", title: "Escala - 27/06/2025", type: "escala", category: undefined, url: "http://localhost:5000/uploads/document-1750965103729-841392224-cardÃ¡pio jun.pdf" }
+DisplayContext.tsx:318:13
+📋 Adicionando nova Escala: Escala - 27/06/2025 Categoria: undefined DisplayContext.tsx:342:17
+🌐 DisplayContext Backend URL (Local): localhost:5000 DisplayContext.tsx:63:15
+📁 Auto-adicionando documento do servidor: Escala - 27/06/2025 DisplayContext.tsx:508:23
+📄 Adicionando documento: 
+Object { id: "1751060018440-whim87uuj", title: "Escala - 27/06/2025", type: "escala", category: undefined, url: "http://localhost:5000/uploads/document-1750964875553-493135159-21 - 02JUN a 08JUN2025.pdf" }
+DisplayContext.tsx:318:13
+🌐 DisplayContext Backend URL (Local): localhost:5000 DisplayContext.tsx:63:15
+📁 Auto-adicionando documento do servidor: PLASA - 27/06/2025 DisplayContext.tsx:508:23
+📄 Adicionando documento: 
+Object { id: "1751060018440-mucrduc9r", title: "PLASA - 27/06/2025", type: "plasa", category: undefined, url: "http://localhost:5000/uploads/document-1750964894194-140401997-PLASA 22_3.pdf" }
+DisplayContext.tsx:318:13
+📄 Adicionando novo PLASA: PLASA - 27/06/2025 DisplayContext.tsx:332:17
+📋 Adicionando nova Escala: Escala - 27/06/2025 Categoria: undefined DisplayContext.tsx:342:17
+🔄 Configurando alternância entre 3 escalas a cada 30s DisplayContext.tsx:409:15
+📢 Resposta do servidor: 200 OK Admin.tsx:139:15
+✅ DisplayContext inicializado DisplayContext.tsx:586:19
+📢 Enviando aviso para o servidor: 
+Object { title: "teste", content: "asdasdasd", priority: "medium", startDate: Date Fri Jun 27 2025 18:33:37 GMT-0300 (Horário Padrão de Brasília), endDate: Date Sat Jun 28 2025 18:33:37 GMT-0300 (Horário Padrão de Brasília), active: true }
+Admin.tsx:218:13
+📢 Criando aviso no servidor: teste DisplayContext.tsx:153:15
+🔄 Convertendo aviso para formato do servidor: 
+Object { title: "teste", content: "asdasdasd", priority: "medium", startDate: Date Fri Jun 27 2025 18:33:37 GMT-0300 (Horário Padrão de Brasília), endDate: Date Sat Jun 28 2025 18:33:37 GMT-0300 (Horário Padrão de Brasília), active: true }
+DisplayContext.tsx:97:13
+📢 Dados para enviar: 
+Object { title: "teste", content: "asdasdasd", priority: "medium", startDate: "2025-06-27T21:33:37.256Z", endDate: "2025-06-28T21:33:37.256Z", active: true }
+DisplayContext.tsx:156:15
+🔍 DEBUG - Dados originais: 
+Object { title: "teste", content: "asdasdasd", priority: "medium", startDate: Date Fri Jun 27 2025 18:33:37 GMT-0300 (Horário Padrão de Brasília), startDateType: "object", startDateValid: true, endDate: Date Sat Jun 28 2025 18:33:37 GMT-0300 (Horário Padrão de Brasília), endDateType: "object", endDateValid: true, active: true }
+DisplayContext.tsx:157:15
+🔍 DEBUG - Dados convertidos: 
+Object { title: "teste", content: "asdasdasd", priority: "medium", startDate: "2025-06-27T21:33:37.256Z", endDate: "2025-06-28T21:33:37.256Z", active: true, startDateLength: 24, endDateLength: 24 }
+DisplayContext.tsx:169:15
+🌐 DisplayContext Backend URL (Local): localhost:5000 DisplayContext.tsx:63:15
+📢 Enviando para: http://localhost:5000/api/notices DisplayContext.tsx:175:15
+📢 Resposta: 200 OK DisplayContext.tsx:184:15
+📢 Resultado: 
+Object { success: true, notice: {…}, message: "Notice created successfully" }
+DisplayContext.tsx:196:17
+✅ Aviso criado no servidor: 1 DisplayContext.tsx:200:19
+Uncaught ReferenceError: id is not defined
+    children Admin.tsx:1894
+    Admin Admin.tsx:1894
+    React 11
+    workLoop scheduler.development.js:266
+    flushWork scheduler.development.js:239
+    performWorkUntilDeadline scheduler.development.js:533
+Admin.tsx:3614:51
+Uncaught ReferenceError: id is not defined
+    children Admin.tsx:1894
+    Admin Admin.tsx:1894
+    React 12
+    workLoop scheduler.development.js:266
+    flushWork scheduler.development.js:239
+    performWorkUntilDeadline scheduler.development.js:533
+Admin.tsx:3614:51
+The above error occurred in the <Admin> component:
+
+Admin@http://localhost:5000/src/pages/Admin.tsx:76:7
+Route@http://localhost:5000/@fs/var/www/html/papem-digital/node_modules/.vite/deps/wouter.js?v=c31bcb38:323:13
+Switch@http://localhost:5000/@fs/var/www/html/papem-digital/node_modules/.vite/deps/wouter.js?v=c31bcb38:379:14
+Router@http://localhost:5000/@fs/var/www/html/papem-digital/node_modules/.vite/deps/wouter.js?v=c31bcb38:291:14
+Provider@http://localhost:5000/@fs/var/www/html/papem-digital/node_modules/.vite/deps/chunk-O46BVKQA.js?v=843925b6:48:47
+TooltipProvider@http://localhost:5000/@fs/var/www/html/papem-digital/node_modules/.vite/deps/@radix-ui_react-tooltip.js?v=f096d6b3:63:7
+DisplayProvider@http://localhost:5000/src/context/DisplayContext.tsx:29:32
+QueryClientProvider@http://localhost:5000/@fs/var/www/html/papem-digital/node_modules/.vite/deps/@tanstack_react-query.js?v=f73b04fc:2804:27
+App
+
+Consider adding an error boundary to your tree to customize error handling behavior.
+Visit https://reactjs.org/link/error-boundaries to learn more about error boundaries. chunk-WERSD76P.js:14032:23
+Uncaught ReferenceError: id is not defined
+    children Admin.tsx:1894
+    Admin Admin.tsx:1894
+    React 9
+    workLoop scheduler.development.js:266
+    flushWork scheduler.development.js:239
+    performWorkUntilDeadline scheduler.development.js:533
+Admin.tsx:3614:51

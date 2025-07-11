@@ -1,0 +1,19 @@
+<svg width="80" height="40" viewBox="0 0 80 40" xmlns="http://www.w3.org/2000/svg">
+  <!-- Capitão-de-Corveta: Três estrelas -->
+  <rect width="80" height="40" fill="#003366" stroke="#FFD700" stroke-width="2"/>
+  
+  <!-- Primeira estrela -->
+  <polygon points="15,12 17,18 23,18 18,22 20,28 15,24 10,28 12,22 7,18 13,18" 
+           fill="#FFD700" stroke="#FFD700" stroke-width="0.5"/>
+  
+  <!-- Segunda estrela -->
+  <polygon points="40,12 42,18 48,18 43,22 45,28 40,24 35,28 37,22 32,18 38,18" 
+           fill="#FFD700" stroke="#FFD700" stroke-width="0.5"/>
+  
+  <!-- Terceira estrela -->
+  <polygon points="65,12 67,18 73,18 68,22 70,28 65,24 60,28 62,22 57,18 63,18" 
+           fill="#FFD700" stroke="#FFD700" stroke-width="0.5"/>
+  
+  <!-- Texto -->
+  <text x="40" y="35" text-anchor="middle" fill="#FFD700" font-family="Arial" font-size="8" font-weight="bold">CC</text>
+</svg>

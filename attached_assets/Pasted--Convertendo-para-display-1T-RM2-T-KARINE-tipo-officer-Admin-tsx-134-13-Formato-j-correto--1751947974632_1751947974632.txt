@@ -1,0 +1,45 @@
+🔄 Convertendo para display: 1T (RM2-T) KARINE tipo: officer Admin.tsx:134:13
+✅ Formato já correto: 
+Object { rank: "1T", specialty: undefined, name: "(RM2-T) KARINE" }
+Admin.tsx:139:15
+🔄 Convertendo para display: 3SG (OS) JUSTINO tipo: master Admin.tsx:134:13
+✅ Formato já correto: 
+Object { rank: "3SG", specialty: "OS", name: "JUSTINO" }
+Admin.tsx:139:15
+🌐 Admin: Detectado Replit, usando mesmo origin: https://1f8faedd-56a9-4fd2-a9c8-53add674d89f-00-2tf8n5fh0bu4h.riker.replit.dev 2 Admin.tsx:481:15
+Warning: Missing `Description` or `aria-describedby={undefined}` for {DialogContent}. @radix-ui_react-dialog.js:337:36
+🌐 Admin: Detectado Replit, usando mesmo origin: https://1f8faedd-56a9-4fd2-a9c8-53add674d89f-00-2tf8n5fh0bu4h.riker.replit.dev Admin.tsx:481:15
+🌐 Admin: Detectado Replit, usando mesmo origin: https://1f8faedd-56a9-4fd2-a9c8-53add674d89f-00-2tf8n5fh0bu4h.riker.replit.dev Admin.tsx:481:15
+🔄 Convertendo para display: 1T (RM2-T) KARINE tipo: officer Admin.tsx:134:13
+✅ Formato já correto: 
+Object { rank: "1T", specialty: undefined, name: "(RM2-T) KARINE" }
+Admin.tsx:139:15
+🔄 Convertendo para display: 3SG (OS) JUSTINO tipo: master Admin.tsx:134:13
+✅ Formato já correto: 
+Object { rank: "3SG", specialty: "OS", name: "JUSTINO" }
+Admin.tsx:139:15
+🌐 Admin: Detectado Replit, usando mesmo origin: https://1f8faedd-56a9-4fd2-a9c8-53add674d89f-00-2tf8n5fh0bu4h.riker.replit.dev Admin.tsx:481:15
+🌐 Admin: Detectado Replit, usando mesmo origin: https://1f8faedd-56a9-4fd2-a9c8-53add674d89f-00-2tf8n5fh0bu4h.riker.replit.dev Admin.tsx:481:15
+🌐 Admin: Detectado Replit, usando mesmo origin: https://1f8faedd-56a9-4fd2-a9c8-53add674d89f-00-2tf8n5fh0bu4h.riker.replit.dev Admin.tsx:481:15
+🔄 Convertendo para display: 1T (RM2-T) KARINE tipo: officer Admin.tsx:134:13
+✅ Formato já correto: 
+Object { rank: "1T", specialty: undefined, name: "(RM2-T) KARINE" }
+Admin.tsx:139:15
+🔄 Convertendo para display: 3SG (OS) JUSTINO tipo: master Admin.tsx:134:13
+✅ Formato já correto: 
+Object { rank: "3SG", specialty: "OS", name: "JUSTINO" }
+Admin.tsx:139:15
+🌐 Admin: Detectado Replit, usando mesmo origin: https://1f8faedd-56a9-4fd2-a9c8-53add674d89f-00-2tf8n5fh0bu4h.riker.replit.dev Admin.tsx:481:15
+🌐 Admin: Detectado Replit, usando mesmo origin: https://1f8faedd-56a9-4fd2-a9c8-53add674d89f-00-2tf8n5fh0bu4h.riker.replit.dev Admin.tsx:481:15
+👮 Dados carregados do servidor: 
+Object { id: 1, officerName: "1T (RM2-T) KARINE", masterName: "3SG (OS) JUSTINO", updatedAt: "2025-07-08T04:12:22.943Z" }
+Admin.tsx:575:17
+🔄 Convertendo para display: 1T (RM2-T) KARINE tipo: officer Admin.tsx:134:13
+✅ Formato já correto: 
+Object { rank: "1T", specialty: undefined, name: "(RM2-T) KARINE" }
+Admin.tsx:139:15
+🔄 Convertendo para display: 3SG (OS) JUSTINO tipo: master Admin.tsx:134:13
+✅ Formato já correto: 
+Object { rank: "3SG", specialty: "OS", name: "JUSTINO" }
+Admin.tsx:139:15
+🌐 Admin: Detectado Replit, usando mesmo origin: https://1f8faedd-56a9-4fd2-a9c8-53add674d89f-00-2tf8n5fh0bu4h.riker.replit.dev 2 Admin.tsx:481:15

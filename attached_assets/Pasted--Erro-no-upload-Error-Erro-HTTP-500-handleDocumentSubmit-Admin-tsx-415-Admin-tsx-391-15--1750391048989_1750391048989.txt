@@ -1,0 +1,20 @@
+❌ Erro no upload: Error: Erro HTTP: 500
+    handleDocumentSubmit Admin.tsx:415
+Admin.tsx:391:15
+    handleDocumentSubmit Admin.tsx:469
+Requisição cross-origin bloqueada: A diretiva Same Origin (mesma origem) não permite a leitura do recurso remoto em http://localhost:5000/uploads/document-1749843459384-PLASA_22_3.pdf (motivo: falta cabeçalho 'Access-Control-Allow-Origin' no CORS). Código de status: 204.
+Requisição cross-origin bloqueada: A diretiva Same Origin (mesma origem) não permite a leitura do recurso remoto em http://localhost:5000/uploads/document-1749843459384-PLASA_22_3.pdf (motivo: falha na requisição CORS). Código de status: (null).
+❌ Erro ao obter dados do PDF: TypeError: NetworkError when attempting to fetch resource. PDFViewer.tsx:213:15
+❌ ERRO CRÍTICO NA CONVERSÃO: TypeError: NetworkError when attempting to fetch resource. PDFViewer.tsx:393:15
+Requisição cross-origin bloqueada: A diretiva Same Origin (mesma origem) não permite a leitura do recurso remoto em http://localhost:5000/uploads/document-1750005783944-21_-_02JUN_a_08JUN2025.pdf.print__0.pdf (motivo: falta cabeçalho 'Access-Control-Allow-Origin' no CORS). Código de status: 200.
+Requisição cross-origin bloqueada: A diretiva Same Origin (mesma origem) não permite a leitura do recurso remoto em http://localhost:5000/uploads/document-1750005783944-21_-_02JUN_a_08JUN2025.pdf.print__0.pdf (motivo: falta cabeçalho 'Access-Control-Allow-Origin' no CORS). Código de status: 204.
+Requisição cross-origin bloqueada: A diretiva Same Origin (mesma origem) não permite a leitura do recurso remoto em http://localhost:5000/uploads/document-1750005783944-21_-_02JUN_a_08JUN2025.pdf.print__0.pdf (motivo: falha na requisição CORS). Código de status: (null).
+❌ Erro ao obter dados do PDF: TypeError: NetworkError when attempting to fetch resource. PDFViewer.tsx:213:15
+❌ ESCALA: Erro na conversão: TypeError: NetworkError when attempting to fetch resource. PDFViewer.tsx:691:15
+❌ Erro ao carregar escala: http://localhost:5000/uploads/document-1750005783944-21_-_02JUN_a_08JUN2025.pdf.print__0.pdf PDFViewer.tsx:829:21
+Requisição cross-origin bloqueada: A diretiva Same Origin (mesma origem) não permite a leitura do recurso remoto em http://localhost:5000/uploads/document-1749842925676-card__pio_jun.pdf (motivo: falta cabeçalho 'Access-Control-Allow-Origin' no CORS). Código de status: 200.
+Requisição cross-origin bloqueada: A diretiva Same Origin (mesma origem) não permite a leitura do recurso remoto em http://localhost:5000/uploads/document-1749842925676-card__pio_jun.pdf (motivo: falta cabeçalho 'Access-Control-Allow-Origin' no CORS). Código de status: 204.
+Requisição cross-origin bloqueada: A diretiva Same Origin (mesma origem) não permite a leitura do recurso remoto em http://localhost:5000/uploads/document-1749842925676-card__pio_jun.pdf (motivo: falha na requisição CORS). Código de status: (null).
+❌ Erro ao obter dados do PDF: TypeError: NetworkError when attempting to fetch resource. PDFViewer.tsx:213:15
+❌ ESCALA: Erro na conversão: TypeError: NetworkError when attempting to fetch resource. PDFViewer.tsx:691:15
+❌ Erro ao carregar escala: http://localhost:5000/uploads/document-1749842925676-card__pio_jun.pdf PDFViewer.tsx:829:21

@@ -1,0 +1,98 @@
+[vite] connecting... client:495:9
+[vite] connected. client:618:15
+Download the React DevTools for a better development experience: https://reactjs.org/link/react-devtools chunk-WERSD76P.js:21551:25
+=== SISTEMA CHM OFICIAL COMPLETO - TODOS OS 365 DIAS === sunsetUtils.ts:413:9
+📍 Rio de Janeiro - 22°55'S, 043°12'W sunsetUtils.ts:414:9
+🏛️ Fonte: Tábuas de Maré CHM 2025 (100% oficial) sunsetUtils.ts:415:9
+📅 COBERTURA: 365 dias completos (sem interpolação) sunsetUtils.ts:416:9
+<empty string> sunsetUtils.ts:417:9
+📅 Consultando CHM completo para: 2025-07-06 sunsetUtils.ts:403:11
+✅ CHM Oficial Completo: 2025-07-06 → 17:21 sunsetUtils.ts:393:13
+🌆 Pôr do sol CHM: 17:21 sunsetUtils.ts:405:11
+🏛️ CHM Completo - Pôr do sol hoje: 17:21 sunsetUtils.ts:410:11
+📊 Total de dados oficiais: 365/365 dias sunsetUtils.ts:420:9
+🎯 HOJE (28/06/2025): 17:18 ← OFICIAL CHM sunsetUtils.ts:421:9
+
+✅ EXEMPLOS DE DADOS AGORA DISPONÍVEIS: sunsetUtils.ts:422:9
+15/01: 18:44 (antes não tinha) sunsetUtils.ts:423:9
+14/02: 18:33 (Dia dos Namorados) sunsetUtils.ts:424:9
+15/07: 17:26 (antes não tinha) sunsetUtils.ts:425:9
+25/12: 18:39 (Natal) sunsetUtils.ts:426:9
+🌐 Admin: Detectado Replit, usando mesmo origin: https://1f8faedd-56a9-4fd2-a9c8-53add674d89f-00-2tf8n5fh0bu4h.riker.replit.dev 3 Admin.tsx:459:15
+🔧 Admin carregado, avisos serão carregados do servidor Admin.tsx:633:13
+🌐 Admin: Detectado Replit, usando mesmo origin: https://1f8faedd-56a9-4fd2-a9c8-53add674d89f-00-2tf8n5fh0bu4h.riker.replit.dev 2 Admin.tsx:459:15
+📋 Nenhuma escala ativa DisplayContext.tsx:457:15
+🚀 Inicializando DisplayContext... DisplayContext.tsx:561:15
+📥 Dados encontrados no localStorage DisplayContext.tsx:567:21
+✅ 1 documentos PLASA carregados DisplayContext.tsx:579:25
+✅ 3 documentos Escala carregados DisplayContext.tsx:607:25
+📢 Carregando avisos do servidor... DisplayContext.tsx:135:15
+🌐 DisplayContext Backend URL (Replit): https://1f8faedd-56a9-4fd2-a9c8-53add674d89f-00-2tf8n5fh0bu4h.riker.replit.dev DisplayContext.tsx:76:15
+📢 URL do backend: https://1f8faedd-56a9-4fd2-a9c8-53add674d89f-00-2tf8n5fh0bu4h.riker.replit.dev/api/notices DisplayContext.tsx:138:15
+🌐 Admin: Detectado Replit, usando mesmo origin: https://1f8faedd-56a9-4fd2-a9c8-53add674d89f-00-2tf8n5fh0bu4h.riker.replit.dev 3 Admin.tsx:459:15
+🔄 Configurando alternância entre 3 escalas a cada 30s DisplayContext.tsx:445:15
+🌐 Admin: Detectado Replit, usando mesmo origin: https://1f8faedd-56a9-4fd2-a9c8-53add674d89f-00-2tf8n5fh0bu4h.riker.replit.dev 2 Admin.tsx:459:15
+📢 Resposta do servidor: 200 OK Admin.tsx:489:15
+📢 Resposta do servidor: 200 OK DisplayContext.tsx:146:15
+🌐 Admin: Detectado Replit, usando mesmo origin: https://1f8faedd-56a9-4fd2-a9c8-53add674d89f-00-2tf8n5fh0bu4h.riker.replit.dev 2 Admin.tsx:459:15
+📢 Dados recebidos: 
+Object { success: true, notices: (1) […], count: 1, timestamp: "2025-07-06T23:55:15.720Z" }
+DisplayContext.tsx:149:17
+📢 1 avisos carregados do servidor DisplayContext.tsx:152:19
+🌐 Admin: Detectado Replit, usando mesmo origin: https://1f8faedd-56a9-4fd2-a9c8-53add674d89f-00-2tf8n5fh0bu4h.riker.replit.dev 3 Admin.tsx:459:15
+📢 Resposta do servidor: 200 OK Admin.tsx:489:15
+🌐 Admin: Detectado Replit, usando mesmo origin: https://1f8faedd-56a9-4fd2-a9c8-53add674d89f-00-2tf8n5fh0bu4h.riker.replit.dev 2 Admin.tsx:459:15
+📢 Resposta do servidor: 200 OK Admin.tsx:489:15
+🌐 Admin: Detectado Replit, usando mesmo origin: https://1f8faedd-56a9-4fd2-a9c8-53add674d89f-00-2tf8n5fh0bu4h.riker.replit.dev 2 Admin.tsx:459:15
+🔄 Carregando documentos do servidor... DisplayContext.tsx:529:15
+🌐 DisplayContext Backend URL (Replit): https://1f8faedd-56a9-4fd2-a9c8-53add674d89f-00-2tf8n5fh0bu4h.riker.replit.dev DisplayContext.tsx:76:15
+📄 Documentos do servidor: 4 DisplayContext.tsx:533:17
+🌐 DisplayContext Backend URL (Replit): https://1f8faedd-56a9-4fd2-a9c8-53add674d89f-00-2tf8n5fh0bu4h.riker.replit.dev DisplayContext.tsx:76:15
+📁 Auto-adicionando documento do servidor: Escala - 03/07/2025 DisplayContext.tsx:549:23
+📄 Adicionando documento: 
+Object { id: "1751846117063-f2at7rroe", title: "Escala - 03/07/2025", type: "escala", category: undefined, url: "https://1f8faedd-56a9-4fd2-a9c8-53add674d89f-00-2tf8n5fh0bu4h.riker.replit.dev/uploads/document-1751514750997-343946799-cardÃ¡pio rede 16jun.pdf" }
+DisplayContext.tsx:338:13
+📋 Documento Escala já existe, ignorando: https://1f8faedd-56a9-4fd2-a9c8-53add674d89f-00-2tf8n5fh0bu4h.riker.replit.dev/uploads/document-1751514750997-343946799-cardÃ¡pio rede 16jun.pdf DisplayContext.tsx:369:19
+🌐 DisplayContext Backend URL (Replit): https://1f8faedd-56a9-4fd2-a9c8-53add674d89f-00-2tf8n5fh0bu4h.riker.replit.dev DisplayContext.tsx:76:15
+📁 Auto-adicionando documento do servidor: Escala - 03/07/2025 DisplayContext.tsx:549:23
+📄 Adicionando documento: 
+Object { id: "1751846117063-7mruhdqhf", title: "Escala - 03/07/2025", type: "escala", category: undefined, url: "https://1f8faedd-56a9-4fd2-a9c8-53add674d89f-00-2tf8n5fh0bu4h.riker.replit.dev/uploads/document-1751514698929-676748080-21 - 02JUN a 08JUN2025.pdf" }
+DisplayContext.tsx:338:13
+📋 Documento Escala já existe, ignorando: https://1f8faedd-56a9-4fd2-a9c8-53add674d89f-00-2tf8n5fh0bu4h.riker.replit.dev/uploads/document-1751514698929-676748080-21 - 02JUN a 08JUN2025.pdf DisplayContext.tsx:369:19
+🌐 DisplayContext Backend URL (Replit): https://1f8faedd-56a9-4fd2-a9c8-53add674d89f-00-2tf8n5fh0bu4h.riker.replit.dev DisplayContext.tsx:76:15
+📁 Auto-adicionando documento do servidor: Escala - 03/07/2025 DisplayContext.tsx:549:23
+📄 Adicionando documento: 
+Object { id: "1751846117063-e0m2fzel3", title: "Escala - 03/07/2025", type: "escala", category: undefined, url: "https://1f8faedd-56a9-4fd2-a9c8-53add674d89f-00-2tf8n5fh0bu4h.riker.replit.dev/uploads/document-1751514732729-170147805-of.pdf" }
+DisplayContext.tsx:338:13
+📋 Documento Escala já existe, ignorando: https://1f8faedd-56a9-4fd2-a9c8-53add674d89f-00-2tf8n5fh0bu4h.riker.replit.dev/uploads/document-1751514732729-170147805-of.pdf DisplayContext.tsx:369:19
+🌐 DisplayContext Backend URL (Replit): https://1f8faedd-56a9-4fd2-a9c8-53add674d89f-00-2tf8n5fh0bu4h.riker.replit.dev DisplayContext.tsx:76:15
+📁 Auto-adicionando documento do servidor: PLASA - 03/07/2025 DisplayContext.tsx:549:23
+📄 Adicionando documento: 
+Object { id: "1751846117063-hocjeto57", title: "PLASA - 03/07/2025", type: "plasa", category: undefined, url: "https://1f8faedd-56a9-4fd2-a9c8-53add674d89f-00-2tf8n5fh0bu4h.riker.replit.dev/uploads/document-1751514647170-734057383-PLASA 20.pdf" }
+DisplayContext.tsx:338:13
+📄 Documento PLASA já existe, ignorando: https://1f8faedd-56a9-4fd2-a9c8-53add674d89f-00-2tf8n5fh0bu4h.riker.replit.dev/uploads/document-1751514647170-734057383-PLASA 20.pdf DisplayContext.tsx:349:19
+✅ DisplayContext inicializado DisplayContext.tsx:640:19
+🌐 Admin: Detectado Replit, usando mesmo origin: https://1f8faedd-56a9-4fd2-a9c8-53add674d89f-00-2tf8n5fh0bu4h.riker.replit.dev 2 Admin.tsx:459:15
+Warning: Missing `Description` or `aria-describedby={undefined}` for {DialogContent}. @radix-ui_react-dialog.js:337:36
+Uncaught Error: A <Select.Item /> must have a value prop that is not an empty string. This is because the Select value can be set to an empty string to clear the selection and show the placeholder.
+    SelectItem select.tsx:1241
+    React 13
+@radix-ui_react-select.js:880:13
+Uncaught Error: A <Select.Item /> must have a value prop that is not an empty string. This is because the Select value can be set to an empty string to clear the selection and show the placeholder.
+    SelectItem select.tsx:1241
+    React 14
+@radix-ui_react-select.js:880:13
+The above error occurred in the <SelectItem> component:
+
+SelectItem<@https://1f8faedd-56a9-4fd2-a9c8-53add674d89f-00-2tf8n5fh0bu4h.riker.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/@radix-ui_react-select.js?v=ba9c4398:858:9
+_c11@https://1f8faedd-56a9-4fd2-a9c8-53add674d89f-00-2tf8n5fh0bu4h.riker.replit.dev/src/components/ui/select.tsx:195:10
+div
+Primitive</Node<@https://1f8faedd-56a9-4fd2-a9c8-53add674d89f-00-2tf8n5fh0bu4h.riker.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-GVTGVYSA.js?v=ba9c4398:42:44
+createSlotClone/SlotClone<@https://1f8faedd-56a9-4fd2-a9c8-53add674d89f-00-2tf8n5fh0bu4h.riker.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-5S42QOQO.js?v=ba9c4398:79:40
+createSlot/Slot2<@https://1f8faedd-56a9-4fd2-a9c8-53add674d89f-00-2tf8n5fh0bu4h.riker.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-5S42QOQO.js?v=ba9c4398:56:40
+createCollection/CollectionSlot<@https://1f8faedd-56a9-4fd2-a9c8-53add674d89f-00-…
+chunk-WERSD76P.js:14032:23
+Uncaught Error: A <Select.Item /> must have a value prop that is not an empty string. This is because the Select value can be set to an empty string to clear the selection and show the placeholder.
+    SelectItem select.tsx:1241
+    React 11
+@radix-ui_react-select.js:880:13

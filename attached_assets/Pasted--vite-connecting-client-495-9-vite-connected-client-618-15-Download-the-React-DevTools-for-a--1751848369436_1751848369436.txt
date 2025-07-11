@@ -1,0 +1,1975 @@
+[vite] connecting... client:495:9
+[vite] connected. client:618:15
+Download the React DevTools for a better development experience: https://reactjs.org/link/react-devtools chunk-WERSD76P.js:21551:25
+=== SISTEMA CHM OFICIAL COMPLETO - TODOS OS 365 DIAS === sunsetUtils.ts:413:9
+📍 Rio de Janeiro - 22°55'S, 043°12'W sunsetUtils.ts:414:9
+🏛️ Fonte: Tábuas de Maré CHM 2025 (100% oficial) sunsetUtils.ts:415:9
+📅 COBERTURA: 365 dias completos (sem interpolação) sunsetUtils.ts:416:9
+<empty string> sunsetUtils.ts:417:9
+📅 Consultando CHM completo para: 2025-07-07 sunsetUtils.ts:403:11
+✅ CHM Oficial Completo: 2025-07-07 → 17:22 sunsetUtils.ts:393:13
+🌆 Pôr do sol CHM: 17:22 sunsetUtils.ts:405:11
+🏛️ CHM Completo - Pôr do sol hoje: 17:22 sunsetUtils.ts:410:11
+📊 Total de dados oficiais: 365/365 dias sunsetUtils.ts:420:9
+🎯 HOJE (28/06/2025): 17:18 ← OFICIAL CHM sunsetUtils.ts:421:9
+
+✅ EXEMPLOS DE DADOS AGORA DISPONÍVEIS: sunsetUtils.ts:422:9
+15/01: 18:44 (antes não tinha) sunsetUtils.ts:423:9
+14/02: 18:33 (Dia dos Namorados) sunsetUtils.ts:424:9
+15/07: 17:26 (antes não tinha) sunsetUtils.ts:425:9
+25/12: 18:39 (Natal) sunsetUtils.ts:426:9
+🌐 Admin: Detectado Replit, usando mesmo origin: https://1f8faedd-56a9-4fd2-a9c8-53add674d89f-00-2tf8n5fh0bu4h.riker.replit.dev 3 Admin.tsx:459:15
+🔧 Admin carregado, avisos serão carregados do servidor Admin.tsx:634:13
+🌐 Admin: Detectado Replit, usando mesmo origin: https://1f8faedd-56a9-4fd2-a9c8-53add674d89f-00-2tf8n5fh0bu4h.riker.replit.dev 2 Admin.tsx:459:15
+📋 Nenhuma escala ativa DisplayContext.tsx:457:15
+🚀 Inicializando DisplayContext... DisplayContext.tsx:561:15
+📥 Dados encontrados no localStorage DisplayContext.tsx:567:21
+✅ 1 documentos PLASA carregados DisplayContext.tsx:579:25
+✅ 3 documentos Escala carregados DisplayContext.tsx:607:25
+📢 Carregando avisos do servidor... DisplayContext.tsx:135:15
+🌐 DisplayContext Backend URL (Replit): https://1f8faedd-56a9-4fd2-a9c8-53add674d89f-00-2tf8n5fh0bu4h.riker.replit.dev DisplayContext.tsx:76:15
+📢 URL do backend: https://1f8faedd-56a9-4fd2-a9c8-53add674d89f-00-2tf8n5fh0bu4h.riker.replit.dev/api/notices DisplayContext.tsx:138:15
+🌐 Admin: Detectado Replit, usando mesmo origin: https://1f8faedd-56a9-4fd2-a9c8-53add674d89f-00-2tf8n5fh0bu4h.riker.replit.dev 3 Admin.tsx:459:15
+🔄 Configurando alternância entre 3 escalas a cada 30s DisplayContext.tsx:445:15
+📢 Resposta do servidor: 200 OK Admin.tsx:489:15
+🌐 Admin: Detectado Replit, usando mesmo origin: https://1f8faedd-56a9-4fd2-a9c8-53add674d89f-00-2tf8n5fh0bu4h.riker.replit.dev 2 Admin.tsx:459:15
+📢 Resposta do servidor: 200 OK Admin.tsx:489:15
+🌐 Admin: Detectado Replit, usando mesmo origin: https://1f8faedd-56a9-4fd2-a9c8-53add674d89f-00-2tf8n5fh0bu4h.riker.replit.dev 2 Admin.tsx:459:15
+👮 Dados carregados do servidor: 
+Object { id: 1, officerId: 16, masterId: 24, officerName: "1T (IM) ELIEZER", masterName: "1SG (ES) DA SILVA", updatedAt: "2025-07-07T00:23:13.145Z" }
+Admin.tsx:553:17
+🌐 Admin: Detectado Replit, usando mesmo origin: https://1f8faedd-56a9-4fd2-a9c8-53add674d89f-00-2tf8n5fh0bu4h.riker.replit.dev 4 Admin.tsx:459:15
+📢 Resposta do servidor: 200 OK DisplayContext.tsx:146:15
+📢 Dados recebidos: 
+Object { success: true, notices: (1) […], count: 1, timestamp: "2025-07-07T00:30:55.573Z" }
+DisplayContext.tsx:149:17
+📢 1 avisos carregados do servidor DisplayContext.tsx:152:19
+🌐 Admin: Detectado Replit, usando mesmo origin: https://1f8faedd-56a9-4fd2-a9c8-53add674d89f-00-2tf8n5fh0bu4h.riker.replit.dev 3 Admin.tsx:459:15
+📢 Resposta do servidor: 200 OK Admin.tsx:489:15
+🌐 Admin: Detectado Replit, usando mesmo origin: https://1f8faedd-56a9-4fd2-a9c8-53add674d89f-00-2tf8n5fh0bu4h.riker.replit.dev 2 Admin.tsx:459:15
+🔄 Carregando documentos do servidor... DisplayContext.tsx:529:15
+🌐 DisplayContext Backend URL (Replit): https://1f8faedd-56a9-4fd2-a9c8-53add674d89f-00-2tf8n5fh0bu4h.riker.replit.dev DisplayContext.tsx:76:15
+📄 Documentos do servidor: 4 DisplayContext.tsx:533:17
+🌐 DisplayContext Backend URL (Replit): https://1f8faedd-56a9-4fd2-a9c8-53add674d89f-00-2tf8n5fh0bu4h.riker.replit.dev DisplayContext.tsx:76:15
+📁 Auto-adicionando documento do servidor: Escala - 03/07/2025 DisplayContext.tsx:549:23
+📄 Adicionando documento: 
+Object { id: "1751848257074-ew0t27bib", title: "Escala - 03/07/2025", type: "escala", category: undefined, url: "https://1f8faedd-56a9-4fd2-a9c8-53add674d89f-00-2tf8n5fh0bu4h.riker.replit.dev/uploads/document-1751514750997-343946799-cardÃ¡pio rede 16jun.pdf" }
+DisplayContext.tsx:338:13
+📋 Documento Escala já existe, ignorando: https://1f8faedd-56a9-4fd2-a9c8-53add674d89f-00-2tf8n5fh0bu4h.riker.replit.dev/uploads/document-1751514750997-343946799-cardÃ¡pio rede 16jun.pdf DisplayContext.tsx:369:19
+🌐 DisplayContext Backend URL (Replit): https://1f8faedd-56a9-4fd2-a9c8-53add674d89f-00-2tf8n5fh0bu4h.riker.replit.dev DisplayContext.tsx:76:15
+📁 Auto-adicionando documento do servidor: Escala - 03/07/2025 DisplayContext.tsx:549:23
+📄 Adicionando documento: 
+Object { id: "1751848257075-mp6pkiqc8", title: "Escala - 03/07/2025", type: "escala", category: undefined, url: "https://1f8faedd-56a9-4fd2-a9c8-53add674d89f-00-2tf8n5fh0bu4h.riker.replit.dev/uploads/document-1751514698929-676748080-21 - 02JUN a 08JUN2025.pdf" }
+DisplayContext.tsx:338:13
+📋 Documento Escala já existe, ignorando: https://1f8faedd-56a9-4fd2-a9c8-53add674d89f-00-2tf8n5fh0bu4h.riker.replit.dev/uploads/document-1751514698929-676748080-21 - 02JUN a 08JUN2025.pdf DisplayContext.tsx:369:19
+🌐 DisplayContext Backend URL (Replit): https://1f8faedd-56a9-4fd2-a9c8-53add674d89f-00-2tf8n5fh0bu4h.riker.replit.dev DisplayContext.tsx:76:15
+📁 Auto-adicionando documento do servidor: Escala - 03/07/2025 DisplayContext.tsx:549:23
+📄 Adicionando documento: 
+Object { id: "1751848257075-qwx7tm4d9", title: "Escala - 03/07/2025", type: "escala", category: undefined, url: "https://1f8faedd-56a9-4fd2-a9c8-53add674d89f-00-2tf8n5fh0bu4h.riker.replit.dev/uploads/document-1751514732729-170147805-of.pdf" }
+DisplayContext.tsx:338:13
+📋 Documento Escala já existe, ignorando: https://1f8faedd-56a9-4fd2-a9c8-53add674d89f-00-2tf8n5fh0bu4h.riker.replit.dev/uploads/document-1751514732729-170147805-of.pdf DisplayContext.tsx:369:19
+🌐 DisplayContext Backend URL (Replit): https://1f8faedd-56a9-4fd2-a9c8-53add674d89f-00-2tf8n5fh0bu4h.riker.replit.dev DisplayContext.tsx:76:15
+📁 Auto-adicionando documento do servidor: PLASA - 03/07/2025 DisplayContext.tsx:549:23
+📄 Adicionando documento: 
+Object { id: "1751848257075-akg05izka", title: "PLASA - 03/07/2025", type: "plasa", category: undefined, url: "https://1f8faedd-56a9-4fd2-a9c8-53add674d89f-00-2tf8n5fh0bu4h.riker.replit.dev/uploads/document-1751514647170-734057383-PLASA 20.pdf" }
+DisplayContext.tsx:338:13
+📄 Documento PLASA já existe, ignorando: https://1f8faedd-56a9-4fd2-a9c8-53add674d89f-00-2tf8n5fh0bu4h.riker.replit.dev/uploads/document-1751514647170-734057383-PLASA 20.pdf DisplayContext.tsx:349:19
+✅ DisplayContext inicializado DisplayContext.tsx:640:19
+🌐 Admin: Detectado Replit, usando mesmo origin: https://1f8faedd-56a9-4fd2-a9c8-53add674d89f-00-2tf8n5fh0bu4h.riker.replit.dev 2 Admin.tsx:459:15
+Warning: Missing `Description` or `aria-describedby={undefined}` for {DialogContent}. @radix-ui_react-dialog.js:337:36
+🌐 Admin: Detectado Replit, usando mesmo origin: https://1f8faedd-56a9-4fd2-a9c8-53add674d89f-00-2tf8n5fh0bu4h.riker.replit.dev 7 Admin.tsx:459:15
+👮 Dados carregados do servidor: 
+Object { id: 1, officerId: 16, masterId: 24, officerName: "1T (IM) ELIEZER", masterName: "1SG (ES) DA SILVA", updatedAt: "2025-07-07T00:23:13.145Z" }
+Admin.tsx:553:17
+🌐 Admin: Detectado Replit, usando mesmo origin: https://1f8faedd-56a9-4fd2-a9c8-53add674d89f-00-2tf8n5fh0bu4h.riker.replit.dev 4 Admin.tsx:459:15
+🔄 Selecionando oficial: ALEXANDRIA Admin.tsx:3307:33
+👮 Oficial encontrado: 
+Object { name: "ALEXANDRIA", rank: "1t", specialty: "IM", fullRankName: "Primeiro-Tenente" }
+Admin.tsx:3309:33
+🔄 Novo estado dos oficiais: 
+Object { officerName: "ALEXANDRIA", officerRank: "1t", masterName: "1SG (ES) DA SILVA", masterRank: "3sg" }
+Admin.tsx:3315:33
+🌐 Admin: Detectado Replit, usando mesmo origin: https://1f8faedd-56a9-4fd2-a9c8-53add674d89f-00-2tf8n5fh0bu4h.riker.replit.dev 7 Admin.tsx:459:15
+🏠 Index: Renderizando página principal 
+Object { activePlasa: "PLASA - 03/07/2025", activeBono: "nenhum", activeEscala: "Escala - 03/07/2025", currentMainDocType: "plasa", currentMainDoc: "PLASA - 03/07/2025", scrollSpeed: "normal", autoRestartDelay: 3 }
+Index.tsx:79:11
+📋 ESCALA: Usando escala 1/3: 
+Object { title: "Escala - 03/07/2025", category: undefined, url: "https://1f8faedd-56a9-4fd2-a9c8-53add674d89f-00-2tf8n5fh0bu4h.riker.replit.dev/uploads/document-1751514750997-343946799-cardÃ¡pio rede 16jun.pdf" }
+PDFViewer.tsx:168:17
+🖼️ ESCALA: Renderizando 
+Object { docUrl: "https://1f8faedd-56a9-4fd2-a9c8-53add674d89f-00-2tf8n5fh0bu4h.riker.replit.dev/uploads/document-1751514750997-343946799-cardÃ¡pio rede 16jun.pdf", escalaImageUrl: null, loading: false, currentEscala: "Escala - 03/07/2025" }
+PDFViewer.tsx:828:15
+📢 Verificando aviso "teste": 
+Object { active: true, inPeriod: true, startDate: "2025-07-06T20:54:39.158Z", endDate: "2025-07-07T20:54:39.158Z", now: "2025-07-07T00:31:15.897Z" }
+NoticeDisplay.tsx:56:17
+🌐 DutyOfficers: Detectado Replit, usando mesmo origin: https://1f8faedd-56a9-4fd2-a9c8-53add674d89f-00-2tf8n5fh0bu4h.riker.replit.dev DutyOfficersDisplay.tsx:116:15
+👮 Carregando oficiais de serviço... https://1f8faedd-56a9-4fd2-a9c8-53add674d89f-00-2tf8n5fh0bu4h.riker.replit.dev/api/duty-officers DutyOfficersDisplay.tsx:131:15
+🔄 PLASA Effect triggered: 
+Object { isScrolling: false, activeDoc: "1751762049590-j6sjb06hm", url: "https://1f8faedd-56a9-4fd2-a9c8-53add674d89f-00-2tf8n5fh0bu4h.riker.replit.dev/uploads/document-1751514647170-734057383-PLASA 20.pdf" }
+PDFViewer.tsx:527:15
+🎯 PLASA: Processando documento: https://1f8faedd-56a9-4fd2-a9c8-53add674d89f-00-2tf8n5fh0bu4h.riker.replit.dev/uploads/document-1751514647170-734057383-PLASA 20.pdf PDFViewer.tsx:548:15
+📄 PLASA: Documento é um PDF, convertendo para imagens PDFViewer.tsx:555:17
+🎯 INICIANDO CONVERSÃO PDF: https://1f8faedd-56a9-4fd2-a9c8-53add674d89f-00-2tf8n5fh0bu4h.riker.replit.dev/uploads/document-1751514647170-734057383-PLASA 20.pdf PDFViewer.tsx:315:15
+📚 Carregando PDF.js... PDFViewer.tsx:190:13
+🔄 ESCALA Effect triggered: 
+Object { currentEscalaIndex: 0, totalActiveEscalas: 3, currentEscala: "Escala - 03/07/2025", category: undefined, url: "https://1f8faedd-56a9-4fd2-a9c8-53add674d89f-00-2tf8n5fh0bu4h.riker.replit.dev/uploads/document-1751514750997-343946799-cardÃ¡pio rede 16jun.pdf", id: "1751762049589-4tr1sipk3" }
+PDFViewer.tsx:568:15
+🖼️ ESCALA: Processando URL: https://1f8faedd-56a9-4fd2-a9c8-53add674d89f-00-2tf8n5fh0bu4h.riker.replit.dev/uploads/document-1751514750997-343946799-cardÃ¡pio rede 16jun.pdf PDFViewer.tsx:581:17
+📄 ESCALA: É um PDF, convertendo para imagem... PDFViewer.tsx:584:19
+🎯 ESCALA: Convertendo PDF: https://1f8faedd-56a9-4fd2-a9c8-53add674d89f-00-2tf8n5fh0bu4h.riker.replit.dev/uploads/document-1751514750997-343946799-cardÃ¡pio rede 16jun.pdf (ID: 1751762049589-4tr1sipk3) PDFViewer.tsx:613:15
+🔍 Verificando cache para escala: 1751762049589-4tr1sipk3 PDFViewer.tsx:616:15
+🌐 PDFViewer: Detectado acesso via rede: 1f8faedd-56a9-4fd2-a9c8-53add674d89f-00-2tf8n5fh0bu4h.riker.replit.dev PDFViewer.tsx:132:15
+Bloqueado carregamento de conteúdo misto ativo “http://1f8faedd-56a9-4fd2-a9c8-53add674d89f-00-2tf8n5fh0bu4h.riker.replit.dev:5000/api/check-escala-cache/1751762049589-4tr1sipk3” admin
+📢 NoticeDisplay - Estado dos avisos: 
+Object { totalNotices: 1, activeNotices: 1, currentIndex: 0, avisos: (1) […] }
+NoticeDisplay.tsx:72:13
+🏛️ CHM Cache: 17:22 sunsetUtils.ts:386:13
+⚠️ Erro ao verificar cache, continuando com conversão... TypeError: NetworkError when attempting to fetch resource.
+    convertEscalaPDFToImage PDFViewer.tsx:804
+    PDFViewer PDFViewer.tsx:761
+    React 7
+    commitRootImpl chunk-WERSD76P.js:19416
+    commitRoot chunk-WERSD76P.js:19277
+    performSyncWorkOnRoot chunk-WERSD76P.js:18895
+    flushSyncCallbacks chunk-WERSD76P.js:9119
+    ensureRootIsScheduled chunk-WERSD76P.js:18627
+PDFViewer.tsx:628:17
+🆕 ESCALA: Cache não encontrado, convertendo... PDFViewer.tsx:630:15
+🏠 Index: Renderizando página principal 
+Object { activePlasa: "PLASA - 03/07/2025", activeBono: "nenhum", activeEscala: "Escala - 03/07/2025", currentMainDocType: "plasa", currentMainDoc: "PLASA - 03/07/2025", scrollSpeed: "normal", autoRestartDelay: 3 }
+Index.tsx:79:11
+📋 ESCALA: Usando escala 1/3: 
+Object { title: "Escala - 03/07/2025", category: undefined, url: "https://1f8faedd-56a9-4fd2-a9c8-53add674d89f-00-2tf8n5fh0bu4h.riker.replit.dev/uploads/document-1751514750997-343946799-cardÃ¡pio rede 16jun.pdf" }
+PDFViewer.tsx:168:17
+🖼️ ESCALA: Renderizando 
+Object { docUrl: "https://1f8faedd-56a9-4fd2-a9c8-53add674d89f-00-2tf8n5fh0bu4h.riker.replit.dev/uploads/document-1751514750997-343946799-cardÃ¡pio rede 16jun.pdf", escalaImageUrl: null, loading: false, currentEscala: "Escala - 03/07/2025" }
+PDFViewer.tsx:828:15
+📢 Verificando aviso "teste": 
+Object { active: true, inPeriod: true, startDate: "2025-07-06T20:54:39.158Z", endDate: "2025-07-07T20:54:39.158Z", now: "2025-07-07T00:31:15.906Z" }
+NoticeDisplay.tsx:56:17
+🏠 Index: Renderizando página principal 
+Object { activePlasa: "PLASA - 03/07/2025", activeBono: "nenhum", activeEscala: "Escala - 03/07/2025", currentMainDocType: "plasa", currentMainDoc: "PLASA - 03/07/2025", scrollSpeed: "normal", autoRestartDelay: 3 }
+Index.tsx:79:11
+📢 Verificando aviso "teste": 
+Object { active: true, inPeriod: true, startDate: "2025-07-06T20:54:39.158Z", endDate: "2025-07-07T20:54:39.158Z", now: "2025-07-07T00:31:15.934Z" }
+NoticeDisplay.tsx:56:17
+📚 Carregando PDF.js... PDFViewer.tsx:190:13
+✅ PDF.js carregado com sucesso PDFViewer.tsx:197:17
+📥 Obtendo dados do PDF: https://1f8faedd-56a9-4fd2-a9c8-53add674d89f-00-2tf8n5fh0bu4h.riker.replit.dev/uploads/document-1751514647170-734057383-PLASA 20.pdf PDFViewer.tsx:208:13
+✅ PDF.js carregado com sucesso PDFViewer.tsx:197:17
+📥 Obtendo dados do PDF: https://1f8faedd-56a9-4fd2-a9c8-53add674d89f-00-2tf8n5fh0bu4h.riker.replit.dev/uploads/document-1751514750997-343946799-cardÃ¡pio rede 16jun.pdf PDFViewer.tsx:208:13
+👮 Oficiais carregados: 
+Object { id: 1, officerId: 16, masterId: 24, officerName: "1T (IM) ELIEZER", masterName: "1SG (ES) DA SILVA", updatedAt: "2025-07-07T00:31:13.687Z" }
+DutyOfficersDisplay.tsx:139:17
+🎖️ Analisando militar: 
+Object { fullName: "1T (IM) ELIEZER", type: "officer" }
+DutyOfficersDisplay.tsx:48:13
+🎖️ Já formatado corretamente: 
+Object { rank: "1T", specialty: "IM", name: "ELIEZER" }
+DutyOfficersDisplay.tsx:53:15
+🎖️ Analisando militar: 
+Object { fullName: "1SG (ES) DA SILVA", type: "master" }
+DutyOfficersDisplay.tsx:48:13
+🎖️ Já formatado corretamente: 
+Object { rank: "1SG", specialty: "ES", name: "DA SILVA" }
+DutyOfficersDisplay.tsx:53:15
+✅ PDF carregado: 81794 bytes PDFViewer.tsx:230:17
+✅ ESCALA: PDF válido, convertendo... PDFViewer.tsx:647:15
+✅ PDF carregado: 1063113 bytes PDFViewer.tsx:230:17
+✅ PDF válido detectado, iniciando processamento... PDFViewer.tsx:333:15
+📄 ESCALA: PDF carregado: 1 páginas PDFViewer.tsx:662:15
+📐 ESCALA: Página 1 - Escala: 1.2163112607557045, Final: 1024x724.0748821548817 PDFViewer.tsx:667:15
+🎨 ESCALA: Renderizando... PDFViewer.tsx:683:15
+📄 PDF carregado com sucesso: 5 páginas PDFViewer.tsx:348:15
+🌐 PDFViewer: Detectado acesso via rede: 1f8faedd-56a9-4fd2-a9c8-53add674d89f-00-2tf8n5fh0bu4h.riker.replit.dev PDFViewer.tsx:132:15
+Bloqueado carregamento de conteúdo misto ativo “http://1f8faedd-56a9-4fd2-a9c8-53add674d89f-00-2tf8n5fh0bu4h.riker.replit.dev:5000/api/check-plasa-pages” admin
+⚠️ Erro ao verificar páginas existentes: TypeError: NetworkError when attempting to fetch resource.
+    checkExistingPages https://1f8faedd-56a9-4fd2-a9c8-53add674d89f-00-2tf8n5fh0bu4h.riker.replit.dev/src/components/PDFViewer.tsx:292
+    convertPDFToImages https://1f8faedd-56a9-4fd2-a9c8-53add674d89f-00-2tf8n5fh0bu4h.riker.replit.dev/src/components/PDFViewer.tsx:351
+PDFViewer.tsx:309:15
+🖼️ Convertendo páginas para imagens... PDFViewer.tsx:359:15
+📄 Processando página 1/5 PDFViewer.tsx:363:19
+📐 Página 1 - Original: 595.4x841.8, Escala: 1.5, Final: 893.0999999999999x1262.6999999999998 PDFViewer.tsx:368:19
+🎨 Renderizando página 1... PDFViewer.tsx:384:19
+downloadable font: glyf: Number of contour points exceeds maxp maxPoints, adjusting limit (glyph 0) (font-family: "g_d0_f1" style:normal weight:400 stretch:100 src index:0) source: (invalid URI)
+✅ ESCALA: Renderizada com sucesso PDFViewer.tsx:689:15
+💾 Salvando escala 1751762049589-4tr1sipk3 no cache... PDFViewer.tsx:691:17
+🌐 PDFViewer: Detectado acesso via rede: 1f8faedd-56a9-4fd2-a9c8-53add674d89f-00-2tf8n5fh0bu4h.riker.replit.dev PDFViewer.tsx:132:15
+Bloqueado carregamento de conteúdo misto ativo “http://1f8faedd-56a9-4fd2-a9c8-53add674d89f-00-2tf8n5fh0bu4h.riker.replit.dev:5000/api/save-escala-cache” admin
+⚠️ ESCALA: Falha ao salvar cache, usando dataURL: TypeError: NetworkError when attempting to fetch resource.
+    convertEscalaPDFToImage https://1f8faedd-56a9-4fd2-a9c8-53add674d89f-00-2tf8n5fh0bu4h.riker.replit.dev/src/components/PDFViewer.tsx:704
+PDFViewer.tsx:723:17
+🎉 ESCALA: Conversão concluída! PDFViewer.tsx:730:15
+📋 ESCALA: Usando escala 1/3: 
+Object { title: "Escala - 03/07/2025", category: undefined, url: "https://1f8faedd-56a9-4fd2-a9c8-53add674d89f-00-2tf8n5fh0bu4h.riker.replit.dev/uploads/document-1751514750997-343946799-cardÃ¡pio rede 16jun.pdf" }
+PDFViewer.tsx:168:17
+🖼️ ESCALA: Renderizando 
+Object { docUrl: "https://1f8faedd-56a9-4fd2-a9c8-53add674d89f-00-2tf8n5fh0bu4h.riker.replit.dev/uploads/document-1751514750997-343946799-cardÃ¡pio rede 16jun.pdf", escalaImageUrl: "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAUDBAQEAwUEBAQFBQUGBwwIBwcHBw8LCwkMEQ8SEhEPERETFhwXExQaFRERGCEYGh0dHx8fExciJCIeJBweHx7/2wBDAQUFBQcGBw4ICA4eFBEUHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh7/wAARCALUBAADASIAAhEBAxEB/8QAHwAAAQUBAQEBAQEAAAAAAAAAAAECAwQFBgcICQoL/8QAtRAAAgEDAwIEAwUFBAQAAAF9AQIDAAQRBRIhMUEGE1FhByJxFDKBkaEII0KxwRVS0fAkM2JyggkKFhcYGRolJicoKSo0NTY3ODk6Q0RFRkdISUpTVFVWV1hZWmNkZWZnaGlqc3R1dnd4eXqDhIWGh4iJipKTlJWWl5iZmqKjpKWmp6ipqrKztLW2t7i5usLDxMXGx8jJytLT1NXW19jZ2uHi4+Tl5ufo6erx8vP09fb3+Pn6/8QAHwEAAwEBAQEBAQEBAQAAAAAAAAECAwQFBgcICQoL/8QAtREAAgECBAQDBAcFBAQAAQJ3AAECAxEEBSExBhJBUQdhcRMiMoEIFEKRobHBCSMzUvAVYnLRChYkNOEl8RcYGRomJygpKjU2Nzg5OkNERUZHSElKU1RVVldYWVpjZGVmZ2hpanN0dXZ3eHl6goOEhYaHiImKkpOUlZaXmJmaoqOkpaanqKmqsrO0tba3uLm6wsPExcbHyMnK0tPU1dbX2Nna4uPk5ebn6Onq8vP09fb3+Pn6/9oADAMBAAIRAxEAPwD7LooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigA…", loading: false, currentEscala: "Escala - 03/07/2025" }
+PDFViewer.tsx:828:15
+✅ Escala convertida carregada com sucesso PDFViewer.tsx:841:21
+✅ Página 1 renderizada com sucesso PDFViewer.tsx:390:19
+🌐 PDFViewer: Detectado acesso via rede: 1f8faedd-56a9-4fd2-a9c8-53add674d89f-00-2tf8n5fh0bu4h.riker.replit.dev PDFViewer.tsx:132:15
+Bloqueado carregamento de conteúdo misto ativo “http://1f8faedd-56a9-4fd2-a9c8-53add674d89f-00-2tf8n5fh0bu4h.riker.replit.dev:5000/api/upload-plasa-page” admin
+⚠️ Falha ao salvar página 1 no servidor, usando data URL: TypeError: NetworkError when attempting to fetch resource.
+    savePageAsImage https://1f8faedd-56a9-4fd2-a9c8-53add674d89f-00-2tf8n5fh0bu4h.riker.replit.dev/src/components/PDFViewer.tsx:261
+PDFViewer.tsx:275:19
+💾 Página 1 salva: data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAUDBAQEAwUEBAQFBQUGBwwIBwcHBw8LCwkMEQ8SEhEPERETFhwXExQaFRERGCEYGh0dHx8fExciJCIeJBweHx7/2wBDAQUFBQcGBw4ICA4eFBEUHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh7/wAARCATuA30DASIAAhEBAxEB/8QAHwAAAQUBAQEBAQEAAAAAAAAAAAECAwQFBgcICQoL/8QAtRAAAgEDAwIEAwUFBAQAAAF9AQIDAAQRBRIhMUEGE1FhByJxFDKBkaEII0KxwRVS0fAkM2JyggkKFhcYGRolJicoKSo0NTY3ODk6Q0RFRkdISUpTVFVWV1hZWmNkZWZnaGlqc3R1dnd4eXqDhIWGh4iJipKTlJWWl5iZmqKjpKWmp6ipqrKztLW2t7i5usLDxMXGx8jJytLT1NXW19jZ2uHi4+Tl5ufo6erx8vP09fb3+Pn6/8QAHwEAAwEBAQEBAQEBAQAAAAAAAAECAwQFBgcICQoL/8QAtREAAgECBAQDBAcFBAQAAQJ3AAECAxEEBSExBhJBUQdhcRMiMoEIFEKRobHBCSMzUvAVYnLRChYkNOEl8RcYGRomJygpKjU2Nzg5OkNERUZHSElKU1RVVldYWVpjZGVmZ2hpanN0dXZ3eHl6goOEhYaHiImKkpOUlZaXmJmaoqOkpaanqKmqsrO0tba3uLm6wsPExcbHyMnK0tPU1dbX2Nna4uPk5ebn6Onq8vP09fb3+Pn6/9oADAMBAAIRAxEAPwD7LooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACii…
+PDFViewer.tsx:393:19
+🏠 Index: Renderizando página principal 
+Object { activePlasa: "PLASA - 03/07/2025", activeBono: "nenhum", activeEscala: "Escala - 03/07/2025", currentMainDocType: "plasa", currentMainDoc: "PLASA - 03/07/2025", scrollSpeed: "normal", autoRestartDelay: 3 }
+Index.tsx:79:11
+🎖️ Analisando militar: 
+Object { fullName: "1T (IM) ELIEZER", type: "officer" }
+DutyOfficersDisplay.tsx:48:13
+🎖️ Já formatado corretamente: 
+Object { rank: "1T", specialty: "IM", name: "ELIEZER" }
+DutyOfficersDisplay.tsx:53:15
+🎖️ Analisando militar: 
+Object { fullName: "1SG (ES) DA SILVA", type: "master" }
+DutyOfficersDisplay.tsx:48:13
+🎖️ Já formatado corretamente: 
+Object { rank: "1SG", specialty: "ES", name: "DA SILVA" }
+DutyOfficersDisplay.tsx:53:15
+📋 ESCALA: Usando escala 1/3: 
+Object { title: "Escala - 03/07/2025", category: undefined, url: "https://1f8faedd-56a9-4fd2-a9c8-53add674d89f-00-2tf8n5fh0bu4h.riker.replit.dev/uploads/document-1751514750997-343946799-cardÃ¡pio rede 16jun.pdf" }
+PDFViewer.tsx:168:17
+🖼️ ESCALA: Renderizando 
+Object { docUrl: "https://1f8faedd-56a9-4fd2-a9c8-53add674d89f-00-2tf8n5fh0bu4h.riker.replit.dev/uploads/document-1751514750997-343946799-cardÃ¡pio rede 16jun.pdf", escalaImageUrl: "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAUDBAQEAwUEBAQFBQUGBwwIBwcHBw8LCwkMEQ8SEhEPERETFhwXExQaFRERGCEYGh0dHx8fExciJCIeJBweHx7/2wBDAQUFBQcGBw4ICA4eFBEUHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh7/wAARCALUBAADASIAAhEBAxEB/8QAHwAAAQUBAQEBAQEAAAAAAAAAAAECAwQFBgcICQoL/8QAtRAAAgEDAwIEAwUFBAQAAAF9AQIDAAQRBRIhMUEGE1FhByJxFDKBkaEII0KxwRVS0fAkM2JyggkKFhcYGRolJicoKSo0NTY3ODk6Q0RFRkdISUpTVFVWV1hZWmNkZWZnaGlqc3R1dnd4eXqDhIWGh4iJipKTlJWWl5iZmqKjpKWmp6ipqrKztLW2t7i5usLDxMXGx8jJytLT1NXW19jZ2uHi4+Tl5ufo6erx8vP09fb3+Pn6/8QAHwEAAwEBAQEBAQEBAQAAAAAAAAECAwQFBgcICQoL/8QAtREAAgECBAQDBAcFBAQAAQJ3AAECAxEEBSExBhJBUQdhcRMiMoEIFEKRobHBCSMzUvAVYnLRChYkNOEl8RcYGRomJygpKjU2Nzg5OkNERUZHSElKU1RVVldYWVpjZGVmZ2hpanN0dXZ3eHl6goOEhYaHiImKkpOUlZaXmJmaoqOkpaanqKmqsrO0tba3uLm6wsPExcbHyMnK0tPU1dbX2Nna4uPk5ebn6Onq8vP09fb3+Pn6/9oADAMBAAIRAxEAPwD7LooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigA…", loading: false, currentEscala: "Escala - 03/07/2025" }
+PDFViewer.tsx:828:15
+📢 Verificando aviso "teste": 
+Object { active: true, inPeriod: true, startDate: "2025-07-06T20:54:39.158Z", endDate: "2025-07-07T20:54:39.158Z", now: "2025-07-07T00:31:16.941Z" }
+NoticeDisplay.tsx:56:17
+📄 Processando página 2/5 PDFViewer.tsx:363:19
+📐 Página 2 - Original: 595.4x841.8, Escala: 1.5, Final: 893.0999999999999x1262.6999999999998 PDFViewer.tsx:368:19
+🎨 Renderizando página 2... PDFViewer.tsx:384:19
+✅ Página 2 renderizada com sucesso PDFViewer.tsx:390:19
+🌐 PDFViewer: Detectado acesso via rede: 1f8faedd-56a9-4fd2-a9c8-53add674d89f-00-2tf8n5fh0bu4h.riker.replit.dev PDFViewer.tsx:132:15
+Bloqueado carregamento de conteúdo misto ativo “http://1f8faedd-56a9-4fd2-a9c8-53add674d89f-00-2tf8n5fh0bu4h.riker.replit.dev:5000/api/upload-plasa-page” admin
+⚠️ Falha ao salvar página 2 no servidor, usando data URL: TypeError: NetworkError when attempting to fetch resource.
+    savePageAsImage https://1f8faedd-56a9-4fd2-a9c8-53add674d89f-00-2tf8n5fh0bu4h.riker.replit.dev/src/components/PDFViewer.tsx:261
+PDFViewer.tsx:275:19
+💾 Página 2 salva: data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAUDBAQEAwUEBAQFBQUGBwwIBwcHBw8LCwkMEQ8SEhEPERETFhwXExQaFRERGCEYGh0dHx8fExciJCIeJBweHx7/2wBDAQUFBQcGBw4ICA4eFBEUHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh7/wAARCATuA30DASIAAhEBAxEB/8QAHwAAAQUBAQEBAQEAAAAAAAAAAAECAwQFBgcICQoL/8QAtRAAAgEDAwIEAwUFBAQAAAF9AQIDAAQRBRIhMUEGE1FhByJxFDKBkaEII0KxwRVS0fAkM2JyggkKFhcYGRolJicoKSo0NTY3ODk6Q0RFRkdISUpTVFVWV1hZWmNkZWZnaGlqc3R1dnd4eXqDhIWGh4iJipKTlJWWl5iZmqKjpKWmp6ipqrKztLW2t7i5usLDxMXGx8jJytLT1NXW19jZ2uHi4+Tl5ufo6erx8vP09fb3+Pn6/8QAHwEAAwEBAQEBAQEBAQAAAAAAAAECAwQFBgcICQoL/8QAtREAAgECBAQDBAcFBAQAAQJ3AAECAxEEBSExBhJBUQdhcRMiMoEIFEKRobHBCSMzUvAVYnLRChYkNOEl8RcYGRomJygpKjU2Nzg5OkNERUZHSElKU1RVVldYWVpjZGVmZ2hpanN0dXZ3eHl6goOEhYaHiImKkpOUlZaXmJmaoqOkpaanqKmqsrO0tba3uLm6wsPExcbHyMnK0tPU1dbX2Nna4uPk5ebn6Onq8vP09fb3+Pn6/9oADAMBAAIRAxEAPwD7LooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACii…
+PDFViewer.tsx:393:19
+📄 Processando página 3/5 PDFViewer.tsx:363:19
+📐 Página 3 - Original: 595.4x841.8, Escala: 1.5, Final: 893.0999999999999x1262.6999999999998 PDFViewer.tsx:368:19
+🎨 Renderizando página 3... PDFViewer.tsx:384:19
+✅ Página 3 renderizada com sucesso PDFViewer.tsx:390:19
+🌐 PDFViewer: Detectado acesso via rede: 1f8faedd-56a9-4fd2-a9c8-53add674d89f-00-2tf8n5fh0bu4h.riker.replit.dev PDFViewer.tsx:132:15
+Bloqueado carregamento de conteúdo misto ativo “http://1f8faedd-56a9-4fd2-a9c8-53add674d89f-00-2tf8n5fh0bu4h.riker.replit.dev:5000/api/upload-plasa-page” admin
+⚠️ Falha ao salvar página 3 no servidor, usando data URL: TypeError: NetworkError when attempting to fetch resource.
+    savePageAsImage https://1f8faedd-56a9-4fd2-a9c8-53add674d89f-00-2tf8n5fh0bu4h.riker.replit.dev/src/components/PDFViewer.tsx:261
+PDFViewer.tsx:275:19
+💾 Página 3 salva: data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAUDBAQEAwUEBAQFBQUGBwwIBwcHBw8LCwkMEQ8SEhEPERETFhwXExQaFRERGCEYGh0dHx8fExciJCIeJBweHx7/2wBDAQUFBQcGBw4ICA4eFBEUHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh7/wAARCATuA30DASIAAhEBAxEB/8QAHwAAAQUBAQEBAQEAAAAAAAAAAAECAwQFBgcICQoL/8QAtRAAAgEDAwIEAwUFBAQAAAF9AQIDAAQRBRIhMUEGE1FhByJxFDKBkaEII0KxwRVS0fAkM2JyggkKFhcYGRolJicoKSo0NTY3ODk6Q0RFRkdISUpTVFVWV1hZWmNkZWZnaGlqc3R1dnd4eXqDhIWGh4iJipKTlJWWl5iZmqKjpKWmp6ipqrKztLW2t7i5usLDxMXGx8jJytLT1NXW19jZ2uHi4+Tl5ufo6erx8vP09fb3+Pn6/8QAHwEAAwEBAQEBAQEBAQAAAAAAAAECAwQFBgcICQoL/8QAtREAAgECBAQDBAcFBAQAAQJ3AAECAxEEBSExBhJBUQdhcRMiMoEIFEKRobHBCSMzUvAVYnLRChYkNOEl8RcYGRomJygpKjU2Nzg5OkNERUZHSElKU1RVVldYWVpjZGVmZ2hpanN0dXZ3eHl6goOEhYaHiImKkpOUlZaXmJmaoqOkpaanqKmqsrO0tba3uLm6wsPExcbHyMnK0tPU1dbX2Nna4uPk5ebn6Onq8vP09fb3+Pn6/9oADAMBAAIRAxEAPwD7LooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACii…
+PDFViewer.tsx:393:19
+📄 Processando página 4/5 PDFViewer.tsx:363:19
+📐 Página 4 - Original: 595.4x841.8, Escala: 1.5, Final: 893.0999999999999x1262.6999999999998 PDFViewer.tsx:368:19
+🎨 Renderizando página 4... PDFViewer.tsx:384:19
+✅ Página 4 renderizada com sucesso PDFViewer.tsx:390:19
+🌐 PDFViewer: Detectado acesso via rede: 1f8faedd-56a9-4fd2-a9c8-53add674d89f-00-2tf8n5fh0bu4h.riker.replit.dev PDFViewer.tsx:132:15
+Bloqueado carregamento de conteúdo misto ativo “http://1f8faedd-56a9-4fd2-a9c8-53add674d89f-00-2tf8n5fh0bu4h.riker.replit.dev:5000/api/upload-plasa-page” admin
+⚠️ Falha ao salvar página 4 no servidor, usando data URL: TypeError: NetworkError when attempting to fetch resource.
+    savePageAsImage https://1f8faedd-56a9-4fd2-a9c8-53add674d89f-00-2tf8n5fh0bu4h.riker.replit.dev/src/components/PDFViewer.tsx:261
+PDFViewer.tsx:275:19
+💾 Página 4 salva: data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAUDBAQEAwUEBAQFBQUGBwwIBwcHBw8LCwkMEQ8SEhEPERETFhwXExQaFRERGCEYGh0dHx8fExciJCIeJBweHx7/2wBDAQUFBQcGBw4ICA4eFBEUHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh7/wAARCATuA30DASIAAhEBAxEB/8QAHwAAAQUBAQEBAQEAAAAAAAAAAAECAwQFBgcICQoL/8QAtRAAAgEDAwIEAwUFBAQAAAF9AQIDAAQRBRIhMUEGE1FhByJxFDKBkaEII0KxwRVS0fAkM2JyggkKFhcYGRolJicoKSo0NTY3ODk6Q0RFRkdISUpTVFVWV1hZWmNkZWZnaGlqc3R1dnd4eXqDhIWGh4iJipKTlJWWl5iZmqKjpKWmp6ipqrKztLW2t7i5usLDxMXGx8jJytLT1NXW19jZ2uHi4+Tl5ufo6erx8vP09fb3+Pn6/8QAHwEAAwEBAQEBAQEBAQAAAAAAAAECAwQFBgcICQoL/8QAtREAAgECBAQDBAcFBAQAAQJ3AAECAxEEBSExBhJBUQdhcRMiMoEIFEKRobHBCSMzUvAVYnLRChYkNOEl8RcYGRomJygpKjU2Nzg5OkNERUZHSElKU1RVVldYWVpjZGVmZ2hpanN0dXZ3eHl6goOEhYaHiImKkpOUlZaXmJmaoqOkpaanqKmqsrO0tba3uLm6wsPExcbHyMnK0tPU1dbX2Nna4uPk5ebn6Onq8vP09fb3+Pn6/9oADAMBAAIRAxEAPwD7LooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACii…
+PDFViewer.tsx:393:19
+🏠 Index: Renderizando página principal 
+Object { activePlasa: "PLASA - 03/07/2025", activeBono: "nenhum", activeEscala: "Escala - 03/07/2025", currentMainDocType: "plasa", currentMainDoc: "PLASA - 03/07/2025", scrollSpeed: "normal", autoRestartDelay: 3 }
+Index.tsx:79:11
+🎖️ Analisando militar: 
+Object { fullName: "1T (IM) ELIEZER", type: "officer" }
+DutyOfficersDisplay.tsx:48:13
+🎖️ Já formatado corretamente: 
+Object { rank: "1T", specialty: "IM", name: "ELIEZER" }
+DutyOfficersDisplay.tsx:53:15
+🎖️ Analisando militar: 
+Object { fullName: "1SG (ES) DA SILVA", type: "master" }
+DutyOfficersDisplay.tsx:48:13
+🎖️ Já formatado corretamente: 
+Object { rank: "1SG", specialty: "ES", name: "DA SILVA" }
+DutyOfficersDisplay.tsx:53:15
+📋 ESCALA: Usando escala 1/3: 
+Object { title: "Escala - 03/07/2025", category: undefined, url: "https://1f8faedd-56a9-4fd2-a9c8-53add674d89f-00-2tf8n5fh0bu4h.riker.replit.dev/uploads/document-1751514750997-343946799-cardÃ¡pio rede 16jun.pdf" }
+PDFViewer.tsx:168:17
+🖼️ ESCALA: Renderizando 
+Object { docUrl: "https://1f8faedd-56a9-4fd2-a9c8-53add674d89f-00-2tf8n5fh0bu4h.riker.replit.dev/uploads/document-1751514750997-343946799-cardÃ¡pio rede 16jun.pdf", escalaImageUrl: "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAUDBAQEAwUEBAQFBQUGBwwIBwcHBw8LCwkMEQ8SEhEPERETFhwXExQaFRERGCEYGh0dHx8fExciJCIeJBweHx7/2wBDAQUFBQcGBw4ICA4eFBEUHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh7/wAARCALUBAADASIAAhEBAxEB/8QAHwAAAQUBAQEBAQEAAAAAAAAAAAECAwQFBgcICQoL/8QAtRAAAgEDAwIEAwUFBAQAAAF9AQIDAAQRBRIhMUEGE1FhByJxFDKBkaEII0KxwRVS0fAkM2JyggkKFhcYGRolJicoKSo0NTY3ODk6Q0RFRkdISUpTVFVWV1hZWmNkZWZnaGlqc3R1dnd4eXqDhIWGh4iJipKTlJWWl5iZmqKjpKWmp6ipqrKztLW2t7i5usLDxMXGx8jJytLT1NXW19jZ2uHi4+Tl5ufo6erx8vP09fb3+Pn6/8QAHwEAAwEBAQEBAQEBAQAAAAAAAAECAwQFBgcICQoL/8QAtREAAgECBAQDBAcFBAQAAQJ3AAECAxEEBSExBhJBUQdhcRMiMoEIFEKRobHBCSMzUvAVYnLRChYkNOEl8RcYGRomJygpKjU2Nzg5OkNERUZHSElKU1RVVldYWVpjZGVmZ2hpanN0dXZ3eHl6goOEhYaHiImKkpOUlZaXmJmaoqOkpaanqKmqsrO0tba3uLm6wsPExcbHyMnK0tPU1dbX2Nna4uPk5ebn6Onq8vP09fb3+Pn6/9oADAMBAAIRAxEAPwD7LooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigA…", loading: false, currentEscala: "Escala - 03/07/2025" }
+PDFViewer.tsx:828:15
+📢 Verificando aviso "teste": 
+Object { active: true, inPeriod: true, startDate: "2025-07-06T20:54:39.158Z", endDate: "2025-07-07T20:54:39.158Z", now: "2025-07-07T00:31:17.940Z" }
+NoticeDisplay.tsx:56:17
+📄 Processando página 5/5 PDFViewer.tsx:363:19
+📐 Página 5 - Original: 595.4x841.8, Escala: 1.5, Final: 893.0999999999999x1262.6999999999998 PDFViewer.tsx:368:19
+🎨 Renderizando página 5... PDFViewer.tsx:384:19
+✅ Página 5 renderizada com sucesso PDFViewer.tsx:390:19
+🌐 PDFViewer: Detectado acesso via rede: 1f8faedd-56a9-4fd2-a9c8-53add674d89f-00-2tf8n5fh0bu4h.riker.replit.dev PDFViewer.tsx:132:15
+Bloqueado carregamento de conteúdo misto ativo “http://1f8faedd-56a9-4fd2-a9c8-53add674d89f-00-2tf8n5fh0bu4h.riker.replit.dev:5000/api/upload-plasa-page” admin
+⚠️ Falha ao salvar página 5 no servidor, usando data URL: TypeError: NetworkError when attempting to fetch resource.
+    savePageAsImage https://1f8faedd-56a9-4fd2-a9c8-53add674d89f-00-2tf8n5fh0bu4h.riker.replit.dev/src/components/PDFViewer.tsx:261
+PDFViewer.tsx:275:19
+💾 Página 5 salva: data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAUDBAQEAwUEBAQFBQUGBwwIBwcHBw8LCwkMEQ8SEhEPERETFhwXExQaFRERGCEYGh0dHx8fExciJCIeJBweHx7/2wBDAQUFBQcGBw4ICA4eFBEUHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh7/wAARCATuA30DASIAAhEBAxEB/8QAHwAAAQUBAQEBAQEAAAAAAAAAAAECAwQFBgcICQoL/8QAtRAAAgEDAwIEAwUFBAQAAAF9AQIDAAQRBRIhMUEGE1FhByJxFDKBkaEII0KxwRVS0fAkM2JyggkKFhcYGRolJicoKSo0NTY3ODk6Q0RFRkdISUpTVFVWV1hZWmNkZWZnaGlqc3R1dnd4eXqDhIWGh4iJipKTlJWWl5iZmqKjpKWmp6ipqrKztLW2t7i5usLDxMXGx8jJytLT1NXW19jZ2uHi4+Tl5ufo6erx8vP09fb3+Pn6/8QAHwEAAwEBAQEBAQEBAQAAAAAAAAECAwQFBgcICQoL/8QAtREAAgECBAQDBAcFBAQAAQJ3AAECAxEEBSExBhJBUQdhcRMiMoEIFEKRobHBCSMzUvAVYnLRChYkNOEl8RcYGRomJygpKjU2Nzg5OkNERUZHSElKU1RVVldYWVpjZGVmZ2hpanN0dXZ3eHl6goOEhYaHiImKkpOUlZaXmJmaoqOkpaanqKmqsrO0tba3uLm6wsPExcbHyMnK0tPU1dbX2Nna4uPk5ebn6Onq8vP09fb3+Pn6/9oADAMBAAIRAxEAPwD7LooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACii…
+PDFViewer.tsx:393:19
+🎉 CONVERSÃO CONCLUÍDA: 5/5 páginas processadas! PDFViewer.tsx:424:15
+✅ Página 1 carregada com sucesso PDFViewer.tsx:765:27
+✅ Página 2 carregada com sucesso PDFViewer.tsx:765:27
+✅ Página 3 carregada com sucesso PDFViewer.tsx:765:27
+✅ Página 4 carregada com sucesso PDFViewer.tsx:765:27
+✅ Página 5 carregada com sucesso PDFViewer.tsx:765:27
+🏠 Index: Renderizando página principal 
+Object { activePlasa: "PLASA - 03/07/2025", activeBono: "nenhum", activeEscala: "Escala - 03/07/2025", currentMainDocType: "plasa", currentMainDoc: "PLASA - 03/07/2025", scrollSpeed: "normal", autoRestartDelay: 3 }
+Index.tsx:79:11
+🎖️ Analisando militar: 
+Object { fullName: "1T (IM) ELIEZER", type: "officer" }
+DutyOfficersDisplay.tsx:48:13
+🎖️ Já formatado corretamente: 
+Object { rank: "1T", specialty: "IM", name: "ELIEZER" }
+DutyOfficersDisplay.tsx:53:15
+🎖️ Analisando militar: 
+Object { fullName: "1SG (ES) DA SILVA", type: "master" }
+DutyOfficersDisplay.tsx:48:13
+🎖️ Já formatado corretamente: 
+Object { rank: "1SG", specialty: "ES", name: "DA SILVA" }
+DutyOfficersDisplay.tsx:53:15
+📋 ESCALA: Usando escala 1/3: 
+Object { title: "Escala - 03/07/2025", category: undefined, url: "https://1f8faedd-56a9-4fd2-a9c8-53add674d89f-00-2tf8n5fh0bu4h.riker.replit.dev/uploads/document-1751514750997-343946799-cardÃ¡pio rede 16jun.pdf" }
+PDFViewer.tsx:168:17
+🖼️ ESCALA: Renderizando 
+Object { docUrl: "https://1f8faedd-56a9-4fd2-a9c8-53add674d89f-00-2tf8n5fh0bu4h.riker.replit.dev/uploads/document-1751514750997-343946799-cardÃ¡pio rede 16jun.pdf", escalaImageUrl: "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAUDBAQEAwUEBAQFBQUGBwwIBwcHBw8LCwkMEQ8SEhEPERETFhwXExQaFRERGCEYGh0dHx8fExciJCIeJBweHx7/2wBDAQUFBQcGBw4ICA4eFBEUHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh7/wAARCALUBAADASIAAhEBAxEB/8QAHwAAAQUBAQEBAQEAAAAAAAAAAAECAwQFBgcICQoL/8QAtRAAAgEDAwIEAwUFBAQAAAF9AQIDAAQRBRIhMUEGE1FhByJxFDKBkaEII0KxwRVS0fAkM2JyggkKFhcYGRolJicoKSo0NTY3ODk6Q0RFRkdISUpTVFVWV1hZWmNkZWZnaGlqc3R1dnd4eXqDhIWGh4iJipKTlJWWl5iZmqKjpKWmp6ipqrKztLW2t7i5usLDxMXGx8jJytLT1NXW19jZ2uHi4+Tl5ufo6erx8vP09fb3+Pn6/8QAHwEAAwEBAQEBAQEBAQAAAAAAAAECAwQFBgcICQoL/8QAtREAAgECBAQDBAcFBAQAAQJ3AAECAxEEBSExBhJBUQdhcRMiMoEIFEKRobHBCSMzUvAVYnLRChYkNOEl8RcYGRomJygpKjU2Nzg5OkNERUZHSElKU1RVVldYWVpjZGVmZ2hpanN0dXZ3eHl6goOEhYaHiImKkpOUlZaXmJmaoqOkpaanqKmqsrO0tba3uLm6wsPExcbHyMnK0tPU1dbX2Nna4uPk5ebn6Onq8vP09fb3+Pn6/9oADAMBAAIRAxEAPwD7LooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigA…", loading: false, currentEscala: "Escala - 03/07/2025" }
+PDFViewer.tsx:828:15
+📢 Verificando aviso "teste": 
+Object { active: true, inPeriod: true, startDate: "2025-07-06T20:54:39.158Z", endDate: "2025-07-07T20:54:39.158Z", now: "2025-07-07T00:31:18.942Z" }
+NoticeDisplay.tsx:56:17
+🏠 Index: Renderizando página principal 
+Object { activePlasa: "PLASA - 03/07/2025", activeBono: "nenhum", activeEscala: "Escala - 03/07/2025", currentMainDocType: "plasa", currentMainDoc: "PLASA - 03/07/2025", scrollSpeed: "normal", autoRestartDelay: 3 }
+Index.tsx:79:11
+🎖️ Analisando militar: 
+Object { fullName: "1T (IM) ELIEZER", type: "officer" }
+DutyOfficersDisplay.tsx:48:13
+🎖️ Já formatado corretamente: 
+Object { rank: "1T", specialty: "IM", name: "ELIEZER" }
+DutyOfficersDisplay.tsx:53:15
+🎖️ Analisando militar: 
+Object { fullName: "1SG (ES) DA SILVA", type: "master" }
+DutyOfficersDisplay.tsx:48:13
+🎖️ Já formatado corretamente: 
+Object { rank: "1SG", specialty: "ES", name: "DA SILVA" }
+DutyOfficersDisplay.tsx:53:15
+📋 ESCALA: Usando escala 1/3: 
+Object { title: "Escala - 03/07/2025", category: undefined, url: "https://1f8faedd-56a9-4fd2-a9c8-53add674d89f-00-2tf8n5fh0bu4h.riker.replit.dev/uploads/document-1751514750997-343946799-cardÃ¡pio rede 16jun.pdf" }
+PDFViewer.tsx:168:17
+🖼️ ESCALA: Renderizando 
+Object { docUrl: "https://1f8faedd-56a9-4fd2-a9c8-53add674d89f-00-2tf8n5fh0bu4h.riker.replit.dev/uploads/document-1751514750997-343946799-cardÃ¡pio rede 16jun.pdf", escalaImageUrl: "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAUDBAQEAwUEBAQFBQUGBwwIBwcHBw8LCwkMEQ8SEhEPERETFhwXExQaFRERGCEYGh0dHx8fExciJCIeJBweHx7/2wBDAQUFBQcGBw4ICA4eFBEUHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh7/wAARCALUBAADASIAAhEBAxEB/8QAHwAAAQUBAQEBAQEAAAAAAAAAAAECAwQFBgcICQoL/8QAtRAAAgEDAwIEAwUFBAQAAAF9AQIDAAQRBRIhMUEGE1FhByJxFDKBkaEII0KxwRVS0fAkM2JyggkKFhcYGRolJicoKSo0NTY3ODk6Q0RFRkdISUpTVFVWV1hZWmNkZWZnaGlqc3R1dnd4eXqDhIWGh4iJipKTlJWWl5iZmqKjpKWmp6ipqrKztLW2t7i5usLDxMXGx8jJytLT1NXW19jZ2uHi4+Tl5ufo6erx8vP09fb3+Pn6/8QAHwEAAwEBAQEBAQEBAQAAAAAAAAECAwQFBgcICQoL/8QAtREAAgECBAQDBAcFBAQAAQJ3AAECAxEEBSExBhJBUQdhcRMiMoEIFEKRobHBCSMzUvAVYnLRChYkNOEl8RcYGRomJygpKjU2Nzg5OkNERUZHSElKU1RVVldYWVpjZGVmZ2hpanN0dXZ3eHl6goOEhYaHiImKkpOUlZaXmJmaoqOkpaanqKmqsrO0tba3uLm6wsPExcbHyMnK0tPU1dbX2Nna4uPk5ebn6Onq8vP09fb3+Pn6/9oADAMBAAIRAxEAPwD7LooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigA…", loading: false, currentEscala: "Escala - 03/07/2025" }
+PDFViewer.tsx:828:15
+📢 Verificando aviso "teste": 
+Object { active: true, inPeriod: true, startDate: "2025-07-06T20:54:39.158Z", endDate: "2025-07-07T20:54:39.158Z", now: "2025-07-07T00:31:20.717Z" }
+NoticeDisplay.tsx:56:17
+🏠 Index: Renderizando página principal 
+Object { activePlasa: "PLASA - 03/07/2025", activeBono: "nenhum", activeEscala: "Escala - 03/07/2025", currentMainDocType: "plasa", currentMainDoc: "PLASA - 03/07/2025", scrollSpeed: "normal", autoRestartDelay: 3 }
+Index.tsx:79:11
+🎖️ Analisando militar: 
+Object { fullName: "1T (IM) ELIEZER", type: "officer" }
+DutyOfficersDisplay.tsx:48:13
+🎖️ Já formatado corretamente: 
+Object { rank: "1T", specialty: "IM", name: "ELIEZER" }
+DutyOfficersDisplay.tsx:53:15
+🎖️ Analisando militar: 
+Object { fullName: "1SG (ES) DA SILVA", type: "master" }
+DutyOfficersDisplay.tsx:48:13
+🎖️ Já formatado corretamente: 
+Object { rank: "1SG", specialty: "ES", name: "DA SILVA" }
+DutyOfficersDisplay.tsx:53:15
+📋 ESCALA: Usando escala 1/3: 
+Object { title: "Escala - 03/07/2025", category: undefined, url: "https://1f8faedd-56a9-4fd2-a9c8-53add674d89f-00-2tf8n5fh0bu4h.riker.replit.dev/uploads/document-1751514750997-343946799-cardÃ¡pio rede 16jun.pdf" }
+PDFViewer.tsx:168:17
+🖼️ ESCALA: Renderizando 
+Object { docUrl: "https://1f8faedd-56a9-4fd2-a9c8-53add674d89f-00-2tf8n5fh0bu4h.riker.replit.dev/uploads/document-1751514750997-343946799-cardÃ¡pio rede 16jun.pdf", escalaImageUrl: "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAUDBAQEAwUEBAQFBQUGBwwIBwcHBw8LCwkMEQ8SEhEPERETFhwXExQaFRERGCEYGh0dHx8fExciJCIeJBweHx7/2wBDAQUFBQcGBw4ICA4eFBEUHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh7/wAARCALUBAADASIAAhEBAxEB/8QAHwAAAQUBAQEBAQEAAAAAAAAAAAECAwQFBgcICQoL/8QAtRAAAgEDAwIEAwUFBAQAAAF9AQIDAAQRBRIhMUEGE1FhByJxFDKBkaEII0KxwRVS0fAkM2JyggkKFhcYGRolJicoKSo0NTY3ODk6Q0RFRkdISUpTVFVWV1hZWmNkZWZnaGlqc3R1dnd4eXqDhIWGh4iJipKTlJWWl5iZmqKjpKWmp6ipqrKztLW2t7i5usLDxMXGx8jJytLT1NXW19jZ2uHi4+Tl5ufo6erx8vP09fb3+Pn6/8QAHwEAAwEBAQEBAQEBAQAAAAAAAAECAwQFBgcICQoL/8QAtREAAgECBAQDBAcFBAQAAQJ3AAECAxEEBSExBhJBUQdhcRMiMoEIFEKRobHBCSMzUvAVYnLRChYkNOEl8RcYGRomJygpKjU2Nzg5OkNERUZHSElKU1RVVldYWVpjZGVmZ2hpanN0dXZ3eHl6goOEhYaHiImKkpOUlZaXmJmaoqOkpaanqKmqsrO0tba3uLm6wsPExcbHyMnK0tPU1dbX2Nna4uPk5ebn6Onq8vP09fb3+Pn6/9oADAMBAAIRAxEAPwD7LooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigA…", loading: false, currentEscala: "Escala - 03/07/2025" }
+PDFViewer.tsx:828:15
+📢 Verificando aviso "teste": 
+Object { active: true, inPeriod: true, startDate: "2025-07-06T20:54:39.158Z", endDate: "2025-07-07T20:54:39.158Z", now: "2025-07-07T00:31:21.779Z" }
+NoticeDisplay.tsx:56:17
+📜 PLASA: Iniciando scroll - Total: 7898px, Visível: 763px, Para rolar: 7135px PDFViewer.tsx:55:13
+🏠 Index: Renderizando página principal 
+Object { activePlasa: "PLASA - 03/07/2025", activeBono: "nenhum", activeEscala: "Escala - 03/07/2025", currentMainDocType: "plasa", currentMainDoc: "PLASA - 03/07/2025", scrollSpeed: "normal", autoRestartDelay: 3 }
+Index.tsx:79:11
+🎖️ Analisando militar: 
+Object { fullName: "1T (IM) ELIEZER", type: "officer" }
+DutyOfficersDisplay.tsx:48:13
+🎖️ Já formatado corretamente: 
+Object { rank: "1T", specialty: "IM", name: "ELIEZER" }
+DutyOfficersDisplay.tsx:53:15
+🎖️ Analisando militar: 
+Object { fullName: "1SG (ES) DA SILVA", type: "master" }
+DutyOfficersDisplay.tsx:48:13
+🎖️ Já formatado corretamente: 
+Object { rank: "1SG", specialty: "ES", name: "DA SILVA" }
+DutyOfficersDisplay.tsx:53:15
+📋 ESCALA: Usando escala 1/3: 
+Object { title: "Escala - 03/07/2025", category: undefined, url: "https://1f8faedd-56a9-4fd2-a9c8-53add674d89f-00-2tf8n5fh0bu4h.riker.replit.dev/uploads/document-1751514750997-343946799-cardÃ¡pio rede 16jun.pdf" }
+PDFViewer.tsx:168:17
+🖼️ ESCALA: Renderizando 
+Object { docUrl: "https://1f8faedd-56a9-4fd2-a9c8-53add674d89f-00-2tf8n5fh0bu4h.riker.replit.dev/uploads/document-1751514750997-343946799-cardÃ¡pio rede 16jun.pdf", escalaImageUrl: "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAUDBAQEAwUEBAQFBQUGBwwIBwcHBw8LCwkMEQ8SEhEPERETFhwXExQaFRERGCEYGh0dHx8fExciJCIeJBweHx7/2wBDAQUFBQcGBw4ICA4eFBEUHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh7/wAARCALUBAADASIAAhEBAxEB/8QAHwAAAQUBAQEBAQEAAAAAAAAAAAECAwQFBgcICQoL/8QAtRAAAgEDAwIEAwUFBAQAAAF9AQIDAAQRBRIhMUEGE1FhByJxFDKBkaEII0KxwRVS0fAkM2JyggkKFhcYGRolJicoKSo0NTY3ODk6Q0RFRkdISUpTVFVWV1hZWmNkZWZnaGlqc3R1dnd4eXqDhIWGh4iJipKTlJWWl5iZmqKjpKWmp6ipqrKztLW2t7i5usLDxMXGx8jJytLT1NXW19jZ2uHi4+Tl5ufo6erx8vP09fb3+Pn6/8QAHwEAAwEBAQEBAQEBAQAAAAAAAAECAwQFBgcICQoL/8QAtREAAgECBAQDBAcFBAQAAQJ3AAECAxEEBSExBhJBUQdhcRMiMoEIFEKRobHBCSMzUvAVYnLRChYkNOEl8RcYGRomJygpKjU2Nzg5OkNERUZHSElKU1RVVldYWVpjZGVmZ2hpanN0dXZ3eHl6goOEhYaHiImKkpOUlZaXmJmaoqOkpaanqKmqsrO0tba3uLm6wsPExcbHyMnK0tPU1dbX2Nna4uPk5ebn6Onq8vP09fb3+Pn6/9oADAMBAAIRAxEAPwD7LooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigA…", loading: false, currentEscala: "Escala - 03/07/2025" }
+PDFViewer.tsx:828:15
+📢 Verificando aviso "teste": 
+Object { active: true, inPeriod: true, startDate: "2025-07-06T20:54:39.158Z", endDate: "2025-07-07T20:54:39.158Z", now: "2025-07-07T00:31:22.779Z" }
+NoticeDisplay.tsx:56:17
+🏠 Index: Renderizando página principal 
+Object { activePlasa: "PLASA - 03/07/2025", activeBono: "nenhum", activeEscala: "Escala - 03/07/2025", currentMainDocType: "plasa", currentMainDoc: "PLASA - 03/07/2025", scrollSpeed: "normal", autoRestartDelay: 3 }
+Index.tsx:79:11
+🎖️ Analisando militar: 
+Object { fullName: "1T (IM) ELIEZER", type: "officer" }
+DutyOfficersDisplay.tsx:48:13
+🎖️ Já formatado corretamente: 
+Object { rank: "1T", specialty: "IM", name: "ELIEZER" }
+DutyOfficersDisplay.tsx:53:15
+🎖️ Analisando militar: 
+Object { fullName: "1SG (ES) DA SILVA", type: "master" }
+DutyOfficersDisplay.tsx:48:13
+🎖️ Já formatado corretamente: 
+Object { rank: "1SG", specialty: "ES", name: "DA SILVA" }
+DutyOfficersDisplay.tsx:53:15
+📋 ESCALA: Usando escala 1/3: 
+Object { title: "Escala - 03/07/2025", category: undefined, url: "https://1f8faedd-56a9-4fd2-a9c8-53add674d89f-00-2tf8n5fh0bu4h.riker.replit.dev/uploads/document-1751514750997-343946799-cardÃ¡pio rede 16jun.pdf" }
+PDFViewer.tsx:168:17
+🖼️ ESCALA: Renderizando 
+Object { docUrl: "https://1f8faedd-56a9-4fd2-a9c8-53add674d89f-00-2tf8n5fh0bu4h.riker.replit.dev/uploads/document-1751514750997-343946799-cardÃ¡pio rede 16jun.pdf", escalaImageUrl: "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAUDBAQEAwUEBAQFBQUGBwwIBwcHBw8LCwkMEQ8SEhEPERETFhwXExQaFRERGCEYGh0dHx8fExciJCIeJBweHx7/2wBDAQUFBQcGBw4ICA4eFBEUHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh7/wAARCALUBAADASIAAhEBAxEB/8QAHwAAAQUBAQEBAQEAAAAAAAAAAAECAwQFBgcICQoL/8QAtRAAAgEDAwIEAwUFBAQAAAF9AQIDAAQRBRIhMUEGE1FhByJxFDKBkaEII0KxwRVS0fAkM2JyggkKFhcYGRolJicoKSo0NTY3ODk6Q0RFRkdISUpTVFVWV1hZWmNkZWZnaGlqc3R1dnd4eXqDhIWGh4iJipKTlJWWl5iZmqKjpKWmp6ipqrKztLW2t7i5usLDxMXGx8jJytLT1NXW19jZ2uHi4+Tl5ufo6erx8vP09fb3+Pn6/8QAHwEAAwEBAQEBAQEBAQAAAAAAAAECAwQFBgcICQoL/8QAtREAAgECBAQDBAcFBAQAAQJ3AAECAxEEBSExBhJBUQdhcRMiMoEIFEKRobHBCSMzUvAVYnLRChYkNOEl8RcYGRomJygpKjU2Nzg5OkNERUZHSElKU1RVVldYWVpjZGVmZ2hpanN0dXZ3eHl6goOEhYaHiImKkpOUlZaXmJmaoqOkpaanqKmqsrO0tba3uLm6wsPExcbHyMnK0tPU1dbX2Nna4uPk5ebn6Onq8vP09fb3+Pn6/9oADAMBAAIRAxEAPwD7LooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigA…", loading: false, currentEscala: "Escala - 03/07/2025" }
+PDFViewer.tsx:828:15
+📢 Verificando aviso "teste": 
+Object { active: true, inPeriod: true, startDate: "2025-07-06T20:54:39.158Z", endDate: "2025-07-07T20:54:39.158Z", now: "2025-07-07T00:31:23.783Z" }
+NoticeDisplay.tsx:56:17
+🏠 Index: Renderizando página principal 
+Object { activePlasa: "PLASA - 03/07/2025", activeBono: "nenhum", activeEscala: "Escala - 03/07/2025", currentMainDocType: "plasa", currentMainDoc: "PLASA - 03/07/2025", scrollSpeed: "normal", autoRestartDelay: 3 }
+Index.tsx:79:11
+🎖️ Analisando militar: 
+Object { fullName: "1T (IM) ELIEZER", type: "officer" }
+DutyOfficersDisplay.tsx:48:13
+🎖️ Já formatado corretamente: 
+Object { rank: "1T", specialty: "IM", name: "ELIEZER" }
+DutyOfficersDisplay.tsx:53:15
+🎖️ Analisando militar: 
+Object { fullName: "1SG (ES) DA SILVA", type: "master" }
+DutyOfficersDisplay.tsx:48:13
+🎖️ Já formatado corretamente: 
+Object { rank: "1SG", specialty: "ES", name: "DA SILVA" }
+DutyOfficersDisplay.tsx:53:15
+📋 ESCALA: Usando escala 1/3: 
+Object { title: "Escala - 03/07/2025", category: undefined, url: "https://1f8faedd-56a9-4fd2-a9c8-53add674d89f-00-2tf8n5fh0bu4h.riker.replit.dev/uploads/document-1751514750997-343946799-cardÃ¡pio rede 16jun.pdf" }
+PDFViewer.tsx:168:17
+🖼️ ESCALA: Renderizando 
+Object { docUrl: "https://1f8faedd-56a9-4fd2-a9c8-53add674d89f-00-2tf8n5fh0bu4h.riker.replit.dev/uploads/document-1751514750997-343946799-cardÃ¡pio rede 16jun.pdf", escalaImageUrl: "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAUDBAQEAwUEBAQFBQUGBwwIBwcHBw8LCwkMEQ8SEhEPERETFhwXExQaFRERGCEYGh0dHx8fExciJCIeJBweHx7/2wBDAQUFBQcGBw4ICA4eFBEUHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh7/wAARCALUBAADASIAAhEBAxEB/8QAHwAAAQUBAQEBAQEAAAAAAAAAAAECAwQFBgcICQoL/8QAtRAAAgEDAwIEAwUFBAQAAAF9AQIDAAQRBRIhMUEGE1FhByJxFDKBkaEII0KxwRVS0fAkM2JyggkKFhcYGRolJicoKSo0NTY3ODk6Q0RFRkdISUpTVFVWV1hZWmNkZWZnaGlqc3R1dnd4eXqDhIWGh4iJipKTlJWWl5iZmqKjpKWmp6ipqrKztLW2t7i5usLDxMXGx8jJytLT1NXW19jZ2uHi4+Tl5ufo6erx8vP09fb3+Pn6/8QAHwEAAwEBAQEBAQEBAQAAAAAAAAECAwQFBgcICQoL/8QAtREAAgECBAQDBAcFBAQAAQJ3AAECAxEEBSExBhJBUQdhcRMiMoEIFEKRobHBCSMzUvAVYnLRChYkNOEl8RcYGRomJygpKjU2Nzg5OkNERUZHSElKU1RVVldYWVpjZGVmZ2hpanN0dXZ3eHl6goOEhYaHiImKkpOUlZaXmJmaoqOkpaanqKmqsrO0tba3uLm6wsPExcbHyMnK0tPU1dbX2Nna4uPk5ebn6Onq8vP09fb3+Pn6/9oADAMBAAIRAxEAPwD7LooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigA…", loading: false, currentEscala: "Escala - 03/07/2025" }
+PDFViewer.tsx:828:15
+📢 Verificando aviso "teste": 
+Object { active: true, inPeriod: true, startDate: "2025-07-06T20:54:39.158Z", endDate: "2025-07-07T20:54:39.158Z", now: "2025-07-07T00:31:24.844Z" }
+NoticeDisplay.tsx:56:17
+🔄 Alternando para escala 2/3: Escala - 03/07/2025 DisplayContext.tsx:449:19
+🏠 Index: Renderizando página principal 
+Object { activePlasa: "PLASA - 03/07/2025", activeBono: "nenhum", activeEscala: "Escala - 03/07/2025", currentMainDocType: "plasa", currentMainDoc: "PLASA - 03/07/2025", scrollSpeed: "normal", autoRestartDelay: 3 }
+Index.tsx:79:11
+🎖️ Analisando militar: 
+Object { fullName: "1T (IM) ELIEZER", type: "officer" }
+DutyOfficersDisplay.tsx:48:13
+🎖️ Já formatado corretamente: 
+Object { rank: "1T", specialty: "IM", name: "ELIEZER" }
+DutyOfficersDisplay.tsx:53:15
+🎖️ Analisando militar: 
+Object { fullName: "1SG (ES) DA SILVA", type: "master" }
+DutyOfficersDisplay.tsx:48:13
+🎖️ Já formatado corretamente: 
+Object { rank: "1SG", specialty: "ES", name: "DA SILVA" }
+DutyOfficersDisplay.tsx:53:15
+📋 ESCALA: Usando escala 2/3: 
+Object { title: "Escala - 03/07/2025", category: undefined, url: "https://1f8faedd-56a9-4fd2-a9c8-53add674d89f-00-2tf8n5fh0bu4h.riker.replit.dev/uploads/document-1751514698929-676748080-21 - 02JUN a 08JUN2025.pdf" }
+PDFViewer.tsx:168:17
+🖼️ ESCALA: Renderizando 
+Object { docUrl: "https://1f8faedd-56a9-4fd2-a9c8-53add674d89f-00-2tf8n5fh0bu4h.riker.replit.dev/uploads/document-1751514698929-676748080-21 - 02JUN a 08JUN2025.pdf", escalaImageUrl: "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAUDBAQEAwUEBAQFBQUGBwwIBwcHBw8LCwkMEQ8SEhEPERETFhwXExQaFRERGCEYGh0dHx8fExciJCIeJBweHx7/2wBDAQUFBQcGBw4ICA4eFBEUHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh7/wAARCALUBAADASIAAhEBAxEB/8QAHwAAAQUBAQEBAQEAAAAAAAAAAAECAwQFBgcICQoL/8QAtRAAAgEDAwIEAwUFBAQAAAF9AQIDAAQRBRIhMUEGE1FhByJxFDKBkaEII0KxwRVS0fAkM2JyggkKFhcYGRolJicoKSo0NTY3ODk6Q0RFRkdISUpTVFVWV1hZWmNkZWZnaGlqc3R1dnd4eXqDhIWGh4iJipKTlJWWl5iZmqKjpKWmp6ipqrKztLW2t7i5usLDxMXGx8jJytLT1NXW19jZ2uHi4+Tl5ufo6erx8vP09fb3+Pn6/8QAHwEAAwEBAQEBAQEBAQAAAAAAAAECAwQFBgcICQoL/8QAtREAAgECBAQDBAcFBAQAAQJ3AAECAxEEBSExBhJBUQdhcRMiMoEIFEKRobHBCSMzUvAVYnLRChYkNOEl8RcYGRomJygpKjU2Nzg5OkNERUZHSElKU1RVVldYWVpjZGVmZ2hpanN0dXZ3eHl6goOEhYaHiImKkpOUlZaXmJmaoqOkpaanqKmqsrO0tba3uLm6wsPExcbHyMnK0tPU1dbX2Nna4uPk5ebn6Onq8vP09fb3+Pn6/9oADAMBAAIRAxEAPwD7LooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigA…", loading: false, currentEscala: "Escala - 03/07/2025" }
+PDFViewer.tsx:828:15
+📢 Verificando aviso "teste": 
+Object { active: true, inPeriod: true, startDate: "2025-07-06T20:54:39.158Z", endDate: "2025-07-07T20:54:39.158Z", now: "2025-07-07T00:31:25.346Z" }
+NoticeDisplay.tsx:56:17
+🔄 ESCALA Effect triggered: 
+Object { currentEscalaIndex: 1, totalActiveEscalas: 3, currentEscala: "Escala - 03/07/2025", category: undefined, url: "https://1f8faedd-56a9-4fd2-a9c8-53add674d89f-00-2tf8n5fh0bu4h.riker.replit.dev/uploads/document-1751514698929-676748080-21 - 02JUN a 08JUN2025.pdf", id: "1751762049590-klvf1un54" }
+PDFViewer.tsx:568:15
+🖼️ ESCALA: Processando URL: https://1f8faedd-56a9-4fd2-a9c8-53add674d89f-00-2tf8n5fh0bu4h.riker.replit.dev/uploads/document-1751514698929-676748080-21 - 02JUN a 08JUN2025.pdf PDFViewer.tsx:581:17
+📄 ESCALA: É um PDF, convertendo para imagem... PDFViewer.tsx:584:19
+🎯 ESCALA: Convertendo PDF: https://1f8faedd-56a9-4fd2-a9c8-53add674d89f-00-2tf8n5fh0bu4h.riker.replit.dev/uploads/document-1751514698929-676748080-21 - 02JUN a 08JUN2025.pdf (ID: 1751762049590-klvf1un54) PDFViewer.tsx:613:15
+🔍 Verificando cache para escala: 1751762049590-klvf1un54 PDFViewer.tsx:616:15
+🌐 PDFViewer: Detectado acesso via rede: 1f8faedd-56a9-4fd2-a9c8-53add674d89f-00-2tf8n5fh0bu4h.riker.replit.dev PDFViewer.tsx:132:15
+Bloqueado carregamento de conteúdo misto ativo “http://1f8faedd-56a9-4fd2-a9c8-53add674d89f-00-2tf8n5fh0bu4h.riker.replit.dev:5000/api/check-escala-cache/1751762049590-klvf1un54” admin
+📊 Estado do DisplayContext: 
+Object { plasaTotal: 1, plasaAtivos: 1, escalaTotal: 3, escalaAtivos: 3, currentEscalaIndex: 1, activePlasa: "PLASA - 03/07/2025", activeEscala: "Escala - 03/07/2025", activeEscalaCategory: "sem categoria", noticesTotal: 1, noticesAtivos: 1, … }
+DisplayContext.tsx:468:15
+💾 Contexto salvo no localStorage (sem avisos): 
+Object { plasa: 1, bono: 0, escala: 3, escalaIndex: 1 }
+DisplayContext.tsx:511:15
+⚠️ Erro ao verificar cache, continuando com conversão... TypeError: NetworkError when attempting to fetch resource.
+    convertEscalaPDFToImage PDFViewer.tsx:804
+    PDFViewer PDFViewer.tsx:761
+    React 8
+    workLoop scheduler.development.js:266
+    flushWork scheduler.development.js:239
+    performWorkUntilDeadline scheduler.development.js:533
+PDFViewer.tsx:628:17
+🆕 ESCALA: Cache não encontrado, convertendo... PDFViewer.tsx:630:15
+📥 Obtendo dados do PDF: https://1f8faedd-56a9-4fd2-a9c8-53add674d89f-00-2tf8n5fh0bu4h.riker.replit.dev/uploads/document-1751514698929-676748080-21 - 02JUN a 08JUN2025.pdf PDFViewer.tsx:208:13
+✅ PDF carregado: 62481 bytes PDFViewer.tsx:230:17
+✅ ESCALA: PDF válido, convertendo... PDFViewer.tsx:647:15
+📄 ESCALA: PDF carregado: 1 páginas PDFViewer.tsx:662:15
+📐 ESCALA: Página 1 - Escala: 1.2163112607557045, Final: 1024x724.0748821548817 PDFViewer.tsx:667:15
+🎨 ESCALA: Renderizando... PDFViewer.tsx:683:15
+downloadable font: glyf: empty gid 16 used as component in glyph 15 (font-family: "g_d1_f1" style:normal weight:400 stretch:100 src index:0) source: (invalid URI)
+downloadable font: glyf: empty gid 16 used as component in glyph 25 (font-family: "g_d1_f1" style:normal weight:400 stretch:100 src index:0) source: (invalid URI)
+downloadable font: glyf: empty gid 16 used as component in glyph 28 (font-family: "g_d1_f1" style:normal weight:400 stretch:100 src index:0) source: (invalid URI)
+downloadable font: glyf: empty gid 16 used as component in glyph 35 (font-family: "g_d1_f1" style:normal weight:400 stretch:100 src index:0) source: (invalid URI)
+downloadable font: glyf: empty gid 16 used as component in glyph 37 (font-family: "g_d1_f1" style:normal weight:400 stretch:100 src index:0) source: (invalid URI)
+downloadable font: glyf: empty gid 16 used as component in glyph 44 (font-family: "g_d1_f1" style:normal weight:400 stretch:100 src index:0) source: (invalid URI)
+downloadable font: glyf: empty gid 16 used as component in glyph 47 (font-family: "g_d1_f1" style:normal weight:400 stretch:100 src index:0) source: (invalid URI)
+downloadable font: glyf: empty gid 16 used as component in glyph 50 (font-family: "g_d1_f1" style:normal weight:400 stretch:100 src index:0) source: (invalid URI)
+downloadable font: glyf: empty gid 16 used as component in glyph 56 (font-family: "g_d1_f1" style:normal weight:400 stretch:100 src index:0) source: (invalid URI)
+downloadable font: glyf: empty gid 16 used as component in glyph 63 (font-family: "g_d1_f1" style:normal weight:400 stretch:100 src index:0) source: (invalid URI)
+downloadable font: glyf: empty gid 16 used as component in glyph 67 (font-family: "g_d1_f1" style:normal weight:400 stretch:100 src index:0) source: (invalid URI)
+downloadable font: glyf: empty gid 16 used as component in glyph 68 (font-family: "g_d1_f1" style:normal weight:400 stretch:100 src index:0) source: (invalid URI)
+downloadable font: glyf: empty gid 16 used as component in glyph 70 (font-family: "g_d1_f1" style:normal weight:400 stretch:100 src index:0) source: (invalid URI)
+downloadable font: glyf: empty gid 16 used as component in glyph 75 (font-family: "g_d1_f1" style:normal weight:400 stretch:100 src index:0) source: (invalid URI)
+downloadable font: glyf: empty gid 18 used as component in glyph 17 (font-family: "g_d1_f2" style:normal weight:400 stretch:100 src index:0) source: (invalid URI)
+downloadable font: glyf: empty gid 18 used as component in glyph 22 (font-family: "g_d1_f2" style:normal weight:400 stretch:100 src index:0) source: (invalid URI)
+downloadable font: glyf: empty gid 18 used as component in glyph 36 (font-family: "g_d1_f2" style:normal weight:400 stretch:100 src index:0) source: (invalid URI)
+downloadable font: glyf: empty gid 18 used as component in glyph 46 (font-family: "g_d1_f2" style:normal weight:400 stretch:100 src index:0) source: (invalid URI)
+downloadable font: glyf: empty gid 18 used as component in glyph 51 (font-family: "g_d1_f2" style:normal weight:400 stretch:100 src index:0) source: (invalid URI)
+downloadable font: glyf: empty gid 18 used as component in glyph 58 (font-family: "g_d1_f2" style:normal weight:400 stretch:100 src index:0) source: (invalid URI)
+downloadable font: glyf: empty gid 18 used as component in glyph 62 (font-family: "g_d1_f2" style:normal weight:400 stretch:100 src index:0) source: (invalid URI)
+downloadable font: glyf: empty gid 18 used as component in glyph 65 (font-family: "g_d1_f2" style:normal weight:400 stretch:100 src index:0) source: (invalid URI)
+downloadable font: glyf: empty gid 18 used as component in glyph 68 (font-family: "g_d1_f2" style:normal weight:400 stretch:100 src index:0) source: (invalid URI)
+downloadable font: glyf: empty gid 18 used as component in glyph 71 (font-family: "g_d1_f2" style:normal weight:400 stretch:100 src index:0) source: (invalid URI)
+downloadable font: glyf: empty gid 18 used as component in glyph 72 (font-family: "g_d1_f2" style:normal weight:400 stretch:100 src index:0) source: (invalid URI)
+downloadable font: glyf: empty gid 18 used as component in glyph 76 (font-family: "g_d1_f2" style:normal weight:400 stretch:100 src index:0) source: (invalid URI)
+downloadable font: glyf: empty gid 18 used as component in glyph 78 (font-family: "g_d1_f2" style:normal weight:400 stretch:100 src index:0) source: (invalid URI)
+downloadable font: glyf: empty gid 18 used as component in glyph 81 (font-family: "g_d1_f2" style:normal weight:400 stretch:100 src index:0) source: (invalid URI)
+🏠 Index: Renderizando página principal 
+Object { activePlasa: "PLASA - 03/07/2025", activeBono: "nenhum", activeEscala: "Escala - 03/07/2025", currentMainDocType: "plasa", currentMainDoc: "PLASA - 03/07/2025", scrollSpeed: "normal", autoRestartDelay: 3 }
+Index.tsx:79:11
+🎖️ Analisando militar: 
+Object { fullName: "1T (IM) ELIEZER", type: "officer" }
+DutyOfficersDisplay.tsx:48:13
+🎖️ Já formatado corretamente: 
+Object { rank: "1T", specialty: "IM", name: "ELIEZER" }
+DutyOfficersDisplay.tsx:53:15
+🎖️ Analisando militar: 
+Object { fullName: "1SG (ES) DA SILVA", type: "master" }
+DutyOfficersDisplay.tsx:48:13
+🎖️ Já formatado corretamente: 
+Object { rank: "1SG", specialty: "ES", name: "DA SILVA" }
+DutyOfficersDisplay.tsx:53:15
+📢 Verificando aviso "teste": 
+Object { active: true, inPeriod: true, startDate: "2025-07-06T20:54:39.158Z", endDate: "2025-07-07T20:54:39.158Z", now: "2025-07-07T00:31:25.892Z" }
+NoticeDisplay.tsx:56:17
+✅ ESCALA: Renderizada com sucesso PDFViewer.tsx:689:15
+💾 Salvando escala 1751762049590-klvf1un54 no cache... PDFViewer.tsx:691:17
+🌐 PDFViewer: Detectado acesso via rede: 1f8faedd-56a9-4fd2-a9c8-53add674d89f-00-2tf8n5fh0bu4h.riker.replit.dev PDFViewer.tsx:132:15
+Bloqueado carregamento de conteúdo misto ativo “http://1f8faedd-56a9-4fd2-a9c8-53add674d89f-00-2tf8n5fh0bu4h.riker.replit.dev:5000/api/save-escala-cache” admin
+⚠️ ESCALA: Falha ao salvar cache, usando dataURL: TypeError: NetworkError when attempting to fetch resource.
+    convertEscalaPDFToImage https://1f8faedd-56a9-4fd2-a9c8-53add674d89f-00-2tf8n5fh0bu4h.riker.replit.dev/src/components/PDFViewer.tsx:704
+    imageBlob https://1f8faedd-56a9-4fd2-a9c8-53add674d89f-00-2tf8n5fh0bu4h.riker.replit.dev/src/components/PDFViewer.tsx:693
+    convertEscalaPDFToImage https://1f8faedd-56a9-4fd2-a9c8-53add674d89f-00-2tf8n5fh0bu4h.riker.replit.dev/src/components/PDFViewer.tsx:692
+    _scheduleNext https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js:22
+    _continue https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js:22
+    operatorListChanged https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js:22
+    _renderPageChunk https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js:22
+    pump https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js:22
+    promise callback*pump https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js:22
+    _pumpOperatorList https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js:22
+    render https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js:22
+    convertEscalaPDFToImage https://1f8faedd-56a9-4fd2-a9c8-53add674d89f-00-2tf8n5fh0bu4h.riker.replit.dev/src/components/PDFViewer.tsx:684
+PDFViewer.tsx:723:17
+🎉 ESCALA: Conversão concluída! PDFViewer.tsx:730:15
+📋 ESCALA: Usando escala 2/3: 
+Object { title: "Escala - 03/07/2025", category: undefined, url: "https://1f8faedd-56a9-4fd2-a9c8-53add674d89f-00-2tf8n5fh0bu4h.riker.replit.dev/uploads/document-1751514698929-676748080-21 - 02JUN a 08JUN2025.pdf" }
+PDFViewer.tsx:168:17
+🖼️ ESCALA: Renderizando 
+Object { docUrl: "https://1f8faedd-56a9-4fd2-a9c8-53add674d89f-00-2tf8n5fh0bu4h.riker.replit.dev/uploads/document-1751514698929-676748080-21 - 02JUN a 08JUN2025.pdf", escalaImageUrl: "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAUDBAQEAwUEBAQFBQUGBwwIBwcHBw8LCwkMEQ8SEhEPERETFhwXExQaFRERGCEYGh0dHx8fExciJCIeJBweHx7/2wBDAQUFBQcGBw4ICA4eFBEUHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh7/wAARCALUBAADASIAAhEBAxEB/8QAHwAAAQUBAQEBAQEAAAAAAAAAAAECAwQFBgcICQoL/8QAtRAAAgEDAwIEAwUFBAQAAAF9AQIDAAQRBRIhMUEGE1FhByJxFDKBkaEII0KxwRVS0fAkM2JyggkKFhcYGRolJicoKSo0NTY3ODk6Q0RFRkdISUpTVFVWV1hZWmNkZWZnaGlqc3R1dnd4eXqDhIWGh4iJipKTlJWWl5iZmqKjpKWmp6ipqrKztLW2t7i5usLDxMXGx8jJytLT1NXW19jZ2uHi4+Tl5ufo6erx8vP09fb3+Pn6/8QAHwEAAwEBAQEBAQEBAQAAAAAAAAECAwQFBgcICQoL/8QAtREAAgECBAQDBAcFBAQAAQJ3AAECAxEEBSExBhJBUQdhcRMiMoEIFEKRobHBCSMzUvAVYnLRChYkNOEl8RcYGRomJygpKjU2Nzg5OkNERUZHSElKU1RVVldYWVpjZGVmZ2hpanN0dXZ3eHl6goOEhYaHiImKkpOUlZaXmJmaoqOkpaanqKmqsrO0tba3uLm6wsPExcbHyMnK0tPU1dbX2Nna4uPk5ebn6Onq8vP09fb3+Pn6/9oADAMBAAIRAxEAPwD7LooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigA…", loading: false, currentEscala: "Escala - 03/07/2025" }
+PDFViewer.tsx:828:15
+✅ Escala convertida carregada com sucesso PDFViewer.tsx:841:21
+🏠 Index: Renderizando página principal 
+Object { activePlasa: "PLASA - 03/07/2025", activeBono: "nenhum", activeEscala: "Escala - 03/07/2025", currentMainDocType: "plasa", currentMainDoc: "PLASA - 03/07/2025", scrollSpeed: "normal", autoRestartDelay: 3 }
+Index.tsx:79:11
+🎖️ Analisando militar: 
+Object { fullName: "1T (IM) ELIEZER", type: "officer" }
+DutyOfficersDisplay.tsx:48:13
+🎖️ Já formatado corretamente: 
+Object { rank: "1T", specialty: "IM", name: "ELIEZER" }
+DutyOfficersDisplay.tsx:53:15
+🎖️ Analisando militar: 
+Object { fullName: "1SG (ES) DA SILVA", type: "master" }
+DutyOfficersDisplay.tsx:48:13
+🎖️ Já formatado corretamente: 
+Object { rank: "1SG", specialty: "ES", name: "DA SILVA" }
+DutyOfficersDisplay.tsx:53:15
+📋 ESCALA: Usando escala 2/3: 
+Object { title: "Escala - 03/07/2025", category: undefined, url: "https://1f8faedd-56a9-4fd2-a9c8-53add674d89f-00-2tf8n5fh0bu4h.riker.replit.dev/uploads/document-1751514698929-676748080-21 - 02JUN a 08JUN2025.pdf" }
+PDFViewer.tsx:168:17
+🖼️ ESCALA: Renderizando 
+Object { docUrl: "https://1f8faedd-56a9-4fd2-a9c8-53add674d89f-00-2tf8n5fh0bu4h.riker.replit.dev/uploads/document-1751514698929-676748080-21 - 02JUN a 08JUN2025.pdf", escalaImageUrl: "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAUDBAQEAwUEBAQFBQUGBwwIBwcHBw8LCwkMEQ8SEhEPERETFhwXExQaFRERGCEYGh0dHx8fExciJCIeJBweHx7/2wBDAQUFBQcGBw4ICA4eFBEUHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh7/wAARCALUBAADASIAAhEBAxEB/8QAHwAAAQUBAQEBAQEAAAAAAAAAAAECAwQFBgcICQoL/8QAtRAAAgEDAwIEAwUFBAQAAAF9AQIDAAQRBRIhMUEGE1FhByJxFDKBkaEII0KxwRVS0fAkM2JyggkKFhcYGRolJicoKSo0NTY3ODk6Q0RFRkdISUpTVFVWV1hZWmNkZWZnaGlqc3R1dnd4eXqDhIWGh4iJipKTlJWWl5iZmqKjpKWmp6ipqrKztLW2t7i5usLDxMXGx8jJytLT1NXW19jZ2uHi4+Tl5ufo6erx8vP09fb3+Pn6/8QAHwEAAwEBAQEBAQEBAQAAAAAAAAECAwQFBgcICQoL/8QAtREAAgECBAQDBAcFBAQAAQJ3AAECAxEEBSExBhJBUQdhcRMiMoEIFEKRobHBCSMzUvAVYnLRChYkNOEl8RcYGRomJygpKjU2Nzg5OkNERUZHSElKU1RVVldYWVpjZGVmZ2hpanN0dXZ3eHl6goOEhYaHiImKkpOUlZaXmJmaoqOkpaanqKmqsrO0tba3uLm6wsPExcbHyMnK0tPU1dbX2Nna4uPk5ebn6Onq8vP09fb3+Pn6/9oADAMBAAIRAxEAPwD7LooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigA…", loading: false, currentEscala: "Escala - 03/07/2025" }
+PDFViewer.tsx:828:15
+📢 Verificando aviso "teste": 
+Object { active: true, inPeriod: true, startDate: "2025-07-06T20:54:39.158Z", endDate: "2025-07-07T20:54:39.158Z", now: "2025-07-07T00:31:26.928Z" }
+NoticeDisplay.tsx:56:17
+🏠 Index: Renderizando página principal 
+Object { activePlasa: "PLASA - 03/07/2025", activeBono: "nenhum", activeEscala: "Escala - 03/07/2025", currentMainDocType: "plasa", currentMainDoc: "PLASA - 03/07/2025", scrollSpeed: "normal", autoRestartDelay: 3 }
+Index.tsx:79:11
+🎖️ Analisando militar: 
+Object { fullName: "1T (IM) ELIEZER", type: "officer" }
+DutyOfficersDisplay.tsx:48:13
+🎖️ Já formatado corretamente: 
+Object { rank: "1T", specialty: "IM", name: "ELIEZER" }
+DutyOfficersDisplay.tsx:53:15
+🎖️ Analisando militar: 
+Object { fullName: "1SG (ES) DA SILVA", type: "master" }
+DutyOfficersDisplay.tsx:48:13
+🎖️ Já formatado corretamente: 
+Object { rank: "1SG", specialty: "ES", name: "DA SILVA" }
+DutyOfficersDisplay.tsx:53:15
+📋 ESCALA: Usando escala 2/3: 
+Object { title: "Escala - 03/07/2025", category: undefined, url: "https://1f8faedd-56a9-4fd2-a9c8-53add674d89f-00-2tf8n5fh0bu4h.riker.replit.dev/uploads/document-1751514698929-676748080-21 - 02JUN a 08JUN2025.pdf" }
+PDFViewer.tsx:168:17
+🖼️ ESCALA: Renderizando 
+Object { docUrl: "https://1f8faedd-56a9-4fd2-a9c8-53add674d89f-00-2tf8n5fh0bu4h.riker.replit.dev/uploads/document-1751514698929-676748080-21 - 02JUN a 08JUN2025.pdf", escalaImageUrl: "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAUDBAQEAwUEBAQFBQUGBwwIBwcHBw8LCwkMEQ8SEhEPERETFhwXExQaFRERGCEYGh0dHx8fExciJCIeJBweHx7/2wBDAQUFBQcGBw4ICA4eFBEUHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh7/wAARCALUBAADASIAAhEBAxEB/8QAHwAAAQUBAQEBAQEAAAAAAAAAAAECAwQFBgcICQoL/8QAtRAAAgEDAwIEAwUFBAQAAAF9AQIDAAQRBRIhMUEGE1FhByJxFDKBkaEII0KxwRVS0fAkM2JyggkKFhcYGRolJicoKSo0NTY3ODk6Q0RFRkdISUpTVFVWV1hZWmNkZWZnaGlqc3R1dnd4eXqDhIWGh4iJipKTlJWWl5iZmqKjpKWmp6ipqrKztLW2t7i5usLDxMXGx8jJytLT1NXW19jZ2uHi4+Tl5ufo6erx8vP09fb3+Pn6/8QAHwEAAwEBAQEBAQEBAQAAAAAAAAECAwQFBgcICQoL/8QAtREAAgECBAQDBAcFBAQAAQJ3AAECAxEEBSExBhJBUQdhcRMiMoEIFEKRobHBCSMzUvAVYnLRChYkNOEl8RcYGRomJygpKjU2Nzg5OkNERUZHSElKU1RVVldYWVpjZGVmZ2hpanN0dXZ3eHl6goOEhYaHiImKkpOUlZaXmJmaoqOkpaanqKmqsrO0tba3uLm6wsPExcbHyMnK0tPU1dbX2Nna4uPk5ebn6Onq8vP09fb3+Pn6/9oADAMBAAIRAxEAPwD7LooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigA…", loading: false, currentEscala: "Escala - 03/07/2025" }
+PDFViewer.tsx:828:15
+📢 Verificando aviso "teste": 
+Object { active: true, inPeriod: true, startDate: "2025-07-06T20:54:39.158Z", endDate: "2025-07-07T20:54:39.158Z", now: "2025-07-07T00:31:27.929Z" }
+NoticeDisplay.tsx:56:17
+🏠 Index: Renderizando página principal 
+Object { activePlasa: "PLASA - 03/07/2025", activeBono: "nenhum", activeEscala: "Escala - 03/07/2025", currentMainDocType: "plasa", currentMainDoc: "PLASA - 03/07/2025", scrollSpeed: "normal", autoRestartDelay: 3 }
+Index.tsx:79:11
+🎖️ Analisando militar: 
+Object { fullName: "1T (IM) ELIEZER", type: "officer" }
+DutyOfficersDisplay.tsx:48:13
+🎖️ Já formatado corretamente: 
+Object { rank: "1T", specialty: "IM", name: "ELIEZER" }
+DutyOfficersDisplay.tsx:53:15
+🎖️ Analisando militar: 
+Object { fullName: "1SG (ES) DA SILVA", type: "master" }
+DutyOfficersDisplay.tsx:48:13
+🎖️ Já formatado corretamente: 
+Object { rank: "1SG", specialty: "ES", name: "DA SILVA" }
+DutyOfficersDisplay.tsx:53:15
+📋 ESCALA: Usando escala 2/3: 
+Object { title: "Escala - 03/07/2025", category: undefined, url: "https://1f8faedd-56a9-4fd2-a9c8-53add674d89f-00-2tf8n5fh0bu4h.riker.replit.dev/uploads/document-1751514698929-676748080-21 - 02JUN a 08JUN2025.pdf" }
+PDFViewer.tsx:168:17
+🖼️ ESCALA: Renderizando 
+Object { docUrl: "https://1f8faedd-56a9-4fd2-a9c8-53add674d89f-00-2tf8n5fh0bu4h.riker.replit.dev/uploads/document-1751514698929-676748080-21 - 02JUN a 08JUN2025.pdf", escalaImageUrl: "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAUDBAQEAwUEBAQFBQUGBwwIBwcHBw8LCwkMEQ8SEhEPERETFhwXExQaFRERGCEYGh0dHx8fExciJCIeJBweHx7/2wBDAQUFBQcGBw4ICA4eFBEUHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh7/wAARCALUBAADASIAAhEBAxEB/8QAHwAAAQUBAQEBAQEAAAAAAAAAAAECAwQFBgcICQoL/8QAtRAAAgEDAwIEAwUFBAQAAAF9AQIDAAQRBRIhMUEGE1FhByJxFDKBkaEII0KxwRVS0fAkM2JyggkKFhcYGRolJicoKSo0NTY3ODk6Q0RFRkdISUpTVFVWV1hZWmNkZWZnaGlqc3R1dnd4eXqDhIWGh4iJipKTlJWWl5iZmqKjpKWmp6ipqrKztLW2t7i5usLDxMXGx8jJytLT1NXW19jZ2uHi4+Tl5ufo6erx8vP09fb3+Pn6/8QAHwEAAwEBAQEBAQEBAQAAAAAAAAECAwQFBgcICQoL/8QAtREAAgECBAQDBAcFBAQAAQJ3AAECAxEEBSExBhJBUQdhcRMiMoEIFEKRobHBCSMzUvAVYnLRChYkNOEl8RcYGRomJygpKjU2Nzg5OkNERUZHSElKU1RVVldYWVpjZGVmZ2hpanN0dXZ3eHl6goOEhYaHiImKkpOUlZaXmJmaoqOkpaanqKmqsrO0tba3uLm6wsPExcbHyMnK0tPU1dbX2Nna4uPk5ebn6Onq8vP09fb3+Pn6/9oADAMBAAIRAxEAPwD7LooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigA…", loading: false, currentEscala: "Escala - 03/07/2025" }
+PDFViewer.tsx:828:15
+📢 Verificando aviso "teste": 
+Object { active: true, inPeriod: true, startDate: "2025-07-06T20:54:39.158Z", endDate: "2025-07-07T20:54:39.158Z", now: "2025-07-07T00:31:28.980Z" }
+NoticeDisplay.tsx:56:17
+🏠 Index: Renderizando página principal 
+Object { activePlasa: "PLASA - 03/07/2025", activeBono: "nenhum", activeEscala: "Escala - 03/07/2025", currentMainDocType: "plasa", currentMainDoc: "PLASA - 03/07/2025", scrollSpeed: "normal", autoRestartDelay: 3 }
+Index.tsx:79:11
+🎖️ Analisando militar: 
+Object { fullName: "1T (IM) ELIEZER", type: "officer" }
+DutyOfficersDisplay.tsx:48:13
+🎖️ Já formatado corretamente: 
+Object { rank: "1T", specialty: "IM", name: "ELIEZER" }
+DutyOfficersDisplay.tsx:53:15
+🎖️ Analisando militar: 
+Object { fullName: "1SG (ES) DA SILVA", type: "master" }
+DutyOfficersDisplay.tsx:48:13
+🎖️ Já formatado corretamente: 
+Object { rank: "1SG", specialty: "ES", name: "DA SILVA" }
+DutyOfficersDisplay.tsx:53:15
+📋 ESCALA: Usando escala 2/3: 
+Object { title: "Escala - 03/07/2025", category: undefined, url: "https://1f8faedd-56a9-4fd2-a9c8-53add674d89f-00-2tf8n5fh0bu4h.riker.replit.dev/uploads/document-1751514698929-676748080-21 - 02JUN a 08JUN2025.pdf" }
+PDFViewer.tsx:168:17
+🖼️ ESCALA: Renderizando 
+Object { docUrl: "https://1f8faedd-56a9-4fd2-a9c8-53add674d89f-00-2tf8n5fh0bu4h.riker.replit.dev/uploads/document-1751514698929-676748080-21 - 02JUN a 08JUN2025.pdf", escalaImageUrl: "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAUDBAQEAwUEBAQFBQUGBwwIBwcHBw8LCwkMEQ8SEhEPERETFhwXExQaFRERGCEYGh0dHx8fExciJCIeJBweHx7/2wBDAQUFBQcGBw4ICA4eFBEUHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh7/wAARCALUBAADASIAAhEBAxEB/8QAHwAAAQUBAQEBAQEAAAAAAAAAAAECAwQFBgcICQoL/8QAtRAAAgEDAwIEAwUFBAQAAAF9AQIDAAQRBRIhMUEGE1FhByJxFDKBkaEII0KxwRVS0fAkM2JyggkKFhcYGRolJicoKSo0NTY3ODk6Q0RFRkdISUpTVFVWV1hZWmNkZWZnaGlqc3R1dnd4eXqDhIWGh4iJipKTlJWWl5iZmqKjpKWmp6ipqrKztLW2t7i5usLDxMXGx8jJytLT1NXW19jZ2uHi4+Tl5ufo6erx8vP09fb3+Pn6/8QAHwEAAwEBAQEBAQEBAQAAAAAAAAECAwQFBgcICQoL/8QAtREAAgECBAQDBAcFBAQAAQJ3AAECAxEEBSExBhJBUQdhcRMiMoEIFEKRobHBCSMzUvAVYnLRChYkNOEl8RcYGRomJygpKjU2Nzg5OkNERUZHSElKU1RVVldYWVpjZGVmZ2hpanN0dXZ3eHl6goOEhYaHiImKkpOUlZaXmJmaoqOkpaanqKmqsrO0tba3uLm6wsPExcbHyMnK0tPU1dbX2Nna4uPk5ebn6Onq8vP09fb3+Pn6/9oADAMBAAIRAxEAPwD7LooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigA…", loading: false, currentEscala: "Escala - 03/07/2025" }
+PDFViewer.tsx:828:15
+📢 Verificando aviso "teste": 
+Object { active: true, inPeriod: true, startDate: "2025-07-06T20:54:39.158Z", endDate: "2025-07-07T20:54:39.158Z", now: "2025-07-07T00:31:29.995Z" }
+NoticeDisplay.tsx:56:17
+🏠 Index: Renderizando página principal 
+Object { activePlasa: "PLASA - 03/07/2025", activeBono: "nenhum", activeEscala: "Escala - 03/07/2025", currentMainDocType: "plasa", currentMainDoc: "PLASA - 03/07/2025", scrollSpeed: "normal", autoRestartDelay: 3 }
+Index.tsx:79:11
+🎖️ Analisando militar: 
+Object { fullName: "1T (IM) ELIEZER", type: "officer" }
+DutyOfficersDisplay.tsx:48:13
+🎖️ Já formatado corretamente: 
+Object { rank: "1T", specialty: "IM", name: "ELIEZER" }
+DutyOfficersDisplay.tsx:53:15
+🎖️ Analisando militar: 
+Object { fullName: "1SG (ES) DA SILVA", type: "master" }
+DutyOfficersDisplay.tsx:48:13
+🎖️ Já formatado corretamente: 
+Object { rank: "1SG", specialty: "ES", name: "DA SILVA" }
+DutyOfficersDisplay.tsx:53:15
+📋 ESCALA: Usando escala 2/3: 
+Object { title: "Escala - 03/07/2025", category: undefined, url: "https://1f8faedd-56a9-4fd2-a9c8-53add674d89f-00-2tf8n5fh0bu4h.riker.replit.dev/uploads/document-1751514698929-676748080-21 - 02JUN a 08JUN2025.pdf" }
+PDFViewer.tsx:168:17
+🖼️ ESCALA: Renderizando 
+Object { docUrl: "https://1f8faedd-56a9-4fd2-a9c8-53add674d89f-00-2tf8n5fh0bu4h.riker.replit.dev/uploads/document-1751514698929-676748080-21 - 02JUN a 08JUN2025.pdf", escalaImageUrl: "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAUDBAQEAwUEBAQFBQUGBwwIBwcHBw8LCwkMEQ8SEhEPERETFhwXExQaFRERGCEYGh0dHx8fExciJCIeJBweHx7/2wBDAQUFBQcGBw4ICA4eFBEUHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh7/wAARCALUBAADASIAAhEBAxEB/8QAHwAAAQUBAQEBAQEAAAAAAAAAAAECAwQFBgcICQoL/8QAtRAAAgEDAwIEAwUFBAQAAAF9AQIDAAQRBRIhMUEGE1FhByJxFDKBkaEII0KxwRVS0fAkM2JyggkKFhcYGRolJicoKSo0NTY3ODk6Q0RFRkdISUpTVFVWV1hZWmNkZWZnaGlqc3R1dnd4eXqDhIWGh4iJipKTlJWWl5iZmqKjpKWmp6ipqrKztLW2t7i5usLDxMXGx8jJytLT1NXW19jZ2uHi4+Tl5ufo6erx8vP09fb3+Pn6/8QAHwEAAwEBAQEBAQEBAQAAAAAAAAECAwQFBgcICQoL/8QAtREAAgECBAQDBAcFBAQAAQJ3AAECAxEEBSExBhJBUQdhcRMiMoEIFEKRobHBCSMzUvAVYnLRChYkNOEl8RcYGRomJygpKjU2Nzg5OkNERUZHSElKU1RVVldYWVpjZGVmZ2hpanN0dXZ3eHl6goOEhYaHiImKkpOUlZaXmJmaoqOkpaanqKmqsrO0tba3uLm6wsPExcbHyMnK0tPU1dbX2Nna4uPk5ebn6Onq8vP09fb3+Pn6/9oADAMBAAIRAxEAPwD7LooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigA…", loading: false, currentEscala: "Escala - 03/07/2025" }
+PDFViewer.tsx:828:15
+📢 Verificando aviso "teste": 
+Object { active: true, inPeriod: true, startDate: "2025-07-06T20:54:39.158Z", endDate: "2025-07-07T20:54:39.158Z", now: "2025-07-07T00:31:31.077Z" }
+NoticeDisplay.tsx:56:17
+🏠 Index: Renderizando página principal 
+Object { activePlasa: "PLASA - 03/07/2025", activeBono: "nenhum", activeEscala: "Escala - 03/07/2025", currentMainDocType: "plasa", currentMainDoc: "PLASA - 03/07/2025", scrollSpeed: "normal", autoRestartDelay: 3 }
+Index.tsx:79:11
+🎖️ Analisando militar: 
+Object { fullName: "1T (IM) ELIEZER", type: "officer" }
+DutyOfficersDisplay.tsx:48:13
+🎖️ Já formatado corretamente: 
+Object { rank: "1T", specialty: "IM", name: "ELIEZER" }
+DutyOfficersDisplay.tsx:53:15
+🎖️ Analisando militar: 
+Object { fullName: "1SG (ES) DA SILVA", type: "master" }
+DutyOfficersDisplay.tsx:48:13
+🎖️ Já formatado corretamente: 
+Object { rank: "1SG", specialty: "ES", name: "DA SILVA" }
+DutyOfficersDisplay.tsx:53:15
+📋 ESCALA: Usando escala 2/3: 
+Object { title: "Escala - 03/07/2025", category: undefined, url: "https://1f8faedd-56a9-4fd2-a9c8-53add674d89f-00-2tf8n5fh0bu4h.riker.replit.dev/uploads/document-1751514698929-676748080-21 - 02JUN a 08JUN2025.pdf" }
+PDFViewer.tsx:168:17
+🖼️ ESCALA: Renderizando 
+Object { docUrl: "https://1f8faedd-56a9-4fd2-a9c8-53add674d89f-00-2tf8n5fh0bu4h.riker.replit.dev/uploads/document-1751514698929-676748080-21 - 02JUN a 08JUN2025.pdf", escalaImageUrl: "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAUDBAQEAwUEBAQFBQUGBwwIBwcHBw8LCwkMEQ8SEhEPERETFhwXExQaFRERGCEYGh0dHx8fExciJCIeJBweHx7/2wBDAQUFBQcGBw4ICA4eFBEUHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh7/wAARCALUBAADASIAAhEBAxEB/8QAHwAAAQUBAQEBAQEAAAAAAAAAAAECAwQFBgcICQoL/8QAtRAAAgEDAwIEAwUFBAQAAAF9AQIDAAQRBRIhMUEGE1FhByJxFDKBkaEII0KxwRVS0fAkM2JyggkKFhcYGRolJicoKSo0NTY3ODk6Q0RFRkdISUpTVFVWV1hZWmNkZWZnaGlqc3R1dnd4eXqDhIWGh4iJipKTlJWWl5iZmqKjpKWmp6ipqrKztLW2t7i5usLDxMXGx8jJytLT1NXW19jZ2uHi4+Tl5ufo6erx8vP09fb3+Pn6/8QAHwEAAwEBAQEBAQEBAQAAAAAAAAECAwQFBgcICQoL/8QAtREAAgECBAQDBAcFBAQAAQJ3AAECAxEEBSExBhJBUQdhcRMiMoEIFEKRobHBCSMzUvAVYnLRChYkNOEl8RcYGRomJygpKjU2Nzg5OkNERUZHSElKU1RVVldYWVpjZGVmZ2hpanN0dXZ3eHl6goOEhYaHiImKkpOUlZaXmJmaoqOkpaanqKmqsrO0tba3uLm6wsPExcbHyMnK0tPU1dbX2Nna4uPk5ebn6Onq8vP09fb3+Pn6/9oADAMBAAIRAxEAPwD7LooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigA…", loading: false, currentEscala: "Escala - 03/07/2025" }
+PDFViewer.tsx:828:15
+📢 Verificando aviso "teste": 
+Object { active: true, inPeriod: true, startDate: "2025-07-06T20:54:39.158Z", endDate: "2025-07-07T20:54:39.158Z", now: "2025-07-07T00:31:32.078Z" }
+NoticeDisplay.tsx:56:17
+🏠 Index: Renderizando página principal 
+Object { activePlasa: "PLASA - 03/07/2025", activeBono: "nenhum", activeEscala: "Escala - 03/07/2025", currentMainDocType: "plasa", currentMainDoc: "PLASA - 03/07/2025", scrollSpeed: "normal", autoRestartDelay: 3 }
+Index.tsx:79:11
+🎖️ Analisando militar: 
+Object { fullName: "1T (IM) ELIEZER", type: "officer" }
+DutyOfficersDisplay.tsx:48:13
+🎖️ Já formatado corretamente: 
+Object { rank: "1T", specialty: "IM", name: "ELIEZER" }
+DutyOfficersDisplay.tsx:53:15
+🎖️ Analisando militar: 
+Object { fullName: "1SG (ES) DA SILVA", type: "master" }
+DutyOfficersDisplay.tsx:48:13
+🎖️ Já formatado corretamente: 
+Object { rank: "1SG", specialty: "ES", name: "DA SILVA" }
+DutyOfficersDisplay.tsx:53:15
+📋 ESCALA: Usando escala 2/3: 
+Object { title: "Escala - 03/07/2025", category: undefined, url: "https://1f8faedd-56a9-4fd2-a9c8-53add674d89f-00-2tf8n5fh0bu4h.riker.replit.dev/uploads/document-1751514698929-676748080-21 - 02JUN a 08JUN2025.pdf" }
+PDFViewer.tsx:168:17
+🖼️ ESCALA: Renderizando 
+Object { docUrl: "https://1f8faedd-56a9-4fd2-a9c8-53add674d89f-00-2tf8n5fh0bu4h.riker.replit.dev/uploads/document-1751514698929-676748080-21 - 02JUN a 08JUN2025.pdf", escalaImageUrl: "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAUDBAQEAwUEBAQFBQUGBwwIBwcHBw8LCwkMEQ8SEhEPERETFhwXExQaFRERGCEYGh0dHx8fExciJCIeJBweHx7/2wBDAQUFBQcGBw4ICA4eFBEUHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh7/wAARCALUBAADASIAAhEBAxEB/8QAHwAAAQUBAQEBAQEAAAAAAAAAAAECAwQFBgcICQoL/8QAtRAAAgEDAwIEAwUFBAQAAAF9AQIDAAQRBRIhMUEGE1FhByJxFDKBkaEII0KxwRVS0fAkM2JyggkKFhcYGRolJicoKSo0NTY3ODk6Q0RFRkdISUpTVFVWV1hZWmNkZWZnaGlqc3R1dnd4eXqDhIWGh4iJipKTlJWWl5iZmqKjpKWmp6ipqrKztLW2t7i5usLDxMXGx8jJytLT1NXW19jZ2uHi4+Tl5ufo6erx8vP09fb3+Pn6/8QAHwEAAwEBAQEBAQEBAQAAAAAAAAECAwQFBgcICQoL/8QAtREAAgECBAQDBAcFBAQAAQJ3AAECAxEEBSExBhJBUQdhcRMiMoEIFEKRobHBCSMzUvAVYnLRChYkNOEl8RcYGRomJygpKjU2Nzg5OkNERUZHSElKU1RVVldYWVpjZGVmZ2hpanN0dXZ3eHl6goOEhYaHiImKkpOUlZaXmJmaoqOkpaanqKmqsrO0tba3uLm6wsPExcbHyMnK0tPU1dbX2Nna4uPk5ebn6Onq8vP09fb3+Pn6/9oADAMBAAIRAxEAPwD7LooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigA…", loading: false, currentEscala: "Escala - 03/07/2025" }
+PDFViewer.tsx:828:15
+📢 Verificando aviso "teste": 
+Object { active: true, inPeriod: true, startDate: "2025-07-06T20:54:39.158Z", endDate: "2025-07-07T20:54:39.158Z", now: "2025-07-07T00:31:33.096Z" }
+NoticeDisplay.tsx:56:17
+🏠 Index: Renderizando página principal 
+Object { activePlasa: "PLASA - 03/07/2025", activeBono: "nenhum", activeEscala: "Escala - 03/07/2025", currentMainDocType: "plasa", currentMainDoc: "PLASA - 03/07/2025", scrollSpeed: "normal", autoRestartDelay: 3 }
+Index.tsx:79:11
+🎖️ Analisando militar: 
+Object { fullName: "1T (IM) ELIEZER", type: "officer" }
+DutyOfficersDisplay.tsx:48:13
+🎖️ Já formatado corretamente: 
+Object { rank: "1T", specialty: "IM", name: "ELIEZER" }
+DutyOfficersDisplay.tsx:53:15
+🎖️ Analisando militar: 
+Object { fullName: "1SG (ES) DA SILVA", type: "master" }
+DutyOfficersDisplay.tsx:48:13
+🎖️ Já formatado corretamente: 
+Object { rank: "1SG", specialty: "ES", name: "DA SILVA" }
+DutyOfficersDisplay.tsx:53:15
+📋 ESCALA: Usando escala 2/3: 
+Object { title: "Escala - 03/07/2025", category: undefined, url: "https://1f8faedd-56a9-4fd2-a9c8-53add674d89f-00-2tf8n5fh0bu4h.riker.replit.dev/uploads/document-1751514698929-676748080-21 - 02JUN a 08JUN2025.pdf" }
+PDFViewer.tsx:168:17
+🖼️ ESCALA: Renderizando 
+Object { docUrl: "https://1f8faedd-56a9-4fd2-a9c8-53add674d89f-00-2tf8n5fh0bu4h.riker.replit.dev/uploads/document-1751514698929-676748080-21 - 02JUN a 08JUN2025.pdf", escalaImageUrl: "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAUDBAQEAwUEBAQFBQUGBwwIBwcHBw8LCwkMEQ8SEhEPERETFhwXExQaFRERGCEYGh0dHx8fExciJCIeJBweHx7/2wBDAQUFBQcGBw4ICA4eFBEUHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh7/wAARCALUBAADASIAAhEBAxEB/8QAHwAAAQUBAQEBAQEAAAAAAAAAAAECAwQFBgcICQoL/8QAtRAAAgEDAwIEAwUFBAQAAAF9AQIDAAQRBRIhMUEGE1FhByJxFDKBkaEII0KxwRVS0fAkM2JyggkKFhcYGRolJicoKSo0NTY3ODk6Q0RFRkdISUpTVFVWV1hZWmNkZWZnaGlqc3R1dnd4eXqDhIWGh4iJipKTlJWWl5iZmqKjpKWmp6ipqrKztLW2t7i5usLDxMXGx8jJytLT1NXW19jZ2uHi4+Tl5ufo6erx8vP09fb3+Pn6/8QAHwEAAwEBAQEBAQEBAQAAAAAAAAECAwQFBgcICQoL/8QAtREAAgECBAQDBAcFBAQAAQJ3AAECAxEEBSExBhJBUQdhcRMiMoEIFEKRobHBCSMzUvAVYnLRChYkNOEl8RcYGRomJygpKjU2Nzg5OkNERUZHSElKU1RVVldYWVpjZGVmZ2hpanN0dXZ3eHl6goOEhYaHiImKkpOUlZaXmJmaoqOkpaanqKmqsrO0tba3uLm6wsPExcbHyMnK0tPU1dbX2Nna4uPk5ebn6Onq8vP09fb3+Pn6/9oADAMBAAIRAxEAPwD7LooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigA…", loading: false, currentEscala: "Escala - 03/07/2025" }
+PDFViewer.tsx:828:15
+📢 Verificando aviso "teste": 
+Object { active: true, inPeriod: true, startDate: "2025-07-06T20:54:39.158Z", endDate: "2025-07-07T20:54:39.158Z", now: "2025-07-07T00:31:34.104Z" }
+NoticeDisplay.tsx:56:17
+🏠 Index: Renderizando página principal 
+Object { activePlasa: "PLASA - 03/07/2025", activeBono: "nenhum", activeEscala: "Escala - 03/07/2025", currentMainDocType: "plasa", currentMainDoc: "PLASA - 03/07/2025", scrollSpeed: "normal", autoRestartDelay: 3 }
+Index.tsx:79:11
+🎖️ Analisando militar: 
+Object { fullName: "1T (IM) ELIEZER", type: "officer" }
+DutyOfficersDisplay.tsx:48:13
+🎖️ Já formatado corretamente: 
+Object { rank: "1T", specialty: "IM", name: "ELIEZER" }
+DutyOfficersDisplay.tsx:53:15
+🎖️ Analisando militar: 
+Object { fullName: "1SG (ES) DA SILVA", type: "master" }
+DutyOfficersDisplay.tsx:48:13
+🎖️ Já formatado corretamente: 
+Object { rank: "1SG", specialty: "ES", name: "DA SILVA" }
+DutyOfficersDisplay.tsx:53:15
+📋 ESCALA: Usando escala 2/3: 
+Object { title: "Escala - 03/07/2025", category: undefined, url: "https://1f8faedd-56a9-4fd2-a9c8-53add674d89f-00-2tf8n5fh0bu4h.riker.replit.dev/uploads/document-1751514698929-676748080-21 - 02JUN a 08JUN2025.pdf" }
+PDFViewer.tsx:168:17
+🖼️ ESCALA: Renderizando 
+Object { docUrl: "https://1f8faedd-56a9-4fd2-a9c8-53add674d89f-00-2tf8n5fh0bu4h.riker.replit.dev/uploads/document-1751514698929-676748080-21 - 02JUN a 08JUN2025.pdf", escalaImageUrl: "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAUDBAQEAwUEBAQFBQUGBwwIBwcHBw8LCwkMEQ8SEhEPERETFhwXExQaFRERGCEYGh0dHx8fExciJCIeJBweHx7/2wBDAQUFBQcGBw4ICA4eFBEUHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh7/wAARCALUBAADASIAAhEBAxEB/8QAHwAAAQUBAQEBAQEAAAAAAAAAAAECAwQFBgcICQoL/8QAtRAAAgEDAwIEAwUFBAQAAAF9AQIDAAQRBRIhMUEGE1FhByJxFDKBkaEII0KxwRVS0fAkM2JyggkKFhcYGRolJicoKSo0NTY3ODk6Q0RFRkdISUpTVFVWV1hZWmNkZWZnaGlqc3R1dnd4eXqDhIWGh4iJipKTlJWWl5iZmqKjpKWmp6ipqrKztLW2t7i5usLDxMXGx8jJytLT1NXW19jZ2uHi4+Tl5ufo6erx8vP09fb3+Pn6/8QAHwEAAwEBAQEBAQEBAQAAAAAAAAECAwQFBgcICQoL/8QAtREAAgECBAQDBAcFBAQAAQJ3AAECAxEEBSExBhJBUQdhcRMiMoEIFEKRobHBCSMzUvAVYnLRChYkNOEl8RcYGRomJygpKjU2Nzg5OkNERUZHSElKU1RVVldYWVpjZGVmZ2hpanN0dXZ3eHl6goOEhYaHiImKkpOUlZaXmJmaoqOkpaanqKmqsrO0tba3uLm6wsPExcbHyMnK0tPU1dbX2Nna4uPk5ebn6Onq8vP09fb3+Pn6/9oADAMBAAIRAxEAPwD7LooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigA…", loading: false, currentEscala: "Escala - 03/07/2025" }
+PDFViewer.tsx:828:15
+📢 Verificando aviso "teste": 
+Object { active: true, inPeriod: true, startDate: "2025-07-06T20:54:39.158Z", endDate: "2025-07-07T20:54:39.158Z", now: "2025-07-07T00:31:36.112Z" }
+NoticeDisplay.tsx:56:17
+🏠 Index: Renderizando página principal 
+Object { activePlasa: "PLASA - 03/07/2025", activeBono: "nenhum", activeEscala: "Escala - 03/07/2025", currentMainDocType: "plasa", currentMainDoc: "PLASA - 03/07/2025", scrollSpeed: "normal", autoRestartDelay: 3 }
+Index.tsx:79:11
+🎖️ Analisando militar: 
+Object { fullName: "1T (IM) ELIEZER", type: "officer" }
+DutyOfficersDisplay.tsx:48:13
+🎖️ Já formatado corretamente: 
+Object { rank: "1T", specialty: "IM", name: "ELIEZER" }
+DutyOfficersDisplay.tsx:53:15
+🎖️ Analisando militar: 
+Object { fullName: "1SG (ES) DA SILVA", type: "master" }
+DutyOfficersDisplay.tsx:48:13
+🎖️ Já formatado corretamente: 
+Object { rank: "1SG", specialty: "ES", name: "DA SILVA" }
+DutyOfficersDisplay.tsx:53:15
+📋 ESCALA: Usando escala 2/3: 
+Object { title: "Escala - 03/07/2025", category: undefined, url: "https://1f8faedd-56a9-4fd2-a9c8-53add674d89f-00-2tf8n5fh0bu4h.riker.replit.dev/uploads/document-1751514698929-676748080-21 - 02JUN a 08JUN2025.pdf" }
+PDFViewer.tsx:168:17
+🖼️ ESCALA: Renderizando 
+Object { docUrl: "https://1f8faedd-56a9-4fd2-a9c8-53add674d89f-00-2tf8n5fh0bu4h.riker.replit.dev/uploads/document-1751514698929-676748080-21 - 02JUN a 08JUN2025.pdf", escalaImageUrl: "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAUDBAQEAwUEBAQFBQUGBwwIBwcHBw8LCwkMEQ8SEhEPERETFhwXExQaFRERGCEYGh0dHx8fExciJCIeJBweHx7/2wBDAQUFBQcGBw4ICA4eFBEUHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh7/wAARCALUBAADASIAAhEBAxEB/8QAHwAAAQUBAQEBAQEAAAAAAAAAAAECAwQFBgcICQoL/8QAtRAAAgEDAwIEAwUFBAQAAAF9AQIDAAQRBRIhMUEGE1FhByJxFDKBkaEII0KxwRVS0fAkM2JyggkKFhcYGRolJicoKSo0NTY3ODk6Q0RFRkdISUpTVFVWV1hZWmNkZWZnaGlqc3R1dnd4eXqDhIWGh4iJipKTlJWWl5iZmqKjpKWmp6ipqrKztLW2t7i5usLDxMXGx8jJytLT1NXW19jZ2uHi4+Tl5ufo6erx8vP09fb3+Pn6/8QAHwEAAwEBAQEBAQEBAQAAAAAAAAECAwQFBgcICQoL/8QAtREAAgECBAQDBAcFBAQAAQJ3AAECAxEEBSExBhJBUQdhcRMiMoEIFEKRobHBCSMzUvAVYnLRChYkNOEl8RcYGRomJygpKjU2Nzg5OkNERUZHSElKU1RVVldYWVpjZGVmZ2hpanN0dXZ3eHl6goOEhYaHiImKkpOUlZaXmJmaoqOkpaanqKmqsrO0tba3uLm6wsPExcbHyMnK0tPU1dbX2Nna4uPk5ebn6Onq8vP09fb3+Pn6/9oADAMBAAIRAxEAPwD7LooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigA…", loading: false, currentEscala: "Escala - 03/07/2025" }
+PDFViewer.tsx:828:15
+📢 Verificando aviso "teste": 
+Object { active: true, inPeriod: true, startDate: "2025-07-06T20:54:39.158Z", endDate: "2025-07-07T20:54:39.158Z", now: "2025-07-07T00:31:37.114Z" }
+NoticeDisplay.tsx:56:17
+🏠 Index: Renderizando página principal 
+Object { activePlasa: "PLASA - 03/07/2025", activeBono: "nenhum", activeEscala: "Escala - 03/07/2025", currentMainDocType: "plasa", currentMainDoc: "PLASA - 03/07/2025", scrollSpeed: "normal", autoRestartDelay: 3 }
+Index.tsx:79:11
+🎖️ Analisando militar: 
+Object { fullName: "1T (IM) ELIEZER", type: "officer" }
+DutyOfficersDisplay.tsx:48:13
+🎖️ Já formatado corretamente: 
+Object { rank: "1T", specialty: "IM", name: "ELIEZER" }
+DutyOfficersDisplay.tsx:53:15
+🎖️ Analisando militar: 
+Object { fullName: "1SG (ES) DA SILVA", type: "master" }
+DutyOfficersDisplay.tsx:48:13
+🎖️ Já formatado corretamente: 
+Object { rank: "1SG", specialty: "ES", name: "DA SILVA" }
+DutyOfficersDisplay.tsx:53:15
+📋 ESCALA: Usando escala 2/3: 
+Object { title: "Escala - 03/07/2025", category: undefined, url: "https://1f8faedd-56a9-4fd2-a9c8-53add674d89f-00-2tf8n5fh0bu4h.riker.replit.dev/uploads/document-1751514698929-676748080-21 - 02JUN a 08JUN2025.pdf" }
+PDFViewer.tsx:168:17
+🖼️ ESCALA: Renderizando 
+Object { docUrl: "https://1f8faedd-56a9-4fd2-a9c8-53add674d89f-00-2tf8n5fh0bu4h.riker.replit.dev/uploads/document-1751514698929-676748080-21 - 02JUN a 08JUN2025.pdf", escalaImageUrl: "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAUDBAQEAwUEBAQFBQUGBwwIBwcHBw8LCwkMEQ8SEhEPERETFhwXExQaFRERGCEYGh0dHx8fExciJCIeJBweHx7/2wBDAQUFBQcGBw4ICA4eFBEUHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh7/wAARCALUBAADASIAAhEBAxEB/8QAHwAAAQUBAQEBAQEAAAAAAAAAAAECAwQFBgcICQoL/8QAtRAAAgEDAwIEAwUFBAQAAAF9AQIDAAQRBRIhMUEGE1FhByJxFDKBkaEII0KxwRVS0fAkM2JyggkKFhcYGRolJicoKSo0NTY3ODk6Q0RFRkdISUpTVFVWV1hZWmNkZWZnaGlqc3R1dnd4eXqDhIWGh4iJipKTlJWWl5iZmqKjpKWmp6ipqrKztLW2t7i5usLDxMXGx8jJytLT1NXW19jZ2uHi4+Tl5ufo6erx8vP09fb3+Pn6/8QAHwEAAwEBAQEBAQEBAQAAAAAAAAECAwQFBgcICQoL/8QAtREAAgECBAQDBAcFBAQAAQJ3AAECAxEEBSExBhJBUQdhcRMiMoEIFEKRobHBCSMzUvAVYnLRChYkNOEl8RcYGRomJygpKjU2Nzg5OkNERUZHSElKU1RVVldYWVpjZGVmZ2hpanN0dXZ3eHl6goOEhYaHiImKkpOUlZaXmJmaoqOkpaanqKmqsrO0tba3uLm6wsPExcbHyMnK0tPU1dbX2Nna4uPk5ebn6Onq8vP09fb3+Pn6/9oADAMBAAIRAxEAPwD7LooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigA…", loading: false, currentEscala: "Escala - 03/07/2025" }
+PDFViewer.tsx:828:15
+📢 Verificando aviso "teste": 
+Object { active: true, inPeriod: true, startDate: "2025-07-06T20:54:39.158Z", endDate: "2025-07-07T20:54:39.158Z", now: "2025-07-07T00:31:38.114Z" }
+NoticeDisplay.tsx:56:17
+🏠 Index: Renderizando página principal 
+Object { activePlasa: "PLASA - 03/07/2025", activeBono: "nenhum", activeEscala: "Escala - 03/07/2025", currentMainDocType: "plasa", currentMainDoc: "PLASA - 03/07/2025", scrollSpeed: "normal", autoRestartDelay: 3 }
+Index.tsx:79:11
+🎖️ Analisando militar: 
+Object { fullName: "1T (IM) ELIEZER", type: "officer" }
+DutyOfficersDisplay.tsx:48:13
+🎖️ Já formatado corretamente: 
+Object { rank: "1T", specialty: "IM", name: "ELIEZER" }
+DutyOfficersDisplay.tsx:53:15
+🎖️ Analisando militar: 
+Object { fullName: "1SG (ES) DA SILVA", type: "master" }
+DutyOfficersDisplay.tsx:48:13
+🎖️ Já formatado corretamente: 
+Object { rank: "1SG", specialty: "ES", name: "DA SILVA" }
+DutyOfficersDisplay.tsx:53:15
+📋 ESCALA: Usando escala 2/3: 
+Object { title: "Escala - 03/07/2025", category: undefined, url: "https://1f8faedd-56a9-4fd2-a9c8-53add674d89f-00-2tf8n5fh0bu4h.riker.replit.dev/uploads/document-1751514698929-676748080-21 - 02JUN a 08JUN2025.pdf" }
+PDFViewer.tsx:168:17
+🖼️ ESCALA: Renderizando 
+Object { docUrl: "https://1f8faedd-56a9-4fd2-a9c8-53add674d89f-00-2tf8n5fh0bu4h.riker.replit.dev/uploads/document-1751514698929-676748080-21 - 02JUN a 08JUN2025.pdf", escalaImageUrl: "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAUDBAQEAwUEBAQFBQUGBwwIBwcHBw8LCwkMEQ8SEhEPERETFhwXExQaFRERGCEYGh0dHx8fExciJCIeJBweHx7/2wBDAQUFBQcGBw4ICA4eFBEUHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh7/wAARCALUBAADASIAAhEBAxEB/8QAHwAAAQUBAQEBAQEAAAAAAAAAAAECAwQFBgcICQoL/8QAtRAAAgEDAwIEAwUFBAQAAAF9AQIDAAQRBRIhMUEGE1FhByJxFDKBkaEII0KxwRVS0fAkM2JyggkKFhcYGRolJicoKSo0NTY3ODk6Q0RFRkdISUpTVFVWV1hZWmNkZWZnaGlqc3R1dnd4eXqDhIWGh4iJipKTlJWWl5iZmqKjpKWmp6ipqrKztLW2t7i5usLDxMXGx8jJytLT1NXW19jZ2uHi4+Tl5ufo6erx8vP09fb3+Pn6/8QAHwEAAwEBAQEBAQEBAQAAAAAAAAECAwQFBgcICQoL/8QAtREAAgECBAQDBAcFBAQAAQJ3AAECAxEEBSExBhJBUQdhcRMiMoEIFEKRobHBCSMzUvAVYnLRChYkNOEl8RcYGRomJygpKjU2Nzg5OkNERUZHSElKU1RVVldYWVpjZGVmZ2hpanN0dXZ3eHl6goOEhYaHiImKkpOUlZaXmJmaoqOkpaanqKmqsrO0tba3uLm6wsPExcbHyMnK0tPU1dbX2Nna4uPk5ebn6Onq8vP09fb3+Pn6/9oADAMBAAIRAxEAPwD7LooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigA…", loading: false, currentEscala: "Escala - 03/07/2025" }
+PDFViewer.tsx:828:15
+📢 Verificando aviso "teste": 
+Object { active: true, inPeriod: true, startDate: "2025-07-06T20:54:39.158Z", endDate: "2025-07-07T20:54:39.158Z", now: "2025-07-07T00:31:39.217Z" }
+NoticeDisplay.tsx:56:17
+🏠 Index: Renderizando página principal 
+Object { activePlasa: "PLASA - 03/07/2025", activeBono: "nenhum", activeEscala: "Escala - 03/07/2025", currentMainDocType: "plasa", currentMainDoc: "PLASA - 03/07/2025", scrollSpeed: "normal", autoRestartDelay: 3 }
+Index.tsx:79:11
+🎖️ Analisando militar: 
+Object { fullName: "1T (IM) ELIEZER", type: "officer" }
+DutyOfficersDisplay.tsx:48:13
+🎖️ Já formatado corretamente: 
+Object { rank: "1T", specialty: "IM", name: "ELIEZER" }
+DutyOfficersDisplay.tsx:53:15
+🎖️ Analisando militar: 
+Object { fullName: "1SG (ES) DA SILVA", type: "master" }
+DutyOfficersDisplay.tsx:48:13
+🎖️ Já formatado corretamente: 
+Object { rank: "1SG", specialty: "ES", name: "DA SILVA" }
+DutyOfficersDisplay.tsx:53:15
+📋 ESCALA: Usando escala 2/3: 
+Object { title: "Escala - 03/07/2025", category: undefined, url: "https://1f8faedd-56a9-4fd2-a9c8-53add674d89f-00-2tf8n5fh0bu4h.riker.replit.dev/uploads/document-1751514698929-676748080-21 - 02JUN a 08JUN2025.pdf" }
+PDFViewer.tsx:168:17
+🖼️ ESCALA: Renderizando 
+Object { docUrl: "https://1f8faedd-56a9-4fd2-a9c8-53add674d89f-00-2tf8n5fh0bu4h.riker.replit.dev/uploads/document-1751514698929-676748080-21 - 02JUN a 08JUN2025.pdf", escalaImageUrl: "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAUDBAQEAwUEBAQFBQUGBwwIBwcHBw8LCwkMEQ8SEhEPERETFhwXExQaFRERGCEYGh0dHx8fExciJCIeJBweHx7/2wBDAQUFBQcGBw4ICA4eFBEUHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh7/wAARCALUBAADASIAAhEBAxEB/8QAHwAAAQUBAQEBAQEAAAAAAAAAAAECAwQFBgcICQoL/8QAtRAAAgEDAwIEAwUFBAQAAAF9AQIDAAQRBRIhMUEGE1FhByJxFDKBkaEII0KxwRVS0fAkM2JyggkKFhcYGRolJicoKSo0NTY3ODk6Q0RFRkdISUpTVFVWV1hZWmNkZWZnaGlqc3R1dnd4eXqDhIWGh4iJipKTlJWWl5iZmqKjpKWmp6ipqrKztLW2t7i5usLDxMXGx8jJytLT1NXW19jZ2uHi4+Tl5ufo6erx8vP09fb3+Pn6/8QAHwEAAwEBAQEBAQEBAQAAAAAAAAECAwQFBgcICQoL/8QAtREAAgECBAQDBAcFBAQAAQJ3AAECAxEEBSExBhJBUQdhcRMiMoEIFEKRobHBCSMzUvAVYnLRChYkNOEl8RcYGRomJygpKjU2Nzg5OkNERUZHSElKU1RVVldYWVpjZGVmZ2hpanN0dXZ3eHl6goOEhYaHiImKkpOUlZaXmJmaoqOkpaanqKmqsrO0tba3uLm6wsPExcbHyMnK0tPU1dbX2Nna4uPk5ebn6Onq8vP09fb3+Pn6/9oADAMBAAIRAxEAPwD7LooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigA…", loading: false, currentEscala: "Escala - 03/07/2025" }
+PDFViewer.tsx:828:15
+📢 Verificando aviso "teste": 
+Object { active: true, inPeriod: true, startDate: "2025-07-06T20:54:39.158Z", endDate: "2025-07-07T20:54:39.158Z", now: "2025-07-07T00:31:40.296Z" }
+NoticeDisplay.tsx:56:17
+🏠 Index: Renderizando página principal 
+Object { activePlasa: "PLASA - 03/07/2025", activeBono: "nenhum", activeEscala: "Escala - 03/07/2025", currentMainDocType: "plasa", currentMainDoc: "PLASA - 03/07/2025", scrollSpeed: "normal", autoRestartDelay: 3 }
+Index.tsx:79:11
+🎖️ Analisando militar: 
+Object { fullName: "1T (IM) ELIEZER", type: "officer" }
+DutyOfficersDisplay.tsx:48:13
+🎖️ Já formatado corretamente: 
+Object { rank: "1T", specialty: "IM", name: "ELIEZER" }
+DutyOfficersDisplay.tsx:53:15
+🎖️ Analisando militar: 
+Object { fullName: "1SG (ES) DA SILVA", type: "master" }
+DutyOfficersDisplay.tsx:48:13
+🎖️ Já formatado corretamente: 
+Object { rank: "1SG", specialty: "ES", name: "DA SILVA" }
+DutyOfficersDisplay.tsx:53:15
+📋 ESCALA: Usando escala 2/3: 
+Object { title: "Escala - 03/07/2025", category: undefined, url: "https://1f8faedd-56a9-4fd2-a9c8-53add674d89f-00-2tf8n5fh0bu4h.riker.replit.dev/uploads/document-1751514698929-676748080-21 - 02JUN a 08JUN2025.pdf" }
+PDFViewer.tsx:168:17
+🖼️ ESCALA: Renderizando 
+Object { docUrl: "https://1f8faedd-56a9-4fd2-a9c8-53add674d89f-00-2tf8n5fh0bu4h.riker.replit.dev/uploads/document-1751514698929-676748080-21 - 02JUN a 08JUN2025.pdf", escalaImageUrl: "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAUDBAQEAwUEBAQFBQUGBwwIBwcHBw8LCwkMEQ8SEhEPERETFhwXExQaFRERGCEYGh0dHx8fExciJCIeJBweHx7/2wBDAQUFBQcGBw4ICA4eFBEUHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh7/wAARCALUBAADASIAAhEBAxEB/8QAHwAAAQUBAQEBAQEAAAAAAAAAAAECAwQFBgcICQoL/8QAtRAAAgEDAwIEAwUFBAQAAAF9AQIDAAQRBRIhMUEGE1FhByJxFDKBkaEII0KxwRVS0fAkM2JyggkKFhcYGRolJicoKSo0NTY3ODk6Q0RFRkdISUpTVFVWV1hZWmNkZWZnaGlqc3R1dnd4eXqDhIWGh4iJipKTlJWWl5iZmqKjpKWmp6ipqrKztLW2t7i5usLDxMXGx8jJytLT1NXW19jZ2uHi4+Tl5ufo6erx8vP09fb3+Pn6/8QAHwEAAwEBAQEBAQEBAQAAAAAAAAECAwQFBgcICQoL/8QAtREAAgECBAQDBAcFBAQAAQJ3AAECAxEEBSExBhJBUQdhcRMiMoEIFEKRobHBCSMzUvAVYnLRChYkNOEl8RcYGRomJygpKjU2Nzg5OkNERUZHSElKU1RVVldYWVpjZGVmZ2hpanN0dXZ3eHl6goOEhYaHiImKkpOUlZaXmJmaoqOkpaanqKmqsrO0tba3uLm6wsPExcbHyMnK0tPU1dbX2Nna4uPk5ebn6Onq8vP09fb3+Pn6/9oADAMBAAIRAxEAPwD7LooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigA…", loading: false, currentEscala: "Escala - 03/07/2025" }
+PDFViewer.tsx:828:15
+📢 Verificando aviso "teste": 
+Object { active: true, inPeriod: true, startDate: "2025-07-06T20:54:39.158Z", endDate: "2025-07-07T20:54:39.158Z", now: "2025-07-07T00:31:41.318Z" }
+NoticeDisplay.tsx:56:17
+🏠 Index: Renderizando página principal 
+Object { activePlasa: "PLASA - 03/07/2025", activeBono: "nenhum", activeEscala: "Escala - 03/07/2025", currentMainDocType: "plasa", currentMainDoc: "PLASA - 03/07/2025", scrollSpeed: "normal", autoRestartDelay: 3 }
+Index.tsx:79:11
+🎖️ Analisando militar: 
+Object { fullName: "1T (IM) ELIEZER", type: "officer" }
+DutyOfficersDisplay.tsx:48:13
+🎖️ Já formatado corretamente: 
+Object { rank: "1T", specialty: "IM", name: "ELIEZER" }
+DutyOfficersDisplay.tsx:53:15
+🎖️ Analisando militar: 
+Object { fullName: "1SG (ES) DA SILVA", type: "master" }
+DutyOfficersDisplay.tsx:48:13
+🎖️ Já formatado corretamente: 
+Object { rank: "1SG", specialty: "ES", name: "DA SILVA" }
+DutyOfficersDisplay.tsx:53:15
+📋 ESCALA: Usando escala 2/3: 
+Object { title: "Escala - 03/07/2025", category: undefined, url: "https://1f8faedd-56a9-4fd2-a9c8-53add674d89f-00-2tf8n5fh0bu4h.riker.replit.dev/uploads/document-1751514698929-676748080-21 - 02JUN a 08JUN2025.pdf" }
+PDFViewer.tsx:168:17
+🖼️ ESCALA: Renderizando 
+Object { docUrl: "https://1f8faedd-56a9-4fd2-a9c8-53add674d89f-00-2tf8n5fh0bu4h.riker.replit.dev/uploads/document-1751514698929-676748080-21 - 02JUN a 08JUN2025.pdf", escalaImageUrl: "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAUDBAQEAwUEBAQFBQUGBwwIBwcHBw8LCwkMEQ8SEhEPERETFhwXExQaFRERGCEYGh0dHx8fExciJCIeJBweHx7/2wBDAQUFBQcGBw4ICA4eFBEUHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh7/wAARCALUBAADASIAAhEBAxEB/8QAHwAAAQUBAQEBAQEAAAAAAAAAAAECAwQFBgcICQoL/8QAtRAAAgEDAwIEAwUFBAQAAAF9AQIDAAQRBRIhMUEGE1FhByJxFDKBkaEII0KxwRVS0fAkM2JyggkKFhcYGRolJicoKSo0NTY3ODk6Q0RFRkdISUpTVFVWV1hZWmNkZWZnaGlqc3R1dnd4eXqDhIWGh4iJipKTlJWWl5iZmqKjpKWmp6ipqrKztLW2t7i5usLDxMXGx8jJytLT1NXW19jZ2uHi4+Tl5ufo6erx8vP09fb3+Pn6/8QAHwEAAwEBAQEBAQEBAQAAAAAAAAECAwQFBgcICQoL/8QAtREAAgECBAQDBAcFBAQAAQJ3AAECAxEEBSExBhJBUQdhcRMiMoEIFEKRobHBCSMzUvAVYnLRChYkNOEl8RcYGRomJygpKjU2Nzg5OkNERUZHSElKU1RVVldYWVpjZGVmZ2hpanN0dXZ3eHl6goOEhYaHiImKkpOUlZaXmJmaoqOkpaanqKmqsrO0tba3uLm6wsPExcbHyMnK0tPU1dbX2Nna4uPk5ebn6Onq8vP09fb3+Pn6/9oADAMBAAIRAxEAPwD7LooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigA…", loading: false, currentEscala: "Escala - 03/07/2025" }
+PDFViewer.tsx:828:15
+📢 Verificando aviso "teste": 
+Object { active: true, inPeriod: true, startDate: "2025-07-06T20:54:39.158Z", endDate: "2025-07-07T20:54:39.158Z", now: "2025-07-07T00:31:42.319Z" }
+NoticeDisplay.tsx:56:17
+🏠 Index: Renderizando página principal 
+Object { activePlasa: "PLASA - 03/07/2025", activeBono: "nenhum", activeEscala: "Escala - 03/07/2025", currentMainDocType: "plasa", currentMainDoc: "PLASA - 03/07/2025", scrollSpeed: "normal", autoRestartDelay: 3 }
+Index.tsx:79:11
+🎖️ Analisando militar: 
+Object { fullName: "1T (IM) ELIEZER", type: "officer" }
+DutyOfficersDisplay.tsx:48:13
+🎖️ Já formatado corretamente: 
+Object { rank: "1T", specialty: "IM", name: "ELIEZER" }
+DutyOfficersDisplay.tsx:53:15
+🎖️ Analisando militar: 
+Object { fullName: "1SG (ES) DA SILVA", type: "master" }
+DutyOfficersDisplay.tsx:48:13
+🎖️ Já formatado corretamente: 
+Object { rank: "1SG", specialty: "ES", name: "DA SILVA" }
+DutyOfficersDisplay.tsx:53:15
+📋 ESCALA: Usando escala 2/3: 
+Object { title: "Escala - 03/07/2025", category: undefined, url: "https://1f8faedd-56a9-4fd2-a9c8-53add674d89f-00-2tf8n5fh0bu4h.riker.replit.dev/uploads/document-1751514698929-676748080-21 - 02JUN a 08JUN2025.pdf" }
+PDFViewer.tsx:168:17
+🖼️ ESCALA: Renderizando 
+Object { docUrl: "https://1f8faedd-56a9-4fd2-a9c8-53add674d89f-00-2tf8n5fh0bu4h.riker.replit.dev/uploads/document-1751514698929-676748080-21 - 02JUN a 08JUN2025.pdf", escalaImageUrl: "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAUDBAQEAwUEBAQFBQUGBwwIBwcHBw8LCwkMEQ8SEhEPERETFhwXExQaFRERGCEYGh0dHx8fExciJCIeJBweHx7/2wBDAQUFBQcGBw4ICA4eFBEUHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh7/wAARCALUBAADASIAAhEBAxEB/8QAHwAAAQUBAQEBAQEAAAAAAAAAAAECAwQFBgcICQoL/8QAtRAAAgEDAwIEAwUFBAQAAAF9AQIDAAQRBRIhMUEGE1FhByJxFDKBkaEII0KxwRVS0fAkM2JyggkKFhcYGRolJicoKSo0NTY3ODk6Q0RFRkdISUpTVFVWV1hZWmNkZWZnaGlqc3R1dnd4eXqDhIWGh4iJipKTlJWWl5iZmqKjpKWmp6ipqrKztLW2t7i5usLDxMXGx8jJytLT1NXW19jZ2uHi4+Tl5ufo6erx8vP09fb3+Pn6/8QAHwEAAwEBAQEBAQEBAQAAAAAAAAECAwQFBgcICQoL/8QAtREAAgECBAQDBAcFBAQAAQJ3AAECAxEEBSExBhJBUQdhcRMiMoEIFEKRobHBCSMzUvAVYnLRChYkNOEl8RcYGRomJygpKjU2Nzg5OkNERUZHSElKU1RVVldYWVpjZGVmZ2hpanN0dXZ3eHl6goOEhYaHiImKkpOUlZaXmJmaoqOkpaanqKmqsrO0tba3uLm6wsPExcbHyMnK0tPU1dbX2Nna4uPk5ebn6Onq8vP09fb3+Pn6/9oADAMBAAIRAxEAPwD7LooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigA…", loading: false, currentEscala: "Escala - 03/07/2025" }
+PDFViewer.tsx:828:15
+📢 Verificando aviso "teste": 
+Object { active: true, inPeriod: true, startDate: "2025-07-06T20:54:39.158Z", endDate: "2025-07-07T20:54:39.158Z", now: "2025-07-07T00:31:43.422Z" }
+NoticeDisplay.tsx:56:17
+🏠 Index: Renderizando página principal 
+Object { activePlasa: "PLASA - 03/07/2025", activeBono: "nenhum", activeEscala: "Escala - 03/07/2025", currentMainDocType: "plasa", currentMainDoc: "PLASA - 03/07/2025", scrollSpeed: "normal", autoRestartDelay: 3 }
+Index.tsx:79:11
+🎖️ Analisando militar: 
+Object { fullName: "1T (IM) ELIEZER", type: "officer" }
+DutyOfficersDisplay.tsx:48:13
+🎖️ Já formatado corretamente: 
+Object { rank: "1T", specialty: "IM", name: "ELIEZER" }
+DutyOfficersDisplay.tsx:53:15
+🎖️ Analisando militar: 
+Object { fullName: "1SG (ES) DA SILVA", type: "master" }
+DutyOfficersDisplay.tsx:48:13
+🎖️ Já formatado corretamente: 
+Object { rank: "1SG", specialty: "ES", name: "DA SILVA" }
+DutyOfficersDisplay.tsx:53:15
+📋 ESCALA: Usando escala 2/3: 
+Object { title: "Escala - 03/07/2025", category: undefined, url: "https://1f8faedd-56a9-4fd2-a9c8-53add674d89f-00-2tf8n5fh0bu4h.riker.replit.dev/uploads/document-1751514698929-676748080-21 - 02JUN a 08JUN2025.pdf" }
+PDFViewer.tsx:168:17
+🖼️ ESCALA: Renderizando 
+Object { docUrl: "https://1f8faedd-56a9-4fd2-a9c8-53add674d89f-00-2tf8n5fh0bu4h.riker.replit.dev/uploads/document-1751514698929-676748080-21 - 02JUN a 08JUN2025.pdf", escalaImageUrl: "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAUDBAQEAwUEBAQFBQUGBwwIBwcHBw8LCwkMEQ8SEhEPERETFhwXExQaFRERGCEYGh0dHx8fExciJCIeJBweHx7/2wBDAQUFBQcGBw4ICA4eFBEUHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh7/wAARCALUBAADASIAAhEBAxEB/8QAHwAAAQUBAQEBAQEAAAAAAAAAAAECAwQFBgcICQoL/8QAtRAAAgEDAwIEAwUFBAQAAAF9AQIDAAQRBRIhMUEGE1FhByJxFDKBkaEII0KxwRVS0fAkM2JyggkKFhcYGRolJicoKSo0NTY3ODk6Q0RFRkdISUpTVFVWV1hZWmNkZWZnaGlqc3R1dnd4eXqDhIWGh4iJipKTlJWWl5iZmqKjpKWmp6ipqrKztLW2t7i5usLDxMXGx8jJytLT1NXW19jZ2uHi4+Tl5ufo6erx8vP09fb3+Pn6/8QAHwEAAwEBAQEBAQEBAQAAAAAAAAECAwQFBgcICQoL/8QAtREAAgECBAQDBAcFBAQAAQJ3AAECAxEEBSExBhJBUQdhcRMiMoEIFEKRobHBCSMzUvAVYnLRChYkNOEl8RcYGRomJygpKjU2Nzg5OkNERUZHSElKU1RVVldYWVpjZGVmZ2hpanN0dXZ3eHl6goOEhYaHiImKkpOUlZaXmJmaoqOkpaanqKmqsrO0tba3uLm6wsPExcbHyMnK0tPU1dbX2Nna4uPk5ebn6Onq8vP09fb3+Pn6/9oADAMBAAIRAxEAPwD7LooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigA…", loading: false, currentEscala: "Escala - 03/07/2025" }
+PDFViewer.tsx:828:15
+📢 Verificando aviso "teste": 
+Object { active: true, inPeriod: true, startDate: "2025-07-06T20:54:39.158Z", endDate: "2025-07-07T20:54:39.158Z", now: "2025-07-07T00:31:44.422Z" }
+NoticeDisplay.tsx:56:17
+🏠 Index: Renderizando página principal 
+Object { activePlasa: "PLASA - 03/07/2025", activeBono: "nenhum", activeEscala: "Escala - 03/07/2025", currentMainDocType: "plasa", currentMainDoc: "PLASA - 03/07/2025", scrollSpeed: "normal", autoRestartDelay: 3 }
+Index.tsx:79:11
+🎖️ Analisando militar: 
+Object { fullName: "1T (IM) ELIEZER", type: "officer" }
+DutyOfficersDisplay.tsx:48:13
+🎖️ Já formatado corretamente: 
+Object { rank: "1T", specialty: "IM", name: "ELIEZER" }
+DutyOfficersDisplay.tsx:53:15
+🎖️ Analisando militar: 
+Object { fullName: "1SG (ES) DA SILVA", type: "master" }
+DutyOfficersDisplay.tsx:48:13
+🎖️ Já formatado corretamente: 
+Object { rank: "1SG", specialty: "ES", name: "DA SILVA" }
+DutyOfficersDisplay.tsx:53:15
+📋 ESCALA: Usando escala 2/3: 
+Object { title: "Escala - 03/07/2025", category: undefined, url: "https://1f8faedd-56a9-4fd2-a9c8-53add674d89f-00-2tf8n5fh0bu4h.riker.replit.dev/uploads/document-1751514698929-676748080-21 - 02JUN a 08JUN2025.pdf" }
+PDFViewer.tsx:168:17
+🖼️ ESCALA: Renderizando 
+Object { docUrl: "https://1f8faedd-56a9-4fd2-a9c8-53add674d89f-00-2tf8n5fh0bu4h.riker.replit.dev/uploads/document-1751514698929-676748080-21 - 02JUN a 08JUN2025.pdf", escalaImageUrl: "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAUDBAQEAwUEBAQFBQUGBwwIBwcHBw8LCwkMEQ8SEhEPERETFhwXExQaFRERGCEYGh0dHx8fExciJCIeJBweHx7/2wBDAQUFBQcGBw4ICA4eFBEUHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh7/wAARCALUBAADASIAAhEBAxEB/8QAHwAAAQUBAQEBAQEAAAAAAAAAAAECAwQFBgcICQoL/8QAtRAAAgEDAwIEAwUFBAQAAAF9AQIDAAQRBRIhMUEGE1FhByJxFDKBkaEII0KxwRVS0fAkM2JyggkKFhcYGRolJicoKSo0NTY3ODk6Q0RFRkdISUpTVFVWV1hZWmNkZWZnaGlqc3R1dnd4eXqDhIWGh4iJipKTlJWWl5iZmqKjpKWmp6ipqrKztLW2t7i5usLDxMXGx8jJytLT1NXW19jZ2uHi4+Tl5ufo6erx8vP09fb3+Pn6/8QAHwEAAwEBAQEBAQEBAQAAAAAAAAECAwQFBgcICQoL/8QAtREAAgECBAQDBAcFBAQAAQJ3AAECAxEEBSExBhJBUQdhcRMiMoEIFEKRobHBCSMzUvAVYnLRChYkNOEl8RcYGRomJygpKjU2Nzg5OkNERUZHSElKU1RVVldYWVpjZGVmZ2hpanN0dXZ3eHl6goOEhYaHiImKkpOUlZaXmJmaoqOkpaanqKmqsrO0tba3uLm6wsPExcbHyMnK0tPU1dbX2Nna4uPk5ebn6Onq8vP09fb3+Pn6/9oADAMBAAIRAxEAPwD7LooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigA…", loading: false, currentEscala: "Escala - 03/07/2025" }
+PDFViewer.tsx:828:15
+📢 Verificando aviso "teste": 
+Object { active: true, inPeriod: true, startDate: "2025-07-06T20:54:39.158Z", endDate: "2025-07-07T20:54:39.158Z", now: "2025-07-07T00:31:45.422Z" }
+NoticeDisplay.tsx:56:17
+🏠 Index: Renderizando página principal 
+Object { activePlasa: "PLASA - 03/07/2025", activeBono: "nenhum", activeEscala: "Escala - 03/07/2025", currentMainDocType: "plasa", currentMainDoc: "PLASA - 03/07/2025", scrollSpeed: "normal", autoRestartDelay: 3 }
+Index.tsx:79:11
+🎖️ Analisando militar: 
+Object { fullName: "1T (IM) ELIEZER", type: "officer" }
+DutyOfficersDisplay.tsx:48:13
+🎖️ Já formatado corretamente: 
+Object { rank: "1T", specialty: "IM", name: "ELIEZER" }
+DutyOfficersDisplay.tsx:53:15
+🎖️ Analisando militar: 
+Object { fullName: "1SG (ES) DA SILVA", type: "master" }
+DutyOfficersDisplay.tsx:48:13
+🎖️ Já formatado corretamente: 
+Object { rank: "1SG", specialty: "ES", name: "DA SILVA" }
+DutyOfficersDisplay.tsx:53:15
+📋 ESCALA: Usando escala 2/3: 
+Object { title: "Escala - 03/07/2025", category: undefined, url: "https://1f8faedd-56a9-4fd2-a9c8-53add674d89f-00-2tf8n5fh0bu4h.riker.replit.dev/uploads/document-1751514698929-676748080-21 - 02JUN a 08JUN2025.pdf" }
+PDFViewer.tsx:168:17
+🖼️ ESCALA: Renderizando 
+Object { docUrl: "https://1f8faedd-56a9-4fd2-a9c8-53add674d89f-00-2tf8n5fh0bu4h.riker.replit.dev/uploads/document-1751514698929-676748080-21 - 02JUN a 08JUN2025.pdf", escalaImageUrl: "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAUDBAQEAwUEBAQFBQUGBwwIBwcHBw8LCwkMEQ8SEhEPERETFhwXExQaFRERGCEYGh0dHx8fExciJCIeJBweHx7/2wBDAQUFBQcGBw4ICA4eFBEUHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh7/wAARCALUBAADASIAAhEBAxEB/8QAHwAAAQUBAQEBAQEAAAAAAAAAAAECAwQFBgcICQoL/8QAtRAAAgEDAwIEAwUFBAQAAAF9AQIDAAQRBRIhMUEGE1FhByJxFDKBkaEII0KxwRVS0fAkM2JyggkKFhcYGRolJicoKSo0NTY3ODk6Q0RFRkdISUpTVFVWV1hZWmNkZWZnaGlqc3R1dnd4eXqDhIWGh4iJipKTlJWWl5iZmqKjpKWmp6ipqrKztLW2t7i5usLDxMXGx8jJytLT1NXW19jZ2uHi4+Tl5ufo6erx8vP09fb3+Pn6/8QAHwEAAwEBAQEBAQEBAQAAAAAAAAECAwQFBgcICQoL/8QAtREAAgECBAQDBAcFBAQAAQJ3AAECAxEEBSExBhJBUQdhcRMiMoEIFEKRobHBCSMzUvAVYnLRChYkNOEl8RcYGRomJygpKjU2Nzg5OkNERUZHSElKU1RVVldYWVpjZGVmZ2hpanN0dXZ3eHl6goOEhYaHiImKkpOUlZaXmJmaoqOkpaanqKmqsrO0tba3uLm6wsPExcbHyMnK0tPU1dbX2Nna4uPk5ebn6Onq8vP09fb3+Pn6/9oADAMBAAIRAxEAPwD7LooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigA…", loading: false, currentEscala: "Escala - 03/07/2025" }
+PDFViewer.tsx:828:15
+📢 Verificando aviso "teste": 
+Object { active: true, inPeriod: true, startDate: "2025-07-06T20:54:39.158Z", endDate: "2025-07-07T20:54:39.158Z", now: "2025-07-07T00:31:46.423Z" }
+NoticeDisplay.tsx:56:17
+🏠 Index: Renderizando página principal 
+Object { activePlasa: "PLASA - 03/07/2025", activeBono: "nenhum", activeEscala: "Escala - 03/07/2025", currentMainDocType: "plasa", currentMainDoc: "PLASA - 03/07/2025", scrollSpeed: "normal", autoRestartDelay: 3 }
+Index.tsx:79:11
+🎖️ Analisando militar: 
+Object { fullName: "1T (IM) ELIEZER", type: "officer" }
+DutyOfficersDisplay.tsx:48:13
+🎖️ Já formatado corretamente: 
+Object { rank: "1T", specialty: "IM", name: "ELIEZER" }
+DutyOfficersDisplay.tsx:53:15
+🎖️ Analisando militar: 
+Object { fullName: "1SG (ES) DA SILVA", type: "master" }
+DutyOfficersDisplay.tsx:48:13
+🎖️ Já formatado corretamente: 
+Object { rank: "1SG", specialty: "ES", name: "DA SILVA" }
+DutyOfficersDisplay.tsx:53:15
+📋 ESCALA: Usando escala 2/3: 
+Object { title: "Escala - 03/07/2025", category: undefined, url: "https://1f8faedd-56a9-4fd2-a9c8-53add674d89f-00-2tf8n5fh0bu4h.riker.replit.dev/uploads/document-1751514698929-676748080-21 - 02JUN a 08JUN2025.pdf" }
+PDFViewer.tsx:168:17
+🖼️ ESCALA: Renderizando 
+Object { docUrl: "https://1f8faedd-56a9-4fd2-a9c8-53add674d89f-00-2tf8n5fh0bu4h.riker.replit.dev/uploads/document-1751514698929-676748080-21 - 02JUN a 08JUN2025.pdf", escalaImageUrl: "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAUDBAQEAwUEBAQFBQUGBwwIBwcHBw8LCwkMEQ8SEhEPERETFhwXExQaFRERGCEYGh0dHx8fExciJCIeJBweHx7/2wBDAQUFBQcGBw4ICA4eFBEUHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh7/wAARCALUBAADASIAAhEBAxEB/8QAHwAAAQUBAQEBAQEAAAAAAAAAAAECAwQFBgcICQoL/8QAtRAAAgEDAwIEAwUFBAQAAAF9AQIDAAQRBRIhMUEGE1FhByJxFDKBkaEII0KxwRVS0fAkM2JyggkKFhcYGRolJicoKSo0NTY3ODk6Q0RFRkdISUpTVFVWV1hZWmNkZWZnaGlqc3R1dnd4eXqDhIWGh4iJipKTlJWWl5iZmqKjpKWmp6ipqrKztLW2t7i5usLDxMXGx8jJytLT1NXW19jZ2uHi4+Tl5ufo6erx8vP09fb3+Pn6/8QAHwEAAwEBAQEBAQEBAQAAAAAAAAECAwQFBgcICQoL/8QAtREAAgECBAQDBAcFBAQAAQJ3AAECAxEEBSExBhJBUQdhcRMiMoEIFEKRobHBCSMzUvAVYnLRChYkNOEl8RcYGRomJygpKjU2Nzg5OkNERUZHSElKU1RVVldYWVpjZGVmZ2hpanN0dXZ3eHl6goOEhYaHiImKkpOUlZaXmJmaoqOkpaanqKmqsrO0tba3uLm6wsPExcbHyMnK0tPU1dbX2Nna4uPk5ebn6Onq8vP09fb3+Pn6/9oADAMBAAIRAxEAPwD7LooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigA…", loading: false, currentEscala: "Escala - 03/07/2025" }
+PDFViewer.tsx:828:15
+📢 Verificando aviso "teste": 
+Object { active: true, inPeriod: true, startDate: "2025-07-06T20:54:39.158Z", endDate: "2025-07-07T20:54:39.158Z", now: "2025-07-07T00:31:47.424Z" }
+NoticeDisplay.tsx:56:17
+🏠 Index: Renderizando página principal 
+Object { activePlasa: "PLASA - 03/07/2025", activeBono: "nenhum", activeEscala: "Escala - 03/07/2025", currentMainDocType: "plasa", currentMainDoc: "PLASA - 03/07/2025", scrollSpeed: "normal", autoRestartDelay: 3 }
+Index.tsx:79:11
+🎖️ Analisando militar: 
+Object { fullName: "1T (IM) ELIEZER", type: "officer" }
+DutyOfficersDisplay.tsx:48:13
+🎖️ Já formatado corretamente: 
+Object { rank: "1T", specialty: "IM", name: "ELIEZER" }
+DutyOfficersDisplay.tsx:53:15
+🎖️ Analisando militar: 
+Object { fullName: "1SG (ES) DA SILVA", type: "master" }
+DutyOfficersDisplay.tsx:48:13
+🎖️ Já formatado corretamente: 
+Object { rank: "1SG", specialty: "ES", name: "DA SILVA" }
+DutyOfficersDisplay.tsx:53:15
+📋 ESCALA: Usando escala 2/3: 
+Object { title: "Escala - 03/07/2025", category: undefined, url: "https://1f8faedd-56a9-4fd2-a9c8-53add674d89f-00-2tf8n5fh0bu4h.riker.replit.dev/uploads/document-1751514698929-676748080-21 - 02JUN a 08JUN2025.pdf" }
+PDFViewer.tsx:168:17
+🖼️ ESCALA: Renderizando 
+Object { docUrl: "https://1f8faedd-56a9-4fd2-a9c8-53add674d89f-00-2tf8n5fh0bu4h.riker.replit.dev/uploads/document-1751514698929-676748080-21 - 02JUN a 08JUN2025.pdf", escalaImageUrl: "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAUDBAQEAwUEBAQFBQUGBwwIBwcHBw8LCwkMEQ8SEhEPERETFhwXExQaFRERGCEYGh0dHx8fExciJCIeJBweHx7/2wBDAQUFBQcGBw4ICA4eFBEUHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh7/wAARCALUBAADASIAAhEBAxEB/8QAHwAAAQUBAQEBAQEAAAAAAAAAAAECAwQFBgcICQoL/8QAtRAAAgEDAwIEAwUFBAQAAAF9AQIDAAQRBRIhMUEGE1FhByJxFDKBkaEII0KxwRVS0fAkM2JyggkKFhcYGRolJicoKSo0NTY3ODk6Q0RFRkdISUpTVFVWV1hZWmNkZWZnaGlqc3R1dnd4eXqDhIWGh4iJipKTlJWWl5iZmqKjpKWmp6ipqrKztLW2t7i5usLDxMXGx8jJytLT1NXW19jZ2uHi4+Tl5ufo6erx8vP09fb3+Pn6/8QAHwEAAwEBAQEBAQEBAQAAAAAAAAECAwQFBgcICQoL/8QAtREAAgECBAQDBAcFBAQAAQJ3AAECAxEEBSExBhJBUQdhcRMiMoEIFEKRobHBCSMzUvAVYnLRChYkNOEl8RcYGRomJygpKjU2Nzg5OkNERUZHSElKU1RVVldYWVpjZGVmZ2hpanN0dXZ3eHl6goOEhYaHiImKkpOUlZaXmJmaoqOkpaanqKmqsrO0tba3uLm6wsPExcbHyMnK0tPU1dbX2Nna4uPk5ebn6Onq8vP09fb3+Pn6/9oADAMBAAIRAxEAPwD7LooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigA…", loading: false, currentEscala: "Escala - 03/07/2025" }
+PDFViewer.tsx:828:15
+📢 Verificando aviso "teste": 
+Object { active: true, inPeriod: true, startDate: "2025-07-06T20:54:39.158Z", endDate: "2025-07-07T20:54:39.158Z", now: "2025-07-07T00:31:48.425Z" }
+NoticeDisplay.tsx:56:17
+🏠 Index: Renderizando página principal 
+Object { activePlasa: "PLASA - 03/07/2025", activeBono: "nenhum", activeEscala: "Escala - 03/07/2025", currentMainDocType: "plasa", currentMainDoc: "PLASA - 03/07/2025", scrollSpeed: "normal", autoRestartDelay: 3 }
+Index.tsx:79:11
+🎖️ Analisando militar: 
+Object { fullName: "1T (IM) ELIEZER", type: "officer" }
+DutyOfficersDisplay.tsx:48:13
+🎖️ Já formatado corretamente: 
+Object { rank: "1T", specialty: "IM", name: "ELIEZER" }
+DutyOfficersDisplay.tsx:53:15
+🎖️ Analisando militar: 
+Object { fullName: "1SG (ES) DA SILVA", type: "master" }
+DutyOfficersDisplay.tsx:48:13
+🎖️ Já formatado corretamente: 
+Object { rank: "1SG", specialty: "ES", name: "DA SILVA" }
+DutyOfficersDisplay.tsx:53:15
+📋 ESCALA: Usando escala 2/3: 
+Object { title: "Escala - 03/07/2025", category: undefined, url: "https://1f8faedd-56a9-4fd2-a9c8-53add674d89f-00-2tf8n5fh0bu4h.riker.replit.dev/uploads/document-1751514698929-676748080-21 - 02JUN a 08JUN2025.pdf" }
+PDFViewer.tsx:168:17
+🖼️ ESCALA: Renderizando 
+Object { docUrl: "https://1f8faedd-56a9-4fd2-a9c8-53add674d89f-00-2tf8n5fh0bu4h.riker.replit.dev/uploads/document-1751514698929-676748080-21 - 02JUN a 08JUN2025.pdf", escalaImageUrl: "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAUDBAQEAwUEBAQFBQUGBwwIBwcHBw8LCwkMEQ8SEhEPERETFhwXExQaFRERGCEYGh0dHx8fExciJCIeJBweHx7/2wBDAQUFBQcGBw4ICA4eFBEUHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh7/wAARCALUBAADASIAAhEBAxEB/8QAHwAAAQUBAQEBAQEAAAAAAAAAAAECAwQFBgcICQoL/8QAtRAAAgEDAwIEAwUFBAQAAAF9AQIDAAQRBRIhMUEGE1FhByJxFDKBkaEII0KxwRVS0fAkM2JyggkKFhcYGRolJicoKSo0NTY3ODk6Q0RFRkdISUpTVFVWV1hZWmNkZWZnaGlqc3R1dnd4eXqDhIWGh4iJipKTlJWWl5iZmqKjpKWmp6ipqrKztLW2t7i5usLDxMXGx8jJytLT1NXW19jZ2uHi4+Tl5ufo6erx8vP09fb3+Pn6/8QAHwEAAwEBAQEBAQEBAQAAAAAAAAECAwQFBgcICQoL/8QAtREAAgECBAQDBAcFBAQAAQJ3AAECAxEEBSExBhJBUQdhcRMiMoEIFEKRobHBCSMzUvAVYnLRChYkNOEl8RcYGRomJygpKjU2Nzg5OkNERUZHSElKU1RVVldYWVpjZGVmZ2hpanN0dXZ3eHl6goOEhYaHiImKkpOUlZaXmJmaoqOkpaanqKmqsrO0tba3uLm6wsPExcbHyMnK0tPU1dbX2Nna4uPk5ebn6Onq8vP09fb3+Pn6/9oADAMBAAIRAxEAPwD7LooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigA…", loading: false, currentEscala: "Escala - 03/07/2025" }
+PDFViewer.tsx:828:15
+📢 Verificando aviso "teste": 
+Object { active: true, inPeriod: true, startDate: "2025-07-06T20:54:39.158Z", endDate: "2025-07-07T20:54:39.158Z", now: "2025-07-07T00:31:49.427Z" }
+NoticeDisplay.tsx:56:17
+🏠 Index: Renderizando página principal 
+Object { activePlasa: "PLASA - 03/07/2025", activeBono: "nenhum", activeEscala: "Escala - 03/07/2025", currentMainDocType: "plasa", currentMainDoc: "PLASA - 03/07/2025", scrollSpeed: "normal", autoRestartDelay: 3 }
+Index.tsx:79:11
+🎖️ Analisando militar: 
+Object { fullName: "1T (IM) ELIEZER", type: "officer" }
+DutyOfficersDisplay.tsx:48:13
+🎖️ Já formatado corretamente: 
+Object { rank: "1T", specialty: "IM", name: "ELIEZER" }
+DutyOfficersDisplay.tsx:53:15
+🎖️ Analisando militar: 
+Object { fullName: "1SG (ES) DA SILVA", type: "master" }
+DutyOfficersDisplay.tsx:48:13
+🎖️ Já formatado corretamente: 
+Object { rank: "1SG", specialty: "ES", name: "DA SILVA" }
+DutyOfficersDisplay.tsx:53:15
+📋 ESCALA: Usando escala 2/3: 
+Object { title: "Escala - 03/07/2025", category: undefined, url: "https://1f8faedd-56a9-4fd2-a9c8-53add674d89f-00-2tf8n5fh0bu4h.riker.replit.dev/uploads/document-1751514698929-676748080-21 - 02JUN a 08JUN2025.pdf" }
+PDFViewer.tsx:168:17
+🖼️ ESCALA: Renderizando 
+Object { docUrl: "https://1f8faedd-56a9-4fd2-a9c8-53add674d89f-00-2tf8n5fh0bu4h.riker.replit.dev/uploads/document-1751514698929-676748080-21 - 02JUN a 08JUN2025.pdf", escalaImageUrl: "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAUDBAQEAwUEBAQFBQUGBwwIBwcHBw8LCwkMEQ8SEhEPERETFhwXExQaFRERGCEYGh0dHx8fExciJCIeJBweHx7/2wBDAQUFBQcGBw4ICA4eFBEUHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh7/wAARCALUBAADASIAAhEBAxEB/8QAHwAAAQUBAQEBAQEAAAAAAAAAAAECAwQFBgcICQoL/8QAtRAAAgEDAwIEAwUFBAQAAAF9AQIDAAQRBRIhMUEGE1FhByJxFDKBkaEII0KxwRVS0fAkM2JyggkKFhcYGRolJicoKSo0NTY3ODk6Q0RFRkdISUpTVFVWV1hZWmNkZWZnaGlqc3R1dnd4eXqDhIWGh4iJipKTlJWWl5iZmqKjpKWmp6ipqrKztLW2t7i5usLDxMXGx8jJytLT1NXW19jZ2uHi4+Tl5ufo6erx8vP09fb3+Pn6/8QAHwEAAwEBAQEBAQEBAQAAAAAAAAECAwQFBgcICQoL/8QAtREAAgECBAQDBAcFBAQAAQJ3AAECAxEEBSExBhJBUQdhcRMiMoEIFEKRobHBCSMzUvAVYnLRChYkNOEl8RcYGRomJygpKjU2Nzg5OkNERUZHSElKU1RVVldYWVpjZGVmZ2hpanN0dXZ3eHl6goOEhYaHiImKkpOUlZaXmJmaoqOkpaanqKmqsrO0tba3uLm6wsPExcbHyMnK0tPU1dbX2Nna4uPk5ebn6Onq8vP09fb3+Pn6/9oADAMBAAIRAxEAPwD7LooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigA…", loading: false, currentEscala: "Escala - 03/07/2025" }
+PDFViewer.tsx:828:15
+📢 Verificando aviso "teste": 
+Object { active: true, inPeriod: true, startDate: "2025-07-06T20:54:39.158Z", endDate: "2025-07-07T20:54:39.158Z", now: "2025-07-07T00:31:50.427Z" }
+NoticeDisplay.tsx:56:17
+🏠 Index: Renderizando página principal 
+Object { activePlasa: "PLASA - 03/07/2025", activeBono: "nenhum", activeEscala: "Escala - 03/07/2025", currentMainDocType: "plasa", currentMainDoc: "PLASA - 03/07/2025", scrollSpeed: "normal", autoRestartDelay: 3 }
+Index.tsx:79:11
+🎖️ Analisando militar: 
+Object { fullName: "1T (IM) ELIEZER", type: "officer" }
+DutyOfficersDisplay.tsx:48:13
+🎖️ Já formatado corretamente: 
+Object { rank: "1T", specialty: "IM", name: "ELIEZER" }
+DutyOfficersDisplay.tsx:53:15
+🎖️ Analisando militar: 
+Object { fullName: "1SG (ES) DA SILVA", type: "master" }
+DutyOfficersDisplay.tsx:48:13
+🎖️ Já formatado corretamente: 
+Object { rank: "1SG", specialty: "ES", name: "DA SILVA" }
+DutyOfficersDisplay.tsx:53:15
+📋 ESCALA: Usando escala 2/3: 
+Object { title: "Escala - 03/07/2025", category: undefined, url: "https://1f8faedd-56a9-4fd2-a9c8-53add674d89f-00-2tf8n5fh0bu4h.riker.replit.dev/uploads/document-1751514698929-676748080-21 - 02JUN a 08JUN2025.pdf" }
+PDFViewer.tsx:168:17
+🖼️ ESCALA: Renderizando 
+Object { docUrl: "https://1f8faedd-56a9-4fd2-a9c8-53add674d89f-00-2tf8n5fh0bu4h.riker.replit.dev/uploads/document-1751514698929-676748080-21 - 02JUN a 08JUN2025.pdf", escalaImageUrl: "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAUDBAQEAwUEBAQFBQUGBwwIBwcHBw8LCwkMEQ8SEhEPERETFhwXExQaFRERGCEYGh0dHx8fExciJCIeJBweHx7/2wBDAQUFBQcGBw4ICA4eFBEUHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh7/wAARCALUBAADASIAAhEBAxEB/8QAHwAAAQUBAQEBAQEAAAAAAAAAAAECAwQFBgcICQoL/8QAtRAAAgEDAwIEAwUFBAQAAAF9AQIDAAQRBRIhMUEGE1FhByJxFDKBkaEII0KxwRVS0fAkM2JyggkKFhcYGRolJicoKSo0NTY3ODk6Q0RFRkdISUpTVFVWV1hZWmNkZWZnaGlqc3R1dnd4eXqDhIWGh4iJipKTlJWWl5iZmqKjpKWmp6ipqrKztLW2t7i5usLDxMXGx8jJytLT1NXW19jZ2uHi4+Tl5ufo6erx8vP09fb3+Pn6/8QAHwEAAwEBAQEBAQEBAQAAAAAAAAECAwQFBgcICQoL/8QAtREAAgECBAQDBAcFBAQAAQJ3AAECAxEEBSExBhJBUQdhcRMiMoEIFEKRobHBCSMzUvAVYnLRChYkNOEl8RcYGRomJygpKjU2Nzg5OkNERUZHSElKU1RVVldYWVpjZGVmZ2hpanN0dXZ3eHl6goOEhYaHiImKkpOUlZaXmJmaoqOkpaanqKmqsrO0tba3uLm6wsPExcbHyMnK0tPU1dbX2Nna4uPk5ebn6Onq8vP09fb3+Pn6/9oADAMBAAIRAxEAPwD7LooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigA…", loading: false, currentEscala: "Escala - 03/07/2025" }
+PDFViewer.tsx:828:15
+📢 Verificando aviso "teste": 
+Object { active: true, inPeriod: true, startDate: "2025-07-06T20:54:39.158Z", endDate: "2025-07-07T20:54:39.158Z", now: "2025-07-07T00:31:51.530Z" }
+NoticeDisplay.tsx:56:17
+🏠 Index: Renderizando página principal 
+Object { activePlasa: "PLASA - 03/07/2025", activeBono: "nenhum", activeEscala: "Escala - 03/07/2025", currentMainDocType: "plasa", currentMainDoc: "PLASA - 03/07/2025", scrollSpeed: "normal", autoRestartDelay: 3 }
+Index.tsx:79:11
+🎖️ Analisando militar: 
+Object { fullName: "1T (IM) ELIEZER", type: "officer" }
+DutyOfficersDisplay.tsx:48:13
+🎖️ Já formatado corretamente: 
+Object { rank: "1T", specialty: "IM", name: "ELIEZER" }
+DutyOfficersDisplay.tsx:53:15
+🎖️ Analisando militar: 
+Object { fullName: "1SG (ES) DA SILVA", type: "master" }
+DutyOfficersDisplay.tsx:48:13
+🎖️ Já formatado corretamente: 
+Object { rank: "1SG", specialty: "ES", name: "DA SILVA" }
+DutyOfficersDisplay.tsx:53:15
+📋 ESCALA: Usando escala 2/3: 
+Object { title: "Escala - 03/07/2025", category: undefined, url: "https://1f8faedd-56a9-4fd2-a9c8-53add674d89f-00-2tf8n5fh0bu4h.riker.replit.dev/uploads/document-1751514698929-676748080-21 - 02JUN a 08JUN2025.pdf" }
+PDFViewer.tsx:168:17
+🖼️ ESCALA: Renderizando 
+Object { docUrl: "https://1f8faedd-56a9-4fd2-a9c8-53add674d89f-00-2tf8n5fh0bu4h.riker.replit.dev/uploads/document-1751514698929-676748080-21 - 02JUN a 08JUN2025.pdf", escalaImageUrl: "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAUDBAQEAwUEBAQFBQUGBwwIBwcHBw8LCwkMEQ8SEhEPERETFhwXExQaFRERGCEYGh0dHx8fExciJCIeJBweHx7/2wBDAQUFBQcGBw4ICA4eFBEUHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh7/wAARCALUBAADASIAAhEBAxEB/8QAHwAAAQUBAQEBAQEAAAAAAAAAAAECAwQFBgcICQoL/8QAtRAAAgEDAwIEAwUFBAQAAAF9AQIDAAQRBRIhMUEGE1FhByJxFDKBkaEII0KxwRVS0fAkM2JyggkKFhcYGRolJicoKSo0NTY3ODk6Q0RFRkdISUpTVFVWV1hZWmNkZWZnaGlqc3R1dnd4eXqDhIWGh4iJipKTlJWWl5iZmqKjpKWmp6ipqrKztLW2t7i5usLDxMXGx8jJytLT1NXW19jZ2uHi4+Tl5ufo6erx8vP09fb3+Pn6/8QAHwEAAwEBAQEBAQEBAQAAAAAAAAECAwQFBgcICQoL/8QAtREAAgECBAQDBAcFBAQAAQJ3AAECAxEEBSExBhJBUQdhcRMiMoEIFEKRobHBCSMzUvAVYnLRChYkNOEl8RcYGRomJygpKjU2Nzg5OkNERUZHSElKU1RVVldYWVpjZGVmZ2hpanN0dXZ3eHl6goOEhYaHiImKkpOUlZaXmJmaoqOkpaanqKmqsrO0tba3uLm6wsPExcbHyMnK0tPU1dbX2Nna4uPk5ebn6Onq8vP09fb3+Pn6/9oADAMBAAIRAxEAPwD7LooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigA…", loading: false, currentEscala: "Escala - 03/07/2025" }
+PDFViewer.tsx:828:15
+📢 Verificando aviso "teste": 
+Object { active: true, inPeriod: true, startDate: "2025-07-06T20:54:39.158Z", endDate: "2025-07-07T20:54:39.158Z", now: "2025-07-07T00:31:52.530Z" }
+NoticeDisplay.tsx:56:17
+🏠 Index: Renderizando página principal 
+Object { activePlasa: "PLASA - 03/07/2025", activeBono: "nenhum", activeEscala: "Escala - 03/07/2025", currentMainDocType: "plasa", currentMainDoc: "PLASA - 03/07/2025", scrollSpeed: "normal", autoRestartDelay: 3 }
+Index.tsx:79:11
+🎖️ Analisando militar: 
+Object { fullName: "1T (IM) ELIEZER", type: "officer" }
+DutyOfficersDisplay.tsx:48:13
+🎖️ Já formatado corretamente: 
+Object { rank: "1T", specialty: "IM", name: "ELIEZER" }
+DutyOfficersDisplay.tsx:53:15
+🎖️ Analisando militar: 
+Object { fullName: "1SG (ES) DA SILVA", type: "master" }
+DutyOfficersDisplay.tsx:48:13
+🎖️ Já formatado corretamente: 
+Object { rank: "1SG", specialty: "ES", name: "DA SILVA" }
+DutyOfficersDisplay.tsx:53:15
+📋 ESCALA: Usando escala 2/3: 
+Object { title: "Escala - 03/07/2025", category: undefined, url: "https://1f8faedd-56a9-4fd2-a9c8-53add674d89f-00-2tf8n5fh0bu4h.riker.replit.dev/uploads/document-1751514698929-676748080-21 - 02JUN a 08JUN2025.pdf" }
+PDFViewer.tsx:168:17
+🖼️ ESCALA: Renderizando 
+Object { docUrl: "https://1f8faedd-56a9-4fd2-a9c8-53add674d89f-00-2tf8n5fh0bu4h.riker.replit.dev/uploads/document-1751514698929-676748080-21 - 02JUN a 08JUN2025.pdf", escalaImageUrl: "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAUDBAQEAwUEBAQFBQUGBwwIBwcHBw8LCwkMEQ8SEhEPERETFhwXExQaFRERGCEYGh0dHx8fExciJCIeJBweHx7/2wBDAQUFBQcGBw4ICA4eFBEUHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh7/wAARCALUBAADASIAAhEBAxEB/8QAHwAAAQUBAQEBAQEAAAAAAAAAAAECAwQFBgcICQoL/8QAtRAAAgEDAwIEAwUFBAQAAAF9AQIDAAQRBRIhMUEGE1FhByJxFDKBkaEII0KxwRVS0fAkM2JyggkKFhcYGRolJicoKSo0NTY3ODk6Q0RFRkdISUpTVFVWV1hZWmNkZWZnaGlqc3R1dnd4eXqDhIWGh4iJipKTlJWWl5iZmqKjpKWmp6ipqrKztLW2t7i5usLDxMXGx8jJytLT1NXW19jZ2uHi4+Tl5ufo6erx8vP09fb3+Pn6/8QAHwEAAwEBAQEBAQEBAQAAAAAAAAECAwQFBgcICQoL/8QAtREAAgECBAQDBAcFBAQAAQJ3AAECAxEEBSExBhJBUQdhcRMiMoEIFEKRobHBCSMzUvAVYnLRChYkNOEl8RcYGRomJygpKjU2Nzg5OkNERUZHSElKU1RVVldYWVpjZGVmZ2hpanN0dXZ3eHl6goOEhYaHiImKkpOUlZaXmJmaoqOkpaanqKmqsrO0tba3uLm6wsPExcbHyMnK0tPU1dbX2Nna4uPk5ebn6Onq8vP09fb3+Pn6/9oADAMBAAIRAxEAPwD7LooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigA…", loading: false, currentEscala: "Escala - 03/07/2025" }
+PDFViewer.tsx:828:15
+📢 Verificando aviso "teste": 
+Object { active: true, inPeriod: true, startDate: "2025-07-06T20:54:39.158Z", endDate: "2025-07-07T20:54:39.158Z", now: "2025-07-07T00:31:53.531Z" }
+NoticeDisplay.tsx:56:17
+🏠 Index: Renderizando página principal 
+Object { activePlasa: "PLASA - 03/07/2025", activeBono: "nenhum", activeEscala: "Escala - 03/07/2025", currentMainDocType: "plasa", currentMainDoc: "PLASA - 03/07/2025", scrollSpeed: "normal", autoRestartDelay: 3 }
+Index.tsx:79:11
+🎖️ Analisando militar: 
+Object { fullName: "1T (IM) ELIEZER", type: "officer" }
+DutyOfficersDisplay.tsx:48:13
+🎖️ Já formatado corretamente: 
+Object { rank: "1T", specialty: "IM", name: "ELIEZER" }
+DutyOfficersDisplay.tsx:53:15
+🎖️ Analisando militar: 
+Object { fullName: "1SG (ES) DA SILVA", type: "master" }
+DutyOfficersDisplay.tsx:48:13
+🎖️ Já formatado corretamente: 
+Object { rank: "1SG", specialty: "ES", name: "DA SILVA" }
+DutyOfficersDisplay.tsx:53:15
+📋 ESCALA: Usando escala 2/3: 
+Object { title: "Escala - 03/07/2025", category: undefined, url: "https://1f8faedd-56a9-4fd2-a9c8-53add674d89f-00-2tf8n5fh0bu4h.riker.replit.dev/uploads/document-1751514698929-676748080-21 - 02JUN a 08JUN2025.pdf" }
+PDFViewer.tsx:168:17
+🖼️ ESCALA: Renderizando 
+Object { docUrl: "https://1f8faedd-56a9-4fd2-a9c8-53add674d89f-00-2tf8n5fh0bu4h.riker.replit.dev/uploads/document-1751514698929-676748080-21 - 02JUN a 08JUN2025.pdf", escalaImageUrl: "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAUDBAQEAwUEBAQFBQUGBwwIBwcHBw8LCwkMEQ8SEhEPERETFhwXExQaFRERGCEYGh0dHx8fExciJCIeJBweHx7/2wBDAQUFBQcGBw4ICA4eFBEUHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh7/wAARCALUBAADASIAAhEBAxEB/8QAHwAAAQUBAQEBAQEAAAAAAAAAAAECAwQFBgcICQoL/8QAtRAAAgEDAwIEAwUFBAQAAAF9AQIDAAQRBRIhMUEGE1FhByJxFDKBkaEII0KxwRVS0fAkM2JyggkKFhcYGRolJicoKSo0NTY3ODk6Q0RFRkdISUpTVFVWV1hZWmNkZWZnaGlqc3R1dnd4eXqDhIWGh4iJipKTlJWWl5iZmqKjpKWmp6ipqrKztLW2t7i5usLDxMXGx8jJytLT1NXW19jZ2uHi4+Tl5ufo6erx8vP09fb3+Pn6/8QAHwEAAwEBAQEBAQEBAQAAAAAAAAECAwQFBgcICQoL/8QAtREAAgECBAQDBAcFBAQAAQJ3AAECAxEEBSExBhJBUQdhcRMiMoEIFEKRobHBCSMzUvAVYnLRChYkNOEl8RcYGRomJygpKjU2Nzg5OkNERUZHSElKU1RVVldYWVpjZGVmZ2hpanN0dXZ3eHl6goOEhYaHiImKkpOUlZaXmJmaoqOkpaanqKmqsrO0tba3uLm6wsPExcbHyMnK0tPU1dbX2Nna4uPk5ebn6Onq8vP09fb3+Pn6/9oADAMBAAIRAxEAPwD7LooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigA…", loading: false, currentEscala: "Escala - 03/07/2025" }
+PDFViewer.tsx:828:15
+📢 Verificando aviso "teste": 
+Object { active: true, inPeriod: true, startDate: "2025-07-06T20:54:39.158Z", endDate: "2025-07-07T20:54:39.158Z", now: "2025-07-07T00:31:54.534Z" }
+NoticeDisplay.tsx:56:17
+🔄 Alternando para escala 3/3: Escala - 03/07/2025 DisplayContext.tsx:449:19
+🏠 Index: Renderizando página principal 
+Object { activePlasa: "PLASA - 03/07/2025", activeBono: "nenhum", activeEscala: "Escala - 03/07/2025", currentMainDocType: "plasa", currentMainDoc: "PLASA - 03/07/2025", scrollSpeed: "normal", autoRestartDelay: 3 }
+Index.tsx:79:11
+🎖️ Analisando militar: 
+Object { fullName: "1T (IM) ELIEZER", type: "officer" }
+DutyOfficersDisplay.tsx:48:13
+🎖️ Já formatado corretamente: 
+Object { rank: "1T", specialty: "IM", name: "ELIEZER" }
+DutyOfficersDisplay.tsx:53:15
+🎖️ Analisando militar: 
+Object { fullName: "1SG (ES) DA SILVA", type: "master" }
+DutyOfficersDisplay.tsx:48:13
+🎖️ Já formatado corretamente: 
+Object { rank: "1SG", specialty: "ES", name: "DA SILVA" }
+DutyOfficersDisplay.tsx:53:15
+📋 ESCALA: Usando escala 3/3: 
+Object { title: "Escala - 03/07/2025", category: undefined, url: "https://1f8faedd-56a9-4fd2-a9c8-53add674d89f-00-2tf8n5fh0bu4h.riker.replit.dev/uploads/document-1751514732729-170147805-of.pdf" }
+PDFViewer.tsx:168:17
+🖼️ ESCALA: Renderizando 
+Object { docUrl: "https://1f8faedd-56a9-4fd2-a9c8-53add674d89f-00-2tf8n5fh0bu4h.riker.replit.dev/uploads/document-1751514732729-170147805-of.pdf", escalaImageUrl: "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAUDBAQEAwUEBAQFBQUGBwwIBwcHBw8LCwkMEQ8SEhEPERETFhwXExQaFRERGCEYGh0dHx8fExciJCIeJBweHx7/2wBDAQUFBQcGBw4ICA4eFBEUHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh7/wAARCALUBAADASIAAhEBAxEB/8QAHwAAAQUBAQEBAQEAAAAAAAAAAAECAwQFBgcICQoL/8QAtRAAAgEDAwIEAwUFBAQAAAF9AQIDAAQRBRIhMUEGE1FhByJxFDKBkaEII0KxwRVS0fAkM2JyggkKFhcYGRolJicoKSo0NTY3ODk6Q0RFRkdISUpTVFVWV1hZWmNkZWZnaGlqc3R1dnd4eXqDhIWGh4iJipKTlJWWl5iZmqKjpKWmp6ipqrKztLW2t7i5usLDxMXGx8jJytLT1NXW19jZ2uHi4+Tl5ufo6erx8vP09fb3+Pn6/8QAHwEAAwEBAQEBAQEBAQAAAAAAAAECAwQFBgcICQoL/8QAtREAAgECBAQDBAcFBAQAAQJ3AAECAxEEBSExBhJBUQdhcRMiMoEIFEKRobHBCSMzUvAVYnLRChYkNOEl8RcYGRomJygpKjU2Nzg5OkNERUZHSElKU1RVVldYWVpjZGVmZ2hpanN0dXZ3eHl6goOEhYaHiImKkpOUlZaXmJmaoqOkpaanqKmqsrO0tba3uLm6wsPExcbHyMnK0tPU1dbX2Nna4uPk5ebn6Onq8vP09fb3+Pn6/9oADAMBAAIRAxEAPwD7LooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigA…", loading: false, currentEscala: "Escala - 03/07/2025" }
+PDFViewer.tsx:828:15
+📢 Verificando aviso "teste": 
+Object { active: true, inPeriod: true, startDate: "2025-07-06T20:54:39.158Z", endDate: "2025-07-07T20:54:39.158Z", now: "2025-07-07T00:31:55.360Z" }
+NoticeDisplay.tsx:56:17
+🔄 ESCALA Effect triggered: 
+Object { currentEscalaIndex: 2, totalActiveEscalas: 3, currentEscala: "Escala - 03/07/2025", category: undefined, url: "https://1f8faedd-56a9-4fd2-a9c8-53add674d89f-00-2tf8n5fh0bu4h.riker.replit.dev/uploads/document-1751514732729-170147805-of.pdf", id: "1751762049590-8op2wnkm6" }
+PDFViewer.tsx:568:15
+🖼️ ESCALA: Processando URL: https://1f8faedd-56a9-4fd2-a9c8-53add674d89f-00-2tf8n5fh0bu4h.riker.replit.dev/uploads/document-1751514732729-170147805-of.pdf PDFViewer.tsx:581:17
+📄 ESCALA: É um PDF, convertendo para imagem... PDFViewer.tsx:584:19
+🎯 ESCALA: Convertendo PDF: https://1f8faedd-56a9-4fd2-a9c8-53add674d89f-00-2tf8n5fh0bu4h.riker.replit.dev/uploads/document-1751514732729-170147805-of.pdf (ID: 1751762049590-8op2wnkm6) PDFViewer.tsx:613:15
+🔍 Verificando cache para escala: 1751762049590-8op2wnkm6 PDFViewer.tsx:616:15
+🌐 PDFViewer: Detectado acesso via rede: 1f8faedd-56a9-4fd2-a9c8-53add674d89f-00-2tf8n5fh0bu4h.riker.replit.dev PDFViewer.tsx:132:15
+Bloqueado carregamento de conteúdo misto ativo “http://1f8faedd-56a9-4fd2-a9c8-53add674d89f-00-2tf8n5fh0bu4h.riker.replit.dev:5000/api/check-escala-cache/1751762049590-8op2wnkm6” admin
+📊 Estado do DisplayContext: 
+Object { plasaTotal: 1, plasaAtivos: 1, escalaTotal: 3, escalaAtivos: 3, currentEscalaIndex: 2, activePlasa: "PLASA - 03/07/2025", activeEscala: "Escala - 03/07/2025", activeEscalaCategory: "sem categoria", noticesTotal: 1, noticesAtivos: 1, … }
+DisplayContext.tsx:468:15
+💾 Contexto salvo no localStorage (sem avisos): 
+Object { plasa: 1, bono: 0, escala: 3, escalaIndex: 2 }
+DisplayContext.tsx:511:15
+⚠️ Erro ao verificar cache, continuando com conversão... TypeError: NetworkError when attempting to fetch resource.
+    convertEscalaPDFToImage PDFViewer.tsx:804
+    PDFViewer PDFViewer.tsx:761
+    React 8
+    workLoop scheduler.development.js:266
+    flushWork scheduler.development.js:239
+    performWorkUntilDeadline scheduler.development.js:533
+PDFViewer.tsx:628:17
+🆕 ESCALA: Cache não encontrado, convertendo... PDFViewer.tsx:630:15
+📥 Obtendo dados do PDF: https://1f8faedd-56a9-4fd2-a9c8-53add674d89f-00-2tf8n5fh0bu4h.riker.replit.dev/uploads/document-1751514732729-170147805-of.pdf PDFViewer.tsx:208:13
+🏠 Index: Renderizando página principal 
+Object { activePlasa: "PLASA - 03/07/2025", activeBono: "nenhum", activeEscala: "Escala - 03/07/2025", currentMainDocType: "plasa", currentMainDoc: "PLASA - 03/07/2025", scrollSpeed: "normal", autoRestartDelay: 3 }
+Index.tsx:79:11
+🎖️ Analisando militar: 
+Object { fullName: "1T (IM) ELIEZER", type: "officer" }
+DutyOfficersDisplay.tsx:48:13
+🎖️ Já formatado corretamente: 
+Object { rank: "1T", specialty: "IM", name: "ELIEZER" }
+DutyOfficersDisplay.tsx:53:15
+🎖️ Analisando militar: 
+Object { fullName: "1SG (ES) DA SILVA", type: "master" }
+DutyOfficersDisplay.tsx:48:13
+🎖️ Já formatado corretamente: 
+Object { rank: "1SG", specialty: "ES", name: "DA SILVA" }
+DutyOfficersDisplay.tsx:53:15
+📢 Verificando aviso "teste": 
+Object { active: true, inPeriod: true, startDate: "2025-07-06T20:54:39.158Z", endDate: "2025-07-07T20:54:39.158Z", now: "2025-07-07T00:31:55.534Z" }
+NoticeDisplay.tsx:56:17
+✅ PDF carregado: 236829 bytes PDFViewer.tsx:230:17
+✅ ESCALA: PDF válido, convertendo... PDFViewer.tsx:647:15
+📄 ESCALA: PDF carregado: 1 páginas PDFViewer.tsx:662:15
+📐 ESCALA: Página 1 - Escala: 1.2163112607557045, Final: 1024x724.0404040404036 PDFViewer.tsx:667:15
+🎨 ESCALA: Renderizando... PDFViewer.tsx:683:15
+✅ ESCALA: Renderizada com sucesso PDFViewer.tsx:689:15
+💾 Salvando escala 1751762049590-8op2wnkm6 no cache... PDFViewer.tsx:691:17
+🌐 PDFViewer: Detectado acesso via rede: 1f8faedd-56a9-4fd2-a9c8-53add674d89f-00-2tf8n5fh0bu4h.riker.replit.dev PDFViewer.tsx:132:15
+Bloqueado carregamento de conteúdo misto ativo “http://1f8faedd-56a9-4fd2-a9c8-53add674d89f-00-2tf8n5fh0bu4h.riker.replit.dev:5000/api/save-escala-cache” admin
+⚠️ ESCALA: Falha ao salvar cache, usando dataURL: TypeError: NetworkError when attempting to fetch resource.
+    convertEscalaPDFToImage PDFViewer.tsx:704
+    PDFViewer PDFViewer.tsx:761
+    React 8
+    workLoop scheduler.development.js:266
+    flushWork scheduler.development.js:239
+    performWorkUntilDeadline scheduler.development.js:533
+PDFViewer.tsx:723:17
+🎉 ESCALA: Conversão concluída! PDFViewer.tsx:730:15
+📋 ESCALA: Usando escala 3/3: 
+Object { title: "Escala - 03/07/2025", category: undefined, url: "https://1f8faedd-56a9-4fd2-a9c8-53add674d89f-00-2tf8n5fh0bu4h.riker.replit.dev/uploads/document-1751514732729-170147805-of.pdf" }
+PDFViewer.tsx:168:17
+🖼️ ESCALA: Renderizando 
+Object { docUrl: "https://1f8faedd-56a9-4fd2-a9c8-53add674d89f-00-2tf8n5fh0bu4h.riker.replit.dev/uploads/document-1751514732729-170147805-of.pdf", escalaImageUrl: "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAUDBAQEAwUEBAQFBQUGBwwIBwcHBw8LCwkMEQ8SEhEPERETFhwXExQaFRERGCEYGh0dHx8fExciJCIeJBweHx7/2wBDAQUFBQcGBw4ICA4eFBEUHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh7/wAARCALUBAADASIAAhEBAxEB/8QAHwAAAQUBAQEBAQEAAAAAAAAAAAECAwQFBgcICQoL/8QAtRAAAgEDAwIEAwUFBAQAAAF9AQIDAAQRBRIhMUEGE1FhByJxFDKBkaEII0KxwRVS0fAkM2JyggkKFhcYGRolJicoKSo0NTY3ODk6Q0RFRkdISUpTVFVWV1hZWmNkZWZnaGlqc3R1dnd4eXqDhIWGh4iJipKTlJWWl5iZmqKjpKWmp6ipqrKztLW2t7i5usLDxMXGx8jJytLT1NXW19jZ2uHi4+Tl5ufo6erx8vP09fb3+Pn6/8QAHwEAAwEBAQEBAQEBAQAAAAAAAAECAwQFBgcICQoL/8QAtREAAgECBAQDBAcFBAQAAQJ3AAECAxEEBSExBhJBUQdhcRMiMoEIFEKRobHBCSMzUvAVYnLRChYkNOEl8RcYGRomJygpKjU2Nzg5OkNERUZHSElKU1RVVldYWVpjZGVmZ2hpanN0dXZ3eHl6goOEhYaHiImKkpOUlZaXmJmaoqOkpaanqKmqsrO0tba3uLm6wsPExcbHyMnK0tPU1dbX2Nna4uPk5ebn6Onq8vP09fb3+Pn6/9oADAMBAAIRAxEAPwD7LooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigA…", loading: false, currentEscala: "Escala - 03/07/2025" }
+PDFViewer.tsx:828:15
+✅ Escala convertida carregada com sucesso PDFViewer.tsx:841:21
+🏠 Index: Renderizando página principal 
+Object { activePlasa: "PLASA - 03/07/2025", activeBono: "nenhum", activeEscala: "Escala - 03/07/2025", currentMainDocType: "plasa", currentMainDoc: "PLASA - 03/07/2025", scrollSpeed: "normal", autoRestartDelay: 3 }
+Index.tsx:79:11
+🎖️ Analisando militar: 
+Object { fullName: "1T (IM) ELIEZER", type: "officer" }
+DutyOfficersDisplay.tsx:48:13
+🎖️ Já formatado corretamente: 
+Object { rank: "1T", specialty: "IM", name: "ELIEZER" }
+DutyOfficersDisplay.tsx:53:15
+🎖️ Analisando militar: 
+Object { fullName: "1SG (ES) DA SILVA", type: "master" }
+DutyOfficersDisplay.tsx:48:13
+🎖️ Já formatado corretamente: 
+Object { rank: "1SG", specialty: "ES", name: "DA SILVA" }
+DutyOfficersDisplay.tsx:53:15
+📋 ESCALA: Usando escala 3/3: 
+Object { title: "Escala - 03/07/2025", category: undefined, url: "https://1f8faedd-56a9-4fd2-a9c8-53add674d89f-00-2tf8n5fh0bu4h.riker.replit.dev/uploads/document-1751514732729-170147805-of.pdf" }
+PDFViewer.tsx:168:17
+🖼️ ESCALA: Renderizando 
+Object { docUrl: "https://1f8faedd-56a9-4fd2-a9c8-53add674d89f-00-2tf8n5fh0bu4h.riker.replit.dev/uploads/document-1751514732729-170147805-of.pdf", escalaImageUrl: "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAUDBAQEAwUEBAQFBQUGBwwIBwcHBw8LCwkMEQ8SEhEPERETFhwXExQaFRERGCEYGh0dHx8fExciJCIeJBweHx7/2wBDAQUFBQcGBw4ICA4eFBEUHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh7/wAARCALUBAADASIAAhEBAxEB/8QAHwAAAQUBAQEBAQEAAAAAAAAAAAECAwQFBgcICQoL/8QAtRAAAgEDAwIEAwUFBAQAAAF9AQIDAAQRBRIhMUEGE1FhByJxFDKBkaEII0KxwRVS0fAkM2JyggkKFhcYGRolJicoKSo0NTY3ODk6Q0RFRkdISUpTVFVWV1hZWmNkZWZnaGlqc3R1dnd4eXqDhIWGh4iJipKTlJWWl5iZmqKjpKWmp6ipqrKztLW2t7i5usLDxMXGx8jJytLT1NXW19jZ2uHi4+Tl5ufo6erx8vP09fb3+Pn6/8QAHwEAAwEBAQEBAQEBAQAAAAAAAAECAwQFBgcICQoL/8QAtREAAgECBAQDBAcFBAQAAQJ3AAECAxEEBSExBhJBUQdhcRMiMoEIFEKRobHBCSMzUvAVYnLRChYkNOEl8RcYGRomJygpKjU2Nzg5OkNERUZHSElKU1RVVldYWVpjZGVmZ2hpanN0dXZ3eHl6goOEhYaHiImKkpOUlZaXmJmaoqOkpaanqKmqsrO0tba3uLm6wsPExcbHyMnK0tPU1dbX2Nna4uPk5ebn6Onq8vP09fb3+Pn6/9oADAMBAAIRAxEAPwD7LooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigA…", loading: false, currentEscala: "Escala - 03/07/2025" }
+PDFViewer.tsx:828:15
+📢 Verificando aviso "teste": 
+Object { active: true, inPeriod: true, startDate: "2025-07-06T20:54:39.158Z", endDate: "2025-07-07T20:54:39.158Z", now: "2025-07-07T00:31:56.601Z" }
+NoticeDisplay.tsx:56:17
+🏠 Index: Renderizando página principal 
+Object { activePlasa: "PLASA - 03/07/2025", activeBono: "nenhum", activeEscala: "Escala - 03/07/2025", currentMainDocType: "plasa", currentMainDoc: "PLASA - 03/07/2025", scrollSpeed: "normal", autoRestartDelay: 3 }
+Index.tsx:79:11
+🎖️ Analisando militar: 
+Object { fullName: "1T (IM) ELIEZER", type: "officer" }
+DutyOfficersDisplay.tsx:48:13
+🎖️ Já formatado corretamente: 
+Object { rank: "1T", specialty: "IM", name: "ELIEZER" }
+DutyOfficersDisplay.tsx:53:15
+🎖️ Analisando militar: 
+Object { fullName: "1SG (ES) DA SILVA", type: "master" }
+DutyOfficersDisplay.tsx:48:13
+🎖️ Já formatado corretamente: 
+Object { rank: "1SG", specialty: "ES", name: "DA SILVA" }
+DutyOfficersDisplay.tsx:53:15
+📋 ESCALA: Usando escala 3/3: 
+Object { title: "Escala - 03/07/2025", category: undefined, url: "https://1f8faedd-56a9-4fd2-a9c8-53add674d89f-00-2tf8n5fh0bu4h.riker.replit.dev/uploads/document-1751514732729-170147805-of.pdf" }
+PDFViewer.tsx:168:17
+🖼️ ESCALA: Renderizando 
+Object { docUrl: "https://1f8faedd-56a9-4fd2-a9c8-53add674d89f-00-2tf8n5fh0bu4h.riker.replit.dev/uploads/document-1751514732729-170147805-of.pdf", escalaImageUrl: "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAUDBAQEAwUEBAQFBQUGBwwIBwcHBw8LCwkMEQ8SEhEPERETFhwXExQaFRERGCEYGh0dHx8fExciJCIeJBweHx7/2wBDAQUFBQcGBw4ICA4eFBEUHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh7/wAARCALUBAADASIAAhEBAxEB/8QAHwAAAQUBAQEBAQEAAAAAAAAAAAECAwQFBgcICQoL/8QAtRAAAgEDAwIEAwUFBAQAAAF9AQIDAAQRBRIhMUEGE1FhByJxFDKBkaEII0KxwRVS0fAkM2JyggkKFhcYGRolJicoKSo0NTY3ODk6Q0RFRkdISUpTVFVWV1hZWmNkZWZnaGlqc3R1dnd4eXqDhIWGh4iJipKTlJWWl5iZmqKjpKWmp6ipqrKztLW2t7i5usLDxMXGx8jJytLT1NXW19jZ2uHi4+Tl5ufo6erx8vP09fb3+Pn6/8QAHwEAAwEBAQEBAQEBAQAAAAAAAAECAwQFBgcICQoL/8QAtREAAgECBAQDBAcFBAQAAQJ3AAECAxEEBSExBhJBUQdhcRMiMoEIFEKRobHBCSMzUvAVYnLRChYkNOEl8RcYGRomJygpKjU2Nzg5OkNERUZHSElKU1RVVldYWVpjZGVmZ2hpanN0dXZ3eHl6goOEhYaHiImKkpOUlZaXmJmaoqOkpaanqKmqsrO0tba3uLm6wsPExcbHyMnK0tPU1dbX2Nna4uPk5ebn6Onq8vP09fb3+Pn6/9oADAMBAAIRAxEAPwD7LooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigA…", loading: false, currentEscala: "Escala - 03/07/2025" }
+PDFViewer.tsx:828:15
+📢 Verificando aviso "teste": 
+Object { active: true, inPeriod: true, startDate: "2025-07-06T20:54:39.158Z", endDate: "2025-07-07T20:54:39.158Z", now: "2025-07-07T00:31:57.597Z" }
+NoticeDisplay.tsx:56:17
+🏠 Index: Renderizando página principal 
+Object { activePlasa: "PLASA - 03/07/2025", activeBono: "nenhum", activeEscala: "Escala - 03/07/2025", currentMainDocType: "plasa", currentMainDoc: "PLASA - 03/07/2025", scrollSpeed: "normal", autoRestartDelay: 3 }
+Index.tsx:79:11
+🎖️ Analisando militar: 
+Object { fullName: "1T (IM) ELIEZER", type: "officer" }
+DutyOfficersDisplay.tsx:48:13
+🎖️ Já formatado corretamente: 
+Object { rank: "1T", specialty: "IM", name: "ELIEZER" }
+DutyOfficersDisplay.tsx:53:15
+🎖️ Analisando militar: 
+Object { fullName: "1SG (ES) DA SILVA", type: "master" }
+DutyOfficersDisplay.tsx:48:13
+🎖️ Já formatado corretamente: 
+Object { rank: "1SG", specialty: "ES", name: "DA SILVA" }
+DutyOfficersDisplay.tsx:53:15
+📋 ESCALA: Usando escala 3/3: 
+Object { title: "Escala - 03/07/2025", category: undefined, url: "https://1f8faedd-56a9-4fd2-a9c8-53add674d89f-00-2tf8n5fh0bu4h.riker.replit.dev/uploads/document-1751514732729-170147805-of.pdf" }
+PDFViewer.tsx:168:17
+🖼️ ESCALA: Renderizando 
+Object { docUrl: "https://1f8faedd-56a9-4fd2-a9c8-53add674d89f-00-2tf8n5fh0bu4h.riker.replit.dev/uploads/document-1751514732729-170147805-of.pdf", escalaImageUrl: "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAUDBAQEAwUEBAQFBQUGBwwIBwcHBw8LCwkMEQ8SEhEPERETFhwXExQaFRERGCEYGh0dHx8fExciJCIeJBweHx7/2wBDAQUFBQcGBw4ICA4eFBEUHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh7/wAARCALUBAADASIAAhEBAxEB/8QAHwAAAQUBAQEBAQEAAAAAAAAAAAECAwQFBgcICQoL/8QAtRAAAgEDAwIEAwUFBAQAAAF9AQIDAAQRBRIhMUEGE1FhByJxFDKBkaEII0KxwRVS0fAkM2JyggkKFhcYGRolJicoKSo0NTY3ODk6Q0RFRkdISUpTVFVWV1hZWmNkZWZnaGlqc3R1dnd4eXqDhIWGh4iJipKTlJWWl5iZmqKjpKWmp6ipqrKztLW2t7i5usLDxMXGx8jJytLT1NXW19jZ2uHi4+Tl5ufo6erx8vP09fb3+Pn6/8QAHwEAAwEBAQEBAQEBAQAAAAAAAAECAwQFBgcICQoL/8QAtREAAgECBAQDBAcFBAQAAQJ3AAECAxEEBSExBhJBUQdhcRMiMoEIFEKRobHBCSMzUvAVYnLRChYkNOEl8RcYGRomJygpKjU2Nzg5OkNERUZHSElKU1RVVldYWVpjZGVmZ2hpanN0dXZ3eHl6goOEhYaHiImKkpOUlZaXmJmaoqOkpaanqKmqsrO0tba3uLm6wsPExcbHyMnK0tPU1dbX2Nna4uPk5ebn6Onq8vP09fb3+Pn6/9oADAMBAAIRAxEAPwD7LooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigA…", loading: false, currentEscala: "Escala - 03/07/2025" }
+PDFViewer.tsx:828:15
+📢 Verificando aviso "teste": 
+Object { active: true, inPeriod: true, startDate: "2025-07-06T20:54:39.158Z", endDate: "2025-07-07T20:54:39.158Z", now: "2025-07-07T00:31:58.628Z" }
+NoticeDisplay.tsx:56:17
+🏠 Index: Renderizando página principal 
+Object { activePlasa: "PLASA - 03/07/2025", activeBono: "nenhum", activeEscala: "Escala - 03/07/2025", currentMainDocType: "plasa", currentMainDoc: "PLASA - 03/07/2025", scrollSpeed: "normal", autoRestartDelay: 3 }
+Index.tsx:79:11
+🎖️ Analisando militar: 
+Object { fullName: "1T (IM) ELIEZER", type: "officer" }
+DutyOfficersDisplay.tsx:48:13
+🎖️ Já formatado corretamente: 
+Object { rank: "1T", specialty: "IM", name: "ELIEZER" }
+DutyOfficersDisplay.tsx:53:15
+🎖️ Analisando militar: 
+Object { fullName: "1SG (ES) DA SILVA", type: "master" }
+DutyOfficersDisplay.tsx:48:13
+🎖️ Já formatado corretamente: 
+Object { rank: "1SG", specialty: "ES", name: "DA SILVA" }
+DutyOfficersDisplay.tsx:53:15
+📋 ESCALA: Usando escala 3/3: 
+Object { title: "Escala - 03/07/2025", category: undefined, url: "https://1f8faedd-56a9-4fd2-a9c8-53add674d89f-00-2tf8n5fh0bu4h.riker.replit.dev/uploads/document-1751514732729-170147805-of.pdf" }
+PDFViewer.tsx:168:17
+🖼️ ESCALA: Renderizando 
+Object { docUrl: "https://1f8faedd-56a9-4fd2-a9c8-53add674d89f-00-2tf8n5fh0bu4h.riker.replit.dev/uploads/document-1751514732729-170147805-of.pdf", escalaImageUrl: "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAUDBAQEAwUEBAQFBQUGBwwIBwcHBw8LCwkMEQ8SEhEPERETFhwXExQaFRERGCEYGh0dHx8fExciJCIeJBweHx7/2wBDAQUFBQcGBw4ICA4eFBEUHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh7/wAARCALUBAADASIAAhEBAxEB/8QAHwAAAQUBAQEBAQEAAAAAAAAAAAECAwQFBgcICQoL/8QAtRAAAgEDAwIEAwUFBAQAAAF9AQIDAAQRBRIhMUEGE1FhByJxFDKBkaEII0KxwRVS0fAkM2JyggkKFhcYGRolJicoKSo0NTY3ODk6Q0RFRkdISUpTVFVWV1hZWmNkZWZnaGlqc3R1dnd4eXqDhIWGh4iJipKTlJWWl5iZmqKjpKWmp6ipqrKztLW2t7i5usLDxMXGx8jJytLT1NXW19jZ2uHi4+Tl5ufo6erx8vP09fb3+Pn6/8QAHwEAAwEBAQEBAQEBAQAAAAAAAAECAwQFBgcICQoL/8QAtREAAgECBAQDBAcFBAQAAQJ3AAECAxEEBSExBhJBUQdhcRMiMoEIFEKRobHBCSMzUvAVYnLRChYkNOEl8RcYGRomJygpKjU2Nzg5OkNERUZHSElKU1RVVldYWVpjZGVmZ2hpanN0dXZ3eHl6goOEhYaHiImKkpOUlZaXmJmaoqOkpaanqKmqsrO0tba3uLm6wsPExcbHyMnK0tPU1dbX2Nna4uPk5ebn6Onq8vP09fb3+Pn6/9oADAMBAAIRAxEAPwD7LooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigA…", loading: false, currentEscala: "Escala - 03/07/2025" }
+PDFViewer.tsx:828:15
+📢 Verificando aviso "teste": 
+Object { active: true, inPeriod: true, startDate: "2025-07-06T20:54:39.158Z", endDate: "2025-07-07T20:54:39.158Z", now: "2025-07-07T00:31:59.216Z" }
+NoticeDisplay.tsx:56:17
+🌐 Admin: Detectado Replit, usando mesmo origin: https://1f8faedd-56a9-4fd2-a9c8-53add674d89f-00-2tf8n5fh0bu4h.riker.replit.dev 3 Admin.tsx:459:15
+🔧 Admin carregado, avisos serão carregados do servidor Admin.tsx:634:13
+🌐 Admin: Detectado Replit, usando mesmo origin: https://1f8faedd-56a9-4fd2-a9c8-53add674d89f-00-2tf8n5fh0bu4h.riker.replit.dev 2 Admin.tsx:459:15
+🌐 Admin: Detectado Replit, usando mesmo origin: https://1f8faedd-56a9-4fd2-a9c8-53add674d89f-00-2tf8n5fh0bu4h.riker.replit.dev 2 Admin.tsx:459:15
+👮 Dados carregados do servidor: 
+Object { id: 1, officerId: 16, masterId: 24, officerName: "1T (IM) ELIEZER", masterName: "1SG (ES) DA SILVA", updatedAt: "2025-07-07T00:31:13.687Z" }
+Admin.tsx:553:17
+🌐 Admin: Detectado Replit, usando mesmo origin: https://1f8faedd-56a9-4fd2-a9c8-53add674d89f-00-2tf8n5fh0bu4h.riker.replit.dev 2 Admin.tsx:459:15
+📢 Resposta do servidor: 200 OK Admin.tsx:489:15
+🌐 Admin: Detectado Replit, usando mesmo origin: https://1f8faedd-56a9-4fd2-a9c8-53add674d89f-00-2tf8n5fh0bu4h.riker.replit.dev 4 Admin.tsx:459:15
+🌐 Admin: Detectado Replit, usando mesmo origin: https://1f8faedd-56a9-4fd2-a9c8-53add674d89f-00-2tf8n5fh0bu4h.riker.replit.dev 2 Admin.tsx:459:15
+Warning: Missing `Description` or `aria-describedby={undefined}` for {DialogContent}. @radix-ui_react-dialog.js:337:36
+🌐 Admin: Detectado Replit, usando mesmo origin: https://1f8faedd-56a9-4fd2-a9c8-53add674d89f-00-2tf8n5fh0bu4h.riker.replit.dev Admin.tsx:459:15
+🌐 Admin: Detectado Replit, usando mesmo origin: https://1f8faedd-56a9-4fd2-a9c8-53add674d89f-00-2tf8n5fh0bu4h.riker.replit.dev Admin.tsx:459:15
+🌐 Admin: Detectado Replit, usando mesmo origin: https://1f8faedd-56a9-4fd2-a9c8-53add674d89f-00-2tf8n5fh0bu4h.riker.replit.dev 3 Admin.tsx:459:15
+🌐 Admin: Detectado Replit, usando mesmo origin: https://1f8faedd-56a9-4fd2-a9c8-53add674d89f-00-2tf8n5fh0bu4h.riker.replit.dev 2 Admin.tsx:459:15
+👮 Dados carregados do servidor: 
+Object { id: 1, officerId: 16, masterId: 24, officerName: "1T (IM) ELIEZER", masterName: "1SG (ES) DA SILVA", updatedAt: "2025-07-07T00:31:13.687Z" }
+Admin.tsx:553:17
+🌐 Admin: Detectado Replit, usando mesmo origin: https://1f8faedd-56a9-4fd2-a9c8-53add674d89f-00-2tf8n5fh0bu4h.riker.replit.dev 4 Admin.tsx:459:15
+🔄 Selecionando oficial: LEONARDO ANDRADE Admin.tsx:3307:33
+👮 Oficial encontrado: 
+Object { name: "LEONARDO ANDRADE", rank: "1t", specialty: "IM", fullRankName: "Primeiro-Tenente" }
+Admin.tsx:3309:33
+🔄 Novo estado dos oficiais: 
+Object { officerName: "LEONARDO ANDRADE", officerRank: "1t", masterName: "1SG (ES) DA SILVA", masterRank: "3sg" }
+Admin.tsx:3315:33
+🌐 Admin: Detectado Replit, usando mesmo origin: https://1f8faedd-56a9-4fd2-a9c8-53add674d89f-00-2tf8n5fh0bu4h.riker.replit.dev 2 Admin.tsx:459:15
+🔄 Alternando para escala 1/3: Escala - 03/07/2025 DisplayContext.tsx:449:19
+🌐 Admin: Detectado Replit, usando mesmo origin: https://1f8faedd-56a9-4fd2-a9c8-53add674d89f-00-2tf8n5fh0bu4h.riker.replit.dev 2 Admin.tsx:459:15
+📊 Estado do DisplayContext: 
+Object { plasaTotal: 1, plasaAtivos: 1, escalaTotal: 3, escalaAtivos: 3, currentEscalaIndex: 0, activePlasa: "PLASA - 03/07/2025", activeEscala: "Escala - 03/07/2025", activeEscalaCategory: "sem categoria", noticesTotal: 1, noticesAtivos: 1, … }
+DisplayContext.tsx:468:15
+💾 Contexto salvo no localStorage (sem avisos): 
+Object { plasa: 1, bono: 0, escala: 3, escalaIndex: 0 }
+DisplayContext.tsx:511:15
+🌐 Admin: Detectado Replit, usando mesmo origin: https://1f8faedd-56a9-4fd2-a9c8-53add674d89f-00-2tf8n5fh0bu4h.riker.replit.dev Admin.tsx:459:15
+🌐 Admin: Detectado Replit, usando mesmo origin: https://1f8faedd-56a9-4fd2-a9c8-53add674d89f-00-2tf8n5fh0bu4h.riker.replit.dev 5 Admin.tsx:459:15
+📢 Resposta do servidor: 200 OK Admin.tsx:489:15
+🌐 Admin: Detectado Replit, usando mesmo origin: https://1f8faedd-56a9-4fd2-a9c8-53add674d89f-00-2tf8n5fh0bu4h.riker.replit.dev 4 Admin.tsx:459:15
+🔄 Selecionando oficial: ALEXANDRIA Admin.tsx:3307:33
+👮 Oficial encontrado: 
+Object { name: "ALEXANDRIA", rank: "1t", specialty: "IM", fullRankName: "Primeiro-Tenente" }
+Admin.tsx:3309:33
+🔄 Novo estado dos oficiais: 
+Object { officerName: "ALEXANDRIA", officerRank: "1t", masterName: "1SG (ES) DA SILVA", masterRank: "3sg" }
+Admin.tsx:3315:33
+🌐 Admin: Detectado Replit, usando mesmo origin: https://1f8faedd-56a9-4fd2-a9c8-53add674d89f-00-2tf8n5fh0bu4h.riker.replit.dev 3 Admin.tsx:459:15
+🌐 Admin: Detectado Replit, usando mesmo origin: https://1f8faedd-56a9-4fd2-a9c8-53add674d89f-00-2tf8n5fh0bu4h.riker.replit.dev Admin.tsx:459:15
+🌐 Admin: Detectado Replit, usando mesmo origin: https://1f8faedd-56a9-4fd2-a9c8-53add674d89f-00-2tf8n5fh0bu4h.riker.replit.dev 3 Admin.tsx:459:15
+🏠 Index: Renderizando página principal 
+Object { activePlasa: "PLASA - 03/07/2025", activeBono: "nenhum", activeEscala: "Escala - 03/07/2025", currentMainDocType: "plasa", currentMainDoc: "PLASA - 03/07/2025", scrollSpeed: "normal", autoRestartDelay: 3 }
+Index.tsx:79:11
+📋 ESCALA: Usando escala 1/3: 
+Object { title: "Escala - 03/07/2025", category: undefined, url: "https://1f8faedd-56a9-4fd2-a9c8-53add674d89f-00-2tf8n5fh0bu4h.riker.replit.dev/uploads/document-1751514750997-343946799-cardÃ¡pio rede 16jun.pdf" }
+PDFViewer.tsx:168:17
+🖼️ ESCALA: Renderizando 
+Object { docUrl: "https://1f8faedd-56a9-4fd2-a9c8-53add674d89f-00-2tf8n5fh0bu4h.riker.replit.dev/uploads/document-1751514750997-343946799-cardÃ¡pio rede 16jun.pdf", escalaImageUrl: null, loading: false, currentEscala: "Escala - 03/07/2025" }
+PDFViewer.tsx:828:15
+📢 Verificando aviso "teste": 
+Object { active: true, inPeriod: true, startDate: "2025-07-06T20:54:39.158Z", endDate: "2025-07-07T20:54:39.158Z", now: "2025-07-07T00:32:40.755Z" }
+NoticeDisplay.tsx:56:17
+🌐 DutyOfficers: Detectado Replit, usando mesmo origin: https://1f8faedd-56a9-4fd2-a9c8-53add674d89f-00-2tf8n5fh0bu4h.riker.replit.dev DutyOfficersDisplay.tsx:116:15
+👮 Carregando oficiais de serviço... https://1f8faedd-56a9-4fd2-a9c8-53add674d89f-00-2tf8n5fh0bu4h.riker.replit.dev/api/duty-officers DutyOfficersDisplay.tsx:131:15
+🔄 PLASA Effect triggered: 
+Object { isScrolling: false, activeDoc: "1751762049590-j6sjb06hm", url: "https://1f8faedd-56a9-4fd2-a9c8-53add674d89f-00-2tf8n5fh0bu4h.riker.replit.dev/uploads/document-1751514647170-734057383-PLASA 20.pdf" }
+PDFViewer.tsx:527:15
+🎯 PLASA: Processando documento: https://1f8faedd-56a9-4fd2-a9c8-53add674d89f-00-2tf8n5fh0bu4h.riker.replit.dev/uploads/document-1751514647170-734057383-PLASA 20.pdf PDFViewer.tsx:548:15
+📄 PLASA: Documento é um PDF, convertendo para imagens PDFViewer.tsx:555:17
+🎯 INICIANDO CONVERSÃO PDF: https://1f8faedd-56a9-4fd2-a9c8-53add674d89f-00-2tf8n5fh0bu4h.riker.replit.dev/uploads/document-1751514647170-734057383-PLASA 20.pdf PDFViewer.tsx:315:15
+🔄 ESCALA Effect triggered: 
+Object { currentEscalaIndex: 0, totalActiveEscalas: 3, currentEscala: "Escala - 03/07/2025", category: undefined, url: "https://1f8faedd-56a9-4fd2-a9c8-53add674d89f-00-2tf8n5fh0bu4h.riker.replit.dev/uploads/document-1751514750997-343946799-cardÃ¡pio rede 16jun.pdf", id: "1751762049589-4tr1sipk3" }
+PDFViewer.tsx:568:15
+🖼️ ESCALA: Processando URL: https://1f8faedd-56a9-4fd2-a9c8-53add674d89f-00-2tf8n5fh0bu4h.riker.replit.dev/uploads/document-1751514750997-343946799-cardÃ¡pio rede 16jun.pdf PDFViewer.tsx:581:17
+📄 ESCALA: É um PDF, convertendo para imagem... PDFViewer.tsx:584:19
+🎯 ESCALA: Convertendo PDF: https://1f8faedd-56a9-4fd2-a9c8-53add674d89f-00-2tf8n5fh0bu4h.riker.replit.dev/uploads/document-1751514750997-343946799-cardÃ¡pio rede 16jun.pdf (ID: 1751762049589-4tr1sipk3) PDFViewer.tsx:613:15
+🔍 Verificando cache para escala: 1751762049589-4tr1sipk3 PDFViewer.tsx:616:15
+🌐 PDFViewer: Detectado acesso via rede: 1f8faedd-56a9-4fd2-a9c8-53add674d89f-00-2tf8n5fh0bu4h.riker.replit.dev PDFViewer.tsx:132:15
+Bloqueado carregamento de conteúdo misto ativo “http://1f8faedd-56a9-4fd2-a9c8-53add674d89f-00-2tf8n5fh0bu4h.riker.replit.dev:5000/api/check-escala-cache/1751762049589-4tr1sipk3” admin
+📢 NoticeDisplay - Estado dos avisos: 
+Object { totalNotices: 1, activeNotices: 1, currentIndex: 0, avisos: (1) […] }
+NoticeDisplay.tsx:72:13
+🏛️ CHM Cache: 17:22 sunsetUtils.ts:386:13
+📥 Obtendo dados do PDF: https://1f8faedd-56a9-4fd2-a9c8-53add674d89f-00-2tf8n5fh0bu4h.riker.replit.dev/uploads/document-1751514647170-734057383-PLASA 20.pdf PDFViewer.tsx:208:13
+⚠️ Erro ao verificar cache, continuando com conversão... TypeError: NetworkError when attempting to fetch resource.
+    convertEscalaPDFToImage PDFViewer.tsx:804
+    PDFViewer PDFViewer.tsx:761
+    React 7
+    commitRootImpl chunk-WERSD76P.js:19416
+    commitRoot chunk-WERSD76P.js:19277
+    performSyncWorkOnRoot chunk-WERSD76P.js:18895
+    flushSyncCallbacks chunk-WERSD76P.js:9119
+    ensureRootIsScheduled chunk-WERSD76P.js:18627
+    ensureRootIsScheduled chunk-WERSD76P.js:18625
+    scheduleUpdateOnFiber chunk-WERSD76P.js:18562
+    forceStoreRerender chunk-WERSD76P.js:11999
+    handleStoreChange chunk-WERSD76P.js:11981
+    type wouter.js:224
+    navigate wouter.js:214
+    useLocationFromRouter wouter.js:265
+    ref wouter.js:178
+    onClick wouter.js:358
+    ref wouter.js:178
+    callCallback2 chunk-WERSD76P.js:3674
+    invokeGuardedCallbackDev chunk-WERSD76P.js:3699
+    invokeGuardedCallback chunk-WERSD76P.js:3733
+    invokeGuardedCallbackAndCatchFirstError chunk-WERSD76P.js:3736
+    executeDispatch chunk-WERSD76P.js:7014
+    processDispatchQueueItemsInOrder chunk-WERSD76P.js:7034
+    processDispatchQueue chunk-WERSD76P.js:7043
+    dispatchEventsForPlugins chunk-WERSD76P.js:7051
+    dispatchEventForPluginEventSystem chunk-WERSD76P.js:7174
+    batchedUpdates$1 chunk-WERSD76P.js:18913
+    batchedUpdates chunk-WERSD76P.js:3579
+    dispatchEventForPluginEventSystem chunk-WERSD76P.js:7173
+    dispatchEventWithEnableCapturePhaseSelectiveHydrationWithoutDiscreteEventReplay chunk-WERSD76P.js:5478
+    dispatchEvent chunk-WERSD76P.js:5472
+    dispatchDiscreteEvent chunk-WERSD76P.js:5449
+PDFViewer.tsx:628:17
+🆕 ESCALA: Cache não encontrado, convertendo... PDFViewer.tsx:630:15
+🏠 Index: Renderizando página principal 
+Object { activePlasa: "PLASA - 03/07/2025", activeBono: "nenhum", activeEscala: "Escala - 03/07/2025", currentMainDocType: "plasa", currentMainDoc: "PLASA - 03/07/2025", scrollSpeed: "normal", autoRestartDelay: 3 }
+Index.tsx:79:11
+📋 ESCALA: Usando escala 1/3: 
+Object { title: "Escala - 03/07/2025", category: undefined, url: "https://1f8faedd-56a9-4fd2-a9c8-53add674d89f-00-2tf8n5fh0bu4h.riker.replit.dev/uploads/document-1751514750997-343946799-cardÃ¡pio rede 16jun.pdf" }
+PDFViewer.tsx:168:17
+🖼️ ESCALA: Renderizando 
+Object { docUrl: "https://1f8faedd-56a9-4fd2-a9c8-53add674d89f-00-2tf8n5fh0bu4h.riker.replit.dev/uploads/document-1751514750997-343946799-cardÃ¡pio rede 16jun.pdf", escalaImageUrl: null, loading: false, currentEscala: "Escala - 03/07/2025" }
+PDFViewer.tsx:828:15
+📢 Verificando aviso "teste": 
+Object { active: true, inPeriod: true, startDate: "2025-07-06T20:54:39.158Z", endDate: "2025-07-07T20:54:39.158Z", now: "2025-07-07T00:32:40.763Z" }
+NoticeDisplay.tsx:56:17
+🏠 Index: Renderizando página principal 
+Object { activePlasa: "PLASA - 03/07/2025", activeBono: "nenhum", activeEscala: "Escala - 03/07/2025", currentMainDocType: "plasa", currentMainDoc: "PLASA - 03/07/2025", scrollSpeed: "normal", autoRestartDelay: 3 }
+Index.tsx:79:11
+📢 Verificando aviso "teste": 
+Object { active: true, inPeriod: true, startDate: "2025-07-06T20:54:39.158Z", endDate: "2025-07-07T20:54:39.158Z", now: "2025-07-07T00:32:40.773Z" }
+NoticeDisplay.tsx:56:17
+📥 Obtendo dados do PDF: https://1f8faedd-56a9-4fd2-a9c8-53add674d89f-00-2tf8n5fh0bu4h.riker.replit.dev/uploads/document-1751514750997-343946799-cardÃ¡pio rede 16jun.pdf PDFViewer.tsx:208:13
+✅ PDF carregado: 1063113 bytes PDFViewer.tsx:230:17
+✅ PDF válido detectado, iniciando processamento... PDFViewer.tsx:333:15
+👮 Oficiais carregados: 
+Object { id: 1, officerId: 16, masterId: 24, officerName: "1T (IM) ELIEZER", masterName: "1SG (ES) DA SILVA", updatedAt: "2025-07-07T00:32:38.590Z" }
+DutyOfficersDisplay.tsx:139:17
+🎖️ Analisando militar: 
+Object { fullName: "1T (IM) ELIEZER", type: "officer" }
+DutyOfficersDisplay.tsx:48:13
+🎖️ Já formatado corretamente: 
+Object { rank: "1T", specialty: "IM", name: "ELIEZER" }
+DutyOfficersDisplay.tsx:53:15
+🎖️ Analisando militar: 
+Object { fullName: "1SG (ES) DA SILVA", type: "master" }
+DutyOfficersDisplay.tsx:48:13
+🎖️ Já formatado corretamente: 
+Object { rank: "1SG", specialty: "ES", name: "DA SILVA" }
+DutyOfficersDisplay.tsx:53:15
+📄 PDF carregado com sucesso: 5 páginas PDFViewer.tsx:348:15
+🌐 PDFViewer: Detectado acesso via rede: 1f8faedd-56a9-4fd2-a9c8-53add674d89f-00-2tf8n5fh0bu4h.riker.replit.dev PDFViewer.tsx:132:15
+Bloqueado carregamento de conteúdo misto ativo “http://1f8faedd-56a9-4fd2-a9c8-53add674d89f-00-2tf8n5fh0bu4h.riker.replit.dev:5000/api/check-plasa-pages” admin
+⚠️ Erro ao verificar páginas existentes: TypeError: NetworkError when attempting to fetch resource.
+    checkExistingPages PDFViewer.tsx:292
+    convertPDFToImages PDFViewer.tsx:351
+    PDFViewer PDFViewer.tsx:556
+    React 7
+    commitRootImpl chunk-WERSD76P.js:19416
+    commitRoot chunk-WERSD76P.js:19277
+    performSyncWorkOnRoot chunk-WERSD76P.js:18895
+    flushSyncCallbacks chunk-WERSD76P.js:9119
+    ensureRootIsScheduled chunk-WERSD76P.js:18627
+    ensureRootIsScheduled chunk-WERSD76P.js:18625
+    scheduleUpdateOnFiber chunk-WERSD76P.js:18562
+    forceStoreRerender chunk-WERSD76P.js:11999
+    handleStoreChange chunk-WERSD76P.js:11981
+    type wouter.js:224
+    navigate wouter.js:214
+    useLocationFromRouter wouter.js:265
+    ref wouter.js:178
+    onClick wouter.js:358
+    ref wouter.js:178
+    callCallback2 chunk-WERSD76P.js:3674
+    invokeGuardedCallbackDev chunk-WERSD76P.js:3699
+    invokeGuardedCallback chunk-WERSD76P.js:3733
+    invokeGuardedCallbackAndCatchFirstError chunk-WERSD76P.js:3736
+    executeDispatch chunk-WERSD76P.js:7014
+    processDispatchQueueItemsInOrder chunk-WERSD76P.js:7034
+    processDispatchQueue chunk-WERSD76P.js:7043
+    dispatchEventsForPlugins chunk-WERSD76P.js:7051
+    dispatchEventForPluginEventSystem chunk-WERSD76P.js:7174
+    batchedUpdates$1 chunk-WERSD76P.js:18913
+    batchedUpdates chunk-WERSD76P.js:3579
+    dispatchEventForPluginEventSystem chunk-WERSD76P.js:7173
+    dispatchEventWithEnableCapturePhaseSelectiveHydrationWithoutDiscreteEventReplay chunk-WERSD76P.js:5478
+    dispatchEvent chunk-WERSD76P.js:5472
+    dispatchDiscreteEvent chunk-WERSD76P.js:5449
+PDFViewer.tsx:309:15
+🖼️ Convertendo páginas para imagens... PDFViewer.tsx:359:15
+📄 Processando página 1/5 PDFViewer.tsx:363:19
+📐 Página 1 - Original: 595.4x841.8, Escala: 1.5, Final: 893.0999999999999x1262.6999999999998 PDFViewer.tsx:368:19
+🎨 Renderizando página 1... PDFViewer.tsx:384:19
+✅ Página 1 renderizada com sucesso PDFViewer.tsx:390:19
+🌐 PDFViewer: Detectado acesso via rede: 1f8faedd-56a9-4fd2-a9c8-53add674d89f-00-2tf8n5fh0bu4h.riker.replit.dev PDFViewer.tsx:132:15
+Bloqueado carregamento de conteúdo misto ativo “http://1f8faedd-56a9-4fd2-a9c8-53add674d89f-00-2tf8n5fh0bu4h.riker.replit.dev:5000/api/upload-plasa-page” admin
+⚠️ Falha ao salvar página 1 no servidor, usando data URL: TypeError: NetworkError when attempting to fetch resource.
+    savePageAsImage PDFViewer.tsx:261
+    savePageAsImage PDFViewer.tsx:249
+    savePageAsImage PDFViewer.tsx:248
+    convertPDFToImages PDFViewer.tsx:391
+    PDFViewer PDFViewer.tsx:556
+    React 7
+    commitRootImpl chunk-WERSD76P.js:19416
+    commitRoot chunk-WERSD76P.js:19277
+    performSyncWorkOnRoot chunk-WERSD76P.js:18895
+    flushSyncCallbacks chunk-WERSD76P.js:9119
+    ensureRootIsScheduled chunk-WERSD76P.js:18627
+    ensureRootIsScheduled chunk-WERSD76P.js:18625
+    scheduleUpdateOnFiber chunk-WERSD76P.js:18562
+    forceStoreRerender chunk-WERSD76P.js:11999
+    handleStoreChange chunk-WERSD76P.js:11981
+    type wouter.js:224
+    navigate wouter.js:214
+    useLocationFromRouter wouter.js:265
+    ref wouter.js:178
+    onClick wouter.js:358
+    ref wouter.js:178
+    callCallback2 chunk-WERSD76P.js:3674
+    invokeGuardedCallbackDev chunk-WERSD76P.js:3699
+    invokeGuardedCallback chunk-WERSD76P.js:3733
+    invokeGuardedCallbackAndCatchFirstError chunk-WERSD76P.js:3736
+    executeDispatch chunk-WERSD76P.js:7014
+    processDispatchQueueItemsInOrder chunk-WERSD76P.js:7034
+    processDispatchQueue chunk-WERSD76P.js:7043
+    dispatchEventsForPlugins chunk-WERSD76P.js:7051
+    dispatchEventForPluginEventSystem chunk-WERSD76P.js:7174
+    batchedUpdates$1 chunk-WERSD76P.js:18913
+    batchedUpdates chunk-WERSD76P.js:3579
+    dispatchEventForPluginEventSystem chunk-WERSD76P.js:7173
+    dispatchEventWithEnableCapturePhaseSelectiveHydrationWithoutDiscreteEventReplay chunk-WERSD76P.js:5478
+    dispatchEvent chunk-WERSD76P.js:5472
+    dispatchDiscreteEvent chunk-WERSD76P.js:5449
+PDFViewer.tsx:275:19
+💾 Página 1 salva: data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAUDBAQEAwUEBAQFBQUGBwwIBwcHBw8LCwkMEQ8SEhEPERETFhwXExQaFRERGCEYGh0dHx8fExciJCIeJBweHx7/2wBDAQUFBQcGBw4ICA4eFBEUHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh7/wAARCATuA30DASIAAhEBAxEB/8QAHwAAAQUBAQEBAQEAAAAAAAAAAAECAwQFBgcICQoL/8QAtRAAAgEDAwIEAwUFBAQAAAF9AQIDAAQRBRIhMUEGE1FhByJxFDKBkaEII0KxwRVS0fAkM2JyggkKFhcYGRolJicoKSo0NTY3ODk6Q0RFRkdISUpTVFVWV1hZWmNkZWZnaGlqc3R1dnd4eXqDhIWGh4iJipKTlJWWl5iZmqKjpKWmp6ipqrKztLW2t7i5usLDxMXGx8jJytLT1NXW19jZ2uHi4+Tl5ufo6erx8vP09fb3+Pn6/8QAHwEAAwEBAQEBAQEBAQAAAAAAAAECAwQFBgcICQoL/8QAtREAAgECBAQDBAcFBAQAAQJ3AAECAxEEBSExBhJBUQdhcRMiMoEIFEKRobHBCSMzUvAVYnLRChYkNOEl8RcYGRomJygpKjU2Nzg5OkNERUZHSElKU1RVVldYWVpjZGVmZ2hpanN0dXZ3eHl6goOEhYaHiImKkpOUlZaXmJmaoqOkpaanqKmqsrO0tba3uLm6wsPExcbHyMnK0tPU1dbX2Nna4uPk5ebn6Onq8vP09fb3+Pn6/9oADAMBAAIRAxEAPwD7LooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACii…
+PDFViewer.tsx:393:19
+📄 Processando página 2/5 PDFViewer.tsx:363:19
+📐 Página 2 - Original: 595.4x841.8, Escala: 1.5, Final: 893.0999999999999x1262.6999999999998 PDFViewer.tsx:368:19
+🎨 Renderizando página 2... PDFViewer.tsx:384:19
+✅ PDF carregado: 81794 bytes PDFViewer.tsx:230:17
+✅ ESCALA: PDF válido, convertendo... PDFViewer.tsx:647:15
+✅ Página 2 renderizada com sucesso PDFViewer.tsx:390:19
+🌐 PDFViewer: Detectado acesso via rede: 1f8faedd-56a9-4fd2-a9c8-53add674d89f-00-2tf8n5fh0bu4h.riker.replit.dev PDFViewer.tsx:132:15
+Bloqueado carregamento de conteúdo misto ativo “http://1f8faedd-56a9-4fd2-a9c8-53add674d89f-00-2tf8n5fh0bu4h.riker.replit.dev:5000/api/upload-plasa-page” admin
+⚠️ Falha ao salvar página 2 no servidor, usando data URL: TypeError: NetworkError when attempting to fetch resource.
+    savePageAsImage PDFViewer.tsx:261
+    savePageAsImage PDFViewer.tsx:249
+    savePageAsImage PDFViewer.tsx:248
+    convertPDFToImages PDFViewer.tsx:391
+    PDFViewer PDFViewer.tsx:556
+    React 7
+    commitRootImpl chunk-WERSD76P.js:19416
+    commitRoot chunk-WERSD76P.js:19277
+    performSyncWorkOnRoot chunk-WERSD76P.js:18895
+    flushSyncCallbacks chunk-WERSD76P.js:9119
+    ensureRootIsScheduled chunk-WERSD76P.js:18627
+    ensureRootIsScheduled chunk-WERSD76P.js:18625
+    scheduleUpdateOnFiber chunk-WERSD76P.js:18562
+    forceStoreRerender chunk-WERSD76P.js:11999
+    handleStoreChange chunk-WERSD76P.js:11981
+    type wouter.js:224
+    navigate wouter.js:214
+    useLocationFromRouter wouter.js:265
+    ref wouter.js:178
+    onClick wouter.js:358
+    ref wouter.js:178
+    callCallback2 chunk-WERSD76P.js:3674
+    invokeGuardedCallbackDev chunk-WERSD76P.js:3699
+    invokeGuardedCallback chunk-WERSD76P.js:3733
+    invokeGuardedCallbackAndCatchFirstError chunk-WERSD76P.js:3736
+    executeDispatch chunk-WERSD76P.js:7014
+    processDispatchQueueItemsInOrder chunk-WERSD76P.js:7034
+    processDispatchQueue chunk-WERSD76P.js:7043
+    dispatchEventsForPlugins chunk-WERSD76P.js:7051
+    dispatchEventForPluginEventSystem chunk-WERSD76P.js:7174
+    batchedUpdates$1 chunk-WERSD76P.js:18913
+    batchedUpdates chunk-WERSD76P.js:3579
+    dispatchEventForPluginEventSystem chunk-WERSD76P.js:7173
+    dispatchEventWithEnableCapturePhaseSelectiveHydrationWithoutDiscreteEventReplay chunk-WERSD76P.js:5478
+    dispatchEvent chunk-WERSD76P.js:5472
+    dispatchDiscreteEvent chunk-WERSD76P.js:5449
+PDFViewer.tsx:275:19
+💾 Página 2 salva: data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAUDBAQEAwUEBAQFBQUGBwwIBwcHBw8LCwkMEQ8SEhEPERETFhwXExQaFRERGCEYGh0dHx8fExciJCIeJBweHx7/2wBDAQUFBQcGBw4ICA4eFBEUHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh7/wAARCATuA30DASIAAhEBAxEB/8QAHwAAAQUBAQEBAQEAAAAAAAAAAAECAwQFBgcICQoL/8QAtRAAAgEDAwIEAwUFBAQAAAF9AQIDAAQRBRIhMUEGE1FhByJxFDKBkaEII0KxwRVS0fAkM2JyggkKFhcYGRolJicoKSo0NTY3ODk6Q0RFRkdISUpTVFVWV1hZWmNkZWZnaGlqc3R1dnd4eXqDhIWGh4iJipKTlJWWl5iZmqKjpKWmp6ipqrKztLW2t7i5usLDxMXGx8jJytLT1NXW19jZ2uHi4+Tl5ufo6erx8vP09fb3+Pn6/8QAHwEAAwEBAQEBAQEBAQAAAAAAAAECAwQFBgcICQoL/8QAtREAAgECBAQDBAcFBAQAAQJ3AAECAxEEBSExBhJBUQdhcRMiMoEIFEKRobHBCSMzUvAVYnLRChYkNOEl8RcYGRomJygpKjU2Nzg5OkNERUZHSElKU1RVVldYWVpjZGVmZ2hpanN0dXZ3eHl6goOEhYaHiImKkpOUlZaXmJmaoqOkpaanqKmqsrO0tba3uLm6wsPExcbHyMnK0tPU1dbX2Nna4uPk5ebn6Onq8vP09fb3+Pn6/9oADAMBAAIRAxEAPwD7LooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACii…
+PDFViewer.tsx:393:19
+📄 ESCALA: PDF carregado: 1 páginas PDFViewer.tsx:662:15
+📐 ESCALA: Página 1 - Escala: 1.2163112607557045, Final: 1024x724.0748821548817 PDFViewer.tsx:667:15
+🎨 ESCALA: Renderizando... PDFViewer.tsx:683:15
+downloadable font: glyf: Number of contour points exceeds maxp maxPoints, adjusting limit (glyph 0) (font-family: "g_d4_f1" style:normal weight:400 stretch:100 src index:0) source: (invalid URI)
+✅ ESCALA: Renderizada com sucesso PDFViewer.tsx:689:15
+💾 Salvando escala 1751762049589-4tr1sipk3 no cache... PDFViewer.tsx:691:17
+🌐 PDFViewer: Detectado acesso via rede: 1f8faedd-56a9-4fd2-a9c8-53add674d89f-00-2tf8n5fh0bu4h.riker.replit.dev PDFViewer.tsx:132:15
+Bloqueado carregamento de conteúdo misto ativo “http://1f8faedd-56a9-4fd2-a9c8-53add674d89f-00-2tf8n5fh0bu4h.riker.replit.dev:5000/api/save-escala-cache” admin
+⚠️ ESCALA: Falha ao salvar cache, usando dataURL: TypeError: NetworkError when attempting to fetch resource.
+    convertEscalaPDFToImage PDFViewer.tsx:704
+    PDFViewer PDFViewer.tsx:761
+    React 7
+    commitRootImpl chunk-WERSD76P.js:19416
+    commitRoot chunk-WERSD76P.js:19277
+    performSyncWorkOnRoot chunk-WERSD76P.js:18895
+    flushSyncCallbacks chunk-WERSD76P.js:9119
+    ensureRootIsScheduled chunk-WERSD76P.js:18627
+    ensureRootIsScheduled chunk-WERSD76P.js:18625
+    scheduleUpdateOnFiber chunk-WERSD76P.js:18562
+    forceStoreRerender chunk-WERSD76P.js:11999
+    handleStoreChange chunk-WERSD76P.js:11981
+    type wouter.js:224
+    navigate wouter.js:214
+    useLocationFromRouter wouter.js:265
+    ref wouter.js:178
+    onClick wouter.js:358
+    ref wouter.js:178
+    callCallback2 chunk-WERSD76P.js:3674
+    invokeGuardedCallbackDev chunk-WERSD76P.js:3699
+    invokeGuardedCallback chunk-WERSD76P.js:3733
+    invokeGuardedCallbackAndCatchFirstError chunk-WERSD76P.js:3736
+    executeDispatch chunk-WERSD76P.js:7014
+    processDispatchQueueItemsInOrder chunk-WERSD76P.js:7034
+    processDispatchQueue chunk-WERSD76P.js:7043
+    dispatchEventsForPlugins chunk-WERSD76P.js:7051
+    dispatchEventForPluginEventSystem chunk-WERSD76P.js:7174
+    batchedUpdates$1 chunk-WERSD76P.js:18913
+    batchedUpdates chunk-WERSD76P.js:3579
+    dispatchEventForPluginEventSystem chunk-WERSD76P.js:7173
+    dispatchEventWithEnableCapturePhaseSelectiveHydrationWithoutDiscreteEventReplay chunk-WERSD76P.js:5478
+    dispatchEvent chunk-WERSD76P.js:5472
+    dispatchDiscreteEvent chunk-WERSD76P.js:5449
+PDFViewer.tsx:723:17
+🎉 ESCALA: Conversão concluída! PDFViewer.tsx:730:15
+🏠 Index: Renderizando página principal 
+Object { activePlasa: "PLASA - 03/07/2025", activeBono: "nenhum", activeEscala: "Escala - 03/07/2025", currentMainDocType: "plasa", currentMainDoc: "PLASA - 03/07/2025", scrollSpeed: "normal", autoRestartDelay: 3 }
+Index.tsx:79:11
+🎖️ Analisando militar: 
+Object { fullName: "1T (IM) ELIEZER", type: "officer" }
+DutyOfficersDisplay.tsx:48:13
+🎖️ Já formatado corretamente: 
+Object { rank: "1T", specialty: "IM", name: "ELIEZER" }
+DutyOfficersDisplay.tsx:53:15
+🎖️ Analisando militar: 
+Object { fullName: "1SG (ES) DA SILVA", type: "master" }
+DutyOfficersDisplay.tsx:48:13
+🎖️ Já formatado corretamente: 
+Object { rank: "1SG", specialty: "ES", name: "DA SILVA" }
+DutyOfficersDisplay.tsx:53:15
+📋 ESCALA: Usando escala 1/3: 
+Object { title: "Escala - 03/07/2025", category: undefined, url: "https://1f8faedd-56a9-4fd2-a9c8-53add674d89f-00-2tf8n5fh0bu4h.riker.replit.dev/uploads/document-1751514750997-343946799-cardÃ¡pio rede 16jun.pdf" }
+PDFViewer.tsx:168:17
+🖼️ ESCALA: Renderizando 
+Object { docUrl: "https://1f8faedd-56a9-4fd2-a9c8-53add674d89f-00-2tf8n5fh0bu4h.riker.replit.dev/uploads/document-1751514750997-343946799-cardÃ¡pio rede 16jun.pdf", escalaImageUrl: "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAUDBAQEAwUEBAQFBQUGBwwIBwcHBw8LCwkMEQ8SEhEPERETFhwXExQaFRERGCEYGh0dHx8fExciJCIeJBweHx7/2wBDAQUFBQcGBw4ICA4eFBEUHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh7/wAARCALUBAADASIAAhEBAxEB/8QAHwAAAQUBAQEBAQEAAAAAAAAAAAECAwQFBgcICQoL/8QAtRAAAgEDAwIEAwUFBAQAAAF9AQIDAAQRBRIhMUEGE1FhByJxFDKBkaEII0KxwRVS0fAkM2JyggkKFhcYGRolJicoKSo0NTY3ODk6Q0RFRkdISUpTVFVWV1hZWmNkZWZnaGlqc3R1dnd4eXqDhIWGh4iJipKTlJWWl5iZmqKjpKWmp6ipqrKztLW2t7i5usLDxMXGx8jJytLT1NXW19jZ2uHi4+Tl5ufo6erx8vP09fb3+Pn6/8QAHwEAAwEBAQEBAQEBAQAAAAAAAAECAwQFBgcICQoL/8QAtREAAgECBAQDBAcFBAQAAQJ3AAECAxEEBSExBhJBUQdhcRMiMoEIFEKRobHBCSMzUvAVYnLRChYkNOEl8RcYGRomJygpKjU2Nzg5OkNERUZHSElKU1RVVldYWVpjZGVmZ2hpanN0dXZ3eHl6goOEhYaHiImKkpOUlZaXmJmaoqOkpaanqKmqsrO0tba3uLm6wsPExcbHyMnK0tPU1dbX2Nna4uPk5ebn6Onq8vP09fb3+Pn6/9oADAMBAAIRAxEAPwD7LooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigA…", loading: false, currentEscala: "Escala - 03/07/2025" }
+PDFViewer.tsx:828:15
+📢 Verificando aviso "teste": 
+Object { active: true, inPeriod: true, startDate: "2025-07-06T20:54:39.158Z", endDate: "2025-07-07T20:54:39.158Z", now: "2025-07-07T00:32:41.785Z" }
+NoticeDisplay.tsx:56:17
+✅ Escala convertida carregada com sucesso PDFViewer.tsx:841:21
+📄 Processando página 3/5 PDFViewer.tsx:363:19
+📐 Página 3 - Original: 595.4x841.8, Escala: 1.5, Final: 893.0999999999999x1262.6999999999998 PDFViewer.tsx:368:19
+🎨 Renderizando página 3... PDFViewer.tsx:384:19
+✅ Página 3 renderizada com sucesso PDFViewer.tsx:390:19
+🌐 PDFViewer: Detectado acesso via rede: 1f8faedd-56a9-4fd2-a9c8-53add674d89f-00-2tf8n5fh0bu4h.riker.replit.dev PDFViewer.tsx:132:15
+Bloqueado carregamento de conteúdo misto ativo “http://1f8faedd-56a9-4fd2-a9c8-53add674d89f-00-2tf8n5fh0bu4h.riker.replit.dev:5000/api/upload-plasa-page” admin
+⚠️ Falha ao salvar página 3 no servidor, usando data URL: TypeError: NetworkError when attempting to fetch resource.
+    savePageAsImage PDFViewer.tsx:261
+    savePageAsImage PDFViewer.tsx:249
+    savePageAsImage PDFViewer.tsx:248
+    convertPDFToImages PDFViewer.tsx:391
+    PDFViewer PDFViewer.tsx:556
+    React 7
+    commitRootImpl chunk-WERSD76P.js:19416
+    commitRoot chunk-WERSD76P.js:19277
+    performSyncWorkOnRoot chunk-WERSD76P.js:18895
+    flushSyncCallbacks chunk-WERSD76P.js:9119
+    ensureRootIsScheduled chunk-WERSD76P.js:18627
+    ensureRootIsScheduled chunk-WERSD76P.js:18625
+    scheduleUpdateOnFiber chunk-WERSD76P.js:18562
+    forceStoreRerender chunk-WERSD76P.js:11999
+    handleStoreChange chunk-WERSD76P.js:11981
+    type wouter.js:224
+    navigate wouter.js:214
+    useLocationFromRouter wouter.js:265
+    ref wouter.js:178
+    onClick wouter.js:358
+    ref wouter.js:178
+    callCallback2 chunk-WERSD76P.js:3674
+    invokeGuardedCallbackDev chunk-WERSD76P.js:3699
+    invokeGuardedCallback chunk-WERSD76P.js:3733
+    invokeGuardedCallbackAndCatchFirstError chunk-WERSD76P.js:3736
+    executeDispatch chunk-WERSD76P.js:7014
+    processDispatchQueueItemsInOrder chunk-WERSD76P.js:7034
+    processDispatchQueue chunk-WERSD76P.js:7043
+    dispatchEventsForPlugins chunk-WERSD76P.js:7051
+    dispatchEventForPluginEventSystem chunk-WERSD76P.js:7174
+    batchedUpdates$1 chunk-WERSD76P.js:18913
+    batchedUpdates chunk-WERSD76P.js:3579
+    dispatchEventForPluginEventSystem chunk-WERSD76P.js:7173
+    dispatchEventWithEnableCapturePhaseSelectiveHydrationWithoutDiscreteEventReplay chunk-WERSD76P.js:5478
+    dispatchEvent chunk-WERSD76P.js:5472
+    dispatchDiscreteEvent chunk-WERSD76P.js:5449
+PDFViewer.tsx:275:19
+💾 Página 3 salva: data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAUDBAQEAwUEBAQFBQUGBwwIBwcHBw8LCwkMEQ8SEhEPERETFhwXExQaFRERGCEYGh0dHx8fExciJCIeJBweHx7/2wBDAQUFBQcGBw4ICA4eFBEUHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh7/wAARCATuA30DASIAAhEBAxEB/8QAHwAAAQUBAQEBAQEAAAAAAAAAAAECAwQFBgcICQoL/8QAtRAAAgEDAwIEAwUFBAQAAAF9AQIDAAQRBRIhMUEGE1FhByJxFDKBkaEII0KxwRVS0fAkM2JyggkKFhcYGRolJicoKSo0NTY3ODk6Q0RFRkdISUpTVFVWV1hZWmNkZWZnaGlqc3R1dnd4eXqDhIWGh4iJipKTlJWWl5iZmqKjpKWmp6ipqrKztLW2t7i5usLDxMXGx8jJytLT1NXW19jZ2uHi4+Tl5ufo6erx8vP09fb3+Pn6/8QAHwEAAwEBAQEBAQEBAQAAAAAAAAECAwQFBgcICQoL/8QAtREAAgECBAQDBAcFBAQAAQJ3AAECAxEEBSExBhJBUQdhcRMiMoEIFEKRobHBCSMzUvAVYnLRChYkNOEl8RcYGRomJygpKjU2Nzg5OkNERUZHSElKU1RVVldYWVpjZGVmZ2hpanN0dXZ3eHl6goOEhYaHiImKkpOUlZaXmJmaoqOkpaanqKmqsrO0tba3uLm6wsPExcbHyMnK0tPU1dbX2Nna4uPk5ebn6Onq8vP09fb3+Pn6/9oADAMBAAIRAxEAPwD7LooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACii…
+PDFViewer.tsx:393:19
+📄 Processando página 4/5 PDFViewer.tsx:363:19
+📐 Página 4 - Original: 595.4x841.8, Escala: 1.5, Final: 893.0999999999999x1262.6999999999998 PDFViewer.tsx:368:19
+🎨 Renderizando página 4... PDFViewer.tsx:384:19
+✅ Página 4 renderizada com sucesso PDFViewer.tsx:390:19
+🌐 PDFViewer: Detectado acesso via rede: 1f8faedd-56a9-4fd2-a9c8-53add674d89f-00-2tf8n5fh0bu4h.riker.replit.dev PDFViewer.tsx:132:15
+Bloqueado carregamento de conteúdo misto ativo “http://1f8faedd-56a9-4fd2-a9c8-53add674d89f-00-2tf8n5fh0bu4h.riker.replit.dev:5000/api/upload-plasa-page” admin
+⚠️ Falha ao salvar página 4 no servidor, usando data URL: TypeError: NetworkError when attempting to fetch resource.
+    savePageAsImage PDFViewer.tsx:261
+    savePageAsImage PDFViewer.tsx:249
+    savePageAsImage PDFViewer.tsx:248
+    convertPDFToImages PDFViewer.tsx:391
+    PDFViewer PDFViewer.tsx:556
+    React 7
+    commitRootImpl chunk-WERSD76P.js:19416
+    commitRoot chunk-WERSD76P.js:19277
+    performSyncWorkOnRoot chunk-WERSD76P.js:18895
+    flushSyncCallbacks chunk-WERSD76P.js:9119
+    ensureRootIsScheduled chunk-WERSD76P.js:18627
+    ensureRootIsScheduled chunk-WERSD76P.js:18625
+    scheduleUpdateOnFiber chunk-WERSD76P.js:18562
+    forceStoreRerender chunk-WERSD76P.js:11999
+    handleStoreChange chunk-WERSD76P.js:11981
+    type wouter.js:224
+    navigate wouter.js:214
+    useLocationFromRouter wouter.js:265
+    ref wouter.js:178
+    onClick wouter.js:358
+    ref wouter.js:178
+    callCallback2 chunk-WERSD76P.js:3674
+    invokeGuardedCallbackDev chunk-WERSD76P.js:3699
+    invokeGuardedCallback chunk-WERSD76P.js:3733
+    invokeGuardedCallbackAndCatchFirstError chunk-WERSD76P.js:3736
+    executeDispatch chunk-WERSD76P.js:7014
+    processDispatchQueueItemsInOrder chunk-WERSD76P.js:7034
+    processDispatchQueue chunk-WERSD76P.js:7043
+    dispatchEventsForPlugins chunk-WERSD76P.js:7051
+    dispatchEventForPluginEventSystem chunk-WERSD76P.js:7174
+    batchedUpdates$1 chunk-WERSD76P.js:18913
+    batchedUpdates chunk-WERSD76P.js:3579
+    dispatchEventForPluginEventSystem chunk-WERSD76P.js:7173
+    dispatchEventWithEnableCapturePhaseSelectiveHydrationWithoutDiscreteEventReplay chunk-WERSD76P.js:5478
+    dispatchEvent chunk-WERSD76P.js:5472
+    dispatchDiscreteEvent chunk-WERSD76P.js:5449
+PDFViewer.tsx:275:19
+💾 Página 4 salva: data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAUDBAQEAwUEBAQFBQUGBwwIBwcHBw8LCwkMEQ8SEhEPERETFhwXExQaFRERGCEYGh0dHx8fExciJCIeJBweHx7/2wBDAQUFBQcGBw4ICA4eFBEUHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh7/wAARCATuA30DASIAAhEBAxEB/8QAHwAAAQUBAQEBAQEAAAAAAAAAAAECAwQFBgcICQoL/8QAtRAAAgEDAwIEAwUFBAQAAAF9AQIDAAQRBRIhMUEGE1FhByJxFDKBkaEII0KxwRVS0fAkM2JyggkKFhcYGRolJicoKSo0NTY3ODk6Q0RFRkdISUpTVFVWV1hZWmNkZWZnaGlqc3R1dnd4eXqDhIWGh4iJipKTlJWWl5iZmqKjpKWmp6ipqrKztLW2t7i5usLDxMXGx8jJytLT1NXW19jZ2uHi4+Tl5ufo6erx8vP09fb3+Pn6/8QAHwEAAwEBAQEBAQEBAQAAAAAAAAECAwQFBgcICQoL/8QAtREAAgECBAQDBAcFBAQAAQJ3AAECAxEEBSExBhJBUQdhcRMiMoEIFEKRobHBCSMzUvAVYnLRChYkNOEl8RcYGRomJygpKjU2Nzg5OkNERUZHSElKU1RVVldYWVpjZGVmZ2hpanN0dXZ3eHl6goOEhYaHiImKkpOUlZaXmJmaoqOkpaanqKmqsrO0tba3uLm6wsPExcbHyMnK0tPU1dbX2Nna4uPk5ebn6Onq8vP09fb3+Pn6/9oADAMBAAIRAxEAPwD7LooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACii…
+PDFViewer.tsx:393:19
+📄 Processando página 5/5 PDFViewer.tsx:363:19
+📐 Página 5 - Original: 595.4x841.8, Escala: 1.5, Final: 893.0999999999999x1262.6999999999998 PDFViewer.tsx:368:19
+🎨 Renderizando página 5... PDFViewer.tsx:384:19
+✅ Página 5 renderizada com sucesso PDFViewer.tsx:390:19
+🌐 PDFViewer: Detectado acesso via rede: 1f8faedd-56a9-4fd2-a9c8-53add674d89f-00-2tf8n5fh0bu4h.riker.replit.dev PDFViewer.tsx:132:15
+Bloqueado carregamento de conteúdo misto ativo “http://1f8faedd-56a9-4fd2-a9c8-53add674d89f-00-2tf8n5fh0bu4h.riker.replit.dev:5000/api/upload-plasa-page” admin
+⚠️ Falha ao salvar página 5 no servidor, usando data URL: TypeError: NetworkError when attempting to fetch resource.
+    savePageAsImage PDFViewer.tsx:261
+    savePageAsImage PDFViewer.tsx:249
+    savePageAsImage PDFViewer.tsx:248
+    convertPDFToImages PDFViewer.tsx:391
+    PDFViewer PDFViewer.tsx:556
+    React 7
+    commitRootImpl chunk-WERSD76P.js:19416
+    commitRoot chunk-WERSD76P.js:19277
+    performSyncWorkOnRoot chunk-WERSD76P.js:18895
+    flushSyncCallbacks chunk-WERSD76P.js:9119
+    ensureRootIsScheduled chunk-WERSD76P.js:18627
+    ensureRootIsScheduled chunk-WERSD76P.js:18625
+    scheduleUpdateOnFiber chunk-WERSD76P.js:18562
+    forceStoreRerender chunk-WERSD76P.js:11999
+    handleStoreChange chunk-WERSD76P.js:11981
+    type wouter.js:224
+    navigate wouter.js:214
+    useLocationFromRouter wouter.js:265
+    ref wouter.js:178
+    onClick wouter.js:358
+    ref wouter.js:178
+    callCallback2 chunk-WERSD76P.js:3674
+    invokeGuardedCallbackDev chunk-WERSD76P.js:3699
+    invokeGuardedCallback chunk-WERSD76P.js:3733
+    invokeGuardedCallbackAndCatchFirstError chunk-WERSD76P.js:3736
+    executeDispatch chunk-WERSD76P.js:7014
+    processDispatchQueueItemsInOrder chunk-WERSD76P.js:7034
+    processDispatchQueue chunk-WERSD76P.js:7043
+    dispatchEventsForPlugins chunk-WERSD76P.js:7051
+    dispatchEventForPluginEventSystem chunk-WERSD76P.js:7174
+    batchedUpdates$1 chunk-WERSD76P.js:18913
+    batchedUpdates chunk-WERSD76P.js:3579
+    dispatchEventForPluginEventSystem chunk-WERSD76P.js:7173
+    dispatchEventWithEnableCapturePhaseSelectiveHydrationWithoutDiscreteEventReplay chunk-WERSD76P.js:5478
+    dispatchEvent chunk-WERSD76P.js:5472
+    dispatchDiscreteEvent chunk-WERSD76P.js:5449
+PDFViewer.tsx:275:19
+💾 Página 5 salva: data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAUDBAQEAwUEBAQFBQUGBwwIBwcHBw8LCwkMEQ8SEhEPERETFhwXExQaFRERGCEYGh0dHx8fExciJCIeJBweHx7/2wBDAQUFBQcGBw4ICA4eFBEUHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh7/wAARCATuA30DASIAAhEBAxEB/8QAHwAAAQUBAQEBAQEAAAAAAAAAAAECAwQFBgcICQoL/8QAtRAAAgEDAwIEAwUFBAQAAAF9AQIDAAQRBRIhMUEGE1FhByJxFDKBkaEII0KxwRVS0fAkM2JyggkKFhcYGRolJicoKSo0NTY3ODk6Q0RFRkdISUpTVFVWV1hZWmNkZWZnaGlqc3R1dnd4eXqDhIWGh4iJipKTlJWWl5iZmqKjpKWmp6ipqrKztLW2t7i5usLDxMXGx8jJytLT1NXW19jZ2uHi4+Tl5ufo6erx8vP09fb3+Pn6/8QAHwEAAwEBAQEBAQEBAQAAAAAAAAECAwQFBgcICQoL/8QAtREAAgECBAQDBAcFBAQAAQJ3AAECAxEEBSExBhJBUQdhcRMiMoEIFEKRobHBCSMzUvAVYnLRChYkNOEl8RcYGRomJygpKjU2Nzg5OkNERUZHSElKU1RVVldYWVpjZGVmZ2hpanN0dXZ3eHl6goOEhYaHiImKkpOUlZaXmJmaoqOkpaanqKmqsrO0tba3uLm6wsPExcbHyMnK0tPU1dbX2Nna4uPk5ebn6Onq8vP09fb3+Pn6/9oADAMBAAIRAxEAPwD7LooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACii…
+PDFViewer.tsx:393:19
+🎉 CONVERSÃO CONCLUÍDA: 5/5 páginas processadas! PDFViewer.tsx:424:15
+✅ Página 1 carregada com sucesso PDFViewer.tsx:765:27
+✅ Página 2 carregada com sucesso PDFViewer.tsx:765:27
+✅ Página 3 carregada com sucesso PDFViewer.tsx:765:27
+✅ Página 4 carregada com sucesso PDFViewer.tsx:765:27
+✅ Página 5 carregada com sucesso PDFViewer.tsx:765:27
+🏠 Index: Renderizando página principal 
+Object { activePlasa: "PLASA - 03/07/2025", activeBono: "nenhum", activeEscala: "Escala - 03/07/2025", currentMainDocType: "plasa", currentMainDoc: "PLASA - 03/07/2025", scrollSpeed: "normal", autoRestartDelay: 3 }
+Index.tsx:79:11
+🎖️ Analisando militar: 
+Object { fullName: "1T (IM) ELIEZER", type: "officer" }
+DutyOfficersDisplay.tsx:48:13
+🎖️ Já formatado corretamente: 
+Object { rank: "1T", specialty: "IM", name: "ELIEZER" }
+DutyOfficersDisplay.tsx:53:15
+🎖️ Analisando militar: 
+Object { fullName: "1SG (ES) DA SILVA", type: "master" }
+DutyOfficersDisplay.tsx:48:13
+🎖️ Já formatado corretamente: 
+Object { rank: "1SG", specialty: "ES", name: "DA SILVA" }
+DutyOfficersDisplay.tsx:53:15
+📋 ESCALA: Usando escala 1/3: 
+Object { title: "Escala - 03/07/2025", category: undefined, url: "https://1f8faedd-56a9-4fd2-a9c8-53add674d89f-00-2tf8n5fh0bu4h.riker.replit.dev/uploads/document-1751514750997-343946799-cardÃ¡pio rede 16jun.pdf" }
+PDFViewer.tsx:168:17
+🖼️ ESCALA: Renderizando 
+Object { docUrl: "https://1f8faedd-56a9-4fd2-a9c8-53add674d89f-00-2tf8n5fh0bu4h.riker.replit.dev/uploads/document-1751514750997-343946799-cardÃ¡pio rede 16jun.pdf", escalaImageUrl: "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAUDBAQEAwUEBAQFBQUGBwwIBwcHBw8LCwkMEQ8SEhEPERETFhwXExQaFRERGCEYGh0dHx8fExciJCIeJBweHx7/2wBDAQUFBQcGBw4ICA4eFBEUHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh7/wAARCALUBAADASIAAhEBAxEB/8QAHwAAAQUBAQEBAQEAAAAAAAAAAAECAwQFBgcICQoL/8QAtRAAAgEDAwIEAwUFBAQAAAF9AQIDAAQRBRIhMUEGE1FhByJxFDKBkaEII0KxwRVS0fAkM2JyggkKFhcYGRolJicoKSo0NTY3ODk6Q0RFRkdISUpTVFVWV1hZWmNkZWZnaGlqc3R1dnd4eXqDhIWGh4iJipKTlJWWl5iZmqKjpKWmp6ipqrKztLW2t7i5usLDxMXGx8jJytLT1NXW19jZ2uHi4+Tl5ufo6erx8vP09fb3+Pn6/8QAHwEAAwEBAQEBAQEBAQAAAAAAAAECAwQFBgcICQoL/8QAtREAAgECBAQDBAcFBAQAAQJ3AAECAxEEBSExBhJBUQdhcRMiMoEIFEKRobHBCSMzUvAVYnLRChYkNOEl8RcYGRomJygpKjU2Nzg5OkNERUZHSElKU1RVVldYWVpjZGVmZ2hpanN0dXZ3eHl6goOEhYaHiImKkpOUlZaXmJmaoqOkpaanqKmqsrO0tba3uLm6wsPExcbHyMnK0tPU1dbX2Nna4uPk5ebn6Onq8vP09fb3+Pn6/9oADAMBAAIRAxEAPwD7LooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigA…", loading: false, currentEscala: "Escala - 03/07/2025" }
+PDFViewer.tsx:828:15
+📢 Verificando aviso "teste": 
+Object { active: true, inPeriod: true, startDate: "2025-07-06T20:54:39.158Z", endDate: "2025-07-07T20:54:39.158Z", now: "2025-07-07T00:32:42.785Z" }
+NoticeDisplay.tsx:56:17
+🏠 Index: Renderizando página principal 
+Object { activePlasa: "PLASA - 03/07/2025", activeBono: "nenhum", activeEscala: "Escala - 03/07/2025", currentMainDocType: "plasa", currentMainDoc: "PLASA - 03/07/2025", scrollSpeed: "normal", autoRestartDelay: 3 }
+Index.tsx:79:11
+🎖️ Analisando militar: 
+Object { fullName: "1T (IM) ELIEZER", type: "officer" }
+DutyOfficersDisplay.tsx:48:13
+🎖️ Já formatado corretamente: 
+Object { rank: "1T", specialty: "IM", name: "ELIEZER" }
+DutyOfficersDisplay.tsx:53:15
+🎖️ Analisando militar: 
+Object { fullName: "1SG (ES) DA SILVA", type: "master" }
+DutyOfficersDisplay.tsx:48:13
+🎖️ Já formatado corretamente: 
+Object { rank: "1SG", specialty: "ES", name: "DA SILVA" }
+DutyOfficersDisplay.tsx:53:15
+📋 ESCALA: Usando escala 1/3: 
+Object { title: "Escala - 03/07/2025", category: undefined, url: "https://1f8faedd-56a9-4fd2-a9c8-53add674d89f-00-2tf8n5fh0bu4h.riker.replit.dev/uploads/document-1751514750997-343946799-cardÃ¡pio rede 16jun.pdf" }
+PDFViewer.tsx:168:17
+🖼️ ESCALA: Renderizando 
+Object { docUrl: "https://1f8faedd-56a9-4fd2-a9c8-53add674d89f-00-2tf8n5fh0bu4h.riker.replit.dev/uploads/document-1751514750997-343946799-cardÃ¡pio rede 16jun.pdf", escalaImageUrl: "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAUDBAQEAwUEBAQFBQUGBwwIBwcHBw8LCwkMEQ8SEhEPERETFhwXExQaFRERGCEYGh0dHx8fExciJCIeJBweHx7/2wBDAQUFBQcGBw4ICA4eFBEUHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh7/wAARCALUBAADASIAAhEBAxEB/8QAHwAAAQUBAQEBAQEAAAAAAAAAAAECAwQFBgcICQoL/8QAtRAAAgEDAwIEAwUFBAQAAAF9AQIDAAQRBRIhMUEGE1FhByJxFDKBkaEII0KxwRVS0fAkM2JyggkKFhcYGRolJicoKSo0NTY3ODk6Q0RFRkdISUpTVFVWV1hZWmNkZWZnaGlqc3R1dnd4eXqDhIWGh4iJipKTlJWWl5iZmqKjpKWmp6ipqrKztLW2t7i5usLDxMXGx8jJytLT1NXW19jZ2uHi4+Tl5ufo6erx8vP09fb3+Pn6/8QAHwEAAwEBAQEBAQEBAQAAAAAAAAECAwQFBgcICQoL/8QAtREAAgECBAQDBAcFBAQAAQJ3AAECAxEEBSExBhJBUQdhcRMiMoEIFEKRobHBCSMzUvAVYnLRChYkNOEl8RcYGRomJygpKjU2Nzg5OkNERUZHSElKU1RVVldYWVpjZGVmZ2hpanN0dXZ3eHl6goOEhYaHiImKkpOUlZaXmJmaoqOkpaanqKmqsrO0tba3uLm6wsPExcbHyMnK0tPU1dbX2Nna4uPk5ebn6Onq8vP09fb3+Pn6/9oADAMBAAIRAxEAPwD7LooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigA…", loading: false, currentEscala: "Escala - 03/07/2025" }
+PDFViewer.tsx:828:15
+📢 Verificando aviso "teste": 
+Object { active: true, inPeriod: true, startDate: "2025-07-06T20:54:39.158Z", endDate: "2025-07-07T20:54:39.158Z", now: "2025-07-07T00:32:43.793Z" }
+NoticeDisplay.tsx:56:17
