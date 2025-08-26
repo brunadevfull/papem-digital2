@@ -222,23 +222,7 @@ const NoticeDisplay: React.FC = () => {
               {currentNotice.content}
             </div>
             
-            {/* Data de validade */}
-            <div className="mt-3 pt-2 border-t border-gray-200 text-xs text-gray-500">
-              <div className="flex justify-between items-center">
-                <span>
-                  📅 Válido até: {
-                    currentNotice.endDate instanceof Date 
-                      ? currentNotice.endDate.toLocaleDateString('pt-BR')
-                      : new Date(currentNotice.endDate).toLocaleDateString('pt-BR')
-                  }
-                </span>
-                {activeNotices.length > 1 && (
-                  <span className="text-blue-600">
-                    ⏱️ Próximo em 10s
-                  </span>
-                )}
-              </div>
-            </div>
+     
           </div>
           
           {/* Indicador de múltiplos avisos */}
