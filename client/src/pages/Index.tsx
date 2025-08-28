@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import PDFViewer from "@/components/PDFViewer";
-import MenuDisplay from "@/components/MenuDisplay"; 
+import NoticeDisplay from "@/components/NoticeDisplay";
 import { WeatherAlertsActive } from "@/components/WeatherAlertsActive";
 import { DutyOfficersDisplay } from "@/components/DutyOfficersDisplay";
 import { useDisplay } from "@/context/DisplayContext";
@@ -165,7 +165,7 @@ const Index = () => {
           </div>
           
           <div className="text-center">
-            <h1 className="text-2xl font-bold text-white">
+            <h1 className="text-2xl font-bold bg-gradient-to-r from-blue-300 to-white bg-clip-text text-transparent">
               MARINHA DO BRASIL
             </h1>
             <p className="text-blue-200/90 text-base font-medium">
@@ -347,10 +347,10 @@ const Index = () => {
           </div>
         </div>
 
-        {/* Lado direito - NOVA ORGANIZAÇÃO: Escala em cima, Cardápio embaixo */}
+        {/* Lado direito - Escala e Avisos */}
         <div className="w-full lg:w-2/5 flex flex-col gap-2 flex-1 lg:flex-none lg:h-full">
           
-          {/* ESCALAS APENAS - 65% da altura disponível */}
+          {/* Escala de Serviço - 65% da altura disponível */}
           <div className="flex-1 lg:h-[65%]">
             <div className="h-full bg-gradient-to-br from-white/5 via-blue-900/20 to-white/5 backdrop-blur-sm rounded-lg border border-blue-400/25 shadow-xl hover:border-blue-400/40 transition-all duration-500 overflow-hidden">
               <PDFViewer
@@ -360,10 +360,10 @@ const Index = () => {
             </div>
           </div>
 
-          {/* CARDÁPIOS APENAS - 35% da altura disponível */}
+          {/* Avisos Importantes - 35% da altura disponível */}
           <div className="flex-1 lg:h-[35%]">
-            <div className="h-full bg-gradient-to-br from-orange-900/20 to-amber-900/20 backdrop-blur-sm rounded-lg border border-orange-400/30 shadow-xl hover:border-orange-400/50 transition-all duration-500 overflow-hidden">
-              <MenuDisplay />
+            <div className="h-full bg-gradient-to-br from-amber-900/20 to-orange-900/20 backdrop-blur-sm rounded-lg border border-amber-400/30 shadow-xl hover:border-amber-400/50 transition-all duration-500 overflow-hidden">
+              <NoticeDisplay />
             </div>
           </div>
           
