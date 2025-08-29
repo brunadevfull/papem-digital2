@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from "react";
 import PDFViewer from "@/components/PDFViewer";
-import NoticeDisplay from "@/components/NoticeDisplay";
 import { WeatherAlertsActive } from "@/components/WeatherAlertsActive";
 import { DutyOfficersDisplay } from "@/components/DutyOfficersDisplay";
 import { useDisplay } from "@/context/DisplayContext";
@@ -152,8 +151,8 @@ const Index = () => {
   return (
     <div className="h-screen w-screen bg-gradient-to-br from-blue-950 via-slate-900 to-blue-950 flex flex-col overflow-hidden">
       {/* Header Principal - Painel com contorno restaurado */}
-      <header className="flex-shrink-0 mb-2 px-6 py-4 bg-gradient-to-r from-slate-800/80 to-blue-900/80 backdrop-blur-xl rounded-lg shadow-xl border border-blue-400/30 mx-2">
-        <div className="flex items-center justify-center space-x-4">
+        <header className="flex-shrink-0 mb-1 px-4 py-2 bg-gradient-to-r from-slate-800/80 to-blue-900/80 backdrop-blur-xl rounded-lg shadow-xl border border-blue-400/30 mx-2">
+         <div className="flex items-center justify-center space-x-4">
           <div className="relative">
             <div className="w-16 h-16 bg-transparent rounded-lg flex items-center justify-center shadow-lg p-1">
               <img 
@@ -348,30 +347,55 @@ const Index = () => {
         </div>
 
         {/* Lado direito - Escala e Avisos */}
-        <div className="w-full lg:w-2/5 flex flex-col gap-2 flex-1 lg:flex-none lg:h-full">
-          
+<div className="w-full lg:w-2/5 flex flex-col gap-1 flex-1 lg:flex-none lg:h-full">          
           {/* Escala de Serviço - 65% da altura disponível */}
-          <div className="flex-1 lg:h-[65%]">
-            <div className="h-full bg-gradient-to-br from-white/5 via-blue-900/20 to-white/5 backdrop-blur-sm rounded-lg border border-blue-400/25 shadow-xl hover:border-blue-400/40 transition-all duration-500 overflow-hidden">
-              <PDFViewer
+          
+    <div className="h-[55%] flex-shrink-0">
+    <div className="h-full bg-gradient-to-br from-white/5 via-blue-900/20 to-white/5 backdrop-blur-sm rounded-lg border border-blue-400/25 shadow-xl hover:border-blue-400/40 transition-all duration-500 overflow-hidden">
+      <PDFViewer
                 documentType="escala"
                 title={activeEscalaDoc?.title || "Escala de Serviço Semanal"}
               />
             </div>
           </div>
 
-          {/* Avisos Importantes - 35% da altura disponível */}
-          <div className="flex-1 lg:h-[35%]">
-            <div className="h-full bg-gradient-to-br from-amber-900/20 to-orange-900/20 backdrop-blur-sm rounded-lg border border-amber-400/30 shadow-xl hover:border-amber-400/50 transition-all duration-500 overflow-hidden">
-              <NoticeDisplay />
-            </div>
-          </div>
-          
+{/* Cardápio Semanal - 45% FIXO da altura disponível */}
+  <div className="h-[45%] flex-shrink-0 group">
+    <div className="h-full relative bg-gradient-to-br from-orange-900/40 via-amber-900/30 to-yellow-900/40 backdrop-blur-md rounded-xl border border-orange-400/40 shadow-2xl hover:shadow-orange-500/20 hover:border-orange-400/60 transition-all duration-700 overflow-hidden">
+      {/* Efeito de brilho animado */}
+      <div className="absolute inset-0 bg-gradient-to-br from-orange-400/5 via-transparent to-yellow-400/5 opacity-0 group-hover:opacity-100 transition-opacity duration-700"></div>
+      
+      {/* Borda interna brilhante */}
+      <div className="absolute inset-[1px] rounded-xl border border-orange-300/10"></div>
+      
+      {/* Pontos decorativos nos cantos */}
+      <div className="absolute top-2 left-2 w-2 h-2 bg-orange-400/50 rounded-full shadow-lg shadow-orange-400/60"></div>
+      <div className="absolute top-2 right-2 w-2 h-2 bg-yellow-400/50 rounded-full shadow-lg shadow-yellow-400/60"></div>
+      
+      {/* Ícone decorativo de cardápio */}
+      <div className="absolute bottom-2 right-2 text-orange-300/20 text-3xl pointer-events-none">🍽️</div>
+      
+      {/* Padrão sutil de fundo */}
+      <div className="absolute inset-0 opacity-5">
+        <div className="absolute top-4 left-4 w-8 h-8 border border-orange-300/20 rounded rotate-12"></div>
+        <div className="absolute bottom-8 left-8 w-6 h-6 border border-yellow-300/15 rounded-full"></div>
+        <div className="absolute top-1/2 right-6 w-4 h-4 bg-orange-400/10 rounded rotate-45"></div>
+      </div>
+      
+      <PDFViewer
+        documentType="cardapio"
+        title="🍽️ Cardápio Semanal"
+      />
+    </div>
+  </div>
+         
         </div>
       </div>
 
+      
+
       {/* Footer - Rodapé fixo */}
-      <footer className="flex-shrink-0 bg-gradient-to-r from-slate-800/70 to-blue-900/70 backdrop-blur-xl shadow-xl border-t border-blue-400/25 py-2 px-4 text-center">
+<footer className="flex-shrink-0 bg-gradient-to-r from-slate-800/70 to-blue-900/70 backdrop-blur-xl shadow-xl border-t border-blue-400/25 py-1 px-4 text-center">
         <p className="text-xs text-blue-200/80 font-medium">
           &copy; {new Date().getFullYear()} Marinha do Brasil - PAPEM 
         </p>

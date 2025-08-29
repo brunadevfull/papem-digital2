@@ -21,7 +21,7 @@ interface DebugInfo {
 }
 
 interface PDFViewerProps {
-  documentType: "plasa" | "escala" | "bono";
+  documentType: "plasa" | "escala" | "bono" | "cardapio";
   title: string;
   scrollSpeed?: "slow" | "normal" | "fast";
   autoRestartDelay?: number;
@@ -196,46 +196,77 @@ const PDFViewer: React.FC<PDFViewerProps> = ({
 };
 
   // CORREÇÃO: Função para determinar a URL do documento com alternância
-  const getDocumentUrl = () => {
-    if (documentType === "plasa") {
-      if (activePlasaDoc?.url) {
-        console.log("📄 PLASA: Usando documento do admin:", activePlasaDoc.url);
-        return getBackendUrl(activePlasaDoc.url);
-      }
-      console.log("📄 PLASA: Nenhum documento ativo");
-      return null;
-    } else if (documentType === "escala") {
-      // CORREÇÃO: Usar a escala atual baseada no índice
-      const activeEscalas = escalaDocuments.filter(doc => doc.active);
-      
-      if (activeEscalas.length === 0) {
-        console.log("📋 ESCALA: Nenhuma escala ativa");
-        return null;
-      }
-      
-      const currentEscala = activeEscalas[currentEscalaIndex % activeEscalas.length];
-      
-      if (currentEscala?.url) {
-        console.log(`📋 ESCALA: Usando escala ${currentEscalaIndex + 1}/${activeEscalas.length}:`, {
-          title: currentEscala.title,
-          category: currentEscala.category,
-          url: currentEscala.url
-        });
-        return getBackendUrl(currentEscala.url);
-      }
-      
-      console.log("📋 ESCALA: Escala atual sem URL válida");
+ const getDocumentUrl = () => {
+  if (documentType === "plasa") {
+    if (activePlasaDoc?.url) {
+      console.log("📄 PLASA: Usando documento do admin:", activePlasaDoc.url);
+      return getBackendUrl(activePlasaDoc.url);
+    }
+    console.log("📄 PLASA: Nenhum documento ativo");
+    return null;
+  } else if (documentType === "escala") {
+    // CORREÇÃO: Usar a escala atual baseada no índice
+    const activeEscalas = escalaDocuments.filter(doc => doc.active && doc.type === "escala");
+    
+    if (activeEscalas.length === 0) {
+      console.log("📋 ESCALA: Nenhuma escala ativa");
       return null;
     }
+    
+    const currentEscala = activeEscalas[currentEscalaIndex % activeEscalas.length];
+    
+    if (currentEscala?.url) {
+      console.log(`📋 ESCALA: Usando escala ${currentEscalaIndex + 1}/${activeEscalas.length}:`, {
+        title: currentEscala.title,
+        category: currentEscala.category,
+        url: currentEscala.url
+      });
+      return getBackendUrl(currentEscala.url);
+    }
+    
+    console.log("📋 ESCALA: Escala atual sem URL válida");
     return null;
-  };
+  } else if (documentType === "cardapio") {
+    // NOVO: Usar apenas cardápios
+    const activeCardapios = escalaDocuments.filter(doc => doc.active && doc.type === "cardapio");
+    
+    if (activeCardapios.length === 0) {
+      console.log("🍽️ CARDÁPIO: Nenhum cardápio ativo");
+      return null;
+    }
+    
+    const currentCardapio = activeCardapios[currentEscalaIndex % activeCardapios.length];
+    
+    if (currentCardapio?.url) {
+      console.log(`🍽️ CARDÁPIO: Usando cardápio ${currentEscalaIndex + 1}/${activeCardapios.length}:`, {
+        title: currentCardapio.title,
+        url: currentCardapio.url
+      });
+      return getBackendUrl(currentCardapio.url);
+    }
+    
+    console.log("🍽️ CARDÁPIO: Cardápio atual sem URL válida");
+    return null;
+  }
+  
+  return null; // ← Adicione esta linha no final
+};
+
+    
+  
 
   // CORREÇÃO: Obter documento da escala atual
   const getCurrentEscalaDoc = () => {
-    const activeEscalas = escalaDocuments.filter(doc => doc.active);
+  const activeEscalas = escalaDocuments.filter(doc => doc.active && doc.type === "escala");
     if (activeEscalas.length === 0) return null;
     return activeEscalas[currentEscalaIndex % activeEscalas.length] || null;
   };
+// NOVO: Obter documento do cardápio atual
+const getCurrentCardapioDoc = () => {
+  const activeCardapios = escalaDocuments.filter(doc => doc.active && doc.type === "cardapio");
+  if (activeCardapios.length === 0) return null;
+  return activeCardapios[currentEscalaIndex % activeCardapios.length] || null;
+};
 
   // Verificar se arquivo é imagem
   const isImageFile = (url: string) => {
@@ -732,7 +763,7 @@ const PDFViewer: React.FC<PDFViewerProps> = ({
       
       console.log("🔄 ESCALA Effect triggered:", {
         currentEscalaIndex,
-        totalActiveEscalas: escalaDocuments.filter(d => d.active).length,
+        totalActiveEscalas: escalaDocuments.filter(d => d.active && d.type === "escala").length,
         currentEscala: currentEscala?.title,
         category: currentEscala?.category,
         url: currentEscala?.url,
@@ -762,6 +793,42 @@ const PDFViewer: React.FC<PDFViewerProps> = ({
     }
   }, [documentType, currentEscalaIndex, escalaDocuments]);
 
+  // NOVO: Inicializar CARDÁPIO
+useEffect(() => {
+  if (documentType === "cardapio") {
+    const currentCardapio = getCurrentCardapioDoc();
+    
+    console.log("🔄 CARDÁPIO Effect triggered:", {
+      currentEscalaIndex,
+      totalActiveCardapios: escalaDocuments.filter(d => d.active && d.type === "cardapio").length,
+      currentCardapio: currentCardapio?.title,
+      url: currentCardapio?.url,
+      id: currentCardapio?.id 
+    });
+    
+    // Resetar estados
+    setEscalaImageUrl(null); // Pode reutilizar ou criar setCardapioImageUrl
+    setLoading(false);
+    setTotalPages(1);
+    
+    if (currentCardapio?.url) {
+      const docUrl = getBackendUrl(currentCardapio.url);
+      console.log("🖼️ CARDÁPIO: Processando URL:", docUrl);
+      
+      const isPDF = docUrl.toLowerCase().includes('.pdf') || currentCardapio.title.toLowerCase().includes('.pdf');
+      
+      if (isPDF) {
+        console.log("📄 CARDÁPIO: É um PDF, convertendo para imagem...");
+        convertEscalaPDFToImage(docUrl); // Pode reutilizar a função ou criar uma nova
+      } else {
+        console.log("🖼️ CARDÁPIO: É uma imagem, usando diretamente");
+        setLoading(false);
+      }
+    } else {
+      setLoading(false);
+    }
+  }
+}, [documentType, currentEscalaIndex, escalaDocuments]);
   // ✅ FUNÇÃO: Verificar se URL é imagem
   const checkIfImageFile = async (url: string): Promise<boolean> => {
     try {
@@ -1045,7 +1112,44 @@ const PDFViewer: React.FC<PDFViewerProps> = ({
           )}
         </div>
       );
-    }
+    } else if (documentType === "cardapio") {
+  const docUrl = getDocumentUrl();
+  const currentCardapio = getCurrentCardapioDoc();
+  
+  return (
+    <div className="w-full h-full flex items-center justify-center p-4">
+      {escalaImageUrl && escalaImageUrl !== 'convertida' && escalaImageUrl !== 'nenhuma' ? (
+        <img
+          src={escalaImageUrl}
+          alt="Cardápio Semanal Convertido"
+          className="max-w-full max-h-full object-contain shadow-lg"
+          onLoad={() => {
+            console.log(`✅ Cardápio convertido carregado com sucesso`);
+          }}
+        />
+      ) : docUrl ? (
+        <img
+          src={docUrl}
+          alt="Cardápio Semanal"
+          className="max-w-full max-h-full object-contain shadow-lg"
+          onError={(e) => {
+            console.error("❌ Erro ao carregar cardápio:", docUrl);
+            (e.target as HTMLImageElement).src = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAwIiBoZWlnaHQ9IjMwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iNDAwIiBoZWlnaHQ9IjMwMCIgZmlsbD0iI2Y4ZjhmOCIvPjx0ZXh0IHg9IjIwMCIgeT0iMTUwIiBmb250LWZhbWlseT0iQXJpYWwiIGZvbnQtc2l6ZT0iMTgiIGZpbGw9IiM5OTkiIHRleHQtYW5jaG9yPSJtaWRkbGUiPkVycm8gYW8gY2FycmVnYXIgY2FyZMOhcGlvPC90ZXh0Pjwvc3ZnPg==';
+          }}
+          onLoad={() => {
+            console.log(`✅ Cardápio carregado com sucesso: ${docUrl}`);
+          }}
+        />
+      ) : (
+        <div className="text-center text-gray-500">
+          <div className="text-4xl mb-4">🍽️</div>
+          <div>Nenhum cardápio ativo</div>
+          <div className="text-sm mt-2">Adicione um cardápio no painel administrativo</div>
+        </div>
+      )}
+    </div>
+  );}
+    
 
     return (
       <div className="w-full h-full flex items-center justify-center">
@@ -1136,7 +1240,7 @@ const PDFViewer: React.FC<PDFViewerProps> = ({
   const getCurrentTitle = () => {
     if (documentType === "escala") {
       const currentEscala = getCurrentEscalaDoc();
-      const activeEscalas = escalaDocuments.filter(doc => doc.active);
+          const activeEscalas = escalaDocuments.filter(doc => doc.active && doc.type === "escala"); // ← ADICIONAR && doc.type === "escala"
       
       if (currentEscala) {
         // Detectar se é cardápio baseado no nome do arquivo/título
@@ -1168,17 +1272,34 @@ const PDFViewer: React.FC<PDFViewerProps> = ({
   return (
     <Card className="h-full overflow-hidden border-0 shadow-none bg-transparent">
       {/* Header Estilizado com Gradiente */}
-      <CardHeader className="relative bg-gradient-to-r from-slate-700 via-blue-800 to-slate-700 text-white py-1 px-3 border-b border-blue-400/30">
+<CardHeader className={`relative text-white border-b ${
+  documentType === "cardapio" 
+    ? "bg-gradient-to-r from-orange-700 via-amber-700 to-orange-700 py-0.5 px-2 border-orange-400/30" 
+    : "bg-gradient-to-r from-slate-700 via-blue-800 to-slate-700 py-0.5 px-2 border-blue-400/30"
+}`}>
         {/* Efeito de brilho */}
-        <div className="absolute inset-0 bg-gradient-to-r from-transparent via-blue-400/10 to-transparent"></div>
-        
+<div className={`absolute inset-0 bg-gradient-to-r from-transparent to-transparent ${
+  documentType === "cardapio" 
+    ? "via-orange-400/10" 
+    : "via-blue-400/10"
+}`}></div>
+
         <CardTitle className="relative z-10 flex items-center justify-between">
   <div className="flex items-center space-x-3">
-<div className="w-6 h-6 bg-gradient-to-br from-blue-500 to-blue-600 rounded flex items-center justify-center shadow-lg">      {documentType === "plasa" ? (
-        <span className="text-white text-lg leading-none">📋</span>
-      ) : (
-        <span className="text-white text-lg leading-none">📅</span>
-      )}
+<div className="w-6 h-6 bg-gradient-to-br from-blue-500 to-blue-600 rounded flex items-center justify-center shadow-lg">    
+  
+      
+  {documentType === "plasa" ? (
+  <span className="text-white text-lg leading-none">📋</span>
+) : documentType === "bono" ? (
+  <span className="text-white text-lg leading-none">📋</span>
+) : documentType === "escala" ? (
+  <span className="text-white text-lg leading-none">📅</span>
+) : documentType === "cardapio" ? (
+  <span className="text-white text-lg leading-none">🍽️</span>
+) : (
+  <span className="text-white text-lg leading-none">📄</span>
+)}
     </div>
     
     <div className="flex flex-col">
