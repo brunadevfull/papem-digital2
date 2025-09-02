@@ -1249,19 +1249,15 @@ useEffect(() => {
                           currentEscala.url.toLowerCase().includes('cardápio') ||
                           currentEscala.url.toLowerCase().includes('cardapio');
         
-        const categorySubtitle = currentEscala.category
-          ? `(${currentEscala.category === "oficial" ? "Oficiais" : "Praças"})`
-          : "";
+       
         
         // Emoji especial para cardápio
         const emojiPrefix = isCardapio ? "🍽️ " : "";
         
-        if (activeEscalas.length > 1) {
-          return `${emojiPrefix}${title} ${categorySubtitle} - ${currentEscalaIndex + 1}/${activeEscalas.length}`;
-        } else {
-          return `${emojiPrefix}${title} ${categorySubtitle}`;
-        }
+     return `${emojiPrefix}${title} `;
+
       }
+
     }
     
     return title;
@@ -1270,64 +1266,135 @@ useEffect(() => {
   const currentEscala = getCurrentEscalaDoc();
 
   return (
+
     <Card className="h-full overflow-hidden border-0 shadow-none bg-transparent">
       {/* Header Estilizado com Gradiente */}
-<CardHeader className={`relative text-white border-b ${
-  documentType === "cardapio" 
-    ? "bg-gradient-to-r from-orange-700 via-amber-700 to-orange-700 py-0.5 px-2 border-orange-400/30" 
-    : "bg-gradient-to-r from-slate-700 via-blue-800 to-slate-700 py-0.5 px-2 border-blue-400/30"
-}`}>
-        {/* Efeito de brilho */}
-<div className={`absolute inset-0 bg-gradient-to-r from-transparent to-transparent ${
-  documentType === "cardapio" 
-    ? "via-orange-400/10" 
-    : "via-blue-400/10"
-}`}></div>
 
-        <CardTitle className="relative z-10 flex items-center justify-between">
-  <div className="flex items-center space-x-3">
-<div className="w-6 h-6 bg-gradient-to-br from-blue-500 to-blue-600 rounded flex items-center justify-center shadow-lg">    
-  
+
+
+
+<CardHeader className={`relative text-white border-b py-2 px-4 ${
+  documentType === "cardapio" 
+    ? "bg-gradient-to-r from-orange-700 via-amber-600 to-orange-700 border-orange-400/40 shadow-lg" 
+    : "bg-gradient-to-r from-slate-700 via-blue-800 to-slate-700 border-blue-400/30"
+}`}>
+  {/* Efeito de brilho melhorado baseado no tipo */}
+  <div className={`absolute inset-0 ${
+    documentType === "cardapio" 
+      ? "bg-gradient-to-r from-orange-400/15 via-yellow-400/10 to-orange-400/15" 
+      : "bg-gradient-to-r from-transparent via-blue-400/10 to-transparent"
+  }`}></div>
+
+  {/* Elementos decorativos melhorados para cardápio */}
+  {documentType === "cardapio" && (
+    <>
+     
+      {/* Borda interna dupla para mais sofisticação */}
+      <div className="absolute inset-[1px] rounded border border-orange-300/20"></div>
+      <div className="absolute inset-1 rounded border border-orange-200/10"></div>
       
-  {documentType === "plasa" ? (
-  <span className="text-white text-lg leading-none">📋</span>
-) : documentType === "bono" ? (
-  <span className="text-white text-lg leading-none">📋</span>
-) : documentType === "escala" ? (
-  <span className="text-white text-lg leading-none">📅</span>
-) : documentType === "cardapio" ? (
-  <span className="text-white text-lg leading-none">🍽️</span>
-) : (
-  <span className="text-white text-lg leading-none">📄</span>
-)}
+      {/* Textura sutil */}
+      <div className="absolute inset-0 opacity-10 bg-gradient-to-br from-orange-200/20 via-transparent to-amber-200/20"></div>
+    </>
+  )}
+
+<CardTitle className="relative z-10 flex items-center justify-between">
+  <div className="flex items-center space-x-3">
+    {/* Ícone estilizado baseado no tipo */}
+    <div className={`relative ${
+      documentType === "cardapio" ? "w-8 h-8" : "w-6 h-6"
+    }`}>
+      <div className={`w-full h-full rounded-lg flex items-center justify-center shadow-lg ${
+        documentType === "cardapio" 
+          ? "bg-gradient-to-br from-orange-500 to-amber-600" 
+          : "bg-gradient-to-br from-blue-500 to-blue-600"
+      }`}>
+        {documentType === "plasa" ? (
+          <span className="text-white text-lg leading-none">📋</span>
+        ) : documentType === "bono" ? (
+          <span className="text-white text-lg leading-none">📋</span>
+        ) : documentType === "escala" ? (
+          <span className="text-white text-lg leading-none">📅</span>
+        ) : documentType === "cardapio" ? (
+          <span className="text-white text-lg leading-none">🍽️</span>
+        ) : (
+          <span className="text-white text-lg leading-none">📄</span>
+        )}
+      </div>
+      
+      {/* Brilho extra para cardápio */}
+      {documentType === "cardapio" && (
+        <div className="absolute inset-0 rounded-lg bg-gradient-to-br from-orange-400/20 to-amber-400/20 blur-sm"></div>
+      )}
     </div>
     
     <div className="flex flex-col">
-      <span className="font-bold text-sm bg-gradient-to-r from-white to-blue-100 bg-clip-text text-transparent uppercase tracking-wide">
+      <span className={`font-bold text-sm bg-clip-text text-transparent uppercase tracking-wide ${
+        documentType === "cardapio"
+          ? "bg-gradient-to-r from-orange-50 via-white to-amber-50 drop-shadow-sm"
+          : "bg-gradient-to-r from-white to-blue-100"
+      }`}>
         {documentType === "plasa" ? (
           activePlasaDoc?.title || "📋 PLASA - PLANO DE SERVIÇO SEMANAL"
+        ) : documentType === "cardapio" ? (
+          "CARDÁPIO SEMANAL"
         ) : (
           getCurrentTitle() || "📅 ESCALA DE SERVIÇO SEMANAL"
         )}
       </span>
+      
+      {/* REMOVIDO: Subtítulo do cardápio */}
     </div>
   </div>
   
-  {/* ✅ CONTADOR DE PÁGINAS ALINHADO */}
   <div className="flex items-center space-x-3">
-    {documentType === "plasa" && savedPageUrls.length > 0 && (
-<div className="bg-blue-600/50 backdrop-blur-sm rounded-lg px-4 h-7 border border-blue-400/30 flex items-center justify-center">
-<div className="flex items-center gap-2">
-          <span className="text-blue-100 text-xs font-medium">📄</span>
-          <span className="text-white font-bold text-sm">
-            {savedPageUrls.length} páginas
-          </span>
+    {/* Indicador OFICIAIS | PRAÇAS fixo com ícones para ESCALA */}
+    {documentType === "escala" && (() => {
+      const currentEscala = getCurrentEscalaDoc();
+      const isOficial = currentEscala?.category === "oficial";
+      
+      return (
+        <div className="bg-slate-600/50 backdrop-blur-sm rounded-lg px-3 py-1 border border-slate-400/30 flex items-center">
+          <div className="flex items-center gap-2">
+            {/* OFICIAIS */}
+            <div className="flex items-center gap-1">
+              <span className={`text-sm transition-all duration-300 ${
+                isOficial ? "opacity-100" : "opacity-40"
+              }`}>⭐</span>
+              <span className={`text-xs font-bold transition-all duration-300 ${
+                isOficial 
+                  ? "text-yellow-200 drop-shadow-sm" 
+                  : "text-slate-400"
+              }`}>
+                OFICIAIS
+              </span>
+            </div>
+            
+            {/* Separador */}
+            <span className="text-slate-300 text-xs mx-1">|</span>
+            
+            {/* PRAÇAS */}
+            <div className="flex items-center gap-1">
+              <span className={`text-sm transition-all duration-300 ${
+                !isOficial ? "opacity-100" : "opacity-40"
+              }`}>🛡️</span>
+              <span className={`text-xs font-bold transition-all duration-300 ${
+                !isOficial 
+                  ? "text-green-200 drop-shadow-sm" 
+                  : "text-slate-400"
+              }`}>
+                PRAÇAS
+              </span>
+            </div>
+          </div>
         </div>
-      </div>
-    )}
+      );
+    })()}
+    
+    {/* REMOVIDO: Status do cardápio */}
   </div>
 </CardTitle>
-      </CardHeader>
+</CardHeader>
       
       <CardContent className="p-0 h-[calc(100%-2.5rem)] bg-white">
         {loading ? (
