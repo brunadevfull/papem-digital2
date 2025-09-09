@@ -1,10 +1,11 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useDisplay } from "@/context/DisplayContext";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 const MenuDisplay: React.FC = () => {
   const { escalaDocuments } = useDisplay();
   const [currentMenuIndex, setCurrentMenuIndex] = useState(0);
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
 
   // Função para filtrar apenas documentos de cardápio
   const getActiveMenus = () => {
@@ -144,6 +145,31 @@ const MenuDisplay: React.FC = () => {
 
   const menuUrl = getBackendUrl(currentMenu.url);
 
+  // Rolagem automática para cardápios da unidade 1DN
+  useEffect(() => {
+    const container = scrollContainerRef.current;
+    if (!container) return;
+
+    // Sempre iniciar do topo
+    container.scrollTop = 0;
+    let interval: number | undefined;
+
+    if (currentMenu.unit === "1DN") {
+      interval = window.setInterval(() => {
+        const maxScroll = container.scrollHeight - container.clientHeight;
+        if (container.scrollTop >= maxScroll) {
+          container.scrollTop = 0;
+        } else {
+          container.scrollTop += 1;
+        }
+      }, 50);
+    }
+
+    return () => {
+      if (interval) window.clearInterval(interval);
+    };
+  }, [currentMenuIndex, currentMenu.unit]);
+
   return (
     <Card className="h-full border-orange-400 overflow-hidden">
       <CardHeader className="bg-gradient-to-r from-orange-600 to-amber-600 text-white py-1.5">
@@ -181,20 +207,37 @@ const MenuDisplay: React.FC = () => {
           {/* Conteúdo do cardápio */}
           <div className="flex-1 overflow-hidden bg-white">
             {menuUrl ? (
-              <div className="w-full h-full flex items-center justify-center p-2">
-                <img
-                  src={menuUrl}
-                  alt={`Cardápio - ${currentMenu.title}`}
-                  className="max-w-full max-h-full object-contain shadow-sm rounded"
-                  onError={(e) => {
-                    console.error("❌ Erro ao carregar cardápio:", menuUrl);
-                    (e.target as HTMLImageElement).src = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAwIiBoZWlnaHQ9IjMwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iNDAwIiBoZWlnaHQ9IjMwMCIgZmlsbD0iI2ZlZjJlMiIvPjx0ZXh0IHg9IjIwMCIgeT0iMTMwIiBmb250LWZhbWlseT0iQXJpYWwiIGZvbnQtc2l6ZT0iMTYiIGZpbGw9IiNkOTc3MDYiIHRleHQtYW5jaG9yPSJtaWRkbGUiPkVycm8gYW8gY2FycmVnYXI8L3RleHQ+PHRleHQgeD0iMjAwIiB5PSIxNTAiIGZvbnQtZmFtaWx5PSJBcmlhbCIgZm9udC1zaXplPSIxNiIgZmlsbD0iI2Q5NzcwNiIgdGV4dC1hbmNob3I9Im1pZGRsZSI+Y2FyZMOhcGlvPC90ZXh0Pjx0ZXh0IHg9IjIwMCIgeT0iMTgwIiBmb250LWZhbWlseT0iQXJpYWwiIGZvbnQtc2l6ZT0iNDgiIGZpbGw9IiNkOTc3MDYiIHRleHQtYW5jaG9yPSJtaWRkbGUiPjx0c3BhbiB4PSIyMDAiIHk9IjE4MCI+8J+NvTwvdHNwYW4+PC90ZXh0Pjwvc3ZnPg==';
-                  }}
-                  onLoad={() => {
-                    console.log(`✅ Cardápio carregado com sucesso: ${currentMenu.title}`);
-                  }}
-                />
-              </div>
+              currentMenu.unit === "1DN" ? (
+                <div ref={scrollContainerRef} className="w-full h-full overflow-hidden">
+                  <img
+                    src={menuUrl}
+                    alt={`Cardápio - ${currentMenu.title}`}
+                    className="w-full h-auto shadow-sm rounded"
+                    onError={(e) => {
+                      console.error("❌ Erro ao carregar cardápio:", menuUrl);
+                      (e.target as HTMLImageElement).src = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAwIiBoZWlnaHQ9IjMwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iNDAwIiBoZWlnaHQ9IjMwMCIgZmlsbD0iI2ZlZjJlMiIvPjx0ZXh0IHg9IjIwMCIgeT0iMTMwIiBmb250LWZhbWlseT0iQXJpYWwiIGZvbnQtc2l6ZT0iMTYiIGZpbGw9IiNkOTc3MDYiIHRleHQtYW5jaG9yPSJtaWRkbGUiPkVycm8gYW8gY2FycmVnYXI8L3RleHQ+PHRleHQgeD0iMjAwIiB5PSIxNTAiIGZvbnQtZmFtaWx5PSJBcmlhbCIgZm9udC1zaXplPSIxNiIgZmlsbD0iI2Q5NzcwNiIgdGV4dC1hbmNob3I9Im1pZGRsZSI+Y2FyZMOhcGlvPC90ZXh0Pjx0ZXh0IHg9IjIwMCIgeT0iMTgwIiBmb250LWZhbWlseT0iQXJpYWwiIGZvbnQtc2l6ZT0iNDgiIGZpbGw9IiNkOTc3MDYiIHRleHQtYW5jaG9yPSJtaWRkbGUiPjx0c3BhbiB4PSIyMDAiIHk9IjE4MCI+8J+NvTwvdHNwYW4+PC90ZXh0Pjwvc3ZnPg==';
+                    }}
+                    onLoad={() => {
+                      console.log(`✅ Cardápio carregado com sucesso: ${currentMenu.title}`);
+                    }}
+                  />
+                </div>
+              ) : (
+                <div className="w-full h-full flex items-center justify-center p-2">
+                  <img
+                    src={menuUrl}
+                    alt={`Cardápio - ${currentMenu.title}`}
+                    className="max-w-full max-h-full object-contain shadow-sm rounded"
+                    onError={(e) => {
+                      console.error("❌ Erro ao carregar cardápio:", menuUrl);
+                      (e.target as HTMLImageElement).src = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAwIiBoZWlnaHQ9IjMwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iNDAwIiBoZWlnaHQ9IjMwMCIgZmlsbD0iI2ZlZjJlMiIvPjx0ZXh0IHg9IjIwMCIgeT0iMTMwIiBmb250LWZhbWlseT0iQXJpYWwiIGZvbnQtc2l6ZT0iMTYiIGZpbGw9IiNkOTc3MDYiIHRleHQtYW5jaG9yPSJtaWRkbGUiPkVycm8gYW8gY2FycmVnYXI8L3RleHQ+PHRleHQgeD0iMjAwIiB5PSIxNTAiIGZvbnQtZmFtaWx5PSJBcmlhbCIgZm9udC1zaXplPSIxNiIgZmlsbD0iI2Q5NzcwNiIgdGV4dC1hbmNob3I9Im1pZGRsZSI+Y2FyZMOhcGlvPC90ZXh0Pjx0ZXh0IHg9IjIwMCIgeT0iMTgwIiBmb250LWZhbWlseT0iQXJpYWwiIGZvbnQtc2l6ZT0iNDgiIGZpbGw9IiNkOTc3MDYiIHRleHQtYW5jaG9yPSJtaWRkbGUiPjx0c3BhbiB4PSIyMDAiIHk9IjE4MCI+8J+NvTwvdHNwYW4+PC90ZXh0Pjwvc3ZnPg==';
+                    }}
+                    onLoad={() => {
+                      console.log(`✅ Cardápio carregado com sucesso: ${currentMenu.title}`);
+                    }}
+                  />
+                </div>
+              )
             ) : (
               <div className="flex items-center justify-center h-full text-center text-gray-500">
                 <div>
