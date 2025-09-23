@@ -17,7 +17,8 @@ export interface PDFDocument {
   title: string;
   url: string;
   type: "plasa" | "bono" | "escala" | "cardapio";
-  category?: "oficial" | "praca"; // Apenas para escalas
+  category?: "oficial" | "praca"; 
+  unit?: "EAGM" | "1DN";
   active: boolean;
   uploadDate: Date;
 }

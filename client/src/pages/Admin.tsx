@@ -32,8 +32,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
-import { useDisplay, Notice, PDFDocument } from "@/context/DisplayContext";
+import { useDisplay, PDFDocument } from "@/context/DisplayContext";
 import { useToast } from "@/hooks/use-toast";
 import { 
   Sheet, 
@@ -114,13 +113,9 @@ interface MilitaryPersonnel {
 
 
 const Admin: React.FC = () => {
-  const { 
-    notices, 
+ const { 
     plasaDocuments, 
     escalaDocuments,
-    addNotice,
-    updateNotice,
-    deleteNotice,
     addDocument,
     updateDocument,
     deleteDocument,
@@ -130,23 +125,15 @@ const Admin: React.FC = () => {
     setScrollSpeed,
     autoRestartDelay,
     setAutoRestartDelay,
-    isLoading,
-    refreshNotices
+    isLoading
   } = useDisplay();
   
   const { toast } = useToast();
   
-  // Form states
-  const [newNotice, setNewNotice] = useState<Omit<Notice, "id" | "createdAt" | "updatedAt">>({
-    title: "",
-    content: "",
-    priority: "medium",
-    startDate: new Date(),
-    endDate: new Date(Date.now() + 86400000), // Default to 1 day
-    active: true
-  });
+ 
   
   // Estados para upload de documentos
+  const [docUnit, setDocUnit] = useState<"EAGM" | "1DN" | undefined>(undefined);
   const [selectedDocType, setSelectedDocType] = useState<"plasa" | "escala" | "cardapio">("plasa");
   const [docTitle, setDocTitle] = useState("");
   const [docUrl, setDocUrl] = useState("");
@@ -580,13 +567,11 @@ const saveEditOfficer = async () => {
     connected: boolean;
     lastResponse: number | null;
     lastCheck: Date | null;
-    notices: number;
     documents: number;
   }>({
     connected: false,
     lastResponse: null,
     lastCheck: null,
-    notices: 0,
     documents: 0
   });
   
@@ -636,7 +621,6 @@ const saveEditOfficer = async () => {
         connected: response.ok,
         lastResponse: response.status,
         lastCheck: new Date(),
-        notices: notices.length,
         documents: plasaDocuments.length + escalaDocuments.length
       }));
       console.log("📢 Resposta do servidor:", response.status, response.ok ? 'OK' : 'ERROR');
@@ -646,7 +630,6 @@ const saveEditOfficer = async () => {
         connected: false,
         lastResponse: null,
         lastCheck: new Date(),
-        notices: notices.length,
         documents: plasaDocuments.length + escalaDocuments.length
       }));
       console.error("❌ Erro de conexão com servidor:", error);
@@ -760,7 +743,7 @@ const saveEditOfficer = async () => {
     }
   };
 
-  // Salvar oficiais de serviço
+  // Salvar serviço
   const saveDutyOfficers = async () => {
     if (!dutyOfficers.officerName && !dutyOfficers.masterName) {
       toast({
@@ -840,66 +823,7 @@ const errorMessage = getErrorMessage(error);
     }
   }, [militaryPersonnel]);
   
-  // Form handler para avisos com servidor
-  const handleNoticeSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    
-    if (!newNotice.title || !newNotice.content) {
-      toast({
-        title: "Erro",
-        description: "Título e conteúdo são obrigatórios.",
-        variant: "destructive"
-      });
-      return;
-    }
 
-    // Validar datas
-    if (newNotice.startDate >= newNotice.endDate) {
-      toast({
-        title: "Erro",
-        description: "A data de início deve ser anterior à data de fim.",
-        variant: "destructive"
-      });
-      return;
-    }
-    
-    console.log("📢 Enviando aviso para o servidor:", newNotice);
-    
-    try {
-      const success = await addNotice(newNotice);
-      
-      if (success) {
-        toast({
-          title: "Sucesso!",
-          description: "Aviso salvo no servidor com sucesso."
-        });
-      } else {
-        toast({
-          title: "Aviso Criado",
-          description: "Aviso criado localmente. Verifique a conexão com o servidor.",
-          variant: "destructive"
-        });
-      }
-      
-      // Reset form
-      setNewNotice({
-        title: "",
-        content: "",
-        priority: "medium",
-        startDate: new Date(),
-        endDate: new Date(Date.now() + 86400000),
-        active: true
-      });
-      
-    } catch (error) {
-      console.error("❌ Erro ao criar aviso:", error);
-      toast({
-        title: "Erro",
-        description: "Não foi possível criar o aviso. Tente novamente.",
-        variant: "destructive"
-      });
-    }
-  };
   
   // Funções de upload de documentos
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -985,14 +909,24 @@ const handleDocumentSubmit = async (e: React.FormEvent) => {
     return;
   }
   
-  if (selectedDocType === "escala" && !docCategory) {
-    toast({
-      title: "Erro",
-      description: "Selecione a categoria da escala (Oficial ou Praça).",
-      variant: "destructive"
-    });
-    return;
-  }
+ // Substituir a validação existente por:
+if (selectedDocType === "escala" && !docCategory) {
+  toast({
+    title: "Erro",
+    description: "Selecione a categoria da escala (Oficial ou Praça).",
+    variant: "destructive"
+  });
+  return;
+}
+
+if (selectedDocType === "cardapio" && !docUnit) {
+  toast({
+    title: "Erro",
+    description: "Selecione a unidade do cardápio (EAGM ou 1DN).",
+    variant: "destructive"
+  });
+  return;
+}
 
   // ✅ DECLARE typeInfo UMA VEZ SÓ aqui no início
   const typeInfo = getDocumentTypeInfo(selectedDocType);
@@ -1017,7 +951,12 @@ const handleDocumentSubmit = async (e: React.FormEvent) => {
       
       if (selectedDocType === "escala" && docCategory) {
         formData.append('category', docCategory);
+
       }
+
+      if (selectedDocType === "cardapio" && docUnit) {
+  formData.append('unit', docUnit);
+}
 
       const progressInterval = setInterval(() => {
         setUploadProgress(prev => {
@@ -1067,6 +1006,7 @@ const handleDocumentSubmit = async (e: React.FormEvent) => {
         url: fullUrl,
         type: selectedDocType,
         category: selectedDocType === "escala" ? docCategory : undefined,
+        unit: selectedDocType === "cardapio" ? docUnit : undefined, 
         active: true
       });
       
@@ -1134,6 +1074,7 @@ const handleDocumentSubmit = async (e: React.FormEvent) => {
     setDocUrl("");
     setSelectedFile(null);
     setDocCategory(undefined);
+    setDocUnit(undefined);
     
     const fileInput = document.getElementById('docFile') as HTMLInputElement;
     if (fileInput) {
@@ -1141,45 +1082,9 @@ const handleDocumentSubmit = async (e: React.FormEvent) => {
     }
   };
   
-  // Funções para avisos com servidor
-  const toggleNoticeActive = async (notice: Notice) => {
-    try {
-      const updatedNotice = { ...notice, active: !notice.active };
-      const success = await updateNotice(updatedNotice);
-      
-      toast({
-        title: success ? "Aviso atualizado" : "Aviso atualizado localmente",
-        description: `O aviso "${notice.title}" foi ${notice.active ? "desativado" : "ativado"}.`,
-        variant: success ? "default" : "destructive"
-      });
-    } catch (error) {
-      toast({
-        title: "Erro",
-        description: "Não foi possível atualizar o aviso.",
-        variant: "destructive"
-      });
-    }
-  };
+
   
-  const removeNotice = async (id: string) => {
-    if (confirm("Tem certeza que deseja remover este aviso?")) {
-      try {
-        const success = await deleteNotice(String(id));
-        
-        toast({
-          title: success ? "Aviso removido" : "Aviso removido localmente",
-          description: success ? "O aviso foi removido do servidor." : "O aviso foi removido apenas localmente.",
-          variant: success ? "default" : "destructive"
-        });
-      } catch (error) {
-        toast({
-          title: "Erro",
-          description: "Não foi possível remover o aviso.",
-          variant: "destructive"
-        });
-      }
-    }
-  };
+ 
   
   // Funções para documentos
     const toggleDocActive = (doc: PDFDocument) => {
@@ -1267,17 +1172,14 @@ const handleDocumentSubmit = async (e: React.FormEvent) => {
     }
   };
 
-  const formatDate = (date: Date) => {
-    return date.toISOString().split("T")[0];
-  };
+ 
 
   // Effect para verificar status do servidor periodicamente
   useEffect(() => {
     checkServerStatus();
     const interval = setInterval(checkServerStatus, 30000); // A cada 30 segundos
     return () => clearInterval(interval);
-  }, [notices.length, plasaDocuments.length, escalaDocuments.length]);
-
+}, [plasaDocuments.length, escalaDocuments.length]);
   // Componente de Status do Servidor
   const ServerStatusIndicator = () => (
     <Card className="mb-6">
@@ -1315,16 +1217,7 @@ const handleDocumentSubmit = async (e: React.FormEvent) => {
             </div>
           </div>
 
-          {/* Avisos */}
-          <div className="p-3 rounded-lg border bg-blue-50 border-blue-200 text-blue-800">
-            <div className="flex items-center gap-2">
-              <span className="text-lg">📢</span>
-              <span className="font-medium">Avisos</span>
-            </div>
-            <div className="text-sm mt-1">
-              {serverStatus.notices} cadastrados
-            </div>
-          </div>
+     
 
           {/* Documentos */}
           <div className="p-3 rounded-lg border bg-purple-50 border-purple-200 text-purple-800">
@@ -1407,297 +1300,13 @@ const handleDocumentSubmit = async (e: React.FormEvent) => {
         <ServerStatusIndicator />
         
         <Tabs defaultValue="documentos" className="w-full">
-          <TabsList className="w-full mb-6">
+        <TabsList className="w-full mb-6">
             <TabsTrigger value="documentos" className="flex-1">📄 Documentos</TabsTrigger>
-            <TabsTrigger value="avisos" className="flex-1">📢 Avisos</TabsTrigger>
             <TabsTrigger value="militares" className="flex-1">👮 Militares</TabsTrigger>
             <TabsTrigger value="sistema" className="flex-1">⚙️ Sistema</TabsTrigger>
           </TabsList>
           
-          {/* Aba de Avisos */}
-          <TabsContent value="avisos">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              {/* Formulário para novo aviso */}
-              <Card className="border-navy">
-                <CardHeader className="bg-navy text-white">
-                  <CardTitle>Adicionar Novo Aviso</CardTitle>
-                  <CardDescription className="text-gray-200">
-                    Crie um novo aviso que será salvo no servidor
-                  </CardDescription>
-                </CardHeader>
-                <form onSubmit={handleNoticeSubmit}>
-                  <CardContent className="space-y-4 pt-6">
-                    <div className="space-y-2">
-                      <Label htmlFor="noticeTitle">Título do Aviso</Label>
-                      <Input 
-                        id="noticeTitle" 
-                        placeholder="Título do aviso"
-                        value={newNotice.title}
-                        onChange={(e) => setNewNotice({...newNotice, title: e.target.value})}
-                        disabled={isLoading}
-                      />
-                    </div>
-                    
-                    <div className="space-y-2">
-                      <Label htmlFor="noticeContent">Conteúdo</Label>
-                      <Textarea 
-                        id="noticeContent" 
-                        placeholder="Conteúdo do aviso"
-                        value={newNotice.content}
-                        onChange={(e) => setNewNotice({...newNotice, content: e.target.value})}
-                        rows={4}
-                        disabled={isLoading}
-                      />
-                    </div>
-                    
-                    <div className="space-y-2">
-                      <Label htmlFor="noticePriority">Prioridade</Label>
-                      <Select 
-                        value={newNotice.priority} 
-                        onValueChange={(value) => setNewNotice({...newNotice, priority: value as "high" | "medium" | "low"})}
-                        disabled={isLoading}
-                      >
-                        <SelectTrigger>
-                          <SelectValue placeholder="Selecione a prioridade" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="high">🔴 Alta</SelectItem>
-                          <SelectItem value="medium">🟡 Média</SelectItem>
-                          <SelectItem value="low">🟢 Baixa</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
-                    
-                    <div className="grid grid-cols-2 gap-4">
-                      <div className="space-y-2">
-                        <Label htmlFor="startDate">Data de Início</Label>
-                        <Input 
-                          id="startDate" 
-                          type="date" 
-                          value={formatDate(newNotice.startDate)}
-                          onChange={(e) => setNewNotice({
-                            ...newNotice, 
-                            startDate: new Date(e.target.value)
-                          })}
-                          disabled={isLoading}
-                        />
-                      </div>
-                      <div className="space-y-2">
-                        <Label htmlFor="endDate">Data de Término</Label>
-                        <Input 
-                          id="endDate" 
-                          type="date" 
-                          value={formatDate(newNotice.endDate)}
-                          onChange={(e) => setNewNotice({
-                            ...newNotice, 
-                            endDate: new Date(e.target.value)
-                          })}
-                          disabled={isLoading}
-                        />
-                      </div>
-                    </div>
-
-                    {isLoading && (
-                      <div className="flex items-center justify-center p-4">
-                        <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-navy"></div>
-                        <span className="ml-2 text-sm text-navy">Salvando no servidor...</span>
-                      </div>
-                    )}
-                  </CardContent>
-                  <CardFooter>
-                    <Button 
-                      type="submit" 
-                      className="w-full bg-navy hover:bg-navy-light"
-                      disabled={isLoading}
-                    >
-                      {isLoading ? (
-                        <>
-                          <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-                          Salvando no Servidor...
-                        </>
-                      ) : (
-                        "📢 Adicionar Aviso no Servidor"
-                      )}
-                    </Button>
-                  </CardFooter>
-                </form>
-              </Card>
-              
-              {/* Lista de Avisos */}
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    📢 Avisos do Servidor
-                    <span className="text-sm font-normal text-gray-500">
-                      ({notices.length})
-                    </span>
-                    {isLoading && (
-                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-navy"></div>
-                    )}
-                  </CardTitle>
-                  <CardDescription className="flex justify-between items-center">
-                    <span>Gerencie os avisos salvos no servidor</span>
-                    <Button 
-                      variant="outline" 
-                      size="sm"
-                      onClick={refreshNotices}
-                      disabled={isLoading}
-                    >
-                      🔄 Atualizar
-                    </Button>
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  {notices.length === 0 ? (
-                    <div className="text-center py-8">
-                      {isLoading ? (
-                        <div>
-                          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-navy mx-auto mb-4"></div>
-                          <p className="text-muted-foreground">Carregando avisos do servidor...</p>
-                        </div>
-                      ) : (
-                        <p className="text-muted-foreground">Nenhum aviso cadastrado no servidor.</p>
-                      )}
-                    </div>
-                  ) : (
-                    <ul className="space-y-3 max-h-[500px] overflow-y-auto pr-2">
-                      {notices.map((notice) => (
-                        <li key={String(notice.id)} className={`border-l-4 ${
-                          notice.priority === "high" ? "border-red-500" :
-                          notice.priority === "medium" ? "border-yellow-500" :
-                          "border-green-500"
-                        } rounded-md p-4 bg-white shadow-sm`}>
-                          <div className="flex justify-between items-start">
-                            <h3 className="font-medium flex items-center gap-2">
-                              {notice.priority === "high" ? "🔴" :
-                               notice.priority === "medium" ? "🟡" : "🟢"}
-                              {notice.title}
-                              {String(notice.id).startsWith('local-') && (
-                                <span className="text-xs bg-orange-100 text-orange-800 px-2 py-1 rounded-full">
-                                  Local
-                                </span>
-                              )}
-                            </h3>
-                            <div className="flex gap-1">
-                              <Button 
-                                variant={notice.active ? "default" : "outline"} 
-                                size="sm" 
-                                onClick={() => toggleNoticeActive(notice)}
-                                disabled={isLoading}
-                              >
-                                {notice.active ? "✅" : "💤"}
-                              </Button>
-                              <Button 
-                                variant="destructive" 
-                                size="sm"
-                                onClick={() => removeNotice(String(notice.id))}
-                                disabled={isLoading}
-                              >
-                                🗑️
-                              </Button>
-                            </div>
-                          </div>
-                          <p className="text-sm text-gray-700 my-2">{notice.content}</p>
-                          <div className="flex justify-between items-center text-xs text-muted-foreground mt-2">
-                            <span>
-                              Prioridade: {
-                                notice.priority === "high" ? "🔴 Alta" :
-                                notice.priority === "medium" ? "🟡 Média" : "🟢 Baixa"
-                              }
-                            </span>
-                            <span>
-                              📅 {notice.startDate.toLocaleDateString('pt-BR')} até {notice.endDate.toLocaleDateString('pt-BR')}
-                            </span>
-                          </div>
-                          {(notice.createdAt || notice.updatedAt) && (
-                            <div className="text-xs text-gray-400 mt-1">
-                              {notice.createdAt && (
-                                <span>Criado: {notice.createdAt.toLocaleString('pt-BR')} </span>
-                              )}
-                              {notice.updatedAt && notice.updatedAt !== notice.createdAt && (
-                                <span>• Atualizado: {notice.updatedAt.toLocaleString('pt-BR')}</span>
-                              )}
-                            </div>
-                          )}
-                        </li>
-                      ))}
-                    </ul>
-                  )}
-                </CardContent>
-              </Card>
-            </div>
-
-            {/* Informações sobre servidor de avisos */}
-            <Card className="mt-6">
-              <CardHeader>
-                <CardTitle>🌐 Servidor de Avisos</CardTitle>
-                <CardDescription>
-                  Os avisos agora são salvos diretamente no servidor backend
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                  <div className="bg-green-50 p-4 rounded-lg">
-                    <h4 className="font-medium text-green-800 mb-2">✅ Vantagens</h4>
-                    <ul className="text-sm text-green-700 space-y-1">
-                      <li>• Persistem mesmo se o navegador for fechado</li>
-                      <li>• Sincronizam entre diferentes dispositivos</li>
-                      <li>• Backup automático no servidor</li>
-                      <li>• Não dependem do localStorage</li>
-                    </ul>
-                  </div>
-                  
-                  <div className="bg-blue-50 p-4 rounded-lg">
-                    <h4 className="font-medium text-blue-800 mb-2">🔧 Como Funciona</h4>
-                    <ul className="text-sm text-blue-700 space-y-1">
-                      <li>• Salvos em arquivo JSON no servidor</li>
-                      <li>• API REST para criar/editar/deletar</li>
-                      <li>• Carregamento automático na inicialização</li>
-                      <li>• Fallback local se servidor estiver offline</li>
-                    </ul>
-                  </div>
-                  
-                  <div className="bg-yellow-50 p-4 rounded-lg">
-                    <h4 className="font-medium text-yellow-800 mb-2">⚠️ Importante</h4>
-                    <ul className="text-sm text-yellow-700 space-y-1">
-                      <li>• Servidor backend deve estar rodando</li>
-                      <li>• Avisos "Local" não foram salvos no servidor</li>
-                      <li>• Use "Atualizar" se houver problemas</li>
-                      <li>• Verifique logs no console (F12)</li>
-                    </ul>
-                  </div>
-                </div>
-                
-                <div className="mt-4 flex gap-2">
-                  <Button 
-                    variant="outline"
-                    onClick={() => window.open(getBackendUrl('/api/notices'), '_blank')}
-                  >
-                    🔗 Ver Avisos no Servidor
-                  </Button>
-                  <Button 
-                    variant="outline"
-                    onClick={refreshNotices}
-                    disabled={isLoading}
-                  >
-                    🔄 Recarregar do Servidor
-                  </Button>
-                  <Button 
-                    variant="outline"
-                    onClick={() => {
-                      console.log("📢 Estado atual dos avisos:", notices);
-                      toast({
-                        title: "Debug",
-                        description: `${notices.length} avisos no console (F12)`
-                      });
-                    }}
-                  >
-                    🐛 Debug Avisos
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
-          </TabsContent>
+        
           
         {/* Aba de Documentos - CÓDIGO COMPLETO */}
 <TabsContent value="documentos">
@@ -1751,6 +1360,24 @@ const handleDocumentSubmit = async (e: React.FormEvent) => {
               </Select>
             </div>
           )}
+          {selectedDocType === "cardapio" && (
+  <div className="space-y-2">
+    <Label htmlFor="docUnit">Unidade do Cardápio</Label>
+    <Select 
+      value={docUnit} 
+      onValueChange={(value) => setDocUnit(value as "EAGM" | "1DN")}
+    >
+      <SelectTrigger>
+        <SelectValue placeholder="Selecione a unidade" />
+      </SelectTrigger>
+      <SelectContent>
+        <SelectItem value="EAGM">🏢 EAGM (Gastão Mota)</SelectItem>
+        <SelectItem value="1DN">⚓ 1º DN (Distrito Naval)</SelectItem>
+      </SelectContent>
+    </Select>
+  </div>
+)}
+
           
           <div className="space-y-2">
             <Label htmlFor="docTitle">Título do Documento</Label>
@@ -2066,7 +1693,16 @@ const handleDocumentSubmit = async (e: React.FormEvent) => {
                       <span className="text-xs bg-orange-100 text-orange-800 px-2 py-0.5 rounded-full status-badge">
                         CARDÁPIO
                       </span>
-                    </div>
+                        {doc.unit && (
+                          <span className={`text-xs px-2 py-0.5 rounded-full status-badge ${
+                            doc.unit === "EAGM" 
+                              ? "bg-blue-100 text-blue-800" 
+                              : "bg-green-100 text-green-800"
+                          }`}>
+                            {doc.unit === "EAGM" ? "🏢 EAGM" : "⚓ 1º DN"}
+                          </span>
+                        )}
+                                            </div>
                     <div className="flex items-center gap-4 text-xs text-muted-foreground">
                       <span className="flex items-center gap-1">
                         📅 {new Date(doc.uploadDate).toLocaleDateString('pt-BR')}
@@ -2349,7 +1985,7 @@ const handleDocumentSubmit = async (e: React.FormEvent) => {
                       disabled={isLoadingOfficers || (!dutyOfficers.officerName && !dutyOfficers.masterName)}
                       className="bg-navy hover:bg-navy/90"
                     >
-                      {isLoadingOfficers ? "💾 Salvando..." : "💾 Salvar Oficiais"}
+                      {isLoadingOfficers ? "💾 Salvando..." : "💾 Salvar"}
                     </Button>
                     <Button 
                       variant="outline"
@@ -2436,7 +2072,7 @@ const handleDocumentSubmit = async (e: React.FormEvent) => {
 
                     <div className="p-3 bg-blue-50 rounded-lg">
                       <p className="text-sm text-blue-700">
-                        💡 <strong>Dica:</strong> As informações dos oficiais são exibidas no cabeçalho 
+                        💡 <strong>Dica:</strong> As informações dos militares são exibidas no cabeçalho 
                         da tela principal e são atualizadas automaticamente em tempo real.
                       </p>
                     </div>
@@ -2599,7 +2235,6 @@ const handleDocumentSubmit = async (e: React.FormEvent) => {
                             <p><strong>Documentos:</strong> {serverStatus.documents}</p>
                           </div>
                           <div>
-                            <p><strong>Avisos:</strong> {serverStatus.notices}</p>
                             <p><strong>Última verificação:</strong> {serverStatus.lastCheck ? serverStatus.lastCheck.toLocaleTimeString('pt-BR') : 'Nunca'}</p>
                           </div>
                         </div>
@@ -2648,10 +2283,7 @@ const handleDocumentSubmit = async (e: React.FormEvent) => {
                     </CardContent>
                   </Card>
 
-                  {/* Alertas Meteorológicos */}
-                  <div className="lg:col-span-2">
-                    <WeatherAlerts />
-                  </div>
+             
 
                   {/* Card de Manutenção do Sistema */}
                   <Card className="lg:col-span-2">

@@ -21,7 +21,7 @@ interface DebugInfo {
 }
 
 interface PDFViewerProps {
-  documentType: "plasa" | "escala" | "bono";
+  documentType: "plasa" | "escala" | "bono" | "cardapio";
   title: string;
   scrollSpeed?: "slow" | "normal" | "fast";
   autoRestartDelay?: number;
@@ -147,100 +147,126 @@ const PDFViewer: React.FC<PDFViewerProps> = ({
   const PDF_SCALE = 1.5;
 
   // Função para obter a URL completa do servidor backend - DETECTAR AMBIENTE
-  const getBackendUrl = (path: string): string => {
-    if (path.startsWith('http') || path.startsWith('blob:') || path.startsWith('data:')) {
-      return path;
-    }
-    
-    // Usar IP real do servidor para acesso em rede
-    const currentHost = window.location.hostname;
-    
-    // Se estamos acessando via IP da rede, usar o mesmo IP para backend
-    if (currentHost !== 'localhost' && currentHost !== '127.0.0.1') {
-      console.log(`🌐 PDFViewer: Detectado acesso via rede: ${currentHost}`);
-      
-      if (path.startsWith('/')) {
-        return `http://${currentHost}:5000${path}`;
-      }
-      return `http://${currentHost}:5000/${path}`;
-    }
-    
-    // Detectar se estamos no Replit
-    const isReplit = currentHost.includes('replit.dev') || currentHost.includes('replit.co');
-    
-    if (isReplit) {
-      const currentOrigin = window.location.origin;
-      if (path.startsWith('/')) {
-        return `${currentOrigin}${path}`;
-      }
-      return `${currentOrigin}/${path}`;
-    } else {
-      // Desenvolvimento local
-      if (path.startsWith('/')) {
-        return `http://localhost:5000${path}`;
-      }
-      return `http://localhost:5000/${path}`;
-    }
-  };
+ const getBackendUrl = (path: string): string => {
 
-  // NOVA FUNÇÃO: Filtrar apenas escalas (excluir cardápios)
-  const getEscalaDocuments = () => {
-    return escalaDocuments.filter(doc => {
-      if (!doc.active) return false;
-      
-      // Filtrar APENAS escalas, excluir cardápios
-      const isMenu = doc.title.toLowerCase().includes('cardápio') || 
-                    doc.title.toLowerCase().includes('cardapio') ||
-                    doc.url.toLowerCase().includes('cardápio') ||
-                    doc.url.toLowerCase().includes('cardapio') ||
-                    doc.title.toLowerCase().includes('menu');
-      
-      // Retornar TRUE apenas se NÃO for cardápio (ou seja, é escala)
-      return !isMenu;
-    });
+  // Função para gerar ID do documento
+  const generateDocumentId = (url: string): string => {
+    const urlParts = url.split("/");
+    const filename = urlParts[urlParts.length - 1];
+    const cleanName = filename
+      .replace(/\.[^/.]+$/, "")
+      .replace(/[^a-zA-Z0-9]/g, "-")
+      .toLowerCase();
+    return cleanName;
   };
-
-  // CORREÇÃO: Função para determinar a URL do documento com alternância APENAS DE ESCALAS
-  const getDocumentUrl = () => {
-    if (documentType === "plasa") {
-      if (activePlasaDoc?.url) {
-        console.log("📄 PLASA: Usando documento do admin:", activePlasaDoc.url);
-        return getBackendUrl(activePlasaDoc.url);
-      }
-      console.log("📄 PLASA: Nenhum documento ativo");
-      return null;
-    } else if (documentType === "escala") {
-      // CORREÇÃO: Usar apenas escalas (sem cardápios)
-      const activeEscalas = getEscalaDocuments();
-      
-      if (activeEscalas.length === 0) {
-        console.log("📋 ESCALA: Nenhuma escala ativa (apenas escalas, sem cardápios)");
-        return null;
-      }
-      
-      const currentEscala = activeEscalas[currentEscalaIndex % activeEscalas.length];
-      
-      if (currentEscala?.url) {
-        console.log(`📋 ESCALA: Usando escala ${currentEscalaIndex + 1}/${activeEscalas.length}:`, {
-          title: currentEscala.title,
-          category: currentEscala.category,
-          url: currentEscala.url
-        });
-        return getBackendUrl(currentEscala.url);
-      }
-      
-      console.log("📋 ESCALA: Escala atual sem URL válida");
-      return null;
+  if (path.startsWith('http') || path.startsWith('blob:') || path.startsWith('data:')) {
+    return path;
+  }
+  
+  // 🚨 CORREÇÃO: Usar IP real do servidor para acesso em rede
+  const currentHost = window.location.hostname;
+  const currentPort = window.location.port;
+  
+  // Se estamos acessando via IP da rede, usar o mesmo IP para backend
+  if (currentHost !== 'localhost' && currentHost !== '127.0.0.1') {
+    console.log(`🌐 PDFViewer: Detectado acesso via rede: ${currentHost}`);
+    
+    if (path.startsWith('/')) {
+      return `http://${currentHost}:5000${path}`;
     }
+    return `http://${currentHost}:5000/${path}`;
+  }
+  
+  // Detectar se estamos no Replit
+  const isReplit = currentHost.includes('replit.dev') || currentHost.includes('replit.co');
+  
+  if (isReplit) {
+    const currentOrigin = window.location.origin;
+    if (path.startsWith('/')) {
+      return `${currentOrigin}${path}`;
+    }
+    return `${currentOrigin}/${path}`;
+  } else {
+    // Desenvolvimento local
+    if (path.startsWith('/')) {
+      return `http://localhost:5000${path}`;
+    }
+    return `http://localhost:5000/${path}`;
+  }
+};
+
+  // CORREÇÃO: Função para determinar a URL do documento com alternância
+ const getDocumentUrl = () => {
+  if (documentType === "plasa") {
+    if (activePlasaDoc?.url) {
+      console.log("📄 PLASA: Usando documento do admin:", activePlasaDoc.url);
+      return getBackendUrl(activePlasaDoc.url);
+    }
+    console.log("📄 PLASA: Nenhum documento ativo");
     return null;
-  };
+  } else if (documentType === "escala") {
+    // CORREÇÃO: Usar a escala atual baseada no índice
+    const activeEscalas = escalaDocuments.filter(doc => doc.active && doc.type === "escala");
+    
+    if (activeEscalas.length === 0) {
+      console.log("📋 ESCALA: Nenhuma escala ativa");
+      return null;
+    }
+    
+    const currentEscala = activeEscalas[currentEscalaIndex % activeEscalas.length];
+    
+    if (currentEscala?.url) {
+      console.log(`📋 ESCALA: Usando escala ${currentEscalaIndex + 1}/${activeEscalas.length}:`, {
+        title: currentEscala.title,
+        category: currentEscala.category,
+        url: currentEscala.url
+      });
+      return getBackendUrl(currentEscala.url);
+    }
+    
+    console.log("📋 ESCALA: Escala atual sem URL válida");
+    return null;
+  } else if (documentType === "cardapio") {
+    // NOVO: Usar apenas cardápios
+    const activeCardapios = escalaDocuments.filter(doc => doc.active && doc.type === "cardapio");
+    
+    if (activeCardapios.length === 0) {
+      console.log("🍽️ CARDÁPIO: Nenhum cardápio ativo");
+      return null;
+    }
+    
+    const currentCardapio = activeCardapios[currentEscalaIndex % activeCardapios.length];
+    
+    if (currentCardapio?.url) {
+      console.log(`🍽️ CARDÁPIO: Usando cardápio ${currentEscalaIndex + 1}/${activeCardapios.length}:`, {
+        title: currentCardapio.title,
+        url: currentCardapio.url
+      });
+      return getBackendUrl(currentCardapio.url);
+    }
+    
+    console.log("🍽️ CARDÁPIO: Cardápio atual sem URL válida");
+    return null;
+  }
+  
+  return null; // ← Adicione esta linha no final
+};
 
-  // CORREÇÃO: Obter documento da escala atual (SEM cardápios)
+    
+  
+
+  // CORREÇÃO: Obter documento da escala atual
   const getCurrentEscalaDoc = () => {
-    const activeEscalas = getEscalaDocuments();
+  const activeEscalas = escalaDocuments.filter(doc => doc.active && doc.type === "escala");
     if (activeEscalas.length === 0) return null;
     return activeEscalas[currentEscalaIndex % activeEscalas.length] || null;
   };
+// NOVO: Obter documento do cardápio atual
+const getCurrentCardapioDoc = () => {
+  const activeCardapios = escalaDocuments.filter(doc => doc.active && doc.type === "cardapio");
+  if (activeCardapios.length === 0) return null;
+  return activeCardapios[currentEscalaIndex % activeCardapios.length] || null;
+};
 
   // Verificar se arquivo é imagem
   const isImageFile = (url: string) => {
@@ -481,7 +507,7 @@ const PDFViewer: React.FC<PDFViewerProps> = ({
           const scale = Math.min(PDF_SCALE, 2048 / Math.max(originalViewport.width, originalViewport.height));
           const viewport = page.getViewport({ scale: scale });
 
-          console.log(`📏 Página ${pageNum} - Original: ${originalViewport.width}x${originalViewport.height}, Escala: ${scale}, Final: ${viewport.width}x${viewport.height}`);
+          console.log(`📐 Página ${pageNum} - Original: ${originalViewport.width}x${originalViewport.height}, Escala: ${scale}, Final: ${viewport.width}x${viewport.height}`);
 
           const canvas = document.createElement('canvas');
           const context = canvas.getContext('2d', { 
@@ -627,6 +653,7 @@ const PDFViewer: React.FC<PDFViewerProps> = ({
 
   // Callback quando scroll completa
   const handleScrollComplete = useCallback(() => {
+
     setIsScrolling(false);
     
     // Chamar callback externo se fornecido (para alternância PLASA/BONO)
@@ -687,10 +714,13 @@ const PDFViewer: React.FC<PDFViewerProps> = ({
   useEffect(() => {
     if (documentType === "plasa" || documentType === "bono") {
       const activeMainDoc = documentType === "plasa" ? activePlasaDoc : activeBonoDoc;
+      
+
 
       if (isScrolling) return;
       
       if (!activeMainDoc || !activeMainDoc.url) {
+
         setLoading(false);
         setSavedPageUrls([]);
         setDebugInfo({
@@ -706,12 +736,15 @@ const PDFViewer: React.FC<PDFViewerProps> = ({
       setDebugInfo({});
 
       const docUrl = getBackendUrl(activeMainDoc.url);
+
       
       if (isImageFile(docUrl) || (docUrl.startsWith('blob:') && activeMainDoc.title.match(/\.(jpg|jpeg|png|gif|webp)$/i))) {
+
         setSavedPageUrls([docUrl]);
         setTotalPages(1);
         setLoading(false);
       } else {
+
         convertPDFToImages(docUrl);
       }
     }
@@ -723,14 +756,14 @@ const PDFViewer: React.FC<PDFViewerProps> = ({
     };
   }, [documentType, activePlasaDoc?.id, activePlasaDoc?.url, activeBonoDoc?.id, activeBonoDoc?.url]);
 
-  // CORREÇÃO: Inicializar ESCALA com monitoramento do índice de alternância (SEM CARDÁPIOS)
+  // CORREÇÃO: Inicializar ESCALA com monitoramento do índice de alternância
   useEffect(() => {
     if (documentType === "escala") {
       const currentEscala = getCurrentEscalaDoc();
       
-      console.log("📄 ESCALA Effect triggered:", {
+      console.log("🔄 ESCALA Effect triggered:", {
         currentEscalaIndex,
-        totalActiveEscalas: getEscalaDocuments().length,
+        totalActiveEscalas: escalaDocuments.filter(d => d.active && d.type === "escala").length,
         currentEscala: currentEscala?.title,
         category: currentEscala?.category,
         url: currentEscala?.url,
@@ -760,7 +793,43 @@ const PDFViewer: React.FC<PDFViewerProps> = ({
     }
   }, [documentType, currentEscalaIndex, escalaDocuments]);
 
-  // Verificar se URL é imagem
+  // NOVO: Inicializar CARDÁPIO
+useEffect(() => {
+  if (documentType === "cardapio") {
+    const currentCardapio = getCurrentCardapioDoc();
+    
+    console.log("🔄 CARDÁPIO Effect triggered:", {
+      currentEscalaIndex,
+      totalActiveCardapios: escalaDocuments.filter(d => d.active && d.type === "cardapio").length,
+      currentCardapio: currentCardapio?.title,
+      url: currentCardapio?.url,
+      id: currentCardapio?.id 
+    });
+    
+    // Resetar estados
+    setEscalaImageUrl(null); // Pode reutilizar ou criar setCardapioImageUrl
+    setLoading(false);
+    setTotalPages(1);
+    
+    if (currentCardapio?.url) {
+      const docUrl = getBackendUrl(currentCardapio.url);
+      console.log("🖼️ CARDÁPIO: Processando URL:", docUrl);
+      
+      const isPDF = docUrl.toLowerCase().includes('.pdf') || currentCardapio.title.toLowerCase().includes('.pdf');
+      
+      if (isPDF) {
+        console.log("📄 CARDÁPIO: É um PDF, convertendo para imagem...");
+        convertEscalaPDFToImage(docUrl); // Pode reutilizar a função ou criar uma nova
+      } else {
+        console.log("🖼️ CARDÁPIO: É uma imagem, usando diretamente");
+        setLoading(false);
+      }
+    } else {
+      setLoading(false);
+    }
+  }
+}, [documentType, currentEscalaIndex, escalaDocuments]);
+  // ✅ FUNÇÃO: Verificar se URL é imagem
   const checkIfImageFile = async (url: string): Promise<boolean> => {
     try {
       const response = await fetch(url, { method: 'HEAD' });
@@ -774,34 +843,43 @@ const PDFViewer: React.FC<PDFViewerProps> = ({
   // NOVA FUNÇÃO: Converter PDF da escala para imagem
   const convertEscalaPDFToImage = async (pdfUrl: string) => {
     try {
-      // Obter documentId para o cache
+      // ✅ NOVO: Obter documentId para o cache
       const currentEscala = getCurrentEscalaDoc();
       if (!currentEscala) {
+
         setLoading(false);
         return;
       }
       
       const documentId = currentEscala.id;
+      
+
       setLoading(true);
       setLoadingProgress(0);
   
-      // VERIFICAR CACHE PRIMEIRO
+      // ✅ NOVO: VERIFICAR CACHE PRIMEIRO
+
+      
       try {
         const cacheResponse = await fetch(getBackendUrl(`/api/check-escala-cache/${documentId}`));
         const cacheResult = await cacheResponse.json();
         
         if (cacheResult.success && cacheResult.exists) {
+
           const cachedUrl = getBackendUrl(cacheResult.url);
           setEscalaImageUrl(cachedUrl);
           setLoading(false);
-          return; // SAIR AQUI - USA CACHE
+          return; // ✅ SAIR AQUI - USA CACHE
         }
       } catch (cacheError) {
-        // Cache error - continue with conversion
+
       }
+      
+
   
       // Verificar se não é imagem primeiro
       if (await checkIfImageFile(pdfUrl)) {
+
         setLoading(false);
         return;
       }
@@ -813,10 +891,14 @@ const PDFViewer: React.FC<PDFViewerProps> = ({
       const header = new TextDecoder().decode(uint8Array.slice(0, 8));
       
       if (!header.startsWith('%PDF')) {
+
         setEscalaImageUrl(pdfUrl);
         setLoading(false);
+
         return;
       }
+      
+
       
       const loadingTask = pdfjsLib.getDocument({
         data: pdfData,
@@ -833,11 +915,15 @@ const PDFViewer: React.FC<PDFViewerProps> = ({
       });
       
       const pdf = await loadingTask.promise;
+
+      
       const page = await pdf.getPage(1);
       
       const originalViewport = page.getViewport({ scale: 1.0 });
       const scale = Math.min(1.5, 1024 / Math.max(originalViewport.width, originalViewport.height));
       const viewport = page.getViewport({ scale: scale });
+  
+
   
       const canvas = document.createElement('canvas');
       const context = canvas.getContext('2d', { 
@@ -857,6 +943,8 @@ const PDFViewer: React.FC<PDFViewerProps> = ({
         background: '#FFFFFF',
         intent: 'display'
       };
+  
+
       
       const renderPromise = page.render(renderContext).promise;
       const timeoutPromise = new Promise((_, reject) => 
@@ -865,8 +953,13 @@ const PDFViewer: React.FC<PDFViewerProps> = ({
       
       await Promise.race([renderPromise, timeoutPromise]);
       
-      // SALVAR NO CACHE APÓS CONVERSÃO
+
+      
+      // ✅ NOVO: SALVAR NO CACHE APÓS CONVERSÃO
       try {
+
+        
+        // CORREÇÃO: Tipagem correta para o Blob
         const imageBlob = await new Promise<Blob | null>((resolve) => {
           canvas.toBlob((blob) => {
             resolve(blob);
@@ -876,6 +969,10 @@ const PDFViewer: React.FC<PDFViewerProps> = ({
         if (!imageBlob) {
           throw new Error('Falha ao converter canvas para blob');
         }
+        
+        const formData = new FormData();
+        formData.append('file', imageBlob, `escala-${documentId}.jpg`);
+        formData.append('documentId', documentId);
         
         const imageDataUrl = canvas.toDataURL('image/jpeg', 0.85);
         
@@ -892,6 +989,9 @@ const PDFViewer: React.FC<PDFViewerProps> = ({
         
         if (saveResponse.ok) {
           const saveResult = await saveResponse.json();
+
+          
+          // ✅ Usar URL do servidor ao invés de dataURL
           const cachedUrl = getBackendUrl(saveResult.url);
           setEscalaImageUrl(cachedUrl);
         } else {
@@ -899,6 +999,7 @@ const PDFViewer: React.FC<PDFViewerProps> = ({
         }
       } catch (saveError) {
         console.log(`⚠️ ESCALA: Falha ao salvar cache, usando dataURL:`, saveError);
+        // ✅ Fallback: usar dataURL se não conseguir salvar no servidor
         const imageDataUrl = canvas.toDataURL('image/jpeg', 0.85);
         setEscalaImageUrl(imageDataUrl);
       }
@@ -1011,7 +1112,44 @@ const PDFViewer: React.FC<PDFViewerProps> = ({
           )}
         </div>
       );
-    }
+    } else if (documentType === "cardapio") {
+  const docUrl = getDocumentUrl();
+  const currentCardapio = getCurrentCardapioDoc();
+  
+  return (
+    <div className="w-full h-full flex items-center justify-center p-4">
+      {escalaImageUrl && escalaImageUrl !== 'convertida' && escalaImageUrl !== 'nenhuma' ? (
+        <img
+          src={escalaImageUrl}
+          alt="Cardápio Semanal Convertido"
+          className="max-w-full max-h-full object-contain shadow-lg"
+          onLoad={() => {
+            console.log(`✅ Cardápio convertido carregado com sucesso`);
+          }}
+        />
+      ) : docUrl ? (
+        <img
+          src={docUrl}
+          alt="Cardápio Semanal"
+          className="max-w-full max-h-full object-contain shadow-lg"
+          onError={(e) => {
+            console.error("❌ Erro ao carregar cardápio:", docUrl);
+            (e.target as HTMLImageElement).src = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAwIiBoZWlnaHQ9IjMwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iNDAwIiBoZWlnaHQ9IjMwMCIgZmlsbD0iI2Y4ZjhmOCIvPjx0ZXh0IHg9IjIwMCIgeT0iMTUwIiBmb250LWZhbWlseT0iQXJpYWwiIGZvbnQtc2l6ZT0iMTgiIGZpbGw9IiM5OTkiIHRleHQtYW5jaG9yPSJtaWRkbGUiPkVycm8gYW8gY2FycmVnYXIgY2FyZMOhcGlvPC90ZXh0Pjwvc3ZnPg==';
+          }}
+          onLoad={() => {
+            console.log(`✅ Cardápio carregado com sucesso: ${docUrl}`);
+          }}
+        />
+      ) : (
+        <div className="text-center text-gray-500">
+          <div className="text-4xl mb-4">🍽️</div>
+          <div>Nenhum cardápio ativo</div>
+          <div className="text-sm mt-2">Adicione um cardápio no painel administrativo</div>
+        </div>
+      )}
+    </div>
+  );}
+    
 
     return (
       <div className="w-full h-full flex items-center justify-center">
@@ -1098,73 +1236,192 @@ const PDFViewer: React.FC<PDFViewerProps> = ({
     );
   };
 
-  // CORREÇÃO: Título dinâmico baseado na escala atual (SEM cardápios)
-  const getCurrentTitle = () => {
-    if (documentType === "escala") {
-      const currentEscala = getCurrentEscalaDoc();
-      const activeEscalas = getEscalaDocuments();
-      
-      if (currentEscala) {
-        const categorySubtitle = currentEscala.category
-          ? `(${currentEscala.category === "oficial" ? "Oficiais" : "Praças"})`
-          : "";
-        
-        if (activeEscalas.length > 1) {
-          return `${title} ${categorySubtitle} - ${currentEscalaIndex + 1}/${activeEscalas.length}`;
-        } else {
-          return `${title} ${categorySubtitle}`;
-        }
-      }
-    }
-    
-    return title;
-  };
+ const getCurrentTitle = () => {
+  if (documentType === "escala") {
+    return title; // ou "ESCALA DE SERVIÇO SEMANAL"
+  } else if (documentType === "cardapio") {
+    return "CARDÁPIO SEMANAL";
+  }
+  
+  return title;
+};
 
   const currentEscala = getCurrentEscalaDoc();
 
   return (
+
     <Card className="h-full overflow-hidden border-0 shadow-none bg-transparent">
       {/* Header Estilizado com Gradiente */}
-      <CardHeader className="relative bg-gradient-to-r from-slate-700 via-blue-800 to-slate-700 text-white py-1 px-3 border-b border-blue-400/30">
-        {/* Efeito de brilho */}
-        <div className="absolute inset-0 bg-gradient-to-r from-transparent via-blue-400/10 to-transparent"></div>
-        
-        <CardTitle className="relative z-10 flex items-center justify-between">
-          <div className="flex items-center space-x-3">
-            <div className="w-6 h-6 bg-gradient-to-br from-blue-500 to-blue-600 rounded flex items-center justify-center shadow-lg">
-              {documentType === "plasa" ? (
-                <span className="text-white text-lg leading-none">📋</span>
-              ) : (
-                <span className="text-white text-lg leading-none">📅</span>
-              )}
+
+
+
+
+<CardHeader className={`relative text-white border-b py-2 px-4 ${
+  documentType === "cardapio" 
+    ? "bg-gradient-to-r from-orange-700 via-amber-600 to-orange-700 border-orange-400/40 shadow-lg" 
+    : "bg-gradient-to-r from-slate-700 via-blue-800 to-slate-700 border-blue-400/30"
+}`}>
+  {/* Efeito de brilho melhorado baseado no tipo */}
+  <div className={`absolute inset-0 ${
+    documentType === "cardapio" 
+      ? "bg-gradient-to-r from-orange-400/15 via-yellow-400/10 to-orange-400/15" 
+      : "bg-gradient-to-r from-transparent via-blue-400/10 to-transparent"
+  }`}></div>
+
+  {/* Elementos decorativos melhorados para cardápio */}
+  {documentType === "cardapio" && (
+    <>
+     
+      {/* Borda interna dupla para mais sofisticação */}
+      <div className="absolute inset-[1px] rounded border border-orange-300/20"></div>
+      <div className="absolute inset-1 rounded border border-orange-200/10"></div>
+      
+      {/* Textura sutil */}
+      <div className="absolute inset-0 opacity-10 bg-gradient-to-br from-orange-200/20 via-transparent to-amber-200/20"></div>
+    </>
+  )}
+
+<CardTitle className="relative z-10 flex items-center justify-between">
+  <div className="flex items-center space-x-3">
+    {/* Ícone estilizado baseado no tipo */}
+    <div className={`relative ${
+      documentType === "cardapio" ? "w-8 h-8" : "w-6 h-6"
+    }`}>
+      <div className={`w-full h-full rounded-lg flex items-center justify-center shadow-lg ${
+        documentType === "cardapio" 
+          ? "bg-gradient-to-br from-orange-500 to-amber-600" 
+          : "bg-gradient-to-br from-blue-500 to-blue-600"
+      }`}>
+        {documentType === "plasa" ? (
+          <span className="text-white text-lg leading-none">📋</span>
+        ) : documentType === "bono" ? (
+          <span className="text-white text-lg leading-none">📋</span>
+        ) : documentType === "escala" ? (
+          <span className="text-white text-lg leading-none">📅</span>
+        ) : documentType === "cardapio" ? (
+          <span className="text-white text-lg leading-none">🍽️</span>
+        ) : (
+          <span className="text-white text-lg leading-none">📄</span>
+        )}
+      </div>
+      
+      {/* Brilho extra para cardápio */}
+      {documentType === "cardapio" && (
+        <div className="absolute inset-0 rounded-lg bg-gradient-to-br from-orange-400/20 to-amber-400/20 blur-sm"></div>
+      )}
+    </div>
+    
+    <div className="flex flex-col">
+      <span className={`font-bold text-sm bg-clip-text text-transparent uppercase tracking-wide ${
+        documentType === "cardapio"
+          ? "bg-gradient-to-r from-orange-50 via-white to-amber-50 drop-shadow-sm"
+          : "bg-gradient-to-r from-white to-blue-100"
+      }`}>
+        {documentType === "plasa" ? (
+          activePlasaDoc?.title || "📋 PLASA - PLANO DE SERVIÇO SEMANAL"
+        ) : documentType === "cardapio" ? (
+          "CARDÁPIO SEMANAL"
+        ) : (
+          getCurrentTitle() || "📅 ESCALA DE SERVIÇO SEMANAL"
+        )}
+      </span>
+      
+      {/* REMOVIDO: Subtítulo do cardápio */}
+    </div>
+  </div>
+  
+  <div className="flex items-center space-x-3">
+    {/* Indicador OFICIAIS | PRAÇAS fixo com ícones para ESCALA */}
+    {documentType === "escala" && (() => {
+      const currentEscala = getCurrentEscalaDoc();
+      const isOficial = currentEscala?.category === "oficial";
+      
+      return (
+        <div className="bg-slate-600/50 backdrop-blur-sm rounded-lg px-3 py-1 border border-slate-400/30 flex items-center">
+          <div className="flex items-center gap-2">
+            {/* OFICIAIS */}
+            <div className="flex items-center gap-1">
+              <span className={`text-sm transition-all duration-300 ${
+                isOficial ? "opacity-100" : "opacity-40"
+              }`}>⭐</span>
+              <span className={`text-xs font-bold transition-all duration-300 ${
+                isOficial 
+                  ? "text-yellow-200 drop-shadow-sm" 
+                  : "text-slate-400"
+              }`}>
+                OFICIAIS
+              </span>
             </div>
             
-            <div className="flex flex-col">
-              <span className="font-bold text-sm bg-gradient-to-r from-white to-blue-100 bg-clip-text text-transparent uppercase tracking-wide">
-                {documentType === "plasa" ? (
-                  activePlasaDoc?.title || "📋 PLASA - PLANO DE SERVIÇO SEMANAL"
-                ) : (
-                  getCurrentTitle() || "📅 ESCALA DE SERVIÇO SEMANAL"
-                )}
+            {/* Separador */}
+            <span className="text-slate-300 text-xs mx-1">|</span>
+            
+            {/* PRAÇAS */}
+            <div className="flex items-center gap-1">
+              <span className={`text-sm transition-all duration-300 ${
+                !isOficial ? "opacity-100" : "opacity-40"
+              }`}>🛡️</span>
+              <span className={`text-xs font-bold transition-all duration-300 ${
+                !isOficial 
+                  ? "text-green-200 drop-shadow-sm" 
+                  : "text-slate-400"
+              }`}>
+                PRAÇAS
               </span>
             </div>
           </div>
-          
-          {/* CONTADOR DE PÁGINAS ALINHADO */}
-          <div className="flex items-center space-x-3">
-            {documentType === "plasa" && savedPageUrls.length > 0 && (
-              <div className="bg-blue-600/50 backdrop-blur-sm rounded-lg px-4 h-7 border border-blue-400/30 flex items-center justify-center">
-                <div className="flex items-center gap-2">
-                  <span className="text-blue-100 text-xs font-medium">📄</span>
-                  <span className="text-white font-bold text-sm">
-                    {savedPageUrls.length} páginas
-                  </span>
-                </div>
-              </div>
-            )}
+        </div>
+      );
+    })()}
+
+
+   {/* ADICIONAR AQUI: Indicador EAGM | 1DN para CARDÁPIO */}
+    {documentType === "cardapio" && (() => {
+      const currentCardapio = getCurrentCardapioDoc();
+      const isEAGM = currentCardapio?.unit === "EAGM";
+      
+      return (
+        <div className="bg-orange-600/50 backdrop-blur-sm rounded-lg px-3 py-1 border border-orange-400/30 flex items-center">
+          <div className="flex items-center gap-2">
+            {/* EAGM */}
+            <div className="flex items-center gap-1">
+              <span className={`text-sm transition-all duration-300 ${
+                isEAGM ? "opacity-100" : "opacity-40"
+              }`}>🏢</span>
+              <span className={`text-xs font-bold transition-all duration-300 ${
+                isEAGM 
+                  ? "text-orange-200 drop-shadow-sm" 
+                  : "text-orange-400/60"
+              }`}>
+                EAGM
+              </span>
+            </div>
+            
+            {/* Separador */}
+            <span className="text-orange-300 text-xs mx-1">|</span>
+            
+            {/* 1DN */}
+            <div className="flex items-center gap-1">
+              <span className={`text-sm transition-all duration-300 ${
+                !isEAGM ? "opacity-100" : "opacity-40"
+              }`}>⚓</span>
+              <span className={`text-xs font-bold transition-all duration-300 ${
+                !isEAGM 
+                  ? "text-orange-200 drop-shadow-sm" 
+                  : "text-orange-400/60"
+              }`}>
+                1DN
+              </span>
+            </div>
           </div>
-        </CardTitle>
-      </CardHeader>
+        </div>
+      );
+    })()}
+  </div>
+    
+
+</CardTitle>
+</CardHeader>
       
       <CardContent className="p-0 h-[calc(100%-2.5rem)] bg-white">
         {loading ? (
