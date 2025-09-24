@@ -16,7 +16,7 @@ export interface PDFDocument {
   id: string;
   title: string;
   url: string;
-  type: "plasa" | "bono" | "escala" | "cardapio";
+  type: "plasa" | "escala" | "cardapio";
   category?: "oficial" | "praca"; 
   unit?: "EAGM" | "1DN";
   active: boolean;
@@ -25,15 +25,12 @@ export interface PDFDocument {
 interface DisplayContextType {
   notices: Notice[];
   plasaDocuments: PDFDocument[];
-  bonoDocuments: PDFDocument[];
   escalaDocuments: PDFDocument[];
   cardapioDocuments: PDFDocument[];
   activePlasaDoc: PDFDocument | null;
-  activeBonoDoc: PDFDocument | null;
   activeEscalaDoc: PDFDocument | null;
   activeCardapioDoc: PDFDocument | null;
   currentEscalaIndex: number;
-  currentMainDocType: "plasa" | "bono";
   documentAlternateInterval: number;
   scrollSpeed: "slow" | "normal" | "fast";
   autoRestartDelay: number;
@@ -69,11 +66,9 @@ export const DisplayProvider: React.FC<DisplayProviderProps> = ({ children }) =>
   // Estados
   const [notices, setNotices] = useState<Notice[]>([]);
   const [plasaDocuments, setPlasaDocuments] = useState<PDFDocument[]>([]);
-  const [bonoDocuments, setBonoDocuments] = useState<PDFDocument[]>([]);
   const [escalaDocuments, setEscalaDocuments] = useState<PDFDocument[]>([]);
   const [cardapioDocuments, setCardapioDocuments] = useState<PDFDocument[]>([]);
   const [currentEscalaIndex, setCurrentEscalaIndex] = useState(0);
-  const [currentMainDocType, setCurrentMainDocType] = useState<"plasa" | "bono">("plasa");
   const [documentAlternateInterval, setDocumentAlternateInterval] = useState(30000);
   const [scrollSpeed, setScrollSpeed] = useState<"slow" | "normal" | "fast">("normal");
   const [autoRestartDelay, setAutoRestartDelay] = useState(3);
@@ -84,37 +79,10 @@ export const DisplayProvider: React.FC<DisplayProviderProps> = ({ children }) =>
   const mainDocTimerRef = useRef<NodeJS.Timeout | null>(null);
   const isInitializingRef = useRef(true);
   
-  // Callback para alternância PLASA/BONO após completar scroll
+  // Callback para após completar scroll (apenas PLASA agora)
   const handleScrollComplete = () => {
-
-    
-    // Limpar timer anterior se existir
-    if (mainDocTimerRef.current) {
-      clearTimeout(mainDocTimerRef.current);
-    }
-    
-    // Agendar alternância após o delay de restart
-    mainDocTimerRef.current = setTimeout(() => {
-      if (activePlasaDoc && activeBonoDoc) {
-        // Alternar entre PLASA e BONO
-        setCurrentMainDocType(prev => {
-          const next = prev === "plasa" ? "bono" : "plasa";
-
-          return next;
-        });
-      } else if (activePlasaDoc && !activeBonoDoc) {
-        // Apenas PLASA ativo, manter PLASA
-
-        setCurrentMainDocType("plasa");
-      } else if (!activePlasaDoc && activeBonoDoc) {
-        // Apenas BONO ativo, manter BONO
-
-        setCurrentMainDocType("bono");
-      } else {
-        // Nenhum documento principal ativo
-
-      }
-    }, autoRestartDelay * 1000);
+    // Função simplificada - apenas PLASA
+    console.log("✅ Scroll completo");
   };
 
   // CORREÇÃO: Função para obter URL completa do backend - DETECTAR AMBIENTE
@@ -497,17 +465,6 @@ const deleteNotice = async (id: string): Promise<boolean> => {
         console.log("📄 Adicionando novo PLASA:", newDoc.title);
         return [...prev, newDoc];
       });
-    } else if (docData.type === "bono") {
-      setBonoDocuments(prev => {
-        const exists = prev.some(doc => doc.url === fullUrl || doc.url === docData.url);
-        if (exists) {
-          console.log("📋 Documento BONO já existe, ignorando:", fullUrl);
-          return prev;
-        }
-        
-        console.log("📋 Adicionando novo BONO:", newDoc.title);
-        return [...prev, newDoc];
-      });
     } else if (docData.type === "cardapio") {
       setCardapioDocuments(prev => {
         const exists = prev.some(doc => doc.url === fullUrl || doc.url === docData.url);
@@ -547,10 +504,6 @@ const deleteNotice = async (id: string): Promise<boolean> => {
       setPlasaDocuments(prev => prev.map(doc => 
         doc.id === updatedDoc.id ? updatedDoc : doc
       ));
-    } else if (updatedDoc.type === "bono") {
-      setBonoDocuments(prev => prev.map(doc => 
-        doc.id === updatedDoc.id ? updatedDoc : doc
-      ));
     } else {
       setEscalaDocuments(prev => prev.map(doc => 
         doc.id === updatedDoc.id ? updatedDoc : doc
@@ -562,7 +515,7 @@ const deleteNotice = async (id: string): Promise<boolean> => {
     console.log("🗑️ Removendo documento:", id);
     
     // Encontrar o documento para obter o filename
-    const allDocs = [...plasaDocuments, ...bonoDocuments, ...escalaDocuments];
+    const allDocs = [...plasaDocuments, ...escalaDocuments];
     const docToDelete = allDocs.find(doc => doc.id === id);
     
     if (docToDelete && docToDelete.url.includes('/uploads/')) {
@@ -592,7 +545,6 @@ const deleteNotice = async (id: string): Promise<boolean> => {
     
     // Remover da lista local independentemente do resultado do servidor
     setPlasaDocuments(prev => prev.filter(doc => doc.id !== id));
-    setBonoDocuments(prev => prev.filter(doc => doc.id !== id));
     setCardapioDocuments(prev => prev.filter(doc => doc.id !== id));
     setEscalaDocuments(prev => {
       const newList = prev.filter(doc => doc.id !== id);
@@ -608,7 +560,6 @@ const deleteNotice = async (id: string): Promise<boolean> => {
 
   // Computed values com alternância automática para escalas  
   const activePlasaDoc = plasaDocuments.find(doc => doc.active) || null;
-  const activeBonoDoc = bonoDocuments.find(doc => doc.active) || null;
   const activeCardapioDoc = cardapioDocuments.find(doc => doc.active) || null;
   const activeEscalaDocuments = escalaDocuments.filter(doc => doc.active);
   const activeEscalaDoc = activeEscalaDocuments.length > 0 
@@ -666,10 +617,6 @@ const deleteNotice = async (id: string): Promise<boolean> => {
           ...doc,
           uploadDate: doc.uploadDate.toISOString()
         })),
-        bonoDocuments: bonoDocuments.map(doc => ({
-          ...doc,
-          uploadDate: doc.uploadDate.toISOString()
-        })),
         escalaDocuments: escalaDocuments.map(doc => ({
           ...doc,
           uploadDate: doc.uploadDate.toISOString()
@@ -689,7 +636,7 @@ const deleteNotice = async (id: string): Promise<boolean> => {
     } catch (error) {
       console.error("❌ Erro ao salvar contexto:", error);
     }
-  }, [plasaDocuments, bonoDocuments, escalaDocuments, currentEscalaIndex, documentAlternateInterval, scrollSpeed, autoRestartDelay]);
+  }, [plasaDocuments, escalaDocuments, currentEscalaIndex, documentAlternateInterval, scrollSpeed, autoRestartDelay]);
 
   // Função auxiliar para determinar categoria
   const determineCategory = (filename: string): "oficial" | "praca" | undefined => {
@@ -717,10 +664,9 @@ const deleteNotice = async (id: string): Promise<boolean> => {
             const existsInEscala = escalaDocuments.some(doc => doc.url === fullUrl);
             
             // CORREÇÃO: Verificar se documento já existe em QUALQUER lista
-            const existsInBono = bonoDocuments.some(doc => doc.url === fullUrl);
             const existsInCardapio = cardapioDocuments.some(doc => doc.url === fullUrl);
             
-            if (!existsInPlasa && !existsInEscala && !existsInBono && !existsInCardapio) {
+            if (!existsInPlasa && !existsInEscala && !existsInCardapio) {
               // USAR A CLASSIFICAÇÃO DO BACKEND DIRETAMENTE
               const docType = serverDoc.type || 'escala'; // fallback para escala
               const category = determineCategory(serverDoc.filename);
@@ -728,7 +674,6 @@ const deleteNotice = async (id: string): Promise<boolean> => {
               // Gerar título baseado no tipo correto
               const typeNames = {
                 'plasa': 'PLASA',
-                'bono': 'BONO', 
                 'escala': 'Escala',
                 'cardapio': 'Cardápio'
               };
@@ -786,24 +731,6 @@ const deleteNotice = async (id: string): Promise<boolean> => {
               }
             }
 
-            // Carregar documentos BONO com correção de URL
-            if (data.bonoDocuments && Array.isArray(data.bonoDocuments)) {
-              const validBonoDocs = data.bonoDocuments
-                .filter((doc: any) => doc && doc.id && doc.title && doc.url)
-                .map((doc: any) => {
-                  return {
-                    ...doc,
-                    url: normalizeDocumentUrl(doc.url),
-                    uploadDate: new Date(doc.uploadDate),
-                    active: doc.active !== false
-                  };
-                });
-              
-              if (validBonoDocs.length > 0) {
-                setBonoDocuments(validBonoDocs);
-
-              }
-            }
 
             // Carregar documentos Escala com correção de URL
             if (data.escalaDocuments && Array.isArray(data.escalaDocuments)) {
@@ -885,15 +812,12 @@ const deleteNotice = async (id: string): Promise<boolean> => {
   const value: DisplayContextType = {
     notices,
     plasaDocuments,
-    bonoDocuments,
     escalaDocuments,
     cardapioDocuments,
     activePlasaDoc,
-    activeBonoDoc,
     activeEscalaDoc,
     activeCardapioDoc,
     currentEscalaIndex,
-    currentMainDocType,
     documentAlternateInterval,
     scrollSpeed,
     autoRestartDelay,

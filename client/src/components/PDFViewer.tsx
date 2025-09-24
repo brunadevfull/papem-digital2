@@ -215,16 +215,6 @@ const PDFViewer: React.FC<PDFViewerProps> = ({
     
     console.log("📋 ESCALA: Escala atual sem URL válida");
     return null;
-  } else if (documentType === "bono") {
-    if (activeBonoDoc?.url) {
-      console.log("📰 BONO: Usando documento ativo:", {
-        title: activeBonoDoc.title,
-        url: activeBonoDoc.url
-      });
-      return getBackendUrl(activeBonoDoc.url);
-    }
-    console.log("📰 BONO: Nenhum documento BONO ativo");
-    return null;
   } else if (documentType === "cardapio") {
     // CORREÇÃO: Usar activeCardapioDoc diretamente do contexto
     if (!activeCardapioDoc) {
