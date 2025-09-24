@@ -42,59 +42,77 @@ function normalizeString(str: string): string {
 
 // Função principal para extrair classificação
 function extractClassification(originalName: string, title?: string, bodyType?: string): DocumentClassification {
-  const cacheKey = `${originalName}-${title || ''}-${bodyType || ''}`;
+  // Cache baseado apenas no nome original para garantir consistência
+  const cacheKey = normalizeString(originalName);
   
   // Verificar cache primeiro
   if (classificationCache.has(cacheKey)) {
     return classificationCache.get(cacheKey)!;
   }
 
-  // Normalizar textos para análise
+  // ESTRATÉGIA DE CLASSIFICAÇÃO ROBUSTA:
+  // 1. Se bodyType é fornecido (upload), use-o como definitivo
+  // 2. Senão, analise o nome original do arquivo (sempre disponível)
+  // 3. Use título apenas como informação complementar
+  
   const normalizedName = normalizeString(originalName);
   const normalizedTitle = title ? normalizeString(title) : '';
-  const searchText = `${normalizedName} ${normalizedTitle}`.trim();
+  
+  // Use nome original como base principal da análise
+  const primaryText = normalizedName;
+  const secondaryText = normalizedTitle;
+  const fullText = `${primaryText} ${secondaryText}`.trim();
 
-  console.log(`🔍 Classificando documento: "${originalName}" -> "${searchText}"`);
+  console.log(`🔍 Classificando documento: "${originalName}" -> "${fullText}"`);
 
-  // Detectar tipo do documento
+  // Detectar tipo do documento - prioridade para bodyType (mais confiável)
   let type: DocumentClassification['type'] = 'escala'; // default
   
   if (bodyType && ['plasa', 'bono', 'escala', 'cardapio'].includes(bodyType)) {
     type = bodyType as DocumentClassification['type'];
   } else {
-    // Inferir do nome/título - ORDEM IMPORTANTE: mais específico primeiro
-    if (searchText.includes('PLASA')) {
+    // Análise do nome original (sempre consistente)
+    if (primaryText.includes('PLASA')) {
       type = 'plasa';
-    } else if (searchText.includes('BONO')) {
+    } else if (primaryText.includes('BONO')) {
       type = 'bono';
-    } else if (searchText.includes('CARDAPIO') || searchText.includes('CARD')) {
+    } else if (primaryText.includes('CARDAPIO') || primaryText.includes('CARD')) {
       type = 'cardapio';
-    } else if (searchText.includes('ESCALA')) {
+    } else if (primaryText.includes('ESCALA')) {
       type = 'escala';
     }
   }
 
-  // Detectar categoria para escala (OFICIAIS/PRAÇAS)
+  // Detectar categoria para escala (OFICIAIS/PRAÇAS) - use texto completo
   let category: DocumentClassification['category'] | undefined;
   if (type === 'escala') {
-    if (searchText.includes('OFICIA') || searchText.includes('OFICIAL') || searchText.includes(' OF ')) {
+    if (fullText.includes('OFICIA') || fullText.includes('OFICIAL') || fullText.includes(' OF ')) {
       category = 'oficial';
-    } else if (searchText.includes('PRACA') || searchText.includes('PRAC') || searchText.includes('PRC')) {
+    } else if (fullText.includes('PRACA') || fullText.includes('PRAC') || fullText.includes('PRC')) {
       category = 'praca';
     }
   }
 
-  // Detectar unidade para cardápio (1DN/EAGM)
+  // Detectar unidade - SEMPRE analise o nome original primeiro (mais confiável)
   let unit: DocumentClassification['unit'] | undefined;
   if (type === 'cardapio') {
-    if (searchText.includes('1DN') || searchText.includes('DN 1') || searchText.includes('DN-1')) {
+    // Prioridade 1: Nome original do arquivo
+    if (primaryText.includes('1DN') || primaryText.includes('DN 1') || primaryText.includes('DN-1')) {
       unit = '1DN';
-    } else if (searchText.includes('EAGM') || searchText.includes('EAGS')) {
+    } else if (primaryText.includes('EAGM') || primaryText.includes('EAGS')) {
       unit = 'EAGM';
+    }
+    // Prioridade 2: Título (se disponível e unidade não foi encontrada)
+    else if (secondaryText && !unit) {
+      if (secondaryText.includes('1DN') || secondaryText.includes('DN 1') || secondaryText.includes('DN-1')) {
+        unit = '1DN';
+      } else if (secondaryText.includes('EAGM') || secondaryText.includes('EAGS')) {
+        unit = 'EAGM';
+      }
     }
   }
 
-  // Extrair todas as tags importantes
+  // Extrair todas as tags importantes - SEMPRE use nome original como base
   const tags: string[] = [];
   
   // Tags específicas por tipo
@@ -108,11 +126,11 @@ function extractClassification(originalName: string, title?: string, bodyType?: 
     if (unit === 'EAGM') tags.push('EAGM');
   }
 
-  // Tags gerais
-  if (searchText.includes('PLASA')) tags.push('PLASA');
-  if (searchText.includes('BONO')) tags.push('BONO');
-  if (searchText.includes('ESCALA')) tags.push('ESCALA');
-  if (searchText.includes('CARDAPIO')) tags.push('CARDÁPIO');
+  // Tags gerais - SEMPRE analise o nome original
+  if (primaryText.includes('PLASA')) tags.push('PLASA');
+  if (primaryText.includes('BONO')) tags.push('BONO');
+  if (primaryText.includes('ESCALA')) tags.push('ESCALA');
+  if (primaryText.includes('CARDAPIO') || primaryText.includes('CARD')) tags.push('CARDÁPIO');
 
   const classification: DocumentClassification = {
     type,
