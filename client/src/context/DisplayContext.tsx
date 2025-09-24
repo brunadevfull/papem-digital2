@@ -27,9 +27,11 @@ interface DisplayContextType {
   plasaDocuments: PDFDocument[];
   bonoDocuments: PDFDocument[];
   escalaDocuments: PDFDocument[];
+  cardapioDocuments: PDFDocument[];
   activePlasaDoc: PDFDocument | null;
   activeBonoDoc: PDFDocument | null;
   activeEscalaDoc: PDFDocument | null;
+  activeCardapioDoc: PDFDocument | null;
   currentEscalaIndex: number;
   currentMainDocType: "plasa" | "bono";
   documentAlternateInterval: number;
@@ -69,6 +71,7 @@ export const DisplayProvider: React.FC<DisplayProviderProps> = ({ children }) =>
   const [plasaDocuments, setPlasaDocuments] = useState<PDFDocument[]>([]);
   const [bonoDocuments, setBonoDocuments] = useState<PDFDocument[]>([]);
   const [escalaDocuments, setEscalaDocuments] = useState<PDFDocument[]>([]);
+  const [cardapioDocuments, setCardapioDocuments] = useState<PDFDocument[]>([]);
   const [currentEscalaIndex, setCurrentEscalaIndex] = useState(0);
   const [currentMainDocType, setCurrentMainDocType] = useState<"plasa" | "bono">("plasa");
   const [documentAlternateInterval, setDocumentAlternateInterval] = useState(30000);
@@ -505,7 +508,19 @@ const deleteNotice = async (id: string): Promise<boolean> => {
         console.log("📋 Adicionando novo BONO:", newDoc.title);
         return [...prev, newDoc];
       });
+    } else if (docData.type === "cardapio") {
+      setCardapioDocuments(prev => {
+        const exists = prev.some(doc => doc.url === fullUrl || doc.url === docData.url);
+        if (exists) {
+          console.log("🍽️ Documento CARDÁPIO já existe, ignorando:", fullUrl);
+          return prev;
+        }
+        
+        console.log("🍽️ Adicionando novo CARDÁPIO:", newDoc.title, "Unidade:", newDoc.unit);
+        return [...prev, newDoc];
+      });
     } else {
+      // Apenas escalas ficam neste caso
       setEscalaDocuments(prev => {
         const exists = prev.some(doc => doc.url === fullUrl || doc.url === docData.url);
         if (exists) {
@@ -578,6 +593,7 @@ const deleteNotice = async (id: string): Promise<boolean> => {
     // Remover da lista local independentemente do resultado do servidor
     setPlasaDocuments(prev => prev.filter(doc => doc.id !== id));
     setBonoDocuments(prev => prev.filter(doc => doc.id !== id));
+    setCardapioDocuments(prev => prev.filter(doc => doc.id !== id));
     setEscalaDocuments(prev => {
       const newList = prev.filter(doc => doc.id !== id);
       const activeEscalas = newList.filter(doc => doc.active);
@@ -593,6 +609,7 @@ const deleteNotice = async (id: string): Promise<boolean> => {
   // Computed values com alternância automática para escalas  
   const activePlasaDoc = plasaDocuments.find(doc => doc.active) || null;
   const activeBonoDoc = bonoDocuments.find(doc => doc.active) || null;
+  const activeCardapioDoc = cardapioDocuments.find(doc => doc.active) || null;
   const activeEscalaDocuments = escalaDocuments.filter(doc => doc.active);
   const activeEscalaDoc = activeEscalaDocuments.length > 0 
     ? activeEscalaDocuments[currentEscalaIndex % activeEscalaDocuments.length] 
@@ -699,17 +716,29 @@ const deleteNotice = async (id: string): Promise<boolean> => {
             const existsInPlasa = plasaDocuments.some(doc => doc.url === fullUrl);
             const existsInEscala = escalaDocuments.some(doc => doc.url === fullUrl);
             
-            if (!existsInPlasa && !existsInEscala) {
-              const isPlasa = serverDoc.type === 'plasa' || 
-                             serverDoc.filename.toLowerCase().includes('plasa');
-              
+            // CORREÇÃO: Verificar se documento já existe em QUALQUER lista
+            const existsInBono = bonoDocuments.some(doc => doc.url === fullUrl);
+            const existsInCardapio = cardapioDocuments.some(doc => doc.url === fullUrl);
+            
+            if (!existsInPlasa && !existsInEscala && !existsInBono && !existsInCardapio) {
+              // USAR A CLASSIFICAÇÃO DO BACKEND DIRETAMENTE
+              const docType = serverDoc.type || 'escala'; // fallback para escala
               const category = determineCategory(serverDoc.filename);
               
+              // Gerar título baseado no tipo correto
+              const typeNames = {
+                'plasa': 'PLASA',
+                'bono': 'BONO', 
+                'escala': 'Escala',
+                'cardapio': 'Cardápio'
+              };
+              const typeName = typeNames[docType as keyof typeof typeNames] || 'Documento';
+              
               const docData: Omit<PDFDocument, "id" | "uploadDate"> = {
-                title: `${isPlasa ? 'PLASA' : 'Escala'} - ${new Date(serverDoc.created).toLocaleDateString('pt-BR')}`,
+                title: `${typeName} - ${new Date(serverDoc.created).toLocaleDateString('pt-BR')}`,
                 url: fullUrl,
-                type: isPlasa ? 'plasa' : 'escala',
-                category: isPlasa ? undefined : category,
+                type: docType as any, // Usar o tipo do servidor diretamente
+                category: docType === 'escala' ? category : undefined,
                 active: true
               };
               
@@ -858,9 +887,11 @@ const deleteNotice = async (id: string): Promise<boolean> => {
     plasaDocuments,
     bonoDocuments,
     escalaDocuments,
+    cardapioDocuments,
     activePlasaDoc,
     activeBonoDoc,
     activeEscalaDoc,
+    activeCardapioDoc,
     currentEscalaIndex,
     currentMainDocType,
     documentAlternateInterval,

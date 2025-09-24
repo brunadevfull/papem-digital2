@@ -119,7 +119,7 @@ const PDFViewer: React.FC<PDFViewerProps> = ({
   onScrollComplete
 }) => {
   // CORREÇÃO: Usar currentEscalaIndex do contexto
-  const { activeEscalaDoc, activePlasaDoc, activeBonoDoc, currentEscalaIndex, escalaDocuments } = useDisplay();
+  const { activeEscalaDoc, activePlasaDoc, activeBonoDoc, activeCardapioDoc, currentEscalaIndex, escalaDocuments } = useDisplay();
   const [totalPages, setTotalPages] = useState(0);
   const [loading, setLoading] = useState(false);
   const [isScrolling, setIsScrolling] = useState(false);
@@ -227,26 +227,17 @@ const PDFViewer: React.FC<PDFViewerProps> = ({
     console.log("📋 ESCALA: Escala atual sem URL válida");
     return null;
   } else if (documentType === "cardapio") {
-    // NOVO: Usar apenas cardápios
-    const activeCardapios = escalaDocuments.filter(doc => doc.active && doc.type === "cardapio");
-    
-    if (activeCardapios.length === 0) {
+    // CORREÇÃO: Usar activeCardapioDoc diretamente do contexto
+    if (!activeCardapioDoc) {
       console.log("🍽️ CARDÁPIO: Nenhum cardápio ativo");
       return null;
     }
     
-    const currentCardapio = activeCardapios[currentEscalaIndex % activeCardapios.length];
-    
-    if (currentCardapio?.url) {
-      console.log(`🍽️ CARDÁPIO: Usando cardápio ${currentEscalaIndex + 1}/${activeCardapios.length}:`, {
-        title: currentCardapio.title,
-        url: currentCardapio.url
-      });
-      return getBackendUrl(currentCardapio.url);
-    }
-    
-    console.log("🍽️ CARDÁPIO: Cardápio atual sem URL válida");
-    return null;
+    console.log("🍽️ CARDÁPIO: Usando cardápio ativo:", {
+      title: activeCardapioDoc.title,
+      url: activeCardapioDoc.url
+    });
+    return getBackendUrl(activeCardapioDoc.url);
   }
   
   return null; // ← Adicione esta linha no final
@@ -261,11 +252,9 @@ const PDFViewer: React.FC<PDFViewerProps> = ({
     if (activeEscalas.length === 0) return null;
     return activeEscalas[currentEscalaIndex % activeEscalas.length] || null;
   };
-// NOVO: Obter documento do cardápio atual
+// CORREÇÃO: Obter documento do cardápio atual do contexto
 const getCurrentCardapioDoc = () => {
-  const activeCardapios = escalaDocuments.filter(doc => doc.active && doc.type === "cardapio");
-  if (activeCardapios.length === 0) return null;
-  return activeCardapios[currentEscalaIndex % activeCardapios.length] || null;
+  return activeCardapioDoc;
 };
 
   // Verificar se arquivo é imagem
@@ -799,8 +788,6 @@ useEffect(() => {
     const currentCardapio = getCurrentCardapioDoc();
     
     console.log("🔄 CARDÁPIO Effect triggered:", {
-      currentEscalaIndex,
-      totalActiveCardapios: escalaDocuments.filter(d => d.active && d.type === "cardapio").length,
       currentCardapio: currentCardapio?.title,
       url: currentCardapio?.url,
       id: currentCardapio?.id 
@@ -828,7 +815,7 @@ useEffect(() => {
       setLoading(false);
     }
   }
-}, [documentType, currentEscalaIndex, escalaDocuments]);
+}, [documentType, activeCardapioDoc]);
   // ✅ FUNÇÃO: Verificar se URL é imagem
   const checkIfImageFile = async (url: string): Promise<boolean> => {
     try {
