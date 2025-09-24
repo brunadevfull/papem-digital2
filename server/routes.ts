@@ -166,8 +166,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // 🔥 NOVO: Criar diretórios de cache
   const plasaPagesDir = path.join(uploadsDir, 'plasa-pages');
   const escalaCacheDir = path.join(uploadsDir, 'escala-cache');
+  const cardapioCacheDir = path.join(uploadsDir, 'cardapio-cache');
   
-  [plasaPagesDir, escalaCacheDir].forEach(dir => {
+  [plasaPagesDir, escalaCacheDir, cardapioCacheDir].forEach(dir => {
     if (!fs.existsSync(dir)) {
       fs.mkdirSync(dir, { recursive: true });
       console.log(`📁 Diretório criado: ${dir}`);
