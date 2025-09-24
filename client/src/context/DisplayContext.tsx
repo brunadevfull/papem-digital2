@@ -19,6 +19,7 @@ export interface PDFDocument {
   type: "plasa" | "escala" | "cardapio";
   category?: "oficial" | "praca"; 
   unit?: "EAGM" | "1DN";
+  tags?: string[]; // 🏷️ Tags de classificação automática
   active: boolean;
   uploadDate: Date;
 }

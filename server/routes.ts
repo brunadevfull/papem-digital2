@@ -182,7 +182,26 @@ export async function registerRoutes(app: Express): Promise<Server> {
     },
     filename: (req, file, cb) => {
       const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
-      cb(null, 'document-' + uniqueSuffix + '-' + file.originalname);
+      
+      // 🔒 SEGURANÇA: Mapear mimetype para extensão segura (previne XSS)
+      const safeExt = (() => {
+        switch(file.mimetype) {
+          case 'application/pdf': return '.pdf';
+          case 'image/jpeg': return '.jpg';
+          case 'image/png': return '.png';
+          case 'image/gif': return '.gif';
+          case 'image/webp': return '.webp';
+          default: return '.bin'; // Extensão segura para outros tipos
+        }
+      })();
+      
+      // Base name sanitizado (sem extensão)
+      const safeBaseName = file.originalname
+        .replace(/\.[^/.]+$/, '') // Remove extensão original
+        .replace(/[^a-zA-Z0-9._-]/g, '_') // Remove caracteres perigosos
+        .substring(0, 50); // Limita tamanho
+      
+      cb(null, 'document-' + uniqueSuffix + '-' + safeBaseName + safeExt);
     }
   });
 
@@ -333,6 +352,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
           error: 'totalPages e documentId são obrigatórios'
         });
       }
+      
+      // 🔒 SEGURANÇA: Sanitizar documentId para prevenir path traversal
+      if (!/^[a-zA-Z0-9_-]+$/.test(documentId) || documentId.length > 100) {
+        return res.status(400).json({
+          success: false,
+          error: 'documentId inválido'
+        });
+      }
 
       // Verificar se todas as páginas existem
       const pageUrls = [];
@@ -419,6 +446,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get('/api/check-escala-cache/:escalId', async (req, res) => {
     try {
       const { escalId } = req.params;
+      
+      // 🔒 SEGURANÇA: Sanitizar escalId para prevenir path traversal
+      if (!escalId || !/^[a-zA-Z0-9_-]+$/.test(escalId) || escalId.length > 100) {
+        return res.status(400).json({
+          success: false,
+          error: 'escalId inválido'
+        });
+      }
       
       const filename = `${escalId}.jpg`;
       const filePath = path.join(escalaCacheDir, filename);
