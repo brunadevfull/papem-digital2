@@ -8,6 +8,127 @@ import path from "path";
 import fs from "fs";
 import { promisify } from "util";
 
+// 🔥 NOVO: Sistema de classificação inteligente de documentos
+interface DocumentClassification {
+  type: 'plasa' | 'bono' | 'escala' | 'cardapio';
+  category?: 'oficial' | 'praca';
+  unit?: 'EAGM' | '1DN';
+  tags: string[];
+}
+
+// Cache para classificações (otimização em runtime)
+const classificationCache = new Map<string, DocumentClassification>();
+
+// Função para extrair o nome original do arquivo salvo
+function getOriginalFromSaved(savedFilename: string): string {
+  // Formato: document-timestamp-random-originalname
+  const parts = savedFilename.split('-');
+  if (parts.length >= 4 && parts[0] === 'document') {
+    return parts.slice(3).join('-');
+  }
+  return savedFilename;
+}
+
+// Função para normalizar strings (remover acentos, maiúsculas)
+function normalizeString(str: string): string {
+  return str
+    .toUpperCase()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '') // Remove diacríticos
+    .replace(/[^A-Z0-9\s]/g, ' ') // Remove caracteres especiais
+    .replace(/\s+/g, ' ') // Normaliza espaços
+    .trim();
+}
+
+// Função principal para extrair classificação
+function extractClassification(originalName: string, title?: string, bodyType?: string): DocumentClassification {
+  const cacheKey = `${originalName}-${title || ''}-${bodyType || ''}`;
+  
+  // Verificar cache primeiro
+  if (classificationCache.has(cacheKey)) {
+    return classificationCache.get(cacheKey)!;
+  }
+
+  // Normalizar textos para análise
+  const normalizedName = normalizeString(originalName);
+  const normalizedTitle = title ? normalizeString(title) : '';
+  const searchText = `${normalizedName} ${normalizedTitle}`.trim();
+
+  console.log(`🔍 Classificando documento: "${originalName}" -> "${searchText}"`);
+
+  // Detectar tipo do documento
+  let type: DocumentClassification['type'] = 'escala'; // default
+  
+  if (bodyType && ['plasa', 'bono', 'escala', 'cardapio'].includes(bodyType)) {
+    type = bodyType as DocumentClassification['type'];
+  } else {
+    // Inferir do nome/título - ORDEM IMPORTANTE: mais específico primeiro
+    if (searchText.includes('PLASA')) {
+      type = 'plasa';
+    } else if (searchText.includes('BONO')) {
+      type = 'bono';
+    } else if (searchText.includes('CARDAPIO') || searchText.includes('CARD')) {
+      type = 'cardapio';
+    } else if (searchText.includes('ESCALA')) {
+      type = 'escala';
+    }
+  }
+
+  // Detectar categoria para escala (OFICIAIS/PRAÇAS)
+  let category: DocumentClassification['category'] | undefined;
+  if (type === 'escala') {
+    if (searchText.includes('OFICIA') || searchText.includes('OFICIAL') || searchText.includes(' OF ')) {
+      category = 'oficial';
+    } else if (searchText.includes('PRACA') || searchText.includes('PRAC') || searchText.includes('PRC')) {
+      category = 'praca';
+    }
+  }
+
+  // Detectar unidade para cardápio (1DN/EAGM)
+  let unit: DocumentClassification['unit'] | undefined;
+  if (type === 'cardapio') {
+    if (searchText.includes('1DN') || searchText.includes('DN 1') || searchText.includes('DN-1')) {
+      unit = '1DN';
+    } else if (searchText.includes('EAGM') || searchText.includes('EAGS')) {
+      unit = 'EAGM';
+    }
+  }
+
+  // Extrair todas as tags importantes
+  const tags: string[] = [];
+  
+  // Tags específicas por tipo
+  if (type === 'escala') {
+    if (category === 'oficial') tags.push('OFICIAIS');
+    if (category === 'praca') tags.push('PRAÇAS');
+  }
+  
+  if (type === 'cardapio') {
+    if (unit === '1DN') tags.push('1DN');
+    if (unit === 'EAGM') tags.push('EAGM');
+  }
+
+  // Tags gerais
+  if (searchText.includes('PLASA')) tags.push('PLASA');
+  if (searchText.includes('BONO')) tags.push('BONO');
+  if (searchText.includes('ESCALA')) tags.push('ESCALA');
+  if (searchText.includes('CARDAPIO')) tags.push('CARDÁPIO');
+
+  const classification: DocumentClassification = {
+    type,
+    category,
+    unit,
+    tags
+  };
+
+  console.log(`✅ Classificação detectada:`, classification);
+
+  // Salvar no cache
+  classificationCache.set(cacheKey, classification);
+  
+  return classification;
+}
+
 
 // Promisify fs functions for async/await
 const writeFile = promisify(fs.writeFile);
@@ -98,6 +219,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       const fileUrl = `/uploads/${req.file.filename}`;
       
+      // 🔥 NOVO: Aplicar classificação inteligente
+      const classification = extractClassification(req.file.originalname, title, type);
+      
+      console.log(`📄 Upload processado: ${req.file.originalname}`);
+      console.log(`🏷️ Classificação aplicada:`, classification);
+      
+      // Salvar classificação no cache usando filename
+      classificationCache.set(req.file.filename, classification);
+      
       res.json({
         success: true,
         data: {
@@ -106,8 +236,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
           size: req.file.size,
           url: fileUrl,
           title: title,
-          type: type,
-          category: category || undefined
+          type: classification.type, // Usar classificação detectada
+          category: classification.category || category,
+          unit: classification.unit,
+          tags: classification.tags,
+          classification: classification // Incluir classificação completa
         }
       });
     } catch (error) {
@@ -747,16 +880,41 @@ export async function registerRoutes(app: Express): Promise<Server> {
           const filePath = path.join(uploadsDir, file);
           const stats = fs.statSync(filePath);
           
+          // 🔥 NOVO: Usar classificação inteligente
+          let classification: DocumentClassification;
+          
+          // Tentar recuperar do cache primeiro
+          if (classificationCache.has(file)) {
+            classification = classificationCache.get(file)!;
+          } else {
+            // Extrair nome original e classificar
+            const originalName = getOriginalFromSaved(file);
+            classification = extractClassification(originalName);
+            
+            // Salvar no cache para otimização
+            classificationCache.set(file, classification);
+          }
+          
+          console.log(`📋 Listando documento: ${file} -> Tipo: ${classification.type}, Tags: [${classification.tags.join(', ')}]`);
+          
           return {
             filename: file,
             url: `/uploads/${file}`,
             created: stats.birthtime,
             size: stats.size,
-            type: file.toLowerCase().includes('plasa') ? 'plasa' : 'escala'
+            // 🔥 Classificação completa
+            type: classification.type,
+            category: classification.category,
+            unit: classification.unit,
+            tags: classification.tags,
+            classification: classification,
+            // Para compatibilidade, incluir o nome original
+            originalname: getOriginalFromSaved(file)
           };
         })
         .sort((a, b) => b.created.getTime() - a.created.getTime());
 
+      console.log(`📂 Listando ${documents.length} documentos com classificação inteligente`);
       res.json({ documents });
     } catch (error) {
       console.error('Error listing PDFs:', error);
