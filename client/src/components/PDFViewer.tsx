@@ -147,25 +147,25 @@ const PDFViewer: React.FC<PDFViewerProps> = ({
   const PDF_SCALE = 1.5;
 
   // Função para obter a URL completa do servidor backend - DETECTAR AMBIENTE
- const getBackendUrl = (path: string): string => {
-
-  // Função para gerar ID do documento
-  const generateDocumentId = (url: string): string => {
-    const urlParts = url.split("/");
-    const filename = urlParts[urlParts.length - 1];
-    const cleanName = filename
-      .replace(/\.[^/.]+$/, "")
-      .replace(/[^a-zA-Z0-9]/g, "-")
-      .toLowerCase();
-    return cleanName;
-  };
-  if (path.startsWith('http') || path.startsWith('blob:') || path.startsWith('data:')) {
-    return path;
-  }
+  const getBackendUrl = (path: string): string => {
+    if (path.startsWith('http') || path.startsWith('blob:') || path.startsWith('data:')) {
+      return path;
+    }
   
   // 🚨 CORREÇÃO: Usar IP real do servidor para acesso em rede
   const currentHost = window.location.hostname;
   const currentPort = window.location.port;
+  
+  // Detectar se estamos no Replit PRIMEIRO
+  const isReplit = currentHost.includes('replit.dev') || currentHost.includes('replit.co');
+  
+  if (isReplit) {
+    const currentOrigin = window.location.origin;
+    if (path.startsWith('/')) {
+      return `${currentOrigin}${path}`;
+    }
+    return `${currentOrigin}/${path}`;
+  }
   
   // Se estamos acessando via IP da rede, usar o mesmo IP para backend
   if (currentHost !== 'localhost' && currentHost !== '127.0.0.1') {
@@ -177,22 +177,11 @@ const PDFViewer: React.FC<PDFViewerProps> = ({
     return `http://${currentHost}:5000/${path}`;
   }
   
-  // Detectar se estamos no Replit
-  const isReplit = currentHost.includes('replit.dev') || currentHost.includes('replit.co');
-  
-  if (isReplit) {
-    const currentOrigin = window.location.origin;
-    if (path.startsWith('/')) {
-      return `${currentOrigin}${path}`;
-    }
-    return `${currentOrigin}/${path}`;
-  } else {
-    // Desenvolvimento local
-    if (path.startsWith('/')) {
-      return `http://localhost:5000${path}`;
-    }
-    return `http://localhost:5000/${path}`;
+  // Desenvolvimento local
+  if (path.startsWith('/')) {
+    return `http://localhost:5000${path}`;
   }
+  return `http://localhost:5000/${path}`;
 };
 
   // CORREÇÃO: Função para determinar a URL do documento com alternância
@@ -226,6 +215,16 @@ const PDFViewer: React.FC<PDFViewerProps> = ({
     
     console.log("📋 ESCALA: Escala atual sem URL válida");
     return null;
+  } else if (documentType === "bono") {
+    if (activeBonoDoc?.url) {
+      console.log("📰 BONO: Usando documento ativo:", {
+        title: activeBonoDoc.title,
+        url: activeBonoDoc.url
+      });
+      return getBackendUrl(activeBonoDoc.url);
+    }
+    console.log("📰 BONO: Nenhum documento BONO ativo");
+    return null;
   } else if (documentType === "cardapio") {
     // CORREÇÃO: Usar activeCardapioDoc diretamente do contexto
     if (!activeCardapioDoc) {
@@ -240,7 +239,7 @@ const PDFViewer: React.FC<PDFViewerProps> = ({
     return getBackendUrl(activeCardapioDoc.url);
   }
   
-  return null; // ← Adicione esta linha no final
+  return null;
 };
 
     
