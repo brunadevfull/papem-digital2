@@ -275,12 +275,26 @@ export async function registerRoutes(app: Express): Promise<Server> {
         });
       }
 
-      const fileUrl = `/uploads/${req.file.filename}`;
+      // 📁 ORGANIZAÇÃO: Determinar subpasta onde o arquivo foi salvo
+      const originalName = req.file.originalname.toLowerCase();
+      let subfolder = 'outros'; // Default
+      
+      if (originalName.includes('plasa') || originalName.includes('plas')) {
+        subfolder = 'plasa';
+      } else if (originalName.includes('escala') || originalName.includes('esc') || originalName.includes('servico') || originalName.includes('serviço')) {
+        subfolder = 'escala';
+      } else if (originalName.includes('cardapio') || originalName.includes('cardápio') || originalName.includes('menu')) {
+        subfolder = 'cardapio';
+      }
+      
+      const fileUrl = `/uploads/${subfolder}/${req.file.filename}`;
       
       // 🔥 NOVO: Aplicar classificação inteligente
       const classification = extractClassification(req.file.originalname, title, type);
       
       console.log(`📄 Upload processado: ${req.file.originalname}`);
+      console.log(`📁 Arquivo salvo em: ${subfolder}/`);
+      console.log(`🔗 URL gerada: ${fileUrl}`);
       console.log(`🏷️ Classificação aplicada:`, classification);
       
       // Salvar classificação no cache usando filename
@@ -643,6 +657,30 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } else {
       next();
     }
+  });
+
+  // 📁 MIDDLEWARE: Buscar arquivos nas subpastas se não encontrados na raiz
+  app.use('/uploads', (req, res, next) => {
+    const filePath = req.url.slice(1); // Remove leading slash
+    const rootFilePath = path.join(process.cwd(), 'uploads', filePath);
+
+    // Se arquivo existe na raiz, servir normalmente
+    if (fs.existsSync(rootFilePath)) {
+      return next();
+    }
+
+    // Se arquivo não existe na raiz, buscar nas subpastas
+    const subfolders = ['plasa', 'escala', 'cardapio', 'outros'];
+    for (const subfolder of subfolders) {
+      const subfolderFilePath = path.join(process.cwd(), 'uploads', subfolder, filePath);
+      if (fs.existsSync(subfolderFilePath)) {
+        console.log(`📁 Redirecionando "${filePath}" de raiz para "${subfolder}/"`);
+        return res.redirect(301, `/uploads/${subfolder}/${filePath}`);
+      }
+    }
+
+    // Se não encontrado em lugar nenhum, continuar (será 404)
+    next();
   });
 
   app.use('/uploads', express.static(path.join(process.cwd(), 'uploads'), {
