@@ -1502,6 +1502,19 @@ if (selectedDocType === "cardapio" && !docUnit) {
                       }`}>
                         PLASA
                       </span>
+                      {(doc as any).tags && (doc as any).tags.length > 0 && (
+                        <div className="flex gap-1 flex-wrap">
+                          {(doc as any).tags.map((tag: string, index: number) => (
+                            <span
+                              key={index}
+                              className="text-xs bg-purple-100 text-purple-800 px-2 py-0.5 rounded-full status-badge"
+                              data-testid={`tag-${tag.toLowerCase()}`}
+                            >
+                              🏷️ {tag}
+                            </span>
+                          ))}
+                        </div>
+                      )}
                     </div>
                     <div className="flex items-center gap-4 text-xs text-muted-foreground">
                       <span className="flex items-center gap-1">
@@ -1596,6 +1609,19 @@ if (selectedDocType === "cardapio" && !docUnit) {
                         }`}>
                           {doc.category === "oficial" ? "👨‍✈️ Oficiais" : "👨‍🔧 Praças"}
                         </span>
+                      )}
+                      {(doc as any).tags && (doc as any).tags.length > 0 && (
+                        <div className="flex gap-1 flex-wrap">
+                          {(doc as any).tags.map((tag: string, index: number) => (
+                            <span
+                              key={index}
+                              className="text-xs bg-purple-100 text-purple-800 px-2 py-0.5 rounded-full status-badge"
+                              data-testid={`tag-${tag.toLowerCase()}`}
+                            >
+                              🏷️ {tag}
+                            </span>
+                          ))}
+                        </div>
                       )}
                     </div>
                     <div className="flex items-center gap-4 text-xs text-muted-foreground">
@@ -1694,6 +1720,19 @@ if (selectedDocType === "cardapio" && !docUnit) {
                           }`}>
                             {doc.unit === "EAGM" ? "🏢 EAGM" : "⚓ 1º DN"}
                           </span>
+                        )}
+                        {(doc as any).tags && (doc as any).tags.length > 0 && (
+                          <div className="flex gap-1 flex-wrap">
+                            {(doc as any).tags.map((tag: string, index: number) => (
+                              <span
+                                key={index}
+                                className="text-xs bg-purple-100 text-purple-800 px-2 py-0.5 rounded-full status-badge"
+                                data-testid={`tag-${tag.toLowerCase()}`}
+                              >
+                                🏷️ {tag}
+                              </span>
+                            ))}
+                          </div>
                         )}
                                             </div>
                     <div className="flex items-center gap-4 text-xs text-muted-foreground">

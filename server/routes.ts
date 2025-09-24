@@ -282,7 +282,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       const pageNumber = req.body.pageNumber;
-      const documentId = req.body.documentId || 'default';
+      const rawDocumentId = req.body.documentId || 'default';
+      
+      // 🔒 SEGURANÇA: Sanitizar documentId para prevenir path traversal
+      const documentId = rawDocumentId.replace(/[^a-zA-Z0-9_-]/g, '').substring(0, 50);
+      if (!documentId || !pageNumber || !/^\d+$/.test(pageNumber)) {
+        return res.status(400).json({
+          success: false,
+          error: 'documentId ou pageNumber inválidos'
+        });
+      }
       
       // Criar nome do arquivo baseado no documento e página
       const filename = `${documentId}-page-${pageNumber}.jpg`;
@@ -364,7 +373,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // 🔥 NOVO: 3. ENDPOINT - Salvar cache de escala
   app.post('/api/save-escala-cache', async (req, res) => {
     try {
-      const { escalId, imageData } = req.body;
+      const { escalId: rawEscalId, imageData } = req.body;
+      
+      // 🔒 SEGURANÇA: Sanitizar escalId para prevenir path traversal
+      const escalId = rawEscalId ? rawEscalId.replace(/[^a-zA-Z0-9_-]/g, '').substring(0, 50) : '';
       
       if (!escalId || !imageData) {
         return res.status(400).json({

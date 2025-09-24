@@ -84,7 +84,10 @@ export type InsertUser = z.infer<typeof insertUserSchema>;
 export type User = typeof users.$inferSelect;
 export type Notice = typeof notices.$inferSelect;
 export type InsertNotice = z.infer<typeof insertNoticeSchema>;
-export type PDFDocument = typeof documents.$inferSelect;
+export type PDFDocument = typeof documents.$inferSelect & {
+  tags?: string[]; // Tags geradas dinamicamente no backend
+  unit?: "EAGM" | "1DN"; // Unidade para cardápios
+};
 export type InsertDocument = z.infer<typeof insertDocumentSchema>;
 export type DutyOfficers = typeof dutyOfficers.$inferSelect;
 export type InsertDutyOfficers = z.infer<typeof insertDutyOfficersSchema>;
