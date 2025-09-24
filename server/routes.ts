@@ -163,12 +163,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
     fs.mkdirSync(uploadsDir, { recursive: true });
   }
 
-  // 🔥 NOVO: Criar diretórios de cache
+  // 🔥 NOVO: Criar diretórios de cache e organização
   const plasaPagesDir = path.join(uploadsDir, 'plasa-pages');
   const escalaCacheDir = path.join(uploadsDir, 'escala-cache');
   const cardapioCacheDir = path.join(uploadsDir, 'cardapio-cache');
   
-  [plasaPagesDir, escalaCacheDir, cardapioCacheDir].forEach(dir => {
+  // 📁 ORGANIZAÇÃO: Criar subpastas para documentos por tipo
+  const plasaDir = path.join(uploadsDir, 'plasa');
+  const escalaDir = path.join(uploadsDir, 'escala');
+  const cardapioDir = path.join(uploadsDir, 'cardapio');
+  const outrosDir = path.join(uploadsDir, 'outros');
+  
+  [plasaPagesDir, escalaCacheDir, cardapioCacheDir, plasaDir, escalaDir, cardapioDir, outrosDir].forEach(dir => {
     if (!fs.existsSync(dir)) {
       fs.mkdirSync(dir, { recursive: true });
       console.log(`📁 Diretório criado: ${dir}`);
@@ -178,7 +184,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Multer configuration for file uploads
   const storage_config = multer.diskStorage({
     destination: (req, file, cb) => {
-      cb(null, uploadsDir);
+      // 📁 ORGANIZAÇÃO: Determinar pasta baseado no tipo de documento
+      let destDir = outrosDir; // Default para outros tipos
+      
+      // Classificar baseado no nome do arquivo
+      const originalName = file.originalname.toLowerCase();
+      if (originalName.includes('plasa') || originalName.includes('plas')) {
+        destDir = plasaDir;
+      } else if (originalName.includes('escala') || originalName.includes('esc') || originalName.includes('servico') || originalName.includes('serviço')) {
+        destDir = escalaDir;
+      } else if (originalName.includes('cardapio') || originalName.includes('cardápio') || originalName.includes('menu')) {
+        destDir = cardapioDir;
+      }
+      
+      console.log(`📁 Salvando arquivo "${file.originalname}" em: ${path.basename(destDir)}/`);
+      cb(null, destDir);
     },
     filename: (req, file, cb) => {
       const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
