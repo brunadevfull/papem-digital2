@@ -653,13 +653,6 @@ const saveEditOfficer = async () => {
           description: "Plano de Serviço",
           color: "bg-blue-50 border-blue-200 text-blue-800"
         };
-        case "bono":  
-      return {
-        icon: "📋",
-        name: "BONO",
-        description: "Boletim de Notícias",
-        color: "bg-purple-50 border-purple-200 text-purple-800"
-      };
       case "escala":
         return {
           icon: "📋",
@@ -1474,11 +1467,11 @@ if (selectedDocType === "cardapio" && !docUnit) {
     
     {/* Document Lists Separadas */}
     <div className="space-y-6">
-      {/* 📄 PLASA/BONO Documents */}
+      {/* 📄 PLASA Documents */}
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
-            📄 Documentos PLASA/BONO
+            📄 Documentos PLASA
             <span className="text-sm font-normal text-gray-500">
               ({plasaDocuments.length})
             </span>
@@ -1490,7 +1483,7 @@ if (selectedDocType === "cardapio" && !docUnit) {
         <CardContent>
           {plasaDocuments.length === 0 ? (
             <p className="text-muted-foreground text-center py-4">
-              Nenhum documento PLASA/BONO cadastrado.
+              Nenhum documento PLASA cadastrado.
             </p>
           ) : (
             <ul className="space-y-2 max-h-48 overflow-y-auto">
@@ -1507,7 +1500,7 @@ if (selectedDocType === "cardapio" && !docUnit) {
                           ? "bg-blue-100 text-blue-800" 
                           : "bg-purple-100 text-purple-800"
                       }`}>
-                        {doc.type === "plasa" ? "PLASA" : "BONO"}
+                        PLASA
                       </span>
                     </div>
                     <div className="flex items-center gap-4 text-xs text-muted-foreground">
@@ -1789,7 +1782,7 @@ if (selectedDocType === "cardapio" && !docUnit) {
         
         <div className="bg-purple-50 p-4 rounded-lg">
           <h4 className="font-medium mb-2 flex items-center gap-2">
-           (PoC)*** <br></br> 📋 BONO (Boletim de Ordens e Notícias)
+           📋 PLASA (Plano de Serviço Semanal)
           </h4>
           <ul className="list-disc pl-5 space-y-1 text-sm text-purple-700">
             <li>Mesmo comportamento do PLASA</li>
@@ -1846,7 +1839,7 @@ if (selectedDocType === "cardapio" && !docUnit) {
             <li>Documentos inativos permanecem salvos mas não são exibidos</li>
           </ul>
           <ul className="list-disc pl-5 space-y-1 text-sm text-green-700">
-            <li>PLASA/BONO: Ideal para documentos longos que precisam ser lidos</li>
+            <li>PLASA: Ideal para documentos longos que precisam ser lidos</li>
             <li>Escalas/Cardápios: Ideal para informações que precisam ser vistas rapidamente</li>
             <li>Use nomes descritivos nos títulos para melhor organização</li>
             <li>Cache evita reprocessamento desnecessário</li>
@@ -2521,7 +2514,7 @@ if (selectedDocType === "cardapio" && !docUnit) {
             {/* Sub-aba Automação */}
             <TabsContent value="automacao">
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                {/* Card de Automação BONO já existente */}
+                {/* Card de Automação PLASA */}
               <Card>
                 <CardHeader>
                   <CardTitle>⚙️ Configurações do Sistema</CardTitle>

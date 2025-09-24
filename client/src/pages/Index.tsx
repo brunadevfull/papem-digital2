@@ -10,9 +10,7 @@ import logoPAPEM from "@assets/logoPAPEM_1751352314977.png";
 const Index = () => {
   const {
     activePlasaDoc,
-    activeBonoDoc,
     activeEscalaDoc,
-    currentMainDocType,
     scrollSpeed = "normal",
     autoRestartDelay = 3,
     handleScrollComplete
@@ -134,15 +132,12 @@ const Index = () => {
   }, []);
 
   // Determinar qual documento principal mostrar
-  const currentMainDoc = currentMainDocType === "plasa" ? activePlasaDoc : activeBonoDoc;
-  const mainDocTitle = currentMainDoc?.title || 
-    (currentMainDocType === "plasa" ? "PLASA - Plano de Serviço Semanal" : "BONO - Boletim de Ocorrências");
+  const currentMainDoc = activePlasaDoc;
+  const mainDocTitle = currentMainDoc?.title || "PLASA - Plano de Serviço Semanal";
 
   console.log("🏠 Index: Renderizando página principal", {
     activePlasa: activePlasaDoc?.title || 'nenhum',
-    activeBono: activeBonoDoc?.title || 'nenhum',
     activeEscala: activeEscalaDoc?.title || 'nenhum',
-    currentMainDocType,
     currentMainDoc: currentMainDoc?.title || 'nenhum',
     scrollSpeed,
     autoRestartDelay
@@ -337,7 +332,7 @@ const Index = () => {
         <div className="w-full lg:w-3/5 flex-1 lg:flex-none lg:h-full">
           <div className="h-full bg-gradient-to-br from-white/5 via-blue-900/20 to-white/5 backdrop-blur-sm rounded-lg border border-blue-400/25 shadow-xl hover:border-blue-400/40 transition-all duration-500 overflow-hidden">
             <PDFViewer
-              documentType={currentMainDocType}
+              documentType="plasa"
               title={mainDocTitle}
               scrollSpeed={scrollSpeed}
               autoRestartDelay={autoRestartDelay}

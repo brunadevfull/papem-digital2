@@ -21,7 +21,7 @@ interface DebugInfo {
 }
 
 interface PDFViewerProps {
-  documentType: "plasa" | "escala" | "bono" | "cardapio";
+  documentType: "plasa" | "escala" | "cardapio";
   title: string;
   scrollSpeed?: "slow" | "normal" | "fast";
   autoRestartDelay?: number;
@@ -119,7 +119,7 @@ const PDFViewer: React.FC<PDFViewerProps> = ({
   onScrollComplete
 }) => {
   // CORREÇÃO: Usar currentEscalaIndex do contexto
-  const { activeEscalaDoc, activePlasaDoc, activeBonoDoc, activeCardapioDoc, currentEscalaIndex, escalaDocuments } = useDisplay();
+  const { activeEscalaDoc, activePlasaDoc, activeCardapioDoc, currentEscalaIndex, escalaDocuments } = useDisplay();
   const [totalPages, setTotalPages] = useState(0);
   const [loading, setLoading] = useState(false);
   const [isScrolling, setIsScrolling] = useState(false);
@@ -690,8 +690,8 @@ const getCurrentCardapioDoc = () => {
 
   // CORREÇÃO: INICIALIZAR PLASA/BONO com melhor verificação
   useEffect(() => {
-    if (documentType === "plasa" || documentType === "bono") {
-      const activeMainDoc = documentType === "plasa" ? activePlasaDoc : activeBonoDoc;
+    if (documentType === "plasa") {
+      const activeMainDoc = activePlasaDoc;
       
 
 
@@ -732,7 +732,7 @@ const getCurrentCardapioDoc = () => {
         clearAllTimers();
       }
     };
-  }, [documentType, activePlasaDoc?.id, activePlasaDoc?.url, activeBonoDoc?.id, activeBonoDoc?.url]);
+  }, [documentType, activePlasaDoc?.id, activePlasaDoc?.url]);
 
   // CORREÇÃO: Inicializar ESCALA com monitoramento do índice de alternância
   useEffect(() => {
@@ -1157,7 +1157,7 @@ useEffect(() => {
                 <button 
                   onClick={() => {
                     setDebugInfo({});
-                    const activeMainDoc = documentType === "plasa" ? activePlasaDoc : activeBonoDoc;
+                    const activeMainDoc = activePlasaDoc;
                     if (activeMainDoc && activeMainDoc.url) {
                       const fullUrl = getBackendUrl(activeMainDoc.url);
                       if (isImageFile(fullUrl)) {
@@ -1187,13 +1187,13 @@ useEffect(() => {
             <>
               <div className="text-6xl mb-4">📄</div>
               <div className="text-gray-600 text-lg">
-                {((documentType === "plasa" && !activePlasaDoc) || (documentType === "bono" && !activeBonoDoc))
+                {(documentType === "plasa" && !activePlasaDoc)
                   ? `Nenhum documento ${documentType.toUpperCase()} ativo` 
                   : loading
                   ? "Processando documento..."
                   : "Preparando visualização..."}
               </div>
-              {((documentType === "plasa" && !activePlasaDoc) || (documentType === "bono" && !activeBonoDoc)) && (
+              {(documentType === "plasa" && !activePlasaDoc) && (
                 <div className="mt-4 text-sm text-gray-500">
                   Vá para o painel administrativo e faça upload de um documento {documentType.toUpperCase()}
                 </div>
