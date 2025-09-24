@@ -197,7 +197,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         destDir = cardapioDir;
       }
       
-      console.log(`📁 Salvando arquivo "${file.originalname}" em: ${path.basename(destDir)}/`);
+      console.log(`📁 MULTER: Salvando arquivo "${file.originalname}" em: ${destDir}`);
+      console.log(`📁 MULTER: Pasta relativa: ${path.basename(destDir)}/`);
       cb(null, destDir);
     },
     filename: (req, file, cb) => {
@@ -275,19 +276,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
         });
       }
 
-      // 📁 ORGANIZAÇÃO: Determinar subpasta onde o arquivo foi salvo
-      const originalName = req.file.originalname.toLowerCase();
-      let subfolder = 'outros'; // Default
-      
-      if (originalName.includes('plasa') || originalName.includes('plas')) {
-        subfolder = 'plasa';
-      } else if (originalName.includes('escala') || originalName.includes('esc') || originalName.includes('servico') || originalName.includes('serviço')) {
-        subfolder = 'escala';
-      } else if (originalName.includes('cardapio') || originalName.includes('cardápio') || originalName.includes('menu')) {
-        subfolder = 'cardapio';
-      }
-      
-      const fileUrl = `/uploads/${subfolder}/${req.file.filename}`;
+      // 📁 ORGANIZAÇÃO: Obter pasta real onde o arquivo foi salvo pelo multer
+      const filePath = req.file.path || req.file.destination + '/' + req.file.filename;
+      const uploadsPath = path.join(process.cwd(), 'uploads');
+      const relativePath = path.relative(uploadsPath, filePath);
+      const fileUrl = `/uploads/${relativePath.replace(/\\/g, '/')}`; // Normalizar separadores para web
       
       // 🔥 NOVO: Aplicar classificação inteligente
       const classification = extractClassification(req.file.originalname, title, type);
