@@ -42,12 +42,19 @@ function normalizeString(str: string): string {
 
 // Função principal para extrair classificação
 function extractClassification(originalName: string, title?: string, bodyType?: string): DocumentClassification {
-  // Cache baseado apenas no nome original para garantir consistência
-  const cacheKey = normalizeString(originalName);
-  
-  // Verificar cache primeiro
-  if (classificationCache.has(cacheKey)) {
-    return classificationCache.get(cacheKey)!;
+  // ✅ CORREÇÃO: Se tipo manual é fornecido, SEMPRE use-o (não cache)
+  if (bodyType && ['plasa', 'bono', 'escala', 'cardapio'].includes(bodyType)) {
+    console.log(`✅ TIPO MANUAL fornecido: ${bodyType} - pulando cache`);
+    // Não usar cache quando temos seleção manual
+  } else {
+    // Cache baseado apenas no nome original para garantir consistência
+    const cacheKey = normalizeString(originalName);
+    
+    // Verificar cache apenas quando NÃO há tipo manual
+    if (classificationCache.has(cacheKey)) {
+      console.log(`📦 Usando classificação do cache para: ${originalName}`);
+      return classificationCache.get(cacheKey)!;
+    }
   }
 
   // ESTRATÉGIA DE CLASSIFICAÇÃO ROBUSTA:
@@ -65,13 +72,17 @@ function extractClassification(originalName: string, title?: string, bodyType?: 
 
   console.log(`🔍 Classificando documento: "${originalName}" -> "${fullText}"`);
 
-  // Detectar tipo do documento - prioridade para bodyType (mais confiável)
-  let type: DocumentClassification['type'] = 'escala'; // default
+  // ✅ CLASSIFICAÇÃO MANUAL: Priorizar SEMPRE o tipo selecionado no combobox
+  let type: DocumentClassification['type'];
   
   if (bodyType && ['plasa', 'bono', 'escala', 'cardapio'].includes(bodyType)) {
+    // ✅ TIPO MANUAL: Usar exatamente o que foi selecionado no combobox
     type = bodyType as DocumentClassification['type'];
+    console.log(`✅ Usando tipo MANUAL selecionado: ${bodyType}`);
   } else {
-    // Análise do nome original (sempre consistente)
+    // ⚠️ FALLBACK: Só quando não há seleção manual (arquivos antigos)
+    console.log(`⚠️ Tipo não fornecido, tentando detectar automaticamente...`);
+    type = 'escala'; // default fallback
     if (primaryText.includes('PLASA')) {
       type = 'plasa';
     } else if (primaryText.includes('BONO')) {
@@ -184,21 +195,24 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Multer configuration for file uploads
   const storage_config = multer.diskStorage({
     destination: (req, file, cb) => {
-      // 📁 ORGANIZAÇÃO: Determinar pasta baseado no tipo de documento
-      let destDir = outrosDir; // Default para outros tipos
+      // 📁 ORGANIZAÇÃO: Usar tipo selecionado no combobox (não adivinhar pelo nome)
+      const documentType = req.body.type;
       
-      // Classificar baseado no nome do arquivo
-      const originalName = file.originalname.toLowerCase();
-      if (originalName.includes('plasa') || originalName.includes('plas')) {
-        destDir = plasaDir;
-      } else if (originalName.includes('escala') || originalName.includes('esc') || originalName.includes('servico') || originalName.includes('serviço')) {
-        destDir = escalaDir;
-      } else if (originalName.includes('cardapio') || originalName.includes('cardápio') || originalName.includes('menu')) {
-        destDir = cardapioDir;
+      // ✅ VALIDAÇÃO: Tipos obrigatórios (sem "outros" como default)
+      const typeToDir = {
+        'plasa': plasaDir,
+        'escala': escalaDir,
+        'cardapio': cardapioDir
+      };
+      
+      if (!documentType || !(documentType in typeToDir)) {
+        const validTypes = Object.keys(typeToDir).join(', ');
+        console.error(`❌ MULTER: Tipo inválido "${documentType}". Tipos válidos: ${validTypes}`);
+        return cb(new Error(`INVALID_TYPE: Tipo deve ser um de: ${validTypes}`), null);
       }
       
-      console.log(`📁 MULTER: Salvando arquivo "${file.originalname}" em: ${destDir}`);
-      console.log(`📁 MULTER: Pasta relativa: ${path.basename(destDir)}/`);
+      const destDir = typeToDir[documentType as keyof typeof typeToDir];
+      console.log(`📁 MULTER: Salvando "${file.originalname}" como tipo "${documentType}" em: ${path.basename(destDir)}/`);
       cb(null, destDir);
     },
     filename: (req, file, cb) => {
@@ -286,7 +300,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const classification = extractClassification(req.file.originalname, title, type);
       
       console.log(`📄 Upload processado: ${req.file.originalname}`);
-      console.log(`📁 Arquivo salvo em: ${subfolder}/`);
       console.log(`🔗 URL gerada: ${fileUrl}`);
       console.log(`🏷️ Classificação aplicada:`, classification);
       
