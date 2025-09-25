@@ -152,8 +152,14 @@ function extractClassification(originalName: string, title?: string, bodyType?: 
 
   console.log(`✅ Classificação detectada:`, classification);
 
-  // Salvar no cache
-  classificationCache.set(cacheKey, classification);
+  // ✅ CACHE SEGURO: Só salvar no cache quando NÃO há tipo manual
+  if (!bodyType) {
+    const normalizedKey = normalizeString(originalName);
+    classificationCache.set(normalizedKey, classification);
+    console.log(`💾 Cache automático salvo para: ${originalName}`);
+  } else {
+    console.log(`⚠️ Tipo manual (${bodyType}) - não salvando no cache automático`);
+  }
   
   return classification;
 }
@@ -303,8 +309,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       console.log(`🔗 URL gerada: ${fileUrl}`);
       console.log(`🏷️ Classificação aplicada:`, classification);
       
-      // Salvar classificação no cache usando filename
-      classificationCache.set(req.file.filename, classification);
+      // ✅ CLASSIFICAÇÃO CONCLUÍDA: Tipo manual sempre respeitado
+      console.log(`✅ Upload processado com tipo MANUAL: ${type}`);
       
       res.json({
         success: true,
