@@ -201,25 +201,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Multer configuration for file uploads
   const storage_config = multer.diskStorage({
     destination: (req, file, cb) => {
-      // 📁 ORGANIZAÇÃO: Usar tipo selecionado no combobox (não adivinhar pelo nome)
-      const documentType = req.body.type;
-      
-      // ✅ VALIDAÇÃO: Tipos obrigatórios (sem "outros" como default)
-      const typeToDir = {
-        'plasa': plasaDir,
-        'escala': escalaDir,
-        'cardapio': cardapioDir
-      };
-      
-      if (!documentType || !(documentType in typeToDir)) {
-        const validTypes = Object.keys(typeToDir).join(', ');
-        console.error(`❌ MULTER: Tipo inválido "${documentType}". Tipos válidos: ${validTypes}`);
-        return cb(new Error(`INVALID_TYPE: Tipo deve ser um de: ${validTypes}`), null);
-      }
-      
-      const destDir = typeToDir[documentType as keyof typeof typeToDir];
-      console.log(`📁 MULTER: Salvando "${file.originalname}" como tipo "${documentType}" em: ${path.basename(destDir)}/`);
-      cb(null, destDir);
+      // 🔧 CORREÇÃO: Usar uploads temporário (body ainda não processado aqui)
+      cb(null, uploadsDir);
     },
     filename: (req, file, cb) => {
       const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
@@ -278,7 +261,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // File upload route
-  app.post('/api/upload-pdf', upload.single('pdf'), (req, res) => {
+  app.post('/api/upload-pdf', upload.single('pdf'), async (req, res) => {
     try {
       if (!req.file) {
         return res.status(400).json({ 
@@ -296,11 +279,41 @@ export async function registerRoutes(app: Express): Promise<Server> {
         });
       }
 
-      // 📁 ORGANIZAÇÃO: Obter pasta real onde o arquivo foi salvo pelo multer
-      const filePath = req.file.path || req.file.destination + '/' + req.file.filename;
-      const uploadsPath = path.join(process.cwd(), 'uploads');
-      const relativePath = path.relative(uploadsPath, filePath);
-      const fileUrl = `/uploads/${relativePath.replace(/\\/g, '/')}`; // Normalizar separadores para web
+      // ✅ VALIDAÇÃO: Tipos obrigatórios (agora que body foi processado)
+      const typeToDir = {
+        'plasa': plasaDir,
+        'escala': escalaDir,
+        'cardapio': cardapioDir
+      };
+      
+      if (!(type in typeToDir)) {
+        const validTypes = Object.keys(typeToDir).join(', ');
+        console.error(`❌ HANDLER: Tipo inválido "${type}". Tipos válidos: ${validTypes}`);
+        
+        // Limpar arquivo temporário
+        if (req.file.path && fs.existsSync(req.file.path)) {
+          fs.unlinkSync(req.file.path);
+        }
+        
+        return res.status(400).json({
+          success: false,
+          error: `INVALID_TYPE: Tipo deve ser um de: ${validTypes}`
+        });
+      }
+
+      // 🔄 MOVER ARQUIVO: Do uploads temporário para pasta correta
+      const tempFilePath = req.file.path;
+      const targetDir = typeToDir[type as keyof typeof typeToDir];
+      const targetFilePath = path.join(targetDir, req.file.filename);
+      
+      // Mover arquivo para pasta correta
+      fs.renameSync(tempFilePath, targetFilePath);
+      
+      console.log(`📁 Arquivo movido: ${path.basename(tempFilePath)} → ${path.basename(targetDir)}/`);
+      
+      // 📁 ORGANIZAÇÃO: Criar URL correto com subpasta
+      const relativePath = path.relative(path.join(process.cwd(), 'uploads'), targetFilePath);
+      const fileUrl = `/uploads/${relativePath.replace(/\\/g, '/')}`;
       
       // 🔥 NOVO: Aplicar classificação inteligente
       const classification = extractClassification(req.file.originalname, title, type);

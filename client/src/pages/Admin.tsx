@@ -940,6 +940,7 @@ if (selectedDocType === "cardapio" && !docUnit) {
 
       const formData = new FormData();
       formData.append('pdf', selectedFile);
+      
       formData.append('type', selectedDocType);
       formData.append('title', docTitle);
       
