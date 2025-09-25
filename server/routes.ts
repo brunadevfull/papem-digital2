@@ -1022,48 +1022,79 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.json({ documents: [] });
       }
 
-      const files = fs.readdirSync(uploadsDir);
-      const documents = files
-        .filter(file => file.endsWith('.pdf') || file.endsWith('.jpg') || file.endsWith('.png'))
-        .map(file => {
-          const filePath = path.join(uploadsDir, file);
-          const stats = fs.statSync(filePath);
+      const documents: any[] = [];
+      const typeSubfolders = ['plasa', 'escala', 'cardapio'];
+      
+      // 📁 Ler documentos das subpastas organizadas
+      typeSubfolders.forEach(subfolder => {
+        const subfolderPath = path.join(uploadsDir, subfolder);
+        
+        if (fs.existsSync(subfolderPath)) {
+          const subFiles = fs.readdirSync(subfolderPath);
           
-          // 🔥 NOVO: Usar classificação inteligente
-          let classification: DocumentClassification;
-          
-          // Tentar recuperar do cache primeiro
-          if (classificationCache.has(file)) {
-            classification = classificationCache.get(file)!;
-          } else {
-            // Extrair nome original e classificar
-            const originalName = getOriginalFromSaved(file);
-            classification = extractClassification(originalName);
-            
-            // Salvar no cache para otimização
-            classificationCache.set(file, classification);
-          }
-          
-          console.log(`📋 Listando documento: ${file} -> Tipo: ${classification.type}, Tags: [${classification.tags.join(', ')}]`);
-          
-          return {
-            filename: file,
-            url: `/uploads/${file}`,
-            created: stats.birthtime,
-            size: stats.size,
-            // 🔥 Classificação completa
-            type: classification.type,
-            category: classification.category,
-            unit: classification.unit,
-            tags: classification.tags,
-            classification: classification,
-            // Para compatibilidade, incluir o nome original
-            originalname: getOriginalFromSaved(file)
-          };
-        })
-        .sort((a, b) => b.created.getTime() - a.created.getTime());
+          subFiles
+            .filter(file => file.endsWith('.pdf') || file.endsWith('.jpg') || file.endsWith('.png'))
+            .forEach(file => {
+              const filePath = path.join(subfolderPath, file);
+              const stats = fs.statSync(filePath);
+              
+              // Extrair nome original e classificar
+              const originalName = getOriginalFromSaved(file);
+              
+              // ✅ Determinar tipo pela pasta (mais confiável)
+              let docType = subfolder as 'plasa' | 'escala' | 'cardapio';
+              
+              // Aplicar classificação baseada no tipo da pasta
+              let classification: DocumentClassification = {
+                type: docType as any,
+                tags: []
+              };
+              
+              // Adicionar classificação específica baseada no nome
+              if (docType === 'escala') {
+                if (originalName.toLowerCase().includes('oficial')) {
+                  classification.category = 'oficial';
+                  classification.tags.push('OFICIAIS');
+                } else if (originalName.toLowerCase().includes('praça')) {
+                  classification.category = 'praca';
+                  classification.tags.push('PRAÇAS');
+                }
+                classification.tags.push('ESCALA');
+              } else if (docType === 'cardapio') {
+                if (originalName.toLowerCase().includes('eagm')) {
+                  classification.unit = 'EAGM';
+                  classification.tags.push('EAGM');
+                } else if (originalName.toLowerCase().includes('1dn')) {
+                  classification.unit = '1DN';
+                  classification.tags.push('1DN');
+                }
+                classification.tags.push('CARDÁPIO');
+              } else if (docType === 'plasa') {
+                classification.tags.push('PLASA');
+              }
+              
+              // Documento classificado e pronto para envio
+              
+              documents.push({
+                filename: file,
+                url: `/uploads/${subfolder}/${file}`,
+                created: stats.birthtime,
+                size: stats.size,
+                type: classification.type,
+                category: classification.category,
+                unit: classification.unit,
+                tags: classification.tags,
+                classification: classification,
+                originalname: getOriginalFromSaved(file)
+              });
+            });
+        }
+      });
 
-      console.log(`📂 Listando ${documents.length} documentos com classificação inteligente`);
+      // Ordenar por data de criação (mais recente primeiro)
+      documents.sort((a, b) => b.created.getTime() - a.created.getTime());
+
+      console.log(`📂 Listando ${documents.length} documentos organizados`);
       res.json({ documents });
     } catch (error) {
       console.error('Error listing PDFs:', error);
