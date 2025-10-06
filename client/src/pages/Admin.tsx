@@ -114,9 +114,10 @@ interface MilitaryPersonnel {
 
 
 const Admin: React.FC = () => {
- const { 
-    plasaDocuments, 
+ const {
+    plasaDocuments,
     escalaDocuments,
+    cardapioDocuments,
     addDocument,
     updateDocument,
     deleteDocument,
@@ -1094,7 +1095,7 @@ if (selectedDocType === "cardapio" && !docUnit) {
   
   const removeDocument = async (id: string) => {
     if (confirm("Tem certeza que deseja remover este documento?")) {
-      const doc = [...plasaDocuments, ...escalaDocuments].find(d => d.id === id);
+      const doc = [...plasaDocuments, ...escalaDocuments, ...cardapioDocuments].find(d => d.id === id);
       
       if (doc && doc.url.includes('/uploads/')) {
         try {
@@ -1667,7 +1668,7 @@ if (selectedDocType === "cardapio" && !docUnit) {
           <CardTitle className="flex items-center gap-2">
             🍽️ Cardápios Semanais
             <span className="text-sm font-normal text-gray-500">
-              ({escalaDocuments.filter(doc => doc.type === "cardapio").length})
+              ({cardapioDocuments.length})
             </span>
           </CardTitle>
           <CardDescription>
@@ -1675,13 +1676,13 @@ if (selectedDocType === "cardapio" && !docUnit) {
           </CardDescription>
         </CardHeader>
         <CardContent>
-          {escalaDocuments.filter(doc => doc.type === "cardapio").length === 0 ? (
+          {cardapioDocuments.length === 0 ? (
             <p className="text-muted-foreground text-center py-4">
               Nenhum cardápio cadastrado.
             </p>
           ) : (
             <ul className="space-y-2 max-h-48 overflow-y-auto">
-              {escalaDocuments.filter(doc => doc.type === "cardapio").map((doc) => (
+              {cardapioDocuments.map((doc) => (
                 <li key={doc.id} className="border rounded-md p-3 flex justify-between items-center document-card">
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 mb-1">
