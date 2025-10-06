@@ -502,11 +502,15 @@ const deleteNotice = async (id: string): Promise<boolean> => {
   const updateDocument = (updatedDoc: PDFDocument) => {
     console.log("📝 Atualizando documento:", updatedDoc.title);
     if (updatedDoc.type === "plasa") {
-      setPlasaDocuments(prev => prev.map(doc => 
+      setPlasaDocuments(prev => prev.map(doc =>
         doc.id === updatedDoc.id ? updatedDoc : doc
       ));
-    } else {
-      setEscalaDocuments(prev => prev.map(doc => 
+    } else if (updatedDoc.type === "escala") {
+      setEscalaDocuments(prev => prev.map(doc =>
+        doc.id === updatedDoc.id ? updatedDoc : doc
+      ));
+    } else if (updatedDoc.type === "cardapio") {
+      setCardapioDocuments(prev => prev.map(doc =>
         doc.id === updatedDoc.id ? updatedDoc : doc
       ));
     }
@@ -516,7 +520,7 @@ const deleteNotice = async (id: string): Promise<boolean> => {
     console.log("🗑️ Removendo documento:", id);
     
     // Encontrar o documento para obter o filename
-    const allDocs = [...plasaDocuments, ...escalaDocuments];
+    const allDocs = [...plasaDocuments, ...escalaDocuments, ...cardapioDocuments];
     const docToDelete = allDocs.find(doc => doc.id === id);
     
     if (docToDelete && docToDelete.url.includes('/uploads/')) {
