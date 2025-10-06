@@ -689,6 +689,12 @@ const deleteNotice = async (id: string): Promise<boolean> => {
                 url: fullUrl,
                 type: docType as any, // Usar o tipo do servidor diretamente
                 category: docType === 'escala' ? category : undefined,
+                tags: Array.isArray(serverDoc.tags)
+                  ? [...serverDoc.tags]
+                  : serverDoc.tags
+                    ? [String(serverDoc.tags)]
+                    : [],
+                unit: serverDoc.unit as PDFDocument['unit'] | undefined,
                 active: true
               };
               

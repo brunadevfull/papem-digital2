@@ -997,12 +997,20 @@ if (selectedDocType === "cardapio" && !docUnit) {
         category: selectedDocType === "escala" ? docCategory : undefined
       });
       
+      const uploadTags = Array.isArray(uploadResult.data?.tags)
+        ? uploadResult.data.tags
+        : [];
+
+      const uploadUnit = (uploadResult.data?.unit as PDFDocument['unit'] | undefined)
+        ?? (selectedDocType === "cardapio" ? docUnit : undefined);
+
       addDocument({
         title: docTitle,
         url: fullUrl,
         type: selectedDocType,
         category: selectedDocType === "escala" ? docCategory : undefined,
-        unit: selectedDocType === "cardapio" ? docUnit : undefined, 
+        unit: uploadUnit,
+        tags: uploadTags,
         active: true
       });
       
@@ -1020,6 +1028,8 @@ if (selectedDocType === "cardapio" && !docUnit) {
         url: fullUrl,
         type: selectedDocType,
         category: selectedDocType === "escala" ? docCategory : undefined,
+        unit: selectedDocType === "cardapio" ? docUnit : undefined,
+        tags: [],
         active: true
       });
       
