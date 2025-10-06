@@ -87,46 +87,95 @@ export const DisplayProvider: React.FC<DisplayProviderProps> = ({ children }) =>
   };
 
   // CORREÇÃO: Função para obter URL completa do backend - DETECTAR AMBIENTE
- const getBackendUrl = (path: string): string => {
-  if (path.startsWith('http') || path.startsWith('blob:') || path.startsWith('data:')) {
-    return path;
-  }
-  
-  // 🚨 CORREÇÃO: Usar IP real do servidor para acesso em rede
-  const currentHost = window.location.hostname;
-  const currentPort = window.location.port;
-  
-  // Detectar se estamos no Replit - frontend e backend na mesma porta
-  const isReplit = currentHost.includes('replit.dev') || currentHost.includes('replit.co');
-  
-  if (isReplit) {
-    const currentOrigin = window.location.origin;
-
-    
-    if (path.startsWith('/')) {
-      return `${currentOrigin}${path}`;
+  const getBackendUrl = (path: string): string => {
+    if (path.startsWith('http') || path.startsWith('blob:') || path.startsWith('data:')) {
+      return path;
     }
-    return `${currentOrigin}/${path}`;
-  }
-  
-  // Se estamos acessando via IP da rede (não Replit), usar porta 5000
-  if (currentHost !== 'localhost' && currentHost !== '127.0.0.1') {
 
-    
-    if (path.startsWith('/')) {
-      return `http://${currentHost}:5000${path}`;
+    // 🚨 CORREÇÃO: Usar IP real do servidor para acesso em rede
+    const currentHost = window.location.hostname;
+    const currentPort = window.location.port;
+
+    // Detectar se estamos no Replit - frontend e backend na mesma porta
+    const isReplit = currentHost.includes('replit.dev') || currentHost.includes('replit.co');
+
+    if (isReplit) {
+      const currentOrigin = window.location.origin;
+
+
+      if (path.startsWith('/')) {
+        return `${currentOrigin}${path}`;
+      }
+      return `${currentOrigin}/${path}`;
     }
-    return `http://${currentHost}:5000/${path}`;
-  }
-  
-  // Desenvolvimento local - usar porta 5000
 
-  
-  if (path.startsWith('/')) {
-    return `http://localhost:5000${path}`;
-  }
-  return `http://localhost:5000/${path}`;
-};
+    // Se estamos acessando via IP da rede (não Replit), usar porta 5000
+    if (currentHost !== 'localhost' && currentHost !== '127.0.0.1') {
+
+
+      if (path.startsWith('/')) {
+        return `http://${currentHost}:5000${path}`;
+      }
+      return `http://${currentHost}:5000/${path}`;
+    }
+
+    // Desenvolvimento local - usar porta 5000
+
+
+    if (path.startsWith('/')) {
+      return `http://localhost:5000${path}`;
+    }
+    return `http://localhost:5000/${path}`;
+  };
+
+  // Função utilitária para tratar tags dos documentos
+  const normalizeDocumentTags = (input: {
+    tags?: string[];
+    type: PDFDocument["type"];
+    category?: PDFDocument["category"];
+    unit?: PDFDocument["unit"];
+  }): string[] => {
+    const baseTags = Array.isArray(input.tags)
+      ? input.tags
+          .map(tag => (typeof tag === "string" ? tag.trim() : ""))
+          .filter(tag => tag.length > 0)
+      : [];
+
+    const ensureTag = (tag: string) => {
+      const normalized = tag.trim();
+      if (!normalized) return;
+      const alreadyExists = baseTags.some(
+        existing => existing.toUpperCase() === normalized.toUpperCase()
+      );
+      if (!alreadyExists) {
+        baseTags.push(normalized);
+      }
+    };
+
+    if (input.type === "plasa") {
+      ensureTag("PLASA");
+    }
+
+    if (input.type === "escala") {
+      ensureTag("ESCALA");
+      if (input.category === "oficial") {
+        ensureTag("OFICIAIS");
+      } else if (input.category === "praca") {
+        ensureTag("PRAÇAS");
+      }
+    }
+
+    if (input.type === "cardapio") {
+      ensureTag("CARDÁPIO");
+      if (input.unit === "EAGM") {
+        ensureTag("EAGM");
+      } else if (input.unit === "1DN") {
+        ensureTag("1DN");
+      }
+    }
+
+    return baseTags;
+  };
 
   // Função para gerar ID único
   const generateUniqueId = (): string => {
@@ -440,8 +489,13 @@ const deleteNotice = async (id: string): Promise<boolean> => {
     const fullUrl = getBackendUrl(docData.url);
     const id = generateUniqueId();
     
-    const newDoc: PDFDocument = {
+    const normalizedDocData = {
       ...docData,
+      tags: normalizeDocumentTags(docData)
+    };
+
+    const newDoc: PDFDocument = {
+      ...normalizedDocData,
       id,
       url: fullUrl,
       uploadDate: new Date()
@@ -501,17 +555,22 @@ const deleteNotice = async (id: string): Promise<boolean> => {
 
   const updateDocument = (updatedDoc: PDFDocument) => {
     console.log("📝 Atualizando documento:", updatedDoc.title);
+    const normalizedDoc = {
+      ...updatedDoc,
+      tags: normalizeDocumentTags(updatedDoc)
+    };
+
     if (updatedDoc.type === "plasa") {
       setPlasaDocuments(prev => prev.map(doc =>
-        doc.id === updatedDoc.id ? updatedDoc : doc
+        doc.id === updatedDoc.id ? normalizedDoc : doc
       ));
     } else if (updatedDoc.type === "escala") {
       setEscalaDocuments(prev => prev.map(doc =>
-        doc.id === updatedDoc.id ? updatedDoc : doc
+        doc.id === updatedDoc.id ? normalizedDoc : doc
       ));
     } else if (updatedDoc.type === "cardapio") {
       setCardapioDocuments(prev => prev.map(doc =>
-        doc.id === updatedDoc.id ? updatedDoc : doc
+        doc.id === updatedDoc.id ? normalizedDoc : doc
       ));
     }
   };
@@ -620,10 +679,17 @@ const deleteNotice = async (id: string): Promise<boolean> => {
       const contextData = {
         plasaDocuments: plasaDocuments.map(doc => ({
           ...doc,
+          tags: normalizeDocumentTags(doc),
           uploadDate: doc.uploadDate.toISOString()
         })),
         escalaDocuments: escalaDocuments.map(doc => ({
           ...doc,
+          tags: normalizeDocumentTags(doc),
+          uploadDate: doc.uploadDate.toISOString()
+        })),
+        cardapioDocuments: cardapioDocuments.map(doc => ({
+          ...doc,
+          tags: normalizeDocumentTags(doc),
           uploadDate: doc.uploadDate.toISOString()
         })),
         currentEscalaIndex,
@@ -641,7 +707,7 @@ const deleteNotice = async (id: string): Promise<boolean> => {
     } catch (error) {
       console.error("❌ Erro ao salvar contexto:", error);
     }
-  }, [plasaDocuments, escalaDocuments, currentEscalaIndex, documentAlternateInterval, scrollSpeed, autoRestartDelay]);
+  }, [plasaDocuments, escalaDocuments, cardapioDocuments, currentEscalaIndex, documentAlternateInterval, scrollSpeed, autoRestartDelay]);
 
   // Função auxiliar para determinar categoria
   const determineCategory = (filename: string): "oficial" | "praca" | undefined => {
@@ -674,30 +740,40 @@ const deleteNotice = async (id: string): Promise<boolean> => {
             if (!existsInPlasa && !existsInEscala && !existsInCardapio) {
               // USAR A CLASSIFICAÇÃO DO BACKEND DIRETAMENTE
               const docType = serverDoc.type || 'escala'; // fallback para escala
+              const allowedTypes: PDFDocument["type"][] = ['plasa', 'escala', 'cardapio'];
+              const safeType = allowedTypes.includes(docType as PDFDocument["type"])
+                ? (docType as PDFDocument["type"])
+                : 'escala';
               const category = determineCategory(serverDoc.filename);
-              
+
               // Gerar título baseado no tipo correto
               const typeNames = {
                 'plasa': 'PLASA',
                 'escala': 'Escala',
                 'cardapio': 'Cardápio'
               };
-              const typeName = typeNames[docType as keyof typeof typeNames] || 'Documento';
-              
-              const docData: Omit<PDFDocument, "id" | "uploadDate"> = {
-                title: `${typeName} - ${new Date(serverDoc.created).toLocaleDateString('pt-BR')}`,
-                url: fullUrl,
-                type: docType as any, // Usar o tipo do servidor diretamente
-                category: docType === 'escala' ? category : undefined,
+              const typeName = typeNames[safeType] || 'Documento';
+
+              const docTags = normalizeDocumentTags({
                 tags: Array.isArray(serverDoc.tags)
                   ? [...serverDoc.tags]
                   : serverDoc.tags
                     ? [String(serverDoc.tags)]
                     : [],
+                type: safeType,
+                category,
+                unit: serverDoc.unit as PDFDocument['unit'] | undefined
+              });
+
+              const docData: Omit<PDFDocument, "id" | "uploadDate"> = {
+                title: `${typeName} - ${new Date(serverDoc.created).toLocaleDateString('pt-BR')}`,
+                url: fullUrl,
+                type: safeType,
+                category: safeType === 'escala' ? category : undefined,
+                tags: docTags,
                 unit: serverDoc.unit as PDFDocument['unit'] | undefined,
                 active: true
               };
-              
 
               addDocument(docData);
             }
@@ -731,11 +807,12 @@ const deleteNotice = async (id: string): Promise<boolean> => {
                   return {
                     ...doc,
                     url: normalizeDocumentUrl(doc.url),
+                    tags: normalizeDocumentTags(doc),
                     uploadDate: new Date(doc.uploadDate),
                     active: doc.active !== false
                   };
                 });
-              
+
               if (validPlasaDocs.length > 0) {
                 setPlasaDocuments(validPlasaDocs);
 
@@ -751,13 +828,34 @@ const deleteNotice = async (id: string): Promise<boolean> => {
                   return {
                     ...doc,
                     url: normalizeDocumentUrl(doc.url),
+                    tags: normalizeDocumentTags(doc),
                     uploadDate: new Date(doc.uploadDate),
                     active: doc.active !== false
                   };
                 });
-              
+
               if (validEscalaDocs.length > 0) {
                 setEscalaDocuments(validEscalaDocs);
+
+              }
+            }
+
+            // Carregar documentos de Cardápio com correção de URL
+            if (data.cardapioDocuments && Array.isArray(data.cardapioDocuments)) {
+              const validCardapioDocs = data.cardapioDocuments
+                .filter((doc: any) => doc && doc.id && doc.title && doc.url)
+                .map((doc: any) => {
+                  return {
+                    ...doc,
+                    url: normalizeDocumentUrl(doc.url),
+                    tags: normalizeDocumentTags(doc),
+                    uploadDate: new Date(doc.uploadDate),
+                    active: doc.active !== false
+                  };
+                });
+
+              if (validCardapioDocs.length > 0) {
+                setCardapioDocuments(validCardapioDocs);
 
               }
             }
