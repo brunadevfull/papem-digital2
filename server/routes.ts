@@ -372,7 +372,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       
       // Criar nome do arquivo baseado no documento e página
-      const filename = `${documentId}-page-${pageNumber}.jpg`;
+      const mimeType = req.file.mimetype || 'image/jpeg';
+      const extension = (() => {
+        switch (mimeType) {
+          case 'image/png':
+            return 'png';
+          case 'image/jpeg':
+          case 'image/jpg':
+            return 'jpg';
+          default:
+            return 'png';
+        }
+      })();
+
+      const filename = `${documentId}-page-${pageNumber}.${extension}`;
       const filePath = path.join(plasaPagesDir, filename);
       const fileUrl = `/uploads/plasa-pages/${filename}`;
 
@@ -425,13 +438,25 @@ export async function registerRoutes(app: Express): Promise<Server> {
       let allExist = true;
 
       for (let i = 1; i <= totalPages; i++) {
-        const filename = `${documentId}-page-${i}.jpg`;
-        const filePath = path.join(plasaPagesDir, filename);
-        
-        try {
-          await access(filePath);
-          pageUrls.push(`/uploads/plasa-pages/${filename}`);
-        } catch {
+        const possibleExtensions = ['png', 'jpg'];
+        let foundFilename: string | null = null;
+
+        for (const ext of possibleExtensions) {
+          const candidate = `${documentId}-page-${i}.${ext}`;
+          const candidatePath = path.join(plasaPagesDir, candidate);
+
+          try {
+            await access(candidatePath);
+            foundFilename = candidate;
+            break;
+          } catch {
+            continue;
+          }
+        }
+
+        if (foundFilename) {
+          pageUrls.push(`/uploads/plasa-pages/${foundFilename}`);
+        } else {
           allExist = false;
           break;
         }
@@ -471,11 +496,34 @@ export async function registerRoutes(app: Express): Promise<Server> {
         });
       }
 
+      if (typeof imageData !== 'string') {
+        return res.status(400).json({
+          success: false,
+          error: 'imageData deve ser uma string base64'
+        });
+      }
+
       // Converter base64 para arquivo
-      const base64Data = imageData.replace(/^data:image\/\w+;base64,/, '');
+      const mimeMatch = typeof imageData === 'string'
+        ? imageData.match(/^data:image\/(png|jpeg|jpg);base64,/i)
+        : null;
+
+      if (!mimeMatch) {
+        return res.status(400).json({
+          success: false,
+          error: 'Formato de imagem inválido para cache de escala'
+        });
+      }
+
+      const detectedExt = mimeMatch[1].toLowerCase();
+      const normalizedExt = detectedExt === 'jpeg' ? 'jpg' : detectedExt;
+
+      const base64Data = typeof imageData === 'string'
+        ? imageData.replace(/^data:image\/[a-zA-Z0-9+.-]+;base64,/, '')
+        : '';
       const buffer = Buffer.from(base64Data, 'base64');
-      
-      const filename = `${escalId}.jpg`;
+
+      const filename = `${escalId}.${normalizedExt}`;
       const filePath = path.join(escalaCacheDir, filename);
       const fileUrl = `/uploads/escala-cache/${filename}`;
 
@@ -514,22 +562,34 @@ export async function registerRoutes(app: Express): Promise<Server> {
         });
       }
       
-      const filename = `${escalId}.jpg`;
-      const filePath = path.join(escalaCacheDir, filename);
-      const fileUrl = `/uploads/escala-cache/${filename}`;
+      const possibleExtensions = ['png', 'jpg'];
+      let existingFilename: string | null = null;
 
-      try {
-        await access(filePath);
-        
-        console.log(`✅ Cache de escala encontrado: ${filename}`);
-        
+      for (const ext of possibleExtensions) {
+        const candidate = `${escalId}.${ext}`;
+        const candidatePath = path.join(escalaCacheDir, candidate);
+
+        try {
+          await access(candidatePath);
+          existingFilename = candidate;
+          break;
+        } catch {
+          continue;
+        }
+      }
+
+      if (existingFilename) {
+        const fileUrl = `/uploads/escala-cache/${existingFilename}`;
+
+        console.log(`✅ Cache de escala encontrado: ${existingFilename}`);
+
         res.json({
           success: true,
           cached: true,
           url: fileUrl,
           escalId: escalId
         });
-      } catch {
+      } else {
         res.json({
           success: true,
           cached: false,
@@ -555,7 +615,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         const files = await readdir(plasaPagesDir);
         
         for (const file of files) {
-          if (file.endsWith('.jpg')) {
+          if (file.endsWith('.jpg') || file.endsWith('.png')) {
             const filePath = path.join(plasaPagesDir, file);
             await unlink(filePath);
             deletedCount++;
@@ -591,7 +651,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         const files = await readdir(escalaCacheDir);
         
         for (const file of files) {
-          if (file.endsWith('.jpg')) {
+          if (file.endsWith('.jpg') || file.endsWith('.png')) {
             const filePath = path.join(escalaCacheDir, file);
             await unlink(filePath);
             deletedCount++;
@@ -627,7 +687,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Contar arquivos PLASA
       try {
         const plasaFiles = await readdir(plasaPagesDir);
-        plasaCount = plasaFiles.filter(f => f.endsWith('.jpg')).length;
+        plasaCount = plasaFiles.filter(f => f.endsWith('.jpg') || f.endsWith('.png')).length;
       } catch {
         // Diretório não existe
       }
@@ -635,7 +695,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Contar arquivos de escala
       try {
         const escalaFiles = await readdir(escalaCacheDir);
-        escalaCount = escalaFiles.filter(f => f.endsWith('.jpg')).length;
+        escalaCount = escalaFiles.filter(f => f.endsWith('.jpg') || f.endsWith('.png')).length;
       } catch {
         // Diretório não existe
       }
@@ -1107,21 +1167,32 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const { id } = req.params;
       
-      const filename = `${id}.jpg`;
-      const filePath = path.join(escalaCacheDir, filename);
-      const fileUrl = `/uploads/escala-cache/${filename}`;
+      const possibleExtensions = ['png', 'jpg'];
+      let foundFilename: string | null = null;
 
-      try {
-        await access(filePath);
-        res.json({ 
-          exists: true, 
-          id, 
-          url: fileUrl,
+      for (const ext of possibleExtensions) {
+        const candidate = `${id}.${ext}`;
+        const candidatePath = path.join(escalaCacheDir, candidate);
+
+        try {
+          await access(candidatePath);
+          foundFilename = candidate;
+          break;
+        } catch {
+          continue;
+        }
+      }
+
+      if (foundFilename) {
+        res.json({
+          exists: true,
+          id,
+          url: `/uploads/escala-cache/${foundFilename}`,
           cached: true
         });
-      } catch {
-        res.json({ 
-          exists: false, 
+      } else {
+        res.json({
+          exists: false,
           id,
           cached: false
         });
@@ -1443,12 +1514,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       try {
         const plasaFiles = await readdir(plasaPagesDir);
-        plasaCacheCount = plasaFiles.filter(f => f.endsWith('.jpg')).length;
+        plasaCacheCount = plasaFiles.filter(f => f.endsWith('.jpg') || f.endsWith('.png')).length;
       } catch {}
-      
+
       try {
         const escalaFiles = await readdir(escalaCacheDir);
-        escalaCacheCount = escalaFiles.filter(f => f.endsWith('.jpg')).length;
+        escalaCacheCount = escalaFiles.filter(f => f.endsWith('.jpg') || f.endsWith('.png')).length;
       } catch {}
 
       const systemInfo = {

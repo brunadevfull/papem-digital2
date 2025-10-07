@@ -3,6 +3,18 @@ import { useDisplay } from "@/context/DisplayContext";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 const IS_DEV_MODE = process.env.NODE_ENV === 'development';
+const PDF_SCALE = 2.0;
+const MAX_RENDER_DIMENSION = 4096;
+const IMAGE_EXPORT_FORMAT = 'image/png';
+
+const getDevicePixelRatio = () => {
+  if (typeof window === 'undefined') {
+    return 1;
+  }
+
+  const ratio = window.devicePixelRatio || 1;
+  return Number.isFinite(ratio) && ratio > 0 ? ratio : 1;
+};
 
 // Configurar PDF.js
 declare global {
@@ -144,7 +156,7 @@ const PDFViewer: React.FC<PDFViewerProps> = ({
 
   const SCROLL_SPEED = getScrollSpeed();
   const RESTART_DELAY = autoRestartDelay * 1000;
-  const PDF_SCALE = 1.5;
+  const devicePixelRatio = getDevicePixelRatio();
 
   // Função para obter a URL completa do servidor backend - DETECTAR AMBIENTE
   const getBackendUrl = (path: string): string => {
@@ -337,18 +349,19 @@ const getCurrentCardapioDoc = () => {
       canvas.toBlob(async (blob) => {
         if (!blob) {
           console.error(`❌ Erro ao converter página ${pageNum} para blob`);
-          resolve(canvas.toDataURL('image/jpeg', 0.85));
+          resolve(canvas.toDataURL(IMAGE_EXPORT_FORMAT));
           return;
         }
 
         try {
           const formData = new FormData();
-          formData.append('file', blob, `plasa-page-${pageNum}.jpg`);
+          const extension = blob.type === 'image/png' ? 'png' : 'jpg';
+          formData.append('file', blob, `plasa-page-${pageNum}.${extension}`);
           formData.append('pageNumber', String(pageNum));
           formData.append('documentId', documentId);
-          
+
           const uploadUrl = getBackendUrl('/api/upload-plasa-page');
-          
+
           const response = await fetch(uploadUrl, {
             method: 'POST',
             body: formData,
@@ -356,19 +369,20 @@ const getCurrentCardapioDoc = () => {
 
           if (response.ok) {
             const result = await response.json();
-            const savedUrl = result.data?.url || result.url || `/plasa-pages/plasa-page-${pageNum}.jpg`;
+            const fallbackFilename = `${documentId}-page-${pageNum}.${extension}`;
+            const savedUrl = result.data?.url || result.url || `/plasa-pages/${fallbackFilename}`;
             const fullSavedUrl = getBackendUrl(savedUrl);
             console.log(`💾 Página ${pageNum} salva no servidor: ${fullSavedUrl}`);
             resolve(fullSavedUrl);
           } else {
             throw new Error(`Erro no servidor: ${response.status}`);
           }
-          
+
         } catch (error) {
           console.warn(`⚠️ Falha ao salvar página ${pageNum} no servidor, usando data URL:`, error);
-          resolve(canvas.toDataURL('image/jpeg', 0.85));
+          resolve(canvas.toDataURL(IMAGE_EXPORT_FORMAT));
         }
-      }, 'image/jpeg', 0.85);
+      }, IMAGE_EXPORT_FORMAT);
     });
   };
 
@@ -480,12 +494,15 @@ const getCurrentCardapioDoc = () => {
           console.log(`📄 Processando página ${pageNum}/${pdf.numPages}`);
           
           const page = await pdf.getPage(pageNum);
-          
-          const originalViewport = page.getViewport({ scale: 1.0 });
-          const scale = Math.min(PDF_SCALE, 2048 / Math.max(originalViewport.width, originalViewport.height));
-          const viewport = page.getViewport({ scale: scale });
 
-          console.log(`📐 Página ${pageNum} - Original: ${originalViewport.width}x${originalViewport.height}, Escala: ${scale}, Final: ${viewport.width}x${viewport.height}`);
+          const originalViewport = page.getViewport({ scale: 1.0 });
+          const maxDimension = Math.max(originalViewport.width, originalViewport.height) || 1;
+          const limitScale = MAX_RENDER_DIMENSION / maxDimension;
+          const baseScale = PDF_SCALE * devicePixelRatio;
+          const appliedScale = limitScale > 0 ? Math.min(baseScale, limitScale) : baseScale;
+          const viewport = page.getViewport({ scale: appliedScale });
+
+          console.log(`📐 Página ${pageNum} - Original: ${originalViewport.width}x${originalViewport.height}, Escala: ${appliedScale}, Final: ${viewport.width}x${viewport.height}`);
 
           const canvas = document.createElement('canvas');
           const context = canvas.getContext('2d', { 
@@ -896,8 +913,11 @@ useEffect(() => {
       const page = await pdf.getPage(1);
       
       const originalViewport = page.getViewport({ scale: 1.0 });
-      const scale = Math.min(1.5, 1024 / Math.max(originalViewport.width, originalViewport.height));
-      const viewport = page.getViewport({ scale: scale });
+      const maxDimension = Math.max(originalViewport.width, originalViewport.height) || 1;
+      const limitScale = MAX_RENDER_DIMENSION / maxDimension;
+      const baseScale = PDF_SCALE * devicePixelRatio;
+      const appliedScale = limitScale > 0 ? Math.min(baseScale, limitScale) : baseScale;
+      const viewport = page.getViewport({ scale: appliedScale });
   
 
   
@@ -939,18 +959,14 @@ useEffect(() => {
         const imageBlob = await new Promise<Blob | null>((resolve) => {
           canvas.toBlob((blob) => {
             resolve(blob);
-          }, 'image/jpeg', 0.85);
+          }, IMAGE_EXPORT_FORMAT);
         });
         
         if (!imageBlob) {
           throw new Error('Falha ao converter canvas para blob');
         }
         
-        const formData = new FormData();
-        formData.append('file', imageBlob, `escala-${documentId}.jpg`);
-        formData.append('documentId', documentId);
-        
-        const imageDataUrl = canvas.toDataURL('image/jpeg', 0.85);
+        const imageDataUrl = canvas.toDataURL(IMAGE_EXPORT_FORMAT);
         
         const saveResponse = await fetch(getBackendUrl('/api/save-escala-cache'), {
           method: 'POST',
@@ -976,7 +992,7 @@ useEffect(() => {
       } catch (saveError) {
         console.log(`⚠️ ESCALA: Falha ao salvar cache, usando dataURL:`, saveError);
         // ✅ Fallback: usar dataURL se não conseguir salvar no servidor
-        const imageDataUrl = canvas.toDataURL('image/jpeg', 0.85);
+        const imageDataUrl = canvas.toDataURL(IMAGE_EXPORT_FORMAT);
         setEscalaImageUrl(imageDataUrl);
       }
       
