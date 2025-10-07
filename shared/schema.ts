@@ -1,3 +1,4 @@
+import { sql } from "drizzle-orm";
 import { pgTable, text, serial, integer, boolean, timestamp } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
@@ -27,6 +28,7 @@ export const documents = pgTable("documents", {
   type: text("type").notNull().$type<"plasa" | "escala" | "cardapio">(),
   category: text("category").$type<"oficial" | "praca">(),
   active: boolean("active").notNull().default(true),
+  tags: text("tags").array().default(sql`ARRAY[]::text[]`),
   uploadDate: timestamp("upload_date").defaultNow(),
 });
 
@@ -64,10 +66,14 @@ export const insertNoticeSchema = createInsertSchema(notices).omit({
   updatedAt: true,
 });
 
-export const insertDocumentSchema = createInsertSchema(documents).omit({
-  id: true,
-  uploadDate: true,
-});
+export const insertDocumentSchema = createInsertSchema(documents)
+  .omit({
+    id: true,
+    uploadDate: true,
+  })
+  .extend({
+    tags: z.array(z.string()).optional(),
+  });
 
 export const insertDutyOfficersSchema = createInsertSchema(dutyOfficers).omit({
   id: true,
@@ -84,11 +90,15 @@ export type InsertUser = z.infer<typeof insertUserSchema>;
 export type User = typeof users.$inferSelect;
 export type Notice = typeof notices.$inferSelect;
 export type InsertNotice = z.infer<typeof insertNoticeSchema>;
-export type PDFDocument = typeof documents.$inferSelect & {
-  tags?: string[]; // Tags geradas dinamicamente no backend
+type DocumentSelect = typeof documents.$inferSelect;
+
+export type PDFDocument = Omit<DocumentSelect, "tags"> & {
+  tags?: string[]; // Tags geradas dinamicamente e persistidas
   unit?: "EAGM" | "1DN"; // Unidade para cardápios
 };
-export type InsertDocument = z.infer<typeof insertDocumentSchema>;
+export type InsertDocument = Omit<z.infer<typeof insertDocumentSchema>, "tags"> & {
+  tags?: string[];
+};
 export type DutyOfficers = typeof dutyOfficers.$inferSelect;
 export type InsertDutyOfficers = z.infer<typeof insertDutyOfficersSchema>;
 export type MilitaryPersonnel = typeof militaryPersonnel.$inferSelect;

@@ -164,6 +164,28 @@ function extractClassification(originalName: string, title?: string, bodyType?: 
   return classification;
 }
 
+function normalizeTagsInput(input: unknown): string[] {
+  const rawList: string[] = Array.isArray(input)
+    ? input.map(tag => (typeof tag === 'string' ? tag : String(tag ?? '')))
+    : typeof input === 'string'
+      ? [input]
+      : [];
+
+  const normalized: string[] = [];
+  const seen = new Set<string>();
+
+  for (const value of rawList) {
+    const trimmed = value.trim();
+    if (!trimmed) continue;
+    const key = trimmed.toUpperCase();
+    if (seen.has(key)) continue;
+    seen.add(key);
+    normalized.push(trimmed);
+  }
+
+  return normalized;
+}
+
 
 // Promisify fs functions for async/await
 const writeFile = promisify(fs.writeFile);
@@ -1030,8 +1052,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post('/api/documents', async (req, res) => {
     try {
-      const validatedData = insertDocumentSchema.parse(req.body);
-      const document = await storage.createDocument(validatedData);
+      const body = (req.body ?? {}) as Record<string, unknown>;
+      const tagsSource = body.tags ?? (typeof body.classification === 'object' && body.classification !== null
+        ? (body.classification as any).tags
+        : undefined);
+      const normalizedTags = normalizeTagsInput(tagsSource);
+      const { classification, ...rest } = body;
+
+      const validatedData = insertDocumentSchema.parse({
+        ...rest,
+        tags: normalizedTags,
+      });
+
+      const document = await storage.createDocument({
+        ...validatedData,
+        tags: normalizedTags,
+      });
       res.json(document);
     } catch (error) {
       if (error instanceof z.ZodError) {
@@ -1046,12 +1082,27 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const id = parseInt(req.params.id);
       const existingDoc = await storage.getDocument(id);
-      
+
       if (!existingDoc) {
         return res.status(404).json({ error: 'Document not found' });
       }
 
-      const updatedDoc = await storage.updateDocument({ ...existingDoc, ...req.body });
+      const body = (req.body ?? {}) as Record<string, unknown>;
+      const classification = body.classification as any;
+      const hasTagsInput = Object.prototype.hasOwnProperty.call(body, 'tags')
+        || (classification && Object.prototype.hasOwnProperty.call(classification, 'tags'));
+      const tagsSource = hasTagsInput
+        ? body.tags ?? (classification ? classification.tags : undefined)
+        : existingDoc.tags;
+      const normalizedTags = normalizeTagsInput(tagsSource);
+
+      const { tags: _ignoredTags, classification: _ignoredClassification, ...rest } = body;
+
+      const updatedDoc = await storage.updateDocument({
+        ...existingDoc,
+        ...rest,
+        tags: normalizedTags,
+      });
       res.json(updatedDoc);
     } catch (error) {
       res.status(500).json({ error: 'Failed to update document' });

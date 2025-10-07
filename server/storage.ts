@@ -391,22 +391,27 @@ export class MemStorage implements IStorage {
 
   async createDocument(insertDocument: InsertDocument): Promise<PDFDocument> {
     const id = this.currentDocumentId++;
-    const document: PDFDocument = { 
+    const document: PDFDocument = {
       id,
       title: insertDocument.title,
       url: insertDocument.url,
       type: insertDocument.type as "plasa" | "bono" | "escala" | "cardapio",
       category: (insertDocument.category as "oficial" | "praca") ?? null,
       active: insertDocument.active ?? true,
-      uploadDate: new Date()
+      uploadDate: new Date(),
+      tags: Array.isArray(insertDocument.tags) ? [...insertDocument.tags] : []
     };
     this.documents.set(id, document);
     return document;
   }
 
   async updateDocument(document: PDFDocument): Promise<PDFDocument> {
-    this.documents.set(document.id, document);
-    return document;
+    const normalizedDocument: PDFDocument = {
+      ...document,
+      tags: Array.isArray(document.tags) ? [...document.tags] : []
+    };
+    this.documents.set(document.id, normalizedDocument);
+    return normalizedDocument;
   }
 
   async deleteDocument(id: number): Promise<boolean> {
