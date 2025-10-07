@@ -988,7 +988,8 @@ if (selectedDocType === "cardapio" && !docUnit) {
         throw new Error(uploadResult.error || 'Upload falhou');
       }
 
-      const fullUrl = getBackendUrl(uploadResult.data.url);
+      const serverRelativeUrl = String(uploadResult.data.url || '');
+      const fullUrl = getBackendUrl(serverRelativeUrl);
       
       console.log("📄 Adicionando documento ao contexto:", {
         title: docTitle,
@@ -1006,7 +1007,7 @@ if (selectedDocType === "cardapio" && !docUnit) {
 
       addDocument({
         title: docTitle,
-        url: fullUrl,
+        url: serverRelativeUrl,
         type: selectedDocType,
         category: selectedDocType === "escala" ? docCategory : undefined,
         unit: uploadUnit,

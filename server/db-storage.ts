@@ -225,7 +225,7 @@ export class DatabaseStorage implements IStorage {
   async getDocuments(): Promise<PDFDocument[]> {
     try {
       const result = await this.pool.query('SELECT * FROM documents ORDER BY upload_date DESC');
-      
+
       return result.rows.map(row => ({
         id: row.id,
         title: row.title,
@@ -233,7 +233,8 @@ export class DatabaseStorage implements IStorage {
         type: row.type as "plasa" | "bono" | "escala" | "cardapio",
         category: row.category as "oficial" | "praca" | null,
         active: row.active,
-        uploadDate: new Date(row.upload_date)
+        uploadDate: new Date(row.upload_date),
+        tags: Array.isArray(row.tags) ? row.tags : []
       }));
     } catch (error) {
       console.error('❌ PostgreSQL: Erro ao buscar documentos:', error);
@@ -253,7 +254,8 @@ export class DatabaseStorage implements IStorage {
         type: row.type as "plasa" | "bono" | "escala" | "cardapio",
         category: row.category as "oficial" | "praca" | null,
         active: row.active,
-        uploadDate: new Date(row.upload_date)
+        uploadDate: new Date(row.upload_date),
+        tags: Array.isArray(row.tags) ? row.tags : []
       } : undefined;
     } catch (error) {
       console.error(`❌ PostgreSQL: Erro ao buscar documento ${id}:`, error);
@@ -264,15 +266,16 @@ export class DatabaseStorage implements IStorage {
   async createDocument(insertDocument: InsertDocument): Promise<PDFDocument> {
     try {
       const result = await this.pool.query(
-        `INSERT INTO documents (title, url, type, category, active) 
-         VALUES ($1, $2, $3, $4, $5) 
+        `INSERT INTO documents (title, url, type, category, active, tags)
+         VALUES ($1, $2, $3, $4, $5, $6)
          RETURNING *`,
         [
           insertDocument.title,
           insertDocument.url,
           insertDocument.type,
-          insertDocument.category,
-          insertDocument.active
+          insertDocument.category ?? null,
+          insertDocument.active ?? true,
+          Array.isArray(insertDocument.tags) ? insertDocument.tags : []
         ]
       );
 
@@ -284,7 +287,8 @@ export class DatabaseStorage implements IStorage {
         type: row.type as "plasa" | "bono" | "escala" | "cardapio",
         category: row.category as "oficial" | "praca" | null,
         active: row.active,
-        uploadDate: new Date(row.upload_date)
+        uploadDate: new Date(row.upload_date),
+        tags: Array.isArray(row.tags) ? row.tags : []
       };
     } catch (error) {
       console.error('❌ PostgreSQL: Erro ao criar documento:', error);
@@ -295,9 +299,9 @@ export class DatabaseStorage implements IStorage {
   async updateDocument(document: PDFDocument): Promise<PDFDocument> {
     try {
       const result = await this.pool.query(
-        `UPDATE documents 
-         SET title = $1, url = $2, type = $3, category = $4, active = $5
-         WHERE id = $6 
+        `UPDATE documents
+         SET title = $1, url = $2, type = $3, category = $4, active = $5, tags = $6
+         WHERE id = $7
          RETURNING *`,
         [
           document.title,
@@ -305,6 +309,7 @@ export class DatabaseStorage implements IStorage {
           document.type,
           document.category,
           document.active,
+          Array.isArray(document.tags) ? document.tags : [],
           document.id
         ]
       );
@@ -317,7 +322,8 @@ export class DatabaseStorage implements IStorage {
         type: row.type as "plasa" | "bono" | "escala" | "cardapio",
         category: row.category as "oficial" | "praca" | null,
         active: row.active,
-        uploadDate: new Date(row.upload_date)
+        uploadDate: new Date(row.upload_date),
+        tags: Array.isArray(row.tags) ? row.tags : []
       };
     } catch (error) {
       console.error(`❌ PostgreSQL: Erro ao atualizar documento ${document.id}:`, error);

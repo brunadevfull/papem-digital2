@@ -17,12 +17,16 @@ export interface PDFDocument {
   title: string;
   url: string;
   type: "plasa" | "escala" | "cardapio";
-  category?: "oficial" | "praca"; 
+  category?: "oficial" | "praca";
   unit?: "EAGM" | "1DN";
   tags?: string[]; // 🏷️ Tags de classificação automática
   active: boolean;
   uploadDate: Date;
 }
+
+type AddDocumentOptions = {
+  persist?: boolean;
+};
 interface DisplayContextType {
   notices: Notice[];
   plasaDocuments: PDFDocument[];
@@ -39,7 +43,7 @@ interface DisplayContextType {
   addNotice: (notice: Omit<Notice, "id" | "createdAt" | "updatedAt">) => Promise<boolean>;
   updateNotice: (notice: Notice) => Promise<boolean>;
   deleteNotice: (id: string) => Promise<boolean>;
-  addDocument: (document: Omit<PDFDocument, "id" | "uploadDate">) => void;
+  addDocument: (document: Omit<PDFDocument, "id" | "uploadDate">, options?: AddDocumentOptions) => void;
   updateDocument: (document: PDFDocument) => void;
   deleteDocument: (id: string) => void;
   setDocumentAlternateInterval: (interval: number) => void;
@@ -175,6 +179,58 @@ export const DisplayProvider: React.FC<DisplayProviderProps> = ({ children }) =>
     }
 
     return baseTags;
+  };
+
+  const persistDocumentMetadata = async (
+    document: Omit<PDFDocument, "id" | "uploadDate"> & { url: string }
+  ) => {
+    const resolveServerPath = (url: string): string | null => {
+      if (!url) return null;
+      if (url.startsWith('/uploads/')) return url;
+      if (url.startsWith('uploads/')) return `/${url}`;
+      if (url.startsWith('http')) {
+        try {
+          const parsed = new URL(url);
+          return parsed.pathname.startsWith('/uploads/')
+            ? `${parsed.pathname}${parsed.search}`
+            : null;
+        } catch (error) {
+          console.warn('⚠️ URL inválida ao persistir documento:', error);
+          return null;
+        }
+      }
+      return null;
+    };
+
+    const serverPath = resolveServerPath(document.url);
+    if (!serverPath) {
+      return;
+    }
+
+    const payload = {
+      title: document.title,
+      url: serverPath,
+      type: document.type,
+      category: document.category ?? null,
+      active: document.active,
+      tags: normalizeDocumentTags(document),
+    };
+
+    try {
+      const response = await fetch(getBackendUrl('/api/documents'), {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(payload),
+      });
+
+      if (!response.ok) {
+        console.warn('⚠️ Falha ao persistir metadados do documento:', await response.text().catch(() => response.statusText));
+      }
+    } catch (error) {
+      console.warn('⚠️ Não foi possível persistir documento no servidor:', error);
+    }
   };
 
   // Função para gerar ID único
@@ -484,11 +540,12 @@ const deleteNotice = async (id: string): Promise<boolean> => {
   }
 };
 
-  // Função addDocument (mantida igual)
-  const addDocument = (docData: Omit<PDFDocument, "id" | "uploadDate">) => {
-    const fullUrl = getBackendUrl(docData.url);
-    const id = generateUniqueId();
-    
+  // Função addDocument com persistência opcional
+  const addDocument = (
+    docData: Omit<PDFDocument, "id" | "uploadDate">,
+    options: AddDocumentOptions = {}
+  ) => {
+    const serverUrl = docData.url;
     const normalizedDocData = {
       ...docData,
       tags: normalizeDocumentTags(docData)
@@ -496,8 +553,8 @@ const deleteNotice = async (id: string): Promise<boolean> => {
 
     const newDoc: PDFDocument = {
       ...normalizedDocData,
-      id,
-      url: fullUrl,
+      id: generateUniqueId(),
+      url: getBackendUrl(serverUrl),
       uploadDate: new Date()
     };
 
@@ -511,45 +568,49 @@ const deleteNotice = async (id: string): Promise<boolean> => {
 
     if (docData.type === "plasa") {
       setPlasaDocuments(prev => {
-        const exists = prev.some(doc => doc.url === fullUrl || doc.url === docData.url);
+        const exists = prev.some(doc => doc.url === newDoc.url || doc.url === serverUrl);
         if (exists) {
-          console.log("📄 Documento PLASA já existe, ignorando:", fullUrl);
+          console.log("📄 Documento PLASA já existe, ignorando:", newDoc.url);
           return prev;
         }
-        
+
         console.log("📄 Adicionando novo PLASA:", newDoc.title);
         return [...prev, newDoc];
       });
     } else if (docData.type === "cardapio") {
       setCardapioDocuments(prev => {
-        const exists = prev.some(doc => doc.url === fullUrl || doc.url === docData.url);
+        const exists = prev.some(doc => doc.url === newDoc.url || doc.url === serverUrl);
         if (exists) {
-          console.log("🍽️ Documento CARDÁPIO já existe, ignorando:", fullUrl);
+          console.log("🍽️ Documento CARDÁPIO já existe, ignorando:", newDoc.url);
           return prev;
         }
-        
+
         console.log("🍽️ Adicionando novo CARDÁPIO:", newDoc.title, "Unidade:", newDoc.unit);
         return [...prev, newDoc];
       });
     } else {
       // Apenas escalas ficam neste caso
       setEscalaDocuments(prev => {
-        const exists = prev.some(doc => doc.url === fullUrl || doc.url === docData.url);
+        const exists = prev.some(doc => doc.url === newDoc.url || doc.url === serverUrl);
         if (exists) {
-          console.log("📋 Documento Escala já existe, ignorando:", fullUrl);
+          console.log("📋 Documento Escala já existe, ignorando:", newDoc.url);
           return prev;
         }
-        
+
         console.log("📋 Adicionando nova Escala:", newDoc.title, "Categoria:", newDoc.category);
         const newList = [...prev, newDoc];
-        
+
         const activeEscalas = newList.filter(doc => doc.active);
         if (activeEscalas.length === 1) {
           setCurrentEscalaIndex(0);
         }
-        
+
         return newList;
       });
+    }
+
+    if (options.persist ?? true) {
+      void persistDocumentMetadata({ ...normalizedDocData, url: serverUrl });
     }
   };
 
@@ -719,70 +780,96 @@ const deleteNotice = async (id: string): Promise<boolean> => {
 
   // Função para carregar documentos do servidor
   const loadDocumentsFromServer = async () => {
-    try {
+    const processServerDocument = (serverDoc: any) => {
+      if (!serverDoc) return;
 
+      const rawUrl = typeof serverDoc.url === 'string' ? serverDoc.url : '';
+      const fullUrl = getBackendUrl(rawUrl || '');
+
+      const existsInPlasa = plasaDocuments.some(doc => doc.url === fullUrl);
+      const existsInEscala = escalaDocuments.some(doc => doc.url === fullUrl);
+      const existsInCardapio = cardapioDocuments.some(doc => doc.url === fullUrl);
+
+      if (existsInPlasa || existsInEscala || existsInCardapio) {
+        return;
+      }
+
+      const allowedTypes: PDFDocument["type"][] = ['plasa', 'escala', 'cardapio'];
+      const docType = typeof serverDoc.type === 'string' ? serverDoc.type : 'escala';
+      const safeType = allowedTypes.includes(docType as PDFDocument["type"])
+        ? (docType as PDFDocument["type"])
+        : 'escala';
+
+      const rawCategory = typeof serverDoc.category === 'string'
+        ? serverDoc.category
+        : safeType === 'escala'
+          ? determineCategory(String(serverDoc.filename || serverDoc.title || ''))
+          : undefined;
+
+      const unit = typeof serverDoc.unit === 'string'
+        ? (serverDoc.unit as PDFDocument['unit'])
+        : undefined;
+
+      const docTags = normalizeDocumentTags({
+        tags: Array.isArray(serverDoc.tags)
+          ? [...serverDoc.tags]
+          : serverDoc.tags
+            ? [String(serverDoc.tags)]
+            : [],
+        type: safeType,
+        category: rawCategory as PDFDocument['category'],
+        unit
+      });
+
+      const timestampSource = serverDoc.uploadDate || serverDoc.created || serverDoc.createdAt;
+      const parsedDate = timestampSource ? new Date(timestampSource) : new Date();
+      const typeNames = {
+        plasa: 'PLASA',
+        escala: 'Escala',
+        cardapio: 'Cardápio'
+      } satisfies Record<PDFDocument['type'], string>;
+
+      const generatedTitle = `${typeNames[safeType]} - ${parsedDate.toLocaleDateString('pt-BR')}`;
+      const finalTitle = typeof serverDoc.title === 'string' && serverDoc.title.trim().length > 0
+        ? serverDoc.title
+        : generatedTitle;
+
+      const docData: Omit<PDFDocument, "id" | "uploadDate"> = {
+        title: finalTitle,
+        url: rawUrl || fullUrl,
+        type: safeType,
+        category: safeType === 'escala' ? (rawCategory as PDFDocument['category']) : undefined,
+        tags: docTags,
+        unit,
+        active: serverDoc.active !== false
+      };
+
+      addDocument(docData, { persist: false });
+    };
+
+    try {
+      const response = await fetch(getBackendUrl('/api/documents'));
+      if (response.ok) {
+        const documents = await response.json();
+        if (Array.isArray(documents) && documents.length > 0) {
+          documents.forEach(processServerDocument);
+          return;
+        }
+      }
+    } catch (error) {
+      console.warn('⚠️ Falha ao carregar documentos do banco:', error);
+    }
+
+    try {
       const response = await fetch(getBackendUrl('/api/list-pdfs'));
-      
       if (response.ok) {
         const result = await response.json();
-
-        
-        if (result.documents && result.documents.length > 0) {
-          result.documents.forEach((serverDoc: any) => {
-            const fullUrl = getBackendUrl(serverDoc.url);
-            
-            const existsInPlasa = plasaDocuments.some(doc => doc.url === fullUrl);
-            const existsInEscala = escalaDocuments.some(doc => doc.url === fullUrl);
-            
-            // CORREÇÃO: Verificar se documento já existe em QUALQUER lista
-            const existsInCardapio = cardapioDocuments.some(doc => doc.url === fullUrl);
-            
-            if (!existsInPlasa && !existsInEscala && !existsInCardapio) {
-              // USAR A CLASSIFICAÇÃO DO BACKEND DIRETAMENTE
-              const docType = serverDoc.type || 'escala'; // fallback para escala
-              const allowedTypes: PDFDocument["type"][] = ['plasa', 'escala', 'cardapio'];
-              const safeType = allowedTypes.includes(docType as PDFDocument["type"])
-                ? (docType as PDFDocument["type"])
-                : 'escala';
-              const category = determineCategory(serverDoc.filename);
-
-              // Gerar título baseado no tipo correto
-              const typeNames = {
-                'plasa': 'PLASA',
-                'escala': 'Escala',
-                'cardapio': 'Cardápio'
-              };
-              const typeName = typeNames[safeType] || 'Documento';
-
-              const docTags = normalizeDocumentTags({
-                tags: Array.isArray(serverDoc.tags)
-                  ? [...serverDoc.tags]
-                  : serverDoc.tags
-                    ? [String(serverDoc.tags)]
-                    : [],
-                type: safeType,
-                category,
-                unit: serverDoc.unit as PDFDocument['unit'] | undefined
-              });
-
-              const docData: Omit<PDFDocument, "id" | "uploadDate"> = {
-                title: `${typeName} - ${new Date(serverDoc.created).toLocaleDateString('pt-BR')}`,
-                url: fullUrl,
-                type: safeType,
-                category: safeType === 'escala' ? category : undefined,
-                tags: docTags,
-                unit: serverDoc.unit as PDFDocument['unit'] | undefined,
-                active: true
-              };
-
-              addDocument(docData);
-            }
-          });
+        if (result.documents && Array.isArray(result.documents)) {
+          result.documents.forEach(processServerDocument);
         }
       }
     } catch (error) {
       // Silenciar erros de documentos - sistema funciona em modo offline
-
     }
   };
 
