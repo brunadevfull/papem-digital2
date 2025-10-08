@@ -780,19 +780,14 @@ const deleteNotice = async (id: string): Promise<boolean> => {
 
   // Função para carregar documentos do servidor
   const loadDocumentsFromServer = async () => {
-    const processServerDocument = (serverDoc: any) => {
-      if (!serverDoc) return;
+    const transformServerDocument = (serverDoc: any): PDFDocument | null => {
+      if (!serverDoc) {
+        return null;
+      }
 
       const rawUrl = typeof serverDoc.url === 'string' ? serverDoc.url : '';
-      const fullUrl = getBackendUrl(rawUrl || '');
-
-      const existsInPlasa = plasaDocuments.some(doc => doc.url === fullUrl);
-      const existsInEscala = escalaDocuments.some(doc => doc.url === fullUrl);
-      const existsInCardapio = cardapioDocuments.some(doc => doc.url === fullUrl);
-
-      if (existsInPlasa || existsInEscala || existsInCardapio) {
-        return;
-      }
+      const normalizedUrl = normalizeDocumentUrl(rawUrl || '');
+      const finalUrl = getBackendUrl(normalizedUrl || rawUrl || '');
 
       const allowedTypes: PDFDocument["type"][] = ['plasa', 'escala', 'cardapio'];
       const docType = typeof serverDoc.type === 'string' ? serverDoc.type : 'escala';
@@ -821,7 +816,7 @@ const deleteNotice = async (id: string): Promise<boolean> => {
         unit
       });
 
-      const timestampSource = serverDoc.uploadDate || serverDoc.created || serverDoc.createdAt;
+      const timestampSource = serverDoc.uploadDate || serverDoc.updatedAt || serverDoc.created || serverDoc.createdAt;
       const parsedDate = timestampSource ? new Date(timestampSource) : new Date();
       const typeNames = {
         plasa: 'PLASA',
@@ -834,25 +829,51 @@ const deleteNotice = async (id: string): Promise<boolean> => {
         ? serverDoc.title
         : generatedTitle;
 
-      const docData: Omit<PDFDocument, "id" | "uploadDate"> = {
+      const documentId = serverDoc.id ? String(serverDoc.id) : `server-${generateUniqueId()}`;
+
+      return {
+        id: documentId,
         title: finalTitle,
-        url: rawUrl || fullUrl,
+        url: finalUrl,
         type: safeType,
         category: safeType === 'escala' ? (rawCategory as PDFDocument['category']) : undefined,
         tags: docTags,
         unit,
-        active: serverDoc.active !== false
+        active: serverDoc.active !== false,
+        uploadDate: parsedDate
       };
-
-      addDocument(docData, { persist: false });
     };
 
     try {
       const response = await fetch(getBackendUrl('/api/documents'));
       if (response.ok) {
         const documents = await response.json();
-        if (Array.isArray(documents) && documents.length > 0) {
-          documents.forEach(processServerDocument);
+        if (Array.isArray(documents)) {
+          const normalizedDocs: PDFDocument[] = documents
+            .map(transformServerDocument)
+            .filter((doc: PDFDocument | null): doc is PDFDocument => doc !== null);
+
+          const nextPlasa = normalizedDocs.filter(doc => doc.type === 'plasa');
+          const nextEscalas = normalizedDocs.filter(doc => doc.type === 'escala');
+          const nextCardapios = normalizedDocs.filter(doc => doc.type === 'cardapio');
+
+          setPlasaDocuments(nextPlasa);
+          setEscalaDocuments(prev => {
+            const activeEscalasBefore = prev.filter(doc => doc.active).length;
+            const next = nextEscalas;
+            const activeEscalas = next.filter(doc => doc.active);
+
+            if (activeEscalas.length === 0) {
+              setCurrentEscalaIndex(0);
+            } else if (currentEscalaIndex >= activeEscalas.length) {
+              setCurrentEscalaIndex(0);
+            } else if (activeEscalasBefore !== activeEscalas.length) {
+              setCurrentEscalaIndex(0);
+            }
+
+            return next;
+          });
+          setCardapioDocuments(nextCardapios);
           return;
         }
       }
@@ -865,7 +886,31 @@ const deleteNotice = async (id: string): Promise<boolean> => {
       if (response.ok) {
         const result = await response.json();
         if (result.documents && Array.isArray(result.documents)) {
-          result.documents.forEach(processServerDocument);
+          const normalizedDocs: PDFDocument[] = result.documents
+            .map(transformServerDocument)
+            .filter((doc: PDFDocument | null): doc is PDFDocument => doc !== null);
+
+          const nextPlasa = normalizedDocs.filter(doc => doc.type === 'plasa');
+          const nextEscalas = normalizedDocs.filter(doc => doc.type === 'escala');
+          const nextCardapios = normalizedDocs.filter(doc => doc.type === 'cardapio');
+
+          setPlasaDocuments(nextPlasa);
+          setEscalaDocuments(prev => {
+            const activeEscalasBefore = prev.filter(doc => doc.active).length;
+            const next = nextEscalas;
+            const activeEscalas = next.filter(doc => doc.active);
+
+            if (activeEscalas.length === 0) {
+              setCurrentEscalaIndex(0);
+            } else if (currentEscalaIndex >= activeEscalas.length) {
+              setCurrentEscalaIndex(0);
+            } else if (activeEscalasBefore !== activeEscalas.length) {
+              setCurrentEscalaIndex(0);
+            }
+
+            return next;
+          });
+          setCardapioDocuments(nextCardapios);
         }
       }
     } catch (error) {

@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef, useCallback, useMemo } from "react";
 import { useDisplay } from "@/context/DisplayContext";
+import type { PDFDocument } from "@/context/DisplayContext";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 const IS_DEV_MODE = process.env.NODE_ENV === 'development';
@@ -432,17 +433,50 @@ const getCurrentCardapioDoc = () => {
   };
 
   // Função para gerar ID único do documento baseado na URL
-  const generateDocumentId = (url: string): string => {
+  const sanitizeCacheKey = (value: string) => {
+    const normalized = typeof value.normalize === 'function'
+      ? value.normalize('NFKD')
+      : value;
+
+    return normalized
+      .replace(/[^a-zA-Z0-9_-]/g, '-')
+      .replace(/-+/g, '-')
+      .replace(/^-|-$/g, '')
+      .toLowerCase()
+      .substring(0, 64);
+  };
+
+  const buildPlasaCacheKey = (doc: PDFDocument | null): string | null => {
+    if (!doc) {
+      return null;
+    }
+
+    const timestamp = doc.uploadDate instanceof Date && !Number.isNaN(doc.uploadDate.getTime())
+      ? doc.uploadDate.getTime().toString()
+      : '';
+
+    const rawKey = [doc.url, timestamp].filter(Boolean).join('-');
+    const sanitized = sanitizeCacheKey(rawKey);
+
+    return sanitized.length > 0 ? sanitized : null;
+  };
+
+  const generateDocumentId = (url: string, explicitId?: string | null): string => {
+    if (explicitId && explicitId.length > 0) {
+      const sanitizedExplicit = sanitizeCacheKey(explicitId);
+      if (sanitizedExplicit.length > 0) {
+        return sanitizedExplicit;
+      }
+    }
+
     const urlParts = url.split("/");
     const filename = urlParts[urlParts.length - 1];
     const timestamp = Date.now();
     const random = Math.random().toString(36).substring(2, 8);
-    const cleanName = filename
-      .replace(/\.[^/.]+$/, "")
-      .replace(/[^a-zA-Z0-9]/g, "-")
-      .toLowerCase()
-      .substring(0, 20);
-    return `${timestamp}-${cleanName}-${random}`;
+    const cleanName = sanitizeCacheKey(filename.replace(/\.[^/.]+$/, ""));
+    const fallback = `${timestamp}-${cleanName}-${random}`;
+
+    return sanitizeCacheKey(fallback) || `${timestamp}-${random}`;
   };
 
   // Verificar se páginas já existem no servidor
@@ -476,7 +510,7 @@ const getCurrentCardapioDoc = () => {
   };
 
   // FUNÇÃO PRINCIPAL: Converter PDF para imagens
-  const convertPDFToImages = async (pdfUrl: string) => {
+  const convertPDFToImages = async (pdfUrl: string, options?: { documentId?: string | null }) => {
     try {
       console.log(`🎯 INICIANDO CONVERSÃO PDF: ${pdfUrl}`);
       setLoading(true);
@@ -521,7 +555,7 @@ const getCurrentCardapioDoc = () => {
       console.log(`📄 PDF carregado com sucesso: ${pdf.numPages} páginas`);
       setTotalPages(pdf.numPages);
       
-      const docId = generateDocumentId(pdfUrl);
+      const docId = generateDocumentId(pdfUrl, options?.documentId);
       const existingPages = await checkExistingPages(pdf.numPages, docId);
       if (existingPages.length === pdf.numPages) {
         console.log(`💾 Usando ${pdf.numPages} páginas já convertidas`);
@@ -787,7 +821,8 @@ const getCurrentCardapioDoc = () => {
         setLoading(false);
       } else {
 
-        convertPDFToImages(docUrl);
+        const cacheKey = buildPlasaCacheKey(activeMainDoc);
+        convertPDFToImages(docUrl, { documentId: cacheKey });
       }
     }
 
@@ -796,7 +831,7 @@ const getCurrentCardapioDoc = () => {
         clearAllTimers();
       }
     };
-  }, [documentType, activePlasaDoc?.id, activePlasaDoc?.url]);
+  }, [documentType, activePlasaDoc?.id, activePlasaDoc?.url, activePlasaDoc?.uploadDate]);
 
   // CORREÇÃO: Inicializar ESCALA com monitoramento do índice de alternância
   useEffect(() => {
