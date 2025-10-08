@@ -37,7 +37,8 @@ interface DisplayContextType {
   activeCardapioDoc: PDFDocument | null;
   currentEscalaIndex: number;
   currentCardapioIndex: number; // ✅ Adicionar
-  documentAlternateInterval: number;
+  escalaAlternateInterval: number;
+  cardapioAlternateInterval: number;
   scrollSpeed: "slow" | "normal" | "fast";
   autoRestartDelay: number;
   isLoading: boolean;
@@ -47,7 +48,8 @@ interface DisplayContextType {
   addDocument: (document: Omit<PDFDocument, "id" | "uploadDate">, options?: AddDocumentOptions) => void;
   updateDocument: (document: PDFDocument) => void;
   deleteDocument: (id: string) => void;
-  setDocumentAlternateInterval: (interval: number) => void;
+  setEscalaAlternateInterval: (interval: number) => void;
+  setCardapioAlternateInterval: (interval: number) => void;
   setScrollSpeed: (speed: "slow" | "normal" | "fast") => void;
   setAutoRestartDelay: (delay: number) => void;
   refreshNotices: () => Promise<void>;
@@ -77,7 +79,8 @@ export const DisplayProvider: React.FC<DisplayProviderProps> = ({ children }) =>
   const [currentEscalaIndex, setCurrentEscalaIndex] = useState(0);
   const [currentCardapioIndex, setCurrentCardapioIndex] = useState(0); // ✅ ADICIONAR
   const cardapioTimerRef = useRef<NodeJS.Timeout | null>(null); // ✅ ADICIONAR
-  const [documentAlternateInterval, setDocumentAlternateInterval] = useState(30000);
+  const [escalaAlternateInterval, setEscalaAlternateInterval] = useState(30000);
+  const [cardapioAlternateInterval, setCardapioAlternateInterval] = useState(30000);
   const [scrollSpeed, setScrollSpeed] = useState<"slow" | "normal" | "fast">("normal");
   const [autoRestartDelay, setAutoRestartDelay] = useState(3);
   const [isLoading, setIsLoading] = useState(false);
@@ -746,7 +749,7 @@ const activeCardapioDoc = activeCardapioDocuments.length > 0
 
           return nextIndex;
         });
-      }, documentAlternateInterval);
+      }, escalaAlternateInterval);
     } else if (activeEscalaDocuments.length === 1) {
       setCurrentEscalaIndex(0);
 
@@ -760,7 +763,7 @@ const activeCardapioDoc = activeCardapioDocuments.length > 0
         escalaTimerRef.current = null;
       }
     };
-  }, [activeEscalaDocuments.length, documentAlternateInterval, escalaDocuments]);
+  }, [activeEscalaDocuments.length, escalaAlternateInterval, escalaDocuments]);
 // ✅ ADICIONAR: Effect para alternar cardápios automaticamente
 useEffect(() => {
   if (cardapioTimerRef.current) {
@@ -778,7 +781,7 @@ useEffect(() => {
         console.log(`🍽️ Alternando para cardápio ${nextIndex + 1}/${activeCardapioDocuments.length}: ${nextCardapio?.unit || 'N/A'}`);
         return nextIndex;
       });
-    }, documentAlternateInterval);
+    }, cardapioAlternateInterval);
   } else if (activeCardapioDocuments.length === 1) {
     console.log(`🍽️ Apenas 1 cardápio ativo, mantendo fixo`);
     setCurrentCardapioIndex(0);
@@ -792,7 +795,7 @@ useEffect(() => {
       cardapioTimerRef.current = null;
     }
   };
-}, [activeCardapioDocuments.length, documentAlternateInterval, cardapioDocuments]);
+}, [activeCardapioDocuments.length, cardapioAlternateInterval, cardapioDocuments]);
 
 // ✅ ADICIONAR: Effect para resetar índice de cardápios
 useEffect(() => {
@@ -833,11 +836,14 @@ useEffect(() => {
           uploadDate: doc.uploadDate.toISOString()
         })),
         currentEscalaIndex,
-        documentAlternateInterval,
+        currentCardapioIndex,
+        escalaAlternateInterval,
+        cardapioAlternateInterval,
+        documentAlternateInterval: escalaAlternateInterval, // 🔙 Compatibilidade com versões anteriores
         scrollSpeed,
         autoRestartDelay,
         lastUpdate: new Date().toISOString(),
-        version: '3.0' // Avisos agora no servidor
+        version: '3.1' // Avisos agora no servidor
       };
       
       localStorage.setItem('display-context', JSON.stringify(contextData, null, 2));
@@ -847,7 +853,17 @@ useEffect(() => {
     } catch (error) {
       console.error("❌ Erro ao salvar contexto:", error);
     }
-  }, [plasaDocuments, escalaDocuments, cardapioDocuments, currentEscalaIndex, documentAlternateInterval, scrollSpeed, autoRestartDelay]);
+  }, [
+    plasaDocuments,
+    escalaDocuments,
+    cardapioDocuments,
+    currentEscalaIndex,
+    currentCardapioIndex,
+    escalaAlternateInterval,
+    cardapioAlternateInterval,
+    scrollSpeed,
+    autoRestartDelay
+  ]);
 
   // Função auxiliar para determinar categoria
   const determineCategory = (filename: string): "oficial" | "praca" | undefined => {
@@ -1065,7 +1081,19 @@ const cardapio = parsedDocs.filter((doc: PDFDocument) => doc.type === 'cardapio'
             if (typeof data.currentEscalaIndex === 'number') {
               setCurrentEscalaIndex(data.currentEscalaIndex);
             }
-            if (data.documentAlternateInterval) setDocumentAlternateInterval(data.documentAlternateInterval);
+            if (typeof data.currentCardapioIndex === 'number') {
+              setCurrentCardapioIndex(data.currentCardapioIndex);
+            }
+            if (data.escalaAlternateInterval) {
+              setEscalaAlternateInterval(data.escalaAlternateInterval);
+            }
+            if (data.cardapioAlternateInterval) {
+              setCardapioAlternateInterval(data.cardapioAlternateInterval);
+            }
+            if (data.documentAlternateInterval && !data.escalaAlternateInterval && !data.cardapioAlternateInterval) {
+              setEscalaAlternateInterval(data.documentAlternateInterval);
+              setCardapioAlternateInterval(data.documentAlternateInterval);
+            }
             if (data.scrollSpeed) setScrollSpeed(data.scrollSpeed);
             if (data.autoRestartDelay) setAutoRestartDelay(data.autoRestartDelay);
           } catch (parseError) {
@@ -1128,7 +1156,8 @@ const value: DisplayContextType = {
   activeCardapioDoc, // ✅ Agora está definido acima
   currentEscalaIndex,
   currentCardapioIndex, // ✅ Adicionar esta propriedade
-  documentAlternateInterval,
+  escalaAlternateInterval,
+  cardapioAlternateInterval,
   scrollSpeed,
   autoRestartDelay,
   isLoading,
@@ -1138,7 +1167,8 @@ const value: DisplayContextType = {
   addDocument,
   updateDocument,
   deleteDocument,
-  setDocumentAlternateInterval,
+  setEscalaAlternateInterval,
+  setCardapioAlternateInterval,
   setScrollSpeed,
   setAutoRestartDelay,
   refreshNotices,
