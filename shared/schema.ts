@@ -25,7 +25,7 @@ export const documents = pgTable("documents", {
   id: serial("id").primaryKey(),
   title: text("title").notNull(),
   url: text("url").notNull(),
-  type: text("type").notNull().$type<"plasa" | "escala" | "cardapio">(),
+  type: text("type").notNull().$type<"plasa" | "bono" | "escala" | "cardapio">(),
   category: text("category").$type<"oficial" | "praca">(),
   active: boolean("active").notNull().default(true),
   tags: text("tags").array().default(sql`ARRAY[]::text[]`),

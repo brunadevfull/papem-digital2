@@ -426,8 +426,10 @@ export class MemStorage implements IStorage {
   async updateDutyOfficers(officers: InsertDutyOfficers): Promise<DutyOfficers> {
     const updatedOfficers: DutyOfficers = {
       id: 1, // Sempre ID 1 pois só temos um registro
-      officerName: officers.officerName || "",
-      masterName: officers.masterName || "",
+      officerId: null,
+      masterId: null,
+      officerName: officers.officerName ?? null,
+      masterName: officers.masterName ?? null,
       updatedAt: new Date()
     };
 
@@ -459,6 +461,7 @@ export class MemStorage implements IStorage {
       specialty: personnel.specialty || null,
       fullRankName: personnel.fullRankName,
       active: personnel.active ?? true,
+      dutyRole: personnel.dutyRole ?? null,
       createdAt: new Date(),
       updatedAt: new Date(),
     };

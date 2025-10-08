@@ -368,21 +368,25 @@ export class DatabaseStorage implements IStorage {
 
       const officer = result.rows.find(row => row.duty_role === 'officer');
       const master = result.rows.find(row => row.duty_role === 'master');
-      
+
       // Formatar nomes no padrão: "1T (RM2-T) KARINE"
-      const officerName = officer ? 
-        `${officer.rank.toUpperCase()}${officer.specialty ? ` (${officer.specialty.toUpperCase()})` : ''} ${officer.name}` : '';
-      
-      const masterName = master ?
-        `${master.rank.toUpperCase()}${master.specialty ? ` (${master.specialty.toUpperCase()})` : ''} ${master.name}` : '';
+      const officerName = officer
+        ? `${officer.rank.toUpperCase()}${officer.specialty ? ` (${officer.specialty.toUpperCase()})` : ''} ${officer.name}`
+        : null;
+
+      const masterName = master
+        ? `${master.rank.toUpperCase()}${master.specialty ? ` (${master.specialty.toUpperCase()})` : ''} ${master.name}`
+        : null;
 
       console.log('👮 PostgreSQL: Oficiais encontrados (sistema unificado):', {
         officerName,
         masterName
       });
-      
+
       return {
         id: 1, // ID fixo para compatibilidade
+        officerId: officer?.id ?? null,
+        masterId: master?.id ?? null,
         officerName,
         masterName,
         updatedAt: new Date()
@@ -415,8 +419,8 @@ export class DatabaseStorage implements IStorage {
         };
       };
       
-      let updatedOfficer = null;
-      let updatedMaster = null;
+      let updatedOfficer: any = null;
+      let updatedMaster: any = null;
       
       // Processar oficial
       if (officers.officerName) {
@@ -490,8 +494,10 @@ export class DatabaseStorage implements IStorage {
       
       return {
         id: 1,
-        officerName: officers.officerName,
-        masterName: officers.masterName,
+        officerId: updatedOfficer?.id ?? null,
+        masterId: updatedMaster?.id ?? null,
+        officerName: officers.officerName ?? null,
+        masterName: officers.masterName ?? null,
         updatedAt: new Date()
       };
       
@@ -515,8 +521,9 @@ async getMilitaryPersonnel(): Promise<MilitaryPersonnel[]> {
         specialty: row.specialty || null,
         fullRankName: row.full_rank_name,
         active: row.active,
-        createdAt: new Date(row.created_at),
-        updatedAt: new Date(row.updated_at)
+        dutyRole: (row.duty_role ?? null) as "officer" | "master" | null,
+        createdAt: row.created_at ? new Date(row.created_at) : null,
+        updatedAt: row.updated_at ? new Date(row.updated_at) : null
       }));
 
       console.log(`🎖️ PostgreSQL: ${personnel.length} militares encontrados`);
@@ -545,8 +552,9 @@ async getMilitaryPersonnel(): Promise<MilitaryPersonnel[]> {
         specialty: row.specialty || null,
         fullRankName: row.full_rank_name,
         active: row.active,
-        createdAt: new Date(row.created_at),
-        updatedAt: new Date(row.updated_at)
+        dutyRole: (row.duty_role ?? null) as "officer" | "master" | null,
+        createdAt: row.created_at ? new Date(row.created_at) : null,
+        updatedAt: row.updated_at ? new Date(row.updated_at) : null
       }));
 
       console.log(`🎖️ PostgreSQL: ${personnel.length} ${type}s encontrados`);
@@ -562,8 +570,8 @@ async getMilitaryPersonnel(): Promise<MilitaryPersonnel[]> {
       console.log(`🎖️ PostgreSQL: Criando ${personnel.type}:`, personnel.name);
       
       const result = await this.pool.query(
-        `INSERT INTO military_personnel (name, type, rank, specialty, full_rank_name, active) 
-         VALUES ($1, $2, $3, $4, $5, $6) 
+        `INSERT INTO military_personnel (name, type, rank, specialty, full_rank_name, active, duty_role)
+         VALUES ($1, $2, $3, $4, $5, $6, $7)
          RETURNING *`,
         [
           personnel.name,
@@ -571,7 +579,8 @@ async getMilitaryPersonnel(): Promise<MilitaryPersonnel[]> {
           personnel.rank,
           personnel.specialty,
           personnel.fullRankName,
-          personnel.active !== false
+          personnel.active !== false,
+          personnel.dutyRole ?? null
         ]
       );
 
@@ -584,8 +593,9 @@ async getMilitaryPersonnel(): Promise<MilitaryPersonnel[]> {
         specialty: row.specialty || null,
         fullRankName: row.full_rank_name,
         active: row.active,
-        createdAt: new Date(row.created_at),
-        updatedAt: new Date(row.updated_at)
+        dutyRole: (row.duty_role ?? null) as "officer" | "master" | null,
+        createdAt: row.created_at ? new Date(row.created_at) : null,
+        updatedAt: row.updated_at ? new Date(row.updated_at) : null
       };
 
       console.log(`✅ PostgreSQL: ${personnel.type} ${created.id} criado`);
@@ -601,9 +611,9 @@ async getMilitaryPersonnel(): Promise<MilitaryPersonnel[]> {
       console.log(`🎖️ PostgreSQL: Atualizando ${personnel.type} ${personnel.id}`);
       
       const result = await this.pool.query(
-        `UPDATE military_personnel 
-         SET name = $1, type = $2, rank = $3, specialty = $4, full_rank_name = $5, active = $6, updated_at = NOW()
-         WHERE id = $7 
+        `UPDATE military_personnel
+         SET name = $1, type = $2, rank = $3, specialty = $4, full_rank_name = $5, active = $6, duty_role = $7, updated_at = NOW()
+         WHERE id = $8
          RETURNING *`,
         [
           personnel.name,
@@ -612,6 +622,7 @@ async getMilitaryPersonnel(): Promise<MilitaryPersonnel[]> {
           personnel.specialty,
           personnel.fullRankName,
           personnel.active,
+          personnel.dutyRole ?? null,
           personnel.id
         ]
       );
@@ -629,8 +640,9 @@ async getMilitaryPersonnel(): Promise<MilitaryPersonnel[]> {
         specialty: row.specialty || null,
         fullRankName: row.full_rank_name,
         active: row.active,
-        createdAt: new Date(row.created_at),
-        updatedAt: new Date(row.updated_at)
+        dutyRole: (row.duty_role ?? null) as "officer" | "master" | null,
+        createdAt: row.created_at ? new Date(row.created_at) : null,
+        updatedAt: row.updated_at ? new Date(row.updated_at) : null
       };
 
       console.log(`✅ PostgreSQL: ${personnel.type} ${personnel.id} atualizado`);
