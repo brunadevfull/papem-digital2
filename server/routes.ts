@@ -10,7 +10,7 @@ import { promisify } from "util";
 
 // 🔥 NOVO: Sistema de classificação inteligente de documentos
 interface DocumentClassification {
-  type: 'plasa' | 'bono' | 'escala' | 'cardapio';
+  type: 'plasa' | 'escala' | 'cardapio';
   category?: 'oficial' | 'praca';
   unit?: 'EAGM' | '1DN';
   tags: string[];
@@ -43,7 +43,7 @@ function normalizeString(str: string): string {
 // Função principal para extrair classificação
 function extractClassification(originalName: string, title?: string, bodyType?: string): DocumentClassification {
   // ✅ CORREÇÃO: Se tipo manual é fornecido, SEMPRE use-o (não cache)
-  if (bodyType && ['plasa', 'bono', 'escala', 'cardapio'].includes(bodyType)) {
+  if (bodyType && ['plasa', 'escala', 'cardapio'].includes(bodyType)) {
     console.log(`✅ TIPO MANUAL fornecido: ${bodyType} - pulando cache`);
     // Não usar cache quando temos seleção manual
   } else {
@@ -74,8 +74,8 @@ function extractClassification(originalName: string, title?: string, bodyType?: 
 
   // ✅ CLASSIFICAÇÃO MANUAL: Priorizar SEMPRE o tipo selecionado no combobox
   let type: DocumentClassification['type'];
-  
-  if (bodyType && ['plasa', 'bono', 'escala', 'cardapio'].includes(bodyType)) {
+
+  if (bodyType && ['plasa', 'escala', 'cardapio'].includes(bodyType)) {
     // ✅ TIPO MANUAL: Usar exatamente o que foi selecionado no combobox
     type = bodyType as DocumentClassification['type'];
     console.log(`✅ Usando tipo MANUAL selecionado: ${bodyType}`);
@@ -85,8 +85,6 @@ function extractClassification(originalName: string, title?: string, bodyType?: 
     type = 'escala'; // default fallback
     if (primaryText.includes('PLASA')) {
       type = 'plasa';
-    } else if (primaryText.includes('BONO')) {
-      type = 'bono';
     } else if (primaryText.includes('CARDAPIO') || primaryText.includes('CARD')) {
       type = 'cardapio';
     } else if (primaryText.includes('ESCALA')) {
@@ -139,7 +137,6 @@ function extractClassification(originalName: string, title?: string, bodyType?: 
 
   // Tags gerais - SEMPRE analise o nome original
   if (primaryText.includes('PLASA')) tags.push('PLASA');
-  if (primaryText.includes('BONO')) tags.push('BONO');
   if (primaryText.includes('ESCALA')) tags.push('ESCALA');
   if (primaryText.includes('CARDAPIO') || primaryText.includes('CARD')) tags.push('CARDÁPIO');
 

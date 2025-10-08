@@ -58,7 +58,7 @@ interface DebugInfo {
 }
 
 interface PDFViewerProps {
-  documentType: "plasa" | "bono" | "escala" | "cardapio";
+  documentType: "plasa" | "escala" | "cardapio";
   title: string;
   scrollSpeed?: "slow" | "normal" | "fast";
   autoRestartDelay?: number;
@@ -156,7 +156,7 @@ const PDFViewer: React.FC<PDFViewerProps> = ({
   onScrollComplete
 }) => {
   // CORREÇÃO: Usar currentEscalaIndex do contexto
-  const { activeEscalaDoc, activePlasaDoc, activeBonoDoc, activeCardapioDoc, currentEscalaIndex, escalaDocuments } = useDisplay();
+  const { activeEscalaDoc, activePlasaDoc, activeCardapioDoc, currentEscalaIndex, escalaDocuments } = useDisplay();
   const [totalPages, setTotalPages] = useState(0);
   const [loading, setLoading] = useState(false);
   const [isScrolling, setIsScrolling] = useState(false);
@@ -250,13 +250,6 @@ const PDFViewer: React.FC<PDFViewerProps> = ({
       return getBackendUrl(activePlasaDoc.url);
     }
     console.log("📄 PLASA: Nenhum documento ativo");
-    return null;
-  } else if (documentType === "bono") {
-    if (activeBonoDoc?.url) {
-      console.log("📰 BONO: Usando documento do admin:", activeBonoDoc.url);
-      return getBackendUrl(activeBonoDoc.url);
-    }
-    console.log("📰 BONO: Nenhum documento ativo");
     return null;
   } else if (documentType === "escala") {
     // CORREÇÃO: Usar a escala atual baseada no índice
@@ -740,7 +733,7 @@ const getCurrentCardapioDoc = () => {
     setIsScrolling(false);
     
     // Chamar callback externo se fornecido (para alternância PLASA/BONO)
-    if (onScrollComplete && (documentType === "plasa" || documentType === "bono")) {
+    if (onScrollComplete && documentType === "plasa") {
       onScrollComplete();
       return; // Não reiniciar automaticamente, deixar o contexto controlar
     }
@@ -756,7 +749,7 @@ const getCurrentCardapioDoc = () => {
 
   // Iniciar scroll contínuo
   const startContinuousScroll = useCallback(() => {
-    if ((documentType !== "plasa" && documentType !== "bono") || !containerRef.current || savedPageUrls.length === 0 || isAutomationPaused) {
+    if (documentType !== "plasa" || !containerRef.current || savedPageUrls.length === 0 || isAutomationPaused) {
       return;
     }
 
@@ -795,8 +788,8 @@ const getCurrentCardapioDoc = () => {
 
   // CORREÇÃO: INICIALIZAR PLASA/BONO com melhor verificação
   useEffect(() => {
-    if (documentType === "plasa" || documentType === "bono") {
-      const activeMainDoc = documentType === "bono" ? activeBonoDoc : activePlasaDoc;
+    if (documentType === "plasa") {
+      const activeMainDoc = activePlasaDoc;
 
       if (isScrolling) return;
 
@@ -828,11 +821,11 @@ const getCurrentCardapioDoc = () => {
     }
 
     return () => {
-      if (documentType === "plasa" || documentType === "bono") {
+      if (documentType === "plasa") {
         clearAllTimers();
       }
     };
-  }, [documentType, activePlasaDoc?.id, activePlasaDoc?.url, activePlasaDoc?.uploadDate, activeBonoDoc?.id, activeBonoDoc?.url, activeBonoDoc?.uploadDate, isScrolling]);
+  }, [documentType, activePlasaDoc?.id, activePlasaDoc?.url, activePlasaDoc?.uploadDate, isScrolling]);
 
   // CORREÇÃO: Inicializar ESCALA com monitoramento do índice de alternância
   useEffect(() => {
@@ -1112,7 +1105,7 @@ useEffect(() => {
 
   // CORREÇÃO: Renderizar conteúdo com melhor tratamento de erros
   const renderContent = () => {
-    if ((documentType === "plasa" || documentType === "bono") && savedPageUrls.length > 0) {
+    if (documentType === "plasa" && savedPageUrls.length > 0) {
       const label = documentType.toUpperCase();
       return (
         <div className="w-full">
@@ -1261,15 +1254,17 @@ useEffect(() => {
                 <button
                   onClick={() => {
                     setDebugInfo({});
-                    const activeMainDoc = documentType === "bono" ? activeBonoDoc : activePlasaDoc;
-                    if (activeMainDoc && activeMainDoc.url) {
-                      const fullUrl = getBackendUrl(activeMainDoc.url);
-                      if (isImageFile(fullUrl)) {
-                        setSavedPageUrls([fullUrl]);
-                        setLoading(false);
-                      } else {
-                        convertPDFToImages(fullUrl);
-                      }
+                    const retryUrl = getDocumentUrl();
+                    if (!retryUrl) {
+                      setLoading(false);
+                      return;
+                    }
+
+                    if (isImageFile(retryUrl)) {
+                      setSavedPageUrls([retryUrl]);
+                      setLoading(false);
+                    } else {
+                      convertPDFToImages(retryUrl);
                     }
                   }}
                   className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 text-sm"
@@ -1291,22 +1286,22 @@ useEffect(() => {
             <>
               <div className="text-6xl mb-4">📄</div>
               <div className="text-gray-600 text-lg">
-                {((documentType === "plasa" && !activePlasaDoc) || (documentType === "bono" && !activeBonoDoc))
+                {(documentType === "plasa" && !activePlasaDoc)
                   ? `Nenhum documento ${documentType.toUpperCase()} ativo`
                   : loading
                   ? "Processando documento..."
                   : "Preparando visualização..."}
               </div>
-              {((documentType === "plasa" && !activePlasaDoc) || (documentType === "bono" && !activeBonoDoc)) && (
+              {(documentType === "plasa" && !activePlasaDoc) && (
                 <div className="mt-4 text-sm text-gray-500">
                   Vá para o painel administrativo e faça upload de um documento {documentType.toUpperCase()}
                 </div>
               )}
-              {((documentType === "plasa" && activePlasaDoc) || (documentType === "bono" && activeBonoDoc)) && (
+              {(documentType === "plasa" && activePlasaDoc) && (
                 <div className="mt-4 text-xs text-gray-400 bg-gray-50 p-3 rounded">
                   <div className="font-medium">Documento ativo:</div>
-                  <div className="truncate">{documentType === "bono" ? activeBonoDoc?.title : activePlasaDoc?.title}</div>
-                  <div className="truncate font-mono">{documentType === "bono" ? activeBonoDoc?.url : activePlasaDoc?.url}</div>
+                  <div className="truncate">{activePlasaDoc?.title}</div>
+                  <div className="truncate font-mono">{activePlasaDoc?.url}</div>
                 </div>
               )}
             </>
@@ -1374,8 +1369,6 @@ useEffect(() => {
       }`}>
         {documentType === "plasa" ? (
           <span className="text-white text-lg leading-none">📋</span>
-        ) : documentType === "bono" ? (
-          <span className="text-white text-lg leading-none">📰</span>
         ) : documentType === "escala" ? (
           <span className="text-white text-lg leading-none">📅</span>
         ) : documentType === "cardapio" ? (
@@ -1399,8 +1392,6 @@ useEffect(() => {
       }`}>
         {documentType === "plasa" ? (
           activePlasaDoc?.title || "📋 PLASA - PLANO DE SERVIÇO SEMANAL"
-        ) : documentType === "bono" ? (
-          activeBonoDoc?.title || "📰 BONO - BOLETIM INTERNO"
         ) : documentType === "cardapio" ? (
           "CARDÁPIO SEMANAL"
         ) : (
@@ -1510,7 +1501,7 @@ useEffect(() => {
           <div className="flex flex-col items-center justify-center h-full">
             <div className="w-16 h-16 border-4 border-navy border-t-transparent rounded-full animate-spin"></div>
             <p className="mt-4 text-navy text-sm font-medium">
-              {documentType === "plasa" || documentType === "bono" ? "Processando documento..." : "Carregando..."}
+              {documentType === "plasa" ? "Processando documento..." : "Carregando..."}
             </p>
           </div>
         ) : (
