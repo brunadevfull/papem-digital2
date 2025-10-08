@@ -652,7 +652,7 @@ const getCurrentCardapioDoc = () => {
     setIsScrolling(false);
     
     // Chamar callback externo se fornecido (para alternância PLASA/BONO)
-    if (onScrollComplete && (documentType === "plasa" || documentType === "bono")) {
+    if (onScrollComplete && documentType === "plasa") {
       onScrollComplete();
       return; // Não reiniciar automaticamente, deixar o contexto controlar
     }
@@ -668,7 +668,7 @@ const getCurrentCardapioDoc = () => {
 
   // Iniciar scroll contínuo
   const startContinuousScroll = useCallback(() => {
-    if ((documentType !== "plasa" && documentType !== "bono") || !containerRef.current || savedPageUrls.length === 0 || isAutomationPaused) {
+    if (documentType !== "plasa" || !containerRef.current || savedPageUrls.length === 0 || isAutomationPaused) {
       return;
     }
 
@@ -745,7 +745,7 @@ const getCurrentCardapioDoc = () => {
     }
 
     return () => {
-      if (documentType === "plasa" || documentType === "bono") {
+      if (documentType === "plasa") {
         clearAllTimers();
       }
     };
@@ -1285,8 +1285,6 @@ useEffect(() => {
           : "bg-gradient-to-br from-blue-500 to-blue-600"
       }`}>
         {documentType === "plasa" ? (
-          <span className="text-white text-lg leading-none">📋</span>
-        ) : documentType === "bono" ? (
           <span className="text-white text-lg leading-none">📋</span>
         ) : documentType === "escala" ? (
           <span className="text-white text-lg leading-none">📅</span>

@@ -29,6 +29,46 @@ export class DatabaseStorage implements IStorage {
     console.log('📊 Connected to:', process.env.DATABASE_URL.replace(/:[^:]*@/, ':***@'));
   }
 
+  private coerceDocumentType(value: unknown): PDFDocument['type'] {
+    return value === 'plasa' || value === 'cardapio' || value === 'escala' ? value : 'escala';
+  }
+
+  private coerceDocumentCategory(value: unknown): PDFDocument['category'] {
+    return value === 'oficial' || value === 'praca' ? value : null;
+  }
+
+  private coerceDocumentUnit(value: unknown): PDFDocument['unit'] | undefined {
+    return value === 'EAGM' || value === '1DN' ? value : undefined;
+  }
+
+  private coerceTags(value: unknown): string[] {
+    if (!Array.isArray(value)) {
+      return [];
+    }
+
+    return value.filter((tag): tag is string => typeof tag === 'string');
+  }
+
+  private mapDocumentRow(row: Record<string, unknown>): PDFDocument {
+    const document: PDFDocument = {
+      id: Number(row.id),
+      title: typeof row.title === 'string' ? row.title : String(row.title ?? ''),
+      url: typeof row.url === 'string' ? row.url : String(row.url ?? ''),
+      type: this.coerceDocumentType(row.type),
+      category: this.coerceDocumentCategory(row.category),
+      active: typeof row.active === 'boolean' ? row.active : true,
+      uploadDate: row.upload_date ? new Date(row.upload_date as string | number | Date) : new Date(),
+      tags: this.coerceTags(row.tags)
+    };
+
+    const unit = this.coerceDocumentUnit(row.unit);
+    if (unit) {
+      document.unit = unit;
+    }
+
+    return document;
+  }
+
   // ===== USERS =====
   async getUser(id: number): Promise<User | undefined> {
     const result = await this.pool.query('SELECT * FROM users WHERE id = $1', [id]);
@@ -226,16 +266,7 @@ export class DatabaseStorage implements IStorage {
     try {
       const result = await this.pool.query('SELECT * FROM documents ORDER BY upload_date DESC');
 
-      return result.rows.map(row => ({
-        id: row.id,
-        title: row.title,
-        url: row.url,
-        type: row.type as "plasa" | "bono" | "escala" | "cardapio",
-        category: row.category as "oficial" | "praca" | null,
-        active: row.active,
-        uploadDate: new Date(row.upload_date),
-        tags: Array.isArray(row.tags) ? row.tags : []
-      }));
+      return result.rows.map(row => this.mapDocumentRow(row));
     } catch (error) {
       console.error('❌ PostgreSQL: Erro ao buscar documentos:', error);
       return [];
@@ -247,16 +278,7 @@ export class DatabaseStorage implements IStorage {
       const result = await this.pool.query('SELECT * FROM documents WHERE id = $1', [id]);
       const row = result.rows[0];
       
-      return row ? {
-        id: row.id,
-        title: row.title,
-        url: row.url,
-        type: row.type as "plasa" | "bono" | "escala" | "cardapio",
-        category: row.category as "oficial" | "praca" | null,
-        active: row.active,
-        uploadDate: new Date(row.upload_date),
-        tags: Array.isArray(row.tags) ? row.tags : []
-      } : undefined;
+      return row ? this.mapDocumentRow(row) : undefined;
     } catch (error) {
       console.error(`❌ PostgreSQL: Erro ao buscar documento ${id}:`, error);
       return undefined;
@@ -280,16 +302,7 @@ export class DatabaseStorage implements IStorage {
       );
 
       const row = result.rows[0];
-      return {
-        id: row.id,
-        title: row.title,
-        url: row.url,
-        type: row.type as "plasa" | "bono" | "escala" | "cardapio",
-        category: row.category as "oficial" | "praca" | null,
-        active: row.active,
-        uploadDate: new Date(row.upload_date),
-        tags: Array.isArray(row.tags) ? row.tags : []
-      };
+      return this.mapDocumentRow(row);
     } catch (error) {
       console.error('❌ PostgreSQL: Erro ao criar documento:', error);
       throw error;
@@ -315,16 +328,7 @@ export class DatabaseStorage implements IStorage {
       );
 
       const row = result.rows[0];
-      return {
-        id: row.id,
-        title: row.title,
-        url: row.url,
-        type: row.type as "plasa" | "bono" | "escala" | "cardapio",
-        category: row.category as "oficial" | "praca" | null,
-        active: row.active,
-        uploadDate: new Date(row.upload_date),
-        tags: Array.isArray(row.tags) ? row.tags : []
-      };
+      return this.mapDocumentRow(row);
     } catch (error) {
       console.error(`❌ PostgreSQL: Erro ao atualizar documento ${document.id}:`, error);
       throw error;
@@ -383,6 +387,8 @@ export class DatabaseStorage implements IStorage {
       
       return {
         id: 1, // ID fixo para compatibilidade
+        officerId: typeof officer?.id === 'number' ? officer.id : null,
+        masterId: typeof master?.id === 'number' ? master.id : null,
         officerName,
         masterName,
         updatedAt: new Date()
@@ -415,8 +421,8 @@ export class DatabaseStorage implements IStorage {
         };
       };
       
-      let updatedOfficer = null;
-      let updatedMaster = null;
+      let updatedOfficer: Record<string, unknown> | null = null;
+      let updatedMaster: Record<string, unknown> | null = null;
       
       // Processar oficial
       if (officers.officerName) {
@@ -444,8 +450,8 @@ export class DatabaseStorage implements IStorage {
           }
           
           if (result.rows.length > 0) {
-            updatedOfficer = result.rows[0];
-            console.log(`✅ Oficial definido: ${officerInfo.rank.toUpperCase()} ${updatedOfficer.name}`);
+            updatedOfficer = result.rows[0] as Record<string, unknown>;
+            console.log(`✅ Oficial definido: ${officerInfo.rank.toUpperCase()} ${officerInfo.name}`);
           } else {
             console.log(`❌ Oficial não encontrado: ${officerInfo.rank.toUpperCase()} ${officerInfo.name}`);
           }
@@ -478,8 +484,8 @@ export class DatabaseStorage implements IStorage {
           }
           
           if (result.rows.length > 0) {
-            updatedMaster = result.rows[0];
-            console.log(`✅ Contramestre definido: ${masterInfo.rank.toUpperCase()} ${updatedMaster.name}`);
+            updatedMaster = result.rows[0] as Record<string, unknown>;
+            console.log(`✅ Contramestre definido: ${masterInfo.rank.toUpperCase()} ${masterInfo.name}`);
           } else {
             console.log(`❌ Contramestre não encontrado: ${masterInfo.rank.toUpperCase()} ${masterInfo.name}`);
           }
@@ -488,10 +494,15 @@ export class DatabaseStorage implements IStorage {
       
       console.log('✅ PostgreSQL: Sistema unificado atualizado com sucesso');
       
+      const officerId = updatedOfficer && typeof updatedOfficer.id === 'number' ? updatedOfficer.id : null;
+      const masterId = updatedMaster && typeof updatedMaster.id === 'number' ? updatedMaster.id : null;
+
       return {
         id: 1,
-        officerName: officers.officerName,
-        masterName: officers.masterName,
+        officerId,
+        masterId,
+        officerName: officers.officerName ?? '',
+        masterName: officers.masterName ?? '',
         updatedAt: new Date()
       };
       
@@ -506,14 +517,15 @@ async getMilitaryPersonnel(): Promise<MilitaryPersonnel[]> {
     try {
       console.log('🎖️ PostgreSQL: Buscando pessoal militar...');
       const result = await this.pool.query('SELECT * FROM military_personnel WHERE active = true ORDER BY type, rank, name');
-      
+
       const personnel = result.rows.map(row => ({
         id: row.id,
         name: row.name,
         type: row.type as "officer" | "master",
-        rank: row.rank as "1t" | "2t" | "ct" | "cc" | "cf" | "1sg" | "2sg" | "3sg",
-        specialty: row.specialty || null,
+        rank: row.rank as MilitaryPersonnel['rank'],
+        specialty: typeof row.specialty === 'string' ? row.specialty : null,
         fullRankName: row.full_rank_name,
+        dutyRole: row.duty_role === 'officer' || row.duty_role === 'master' ? row.duty_role : null,
         active: row.active,
         createdAt: new Date(row.created_at),
         updatedAt: new Date(row.updated_at)
@@ -536,14 +548,15 @@ async getMilitaryPersonnel(): Promise<MilitaryPersonnel[]> {
         'SELECT * FROM military_personnel WHERE type = $1 AND active = true ORDER BY rank, name',
         [type]
       );
-      
+
       const personnel = result.rows.map(row => ({
         id: row.id,
         name: row.name,
         type: row.type as "officer" | "master",
-        rank: row.rank as "1t" | "2t" | "ct" | "cc" | "cf" | "1sg" | "2sg" | "3sg",
-        specialty: row.specialty || null,
+        rank: row.rank as MilitaryPersonnel['rank'],
+        specialty: typeof row.specialty === 'string' ? row.specialty : null,
         fullRankName: row.full_rank_name,
+        dutyRole: row.duty_role === 'officer' || row.duty_role === 'master' ? row.duty_role : null,
         active: row.active,
         createdAt: new Date(row.created_at),
         updatedAt: new Date(row.updated_at)
@@ -562,15 +575,16 @@ async getMilitaryPersonnel(): Promise<MilitaryPersonnel[]> {
       console.log(`🎖️ PostgreSQL: Criando ${personnel.type}:`, personnel.name);
       
       const result = await this.pool.query(
-        `INSERT INTO military_personnel (name, type, rank, specialty, full_rank_name, active) 
-         VALUES ($1, $2, $3, $4, $5, $6) 
+        `INSERT INTO military_personnel (name, type, rank, specialty, full_rank_name, duty_role, active)
+         VALUES ($1, $2, $3, $4, $5, $6, $7)
          RETURNING *`,
         [
           personnel.name,
           personnel.type,
           personnel.rank,
-          personnel.specialty,
+          personnel.specialty ?? null,
           personnel.fullRankName,
+          personnel.dutyRole ?? null,
           personnel.active !== false
         ]
       );
@@ -580,9 +594,10 @@ async getMilitaryPersonnel(): Promise<MilitaryPersonnel[]> {
         id: row.id,
         name: row.name,
         type: row.type as "officer" | "master",
-        rank: row.rank as "1t" | "2t" | "ct" | "cc" | "cf" | "1sg" | "2sg" | "3sg",
-        specialty: row.specialty || null,
+        rank: row.rank as MilitaryPersonnel['rank'],
+        specialty: typeof row.specialty === 'string' ? row.specialty : null,
         fullRankName: row.full_rank_name,
+        dutyRole: row.duty_role === 'officer' || row.duty_role === 'master' ? row.duty_role : null,
         active: row.active,
         createdAt: new Date(row.created_at),
         updatedAt: new Date(row.updated_at)
@@ -601,16 +616,17 @@ async getMilitaryPersonnel(): Promise<MilitaryPersonnel[]> {
       console.log(`🎖️ PostgreSQL: Atualizando ${personnel.type} ${personnel.id}`);
       
       const result = await this.pool.query(
-        `UPDATE military_personnel 
-         SET name = $1, type = $2, rank = $3, specialty = $4, full_rank_name = $5, active = $6, updated_at = NOW()
-         WHERE id = $7 
+        `UPDATE military_personnel
+         SET name = $1, type = $2, rank = $3, specialty = $4, full_rank_name = $5, duty_role = $6, active = $7, updated_at = NOW()
+         WHERE id = $8
          RETURNING *`,
         [
           personnel.name,
           personnel.type,
           personnel.rank,
-          personnel.specialty,
+          personnel.specialty ?? null,
           personnel.fullRankName,
+          personnel.dutyRole ?? null,
           personnel.active,
           personnel.id
         ]
@@ -625,9 +641,10 @@ async getMilitaryPersonnel(): Promise<MilitaryPersonnel[]> {
         id: row.id,
         name: row.name,
         type: row.type as "officer" | "master",
-        rank: row.rank as "1t" | "2t" | "ct" | "cc" | "cf" | "1sg" | "2sg" | "3sg",
-        specialty: row.specialty || null,
+        rank: row.rank as MilitaryPersonnel['rank'],
+        specialty: typeof row.specialty === 'string' ? row.specialty : null,
         fullRankName: row.full_rank_name,
+        dutyRole: row.duty_role === 'officer' || row.duty_role === 'master' ? row.duty_role : null,
         active: row.active,
         createdAt: new Date(row.created_at),
         updatedAt: new Date(row.updated_at)

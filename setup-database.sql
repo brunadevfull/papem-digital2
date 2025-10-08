@@ -34,7 +34,7 @@ CREATE TABLE IF NOT EXISTS documents (
     id SERIAL PRIMARY KEY,
     title TEXT NOT NULL,
     url TEXT NOT NULL,
-    type TEXT NOT NULL CHECK (type IN ('plasa', 'bono', 'escala', 'cardapio')),
+    type TEXT NOT NULL CHECK (type IN ('plasa', 'escala', 'cardapio')),
     category TEXT CHECK (category IN ('oficial', 'praca')),
     active BOOLEAN NOT NULL DEFAULT true,
     upload_date TIMESTAMP DEFAULT NOW()

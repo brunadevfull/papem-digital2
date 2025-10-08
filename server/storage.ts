@@ -1,6 +1,40 @@
 import { users, notices, documents, dutyOfficers, militaryPersonnel, type User, type InsertUser, type Notice, type InsertNotice, type PDFDocument, type InsertDocument, type DutyOfficers, type InsertDutyOfficers, type MilitaryPersonnel, type InsertMilitaryPersonnel } from "@shared/schema";
 import { DatabaseStorage } from "./db-storage";
 
+const DOCUMENT_TYPES: PDFDocument['type'][] = ['plasa', 'escala', 'cardapio'];
+const DOCUMENT_CATEGORIES: (PDFDocument['category'])[] = ['oficial', 'praca'];
+const DOCUMENT_UNITS: NonNullable<PDFDocument['unit']>[] = ['EAGM', '1DN'];
+const PERSONNEL_TYPES: MilitaryPersonnel['type'][] = ['officer', 'master'];
+const PERSONNEL_RANKS: MilitaryPersonnel['rank'][] = ['cmg', 'cf', 'cc', 'ct', '1t', '2t', '1sg', '2sg', '3sg'];
+
+const coerceDocumentType = (value: unknown): PDFDocument['type'] =>
+  DOCUMENT_TYPES.includes(value as PDFDocument['type'])
+    ? (value as PDFDocument['type'])
+    : 'escala';
+
+const coerceDocumentCategory = (value: unknown): PDFDocument['category'] =>
+  DOCUMENT_CATEGORIES.includes(value as PDFDocument['category'])
+    ? (value as PDFDocument['category'])
+    : null;
+
+const coerceDocumentUnit = (value: unknown): PDFDocument['unit'] | undefined =>
+  DOCUMENT_UNITS.includes(value as NonNullable<PDFDocument['unit']>)
+    ? (value as PDFDocument['unit'])
+    : undefined;
+
+const coercePersonnelType = (value: unknown): MilitaryPersonnel['type'] =>
+  PERSONNEL_TYPES.includes(value as MilitaryPersonnel['type'])
+    ? (value as MilitaryPersonnel['type'])
+    : 'officer';
+
+const coercePersonnelRank = (value: unknown): MilitaryPersonnel['rank'] =>
+  PERSONNEL_RANKS.includes(value as MilitaryPersonnel['rank'])
+    ? (value as MilitaryPersonnel['rank'])
+    : 'ct';
+
+const coerceDutyRole = (value: unknown): MilitaryPersonnel['dutyRole'] =>
+  value === 'officer' || value === 'master' ? value : null;
+
 export interface IStorage {
   getUser(id: number): Promise<User | undefined>;
   getUserByUsername(username: string): Promise<User | undefined>;
@@ -391,16 +425,25 @@ export class MemStorage implements IStorage {
 
   async createDocument(insertDocument: InsertDocument): Promise<PDFDocument> {
     const id = this.currentDocumentId++;
+    const tags = Array.isArray(insertDocument.tags)
+      ? insertDocument.tags.filter((tag): tag is string => typeof tag === 'string')
+      : [];
+
     const document: PDFDocument = {
       id,
       title: insertDocument.title,
       url: insertDocument.url,
-      type: insertDocument.type as "plasa" | "bono" | "escala" | "cardapio",
-      category: (insertDocument.category as "oficial" | "praca") ?? null,
+      type: coerceDocumentType(insertDocument.type),
+      category: coerceDocumentCategory(insertDocument.category),
       active: insertDocument.active ?? true,
       uploadDate: new Date(),
-      tags: Array.isArray(insertDocument.tags) ? [...insertDocument.tags] : []
+      tags
     };
+
+    const unit = coerceDocumentUnit((insertDocument as { unit?: string }).unit);
+    if (unit) {
+      document.unit = unit;
+    }
     this.documents.set(id, document);
     return document;
   }
@@ -426,6 +469,8 @@ export class MemStorage implements IStorage {
   async updateDutyOfficers(officers: InsertDutyOfficers): Promise<DutyOfficers> {
     const updatedOfficers: DutyOfficers = {
       id: 1, // Sempre ID 1 pois só temos um registro
+      officerId: officers.officerId ?? null,
+      masterId: officers.masterId ?? null,
       officerName: officers.officerName || "",
       masterName: officers.masterName || "",
       updatedAt: new Date()
@@ -451,13 +496,18 @@ export class MemStorage implements IStorage {
 
   async createMilitaryPersonnel(personnel: InsertMilitaryPersonnel): Promise<MilitaryPersonnel> {
     const id = this.currentMilitaryPersonnelId++;
+    const type = coercePersonnelType(personnel.type);
+    const rank = coercePersonnelRank(personnel.rank);
+    const dutyRole = coerceDutyRole(personnel.dutyRole);
+
     const newPersonnel: MilitaryPersonnel = {
       id,
       name: personnel.name,
-      type: personnel.type as "officer" | "master",
-      rank: personnel.rank as "1t" | "2t" | "ct" | "cc" | "cf" | "1sg" | "2sg" | "3sg",
-      specialty: personnel.specialty || null,
+      type,
+      rank,
+      specialty: personnel.specialty ?? null,
       fullRankName: personnel.fullRankName,
+      dutyRole,
       active: personnel.active ?? true,
       createdAt: new Date(),
       updatedAt: new Date(),
@@ -467,7 +517,13 @@ export class MemStorage implements IStorage {
   }
 
   async updateMilitaryPersonnel(personnel: MilitaryPersonnel): Promise<MilitaryPersonnel> {
-    const updatedPersonnel = { ...personnel, updatedAt: new Date() };
+    const updatedPersonnel: MilitaryPersonnel = {
+      ...personnel,
+      type: coercePersonnelType(personnel.type),
+      rank: coercePersonnelRank(personnel.rank),
+      dutyRole: coerceDutyRole(personnel.dutyRole),
+      updatedAt: new Date()
+    };
     this.militaryPersonnel.set(personnel.id, updatedPersonnel);
     return updatedPersonnel;
   }

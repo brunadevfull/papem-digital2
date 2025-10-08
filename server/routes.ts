@@ -10,7 +10,7 @@ import { promisify } from "util";
 
 // 🔥 NOVO: Sistema de classificação inteligente de documentos
 interface DocumentClassification {
-  type: 'plasa' | 'bono' | 'escala' | 'cardapio';
+  type: 'plasa' | 'escala' | 'cardapio';
   category?: 'oficial' | 'praca';
   unit?: 'EAGM' | '1DN';
   tags: string[];
@@ -43,7 +43,7 @@ function normalizeString(str: string): string {
 // Função principal para extrair classificação
 function extractClassification(originalName: string, title?: string, bodyType?: string): DocumentClassification {
   // ✅ CORREÇÃO: Se tipo manual é fornecido, SEMPRE use-o (não cache)
-  if (bodyType && ['plasa', 'bono', 'escala', 'cardapio'].includes(bodyType)) {
+  if (bodyType && ['plasa', 'escala', 'cardapio'].includes(bodyType)) {
     console.log(`✅ TIPO MANUAL fornecido: ${bodyType} - pulando cache`);
     // Não usar cache quando temos seleção manual
   } else {
@@ -74,8 +74,8 @@ function extractClassification(originalName: string, title?: string, bodyType?: 
 
   // ✅ CLASSIFICAÇÃO MANUAL: Priorizar SEMPRE o tipo selecionado no combobox
   let type: DocumentClassification['type'];
-  
-  if (bodyType && ['plasa', 'bono', 'escala', 'cardapio'].includes(bodyType)) {
+
+  if (bodyType && ['plasa', 'escala', 'cardapio'].includes(bodyType)) {
     // ✅ TIPO MANUAL: Usar exatamente o que foi selecionado no combobox
     type = bodyType as DocumentClassification['type'];
     console.log(`✅ Usando tipo MANUAL selecionado: ${bodyType}`);
@@ -83,10 +83,8 @@ function extractClassification(originalName: string, title?: string, bodyType?: 
     // ⚠️ FALLBACK: Só quando não há seleção manual (arquivos antigos)
     console.log(`⚠️ Tipo não fornecido, tentando detectar automaticamente...`);
     type = 'escala'; // default fallback
-    if (primaryText.includes('PLASA')) {
+    if (primaryText.includes('PLASA') || primaryText.includes('BONO')) {
       type = 'plasa';
-    } else if (primaryText.includes('BONO')) {
-      type = 'bono';
     } else if (primaryText.includes('CARDAPIO') || primaryText.includes('CARD')) {
       type = 'cardapio';
     } else if (primaryText.includes('ESCALA')) {
@@ -1254,18 +1252,63 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Delete uploaded file route
-  app.delete('/api/delete-pdf/:filename', (req, res) => {
+  app.delete('/api/delete-pdf/:filename', async (req, res) => {
     try {
       const { filename } = req.params;
-      const filePath = path.join(process.cwd(), 'uploads', filename);
-      
-      if (fs.existsSync(filePath)) {
-        fs.unlinkSync(filePath);
-        console.log(`🗑️ Arquivo deletado: ${filename}`);
-        res.json({ success: true, message: 'File deleted successfully' });
-      } else {
-        res.status(404).json({ success: false, error: 'File not found' });
+      const normalizedRelativePath = path
+        .normalize(filename)
+        .replace(/^([./\\])+/, '');
+
+      const filePath = path.join(process.cwd(), 'uploads', normalizedRelativePath);
+
+      let fileDeleted = false;
+      try {
+        await access(filePath);
+        await unlink(filePath);
+        fileDeleted = true;
+        console.log(`🗑️ Arquivo deletado: ${normalizedRelativePath}`);
+      } catch (fsError: any) {
+        if (fsError?.code !== 'ENOENT') {
+          throw fsError;
+        }
       }
+
+      let metadataRemoved = false;
+      try {
+        const documents = await storage.getDocuments();
+        const relativeUrl = `/uploads/${normalizedRelativePath.replace(/\\/g, '/')}`;
+        const matchingDoc = documents.find(doc => {
+          if (!doc.url) return false;
+          const docUrl = String(doc.url);
+          return docUrl === relativeUrl || docUrl.endsWith(relativeUrl);
+        });
+
+        if (matchingDoc) {
+          const numericId = typeof matchingDoc.id === 'number'
+            ? matchingDoc.id
+            : parseInt(String(matchingDoc.id), 10);
+
+          if (!Number.isNaN(numericId)) {
+            metadataRemoved = await storage.deleteDocument(numericId);
+            if (metadataRemoved) {
+              console.log(`🗂️ Metadado removido (documento ${numericId}) para ${relativeUrl}`);
+            }
+          }
+        }
+      } catch (metadataError) {
+        console.warn('⚠️ Não foi possível remover metadados do documento:', metadataError);
+      }
+
+      if (!fileDeleted && !metadataRemoved) {
+        return res.status(404).json({ success: false, error: 'File not found' });
+      }
+
+      res.json({
+        success: true,
+        message: 'File deleted successfully',
+        fileDeleted,
+        metadataRemoved
+      });
     } catch (error) {
       console.error('Delete error:', error);
       res.status(500).json({ success: false, error: 'Failed to delete file' });
@@ -1289,12 +1332,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
         
         if (fs.existsSync(filePath)) {
           console.log(`📁 Serving local file via proxy: ${filename}`);
-          
+
           res.setHeader('Access-Control-Allow-Origin', '*');
           res.setHeader('Content-Type', 'application/pdf');
-          res.setHeader('Cache-Control', 'public, max-age=31536000');
-          
-          return res.sendFile(filePath);
+          res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
+          res.setHeader('Pragma', 'no-cache');
+          res.setHeader('Expires', '0');
+
+          return res.sendFile(filePath, {
+            headers: {
+              'Cache-Control': 'no-store, no-cache, must-revalidate, proxy-revalidate',
+            }
+          });
         }
       }
       
