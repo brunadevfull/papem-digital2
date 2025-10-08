@@ -253,6 +253,9 @@ const PDFViewer: React.FC<PDFViewerProps> = ({
     if (activeEscalas.length === 0) return null;
     return activeEscalas[currentEscalaIndex % activeEscalas.length] || null;
   };
+
+
+
 // CORREÇÃO: Obter documento do cardápio atual do contexto
 const getCurrentCardapioDoc = () => {
   return activeCardapioDoc;
@@ -527,7 +530,7 @@ const getCurrentCardapioDoc = () => {
           
           const renderPromise = page.render(renderContext).promise;
           const timeoutPromise = new Promise((_, reject) => 
-            setTimeout(() => reject(new Error('Timeout na renderização')), 30000)
+            setTimeout(() => reject(new Error('Timeout na renderização')), 120000)
           );
           
           await Promise.race([renderPromise, timeoutPromise]);
@@ -652,7 +655,7 @@ const getCurrentCardapioDoc = () => {
     setIsScrolling(false);
     
     // Chamar callback externo se fornecido (para alternância PLASA/BONO)
-    if (onScrollComplete && (documentType === "plasa" || documentType === "bono")) {
+    if (onScrollComplete && (documentType === "plasa")) {
       onScrollComplete();
       return; // Não reiniciar automaticamente, deixar o contexto controlar
     }
@@ -668,7 +671,7 @@ const getCurrentCardapioDoc = () => {
 
   // Iniciar scroll contínuo
   const startContinuousScroll = useCallback(() => {
-    if ((documentType !== "plasa" && documentType !== "bono") || !containerRef.current || savedPageUrls.length === 0 || isAutomationPaused) {
+    if ((documentType !== "plasa") || !containerRef.current || savedPageUrls.length === 0 || isAutomationPaused) {
       return;
     }
 
@@ -745,7 +748,7 @@ const getCurrentCardapioDoc = () => {
     }
 
     return () => {
-      if (documentType === "plasa" || documentType === "bono") {
+      if (documentType === "plasa" ) {
         clearAllTimers();
       }
     };
@@ -1004,6 +1007,11 @@ useEffect(() => {
       
     } catch (error) {
       console.error('❌ ESCALA: Erro na conversão:', error);
+       const currentEscala = getCurrentEscalaDoc();
+  if (currentEscala?.url) {
+    console.log('⚠️ Usando PDF direto como fallback');
+    setEscalaImageUrl(null); // Isso faz renderContent usar docUrl direto
+     }
       setLoading(false);
     }
   };
@@ -1286,9 +1294,7 @@ useEffect(() => {
       }`}>
         {documentType === "plasa" ? (
           <span className="text-white text-lg leading-none">📋</span>
-        ) : documentType === "bono" ? (
-          <span className="text-white text-lg leading-none">📋</span>
-        ) : documentType === "escala" ? (
+        )  : documentType === "escala" ? (
           <span className="text-white text-lg leading-none">📅</span>
         ) : documentType === "cardapio" ? (
           <span className="text-white text-lg leading-none">🍽️</span>
