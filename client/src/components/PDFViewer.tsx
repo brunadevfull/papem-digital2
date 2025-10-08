@@ -1,10 +1,13 @@
-import React, { useState, useEffect, useRef, useCallback } from "react";
+import React, { useState, useEffect, useRef, useCallback, useMemo } from "react";
 import { useDisplay } from "@/context/DisplayContext";
+import type { PDFDocument } from "@/context/DisplayContext";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 const IS_DEV_MODE = process.env.NODE_ENV === 'development';
 const PDF_SCALE = 2.0;
-const MAX_RENDER_DIMENSION = 4096;
+const MIN_RENDER_SCALE = 2.5;
+const MAX_RENDER_DIMENSION = 8192;
+const DEFAULT_TARGET_LONG_EDGE = 3072;
 const IMAGE_EXPORT_FORMAT = 'image/png';
 
 const getDevicePixelRatio = () => {
@@ -14,6 +17,28 @@ const getDevicePixelRatio = () => {
 
   const ratio = window.devicePixelRatio || 1;
   return Number.isFinite(ratio) && ratio > 0 ? ratio : 1;
+};
+
+const getTargetRenderLongEdge = () => {
+  if (typeof window === 'undefined') {
+    return DEFAULT_TARGET_LONG_EDGE;
+  }
+
+  const candidates = [
+    window.innerWidth,
+    window.innerHeight,
+    window.screen?.width,
+    window.screen?.height
+  ].filter((value): value is number => typeof value === 'number' && Number.isFinite(value) && value > 0);
+
+  if (candidates.length === 0) {
+    return DEFAULT_TARGET_LONG_EDGE;
+  }
+
+  const longestEdge = Math.max(...candidates);
+  const adjustedEdge = longestEdge * 1.25;
+
+  return Math.max(DEFAULT_TARGET_LONG_EDGE, adjustedEdge);
 };
 
 // Configurar PDF.js
@@ -33,7 +58,7 @@ interface DebugInfo {
 }
 
 interface PDFViewerProps {
-  documentType: "plasa" | "escala" | "cardapio";
+  documentType: "plasa" | "bono" | "escala" | "cardapio";
   title: string;
   scrollSpeed?: "slow" | "normal" | "fast";
   autoRestartDelay?: number;
@@ -131,7 +156,7 @@ const PDFViewer: React.FC<PDFViewerProps> = ({
   onScrollComplete
 }) => {
   // CORREÇÃO: Usar currentEscalaIndex do contexto
-  const { activeEscalaDoc, activePlasaDoc, activeCardapioDoc, currentEscalaIndex, escalaDocuments } = useDisplay();
+  const { activeEscalaDoc, activePlasaDoc, activeBonoDoc, activeCardapioDoc, currentEscalaIndex, escalaDocuments } = useDisplay();
   const [totalPages, setTotalPages] = useState(0);
   const [loading, setLoading] = useState(false);
   const [isScrolling, setIsScrolling] = useState(false);
@@ -157,6 +182,27 @@ const PDFViewer: React.FC<PDFViewerProps> = ({
   const SCROLL_SPEED = getScrollSpeed();
   const RESTART_DELAY = autoRestartDelay * 1000;
   const devicePixelRatio = getDevicePixelRatio();
+  const targetRenderLongEdge = useMemo(() => getTargetRenderLongEdge(), []);
+
+  const buildRenderViewport = useCallback((page: any) => {
+    const originalViewport = page.getViewport({ scale: 1.0 });
+    const maxDimension = Math.max(originalViewport.width, originalViewport.height) || 1;
+    const limitScale = MAX_RENDER_DIMENSION / maxDimension;
+    const baseScale = Math.max(PDF_SCALE * devicePixelRatio, MIN_RENDER_SCALE);
+    const targetScale = targetRenderLongEdge / maxDimension;
+    const desiredScale = Math.max(baseScale, targetScale);
+    const safeLimit = Number.isFinite(limitScale) && limitScale > 0 ? limitScale : desiredScale;
+    const appliedScale = Math.min(desiredScale, safeLimit);
+    const viewport = page.getViewport({ scale: appliedScale });
+
+    return {
+      originalViewport,
+      viewport,
+      appliedScale,
+      targetScale,
+      limitScale
+    };
+  }, [devicePixelRatio, targetRenderLongEdge]);
 
   // Função para obter a URL completa do servidor backend - DETECTAR AMBIENTE
   const getBackendUrl = (path: string): string => {
@@ -204,6 +250,13 @@ const PDFViewer: React.FC<PDFViewerProps> = ({
       return getBackendUrl(activePlasaDoc.url);
     }
     console.log("📄 PLASA: Nenhum documento ativo");
+    return null;
+  } else if (documentType === "bono") {
+    if (activeBonoDoc?.url) {
+      console.log("📰 BONO: Usando documento do admin:", activeBonoDoc.url);
+      return getBackendUrl(activeBonoDoc.url);
+    }
+    console.log("📰 BONO: Nenhum documento ativo");
     return null;
   } else if (documentType === "escala") {
     // CORREÇÃO: Usar a escala atual baseada no índice
@@ -387,17 +440,50 @@ const getCurrentCardapioDoc = () => {
   };
 
   // Função para gerar ID único do documento baseado na URL
-  const generateDocumentId = (url: string): string => {
+  const sanitizeCacheKey = (value: string) => {
+    const normalized = typeof value.normalize === 'function'
+      ? value.normalize('NFKD')
+      : value;
+
+    return normalized
+      .replace(/[^a-zA-Z0-9_-]/g, '-')
+      .replace(/-+/g, '-')
+      .replace(/^-|-$/g, '')
+      .toLowerCase()
+      .substring(0, 64);
+  };
+
+  const buildPlasaCacheKey = (doc: PDFDocument | null): string | null => {
+    if (!doc) {
+      return null;
+    }
+
+    const timestamp = doc.uploadDate instanceof Date && !Number.isNaN(doc.uploadDate.getTime())
+      ? doc.uploadDate.getTime().toString()
+      : '';
+
+    const rawKey = [doc.url, timestamp].filter(Boolean).join('-');
+    const sanitized = sanitizeCacheKey(rawKey);
+
+    return sanitized.length > 0 ? sanitized : null;
+  };
+
+  const generateDocumentId = (url: string, explicitId?: string | null): string => {
+    if (explicitId && explicitId.length > 0) {
+      const sanitizedExplicit = sanitizeCacheKey(explicitId);
+      if (sanitizedExplicit.length > 0) {
+        return sanitizedExplicit;
+      }
+    }
+
     const urlParts = url.split("/");
     const filename = urlParts[urlParts.length - 1];
     const timestamp = Date.now();
     const random = Math.random().toString(36).substring(2, 8);
-    const cleanName = filename
-      .replace(/\.[^/.]+$/, "")
-      .replace(/[^a-zA-Z0-9]/g, "-")
-      .toLowerCase()
-      .substring(0, 20);
-    return `${timestamp}-${cleanName}-${random}`;
+    const cleanName = sanitizeCacheKey(filename.replace(/\.[^/.]+$/, ""));
+    const fallback = `${timestamp}-${cleanName}-${random}`;
+
+    return sanitizeCacheKey(fallback) || `${timestamp}-${random}`;
   };
 
   // Verificar se páginas já existem no servidor
@@ -431,7 +517,7 @@ const getCurrentCardapioDoc = () => {
   };
 
   // FUNÇÃO PRINCIPAL: Converter PDF para imagens
-  const convertPDFToImages = async (pdfUrl: string) => {
+  const convertPDFToImages = async (pdfUrl: string, options?: { documentId?: string | null }) => {
     try {
       console.log(`🎯 INICIANDO CONVERSÃO PDF: ${pdfUrl}`);
       setLoading(true);
@@ -476,7 +562,7 @@ const getCurrentCardapioDoc = () => {
       console.log(`📄 PDF carregado com sucesso: ${pdf.numPages} páginas`);
       setTotalPages(pdf.numPages);
       
-      const docId = generateDocumentId(pdfUrl);
+      const docId = generateDocumentId(pdfUrl, options?.documentId);
       const existingPages = await checkExistingPages(pdf.numPages, docId);
       if (existingPages.length === pdf.numPages) {
         console.log(`💾 Usando ${pdf.numPages} páginas já convertidas`);
@@ -495,14 +581,16 @@ const getCurrentCardapioDoc = () => {
           
           const page = await pdf.getPage(pageNum);
 
-          const originalViewport = page.getViewport({ scale: 1.0 });
-          const maxDimension = Math.max(originalViewport.width, originalViewport.height) || 1;
-          const limitScale = MAX_RENDER_DIMENSION / maxDimension;
-          const baseScale = PDF_SCALE * devicePixelRatio;
-          const appliedScale = limitScale > 0 ? Math.min(baseScale, limitScale) : baseScale;
-          const viewport = page.getViewport({ scale: appliedScale });
+          const { originalViewport, viewport, appliedScale, targetScale, limitScale } = buildRenderViewport(page);
 
-          console.log(`📐 Página ${pageNum} - Original: ${originalViewport.width}x${originalViewport.height}, Escala: ${appliedScale}, Final: ${viewport.width}x${viewport.height}`);
+          console.log(
+            `📐 Página ${pageNum} - Original: ${originalViewport.width}x${originalViewport.height}, ` +
+            `Alvo long edge: ${targetRenderLongEdge.toFixed(0)}px, ` +
+            `Escala desejada: ${targetScale.toFixed(2)}x, ` +
+            `Escala aplicada: ${appliedScale.toFixed(2)}x, ` +
+            `Limite: ${limitScale.toFixed(2)}x, ` +
+            `Resultado: ${viewport.width}x${viewport.height}`
+          );
 
           const canvas = document.createElement('canvas');
           const context = canvas.getContext('2d', { 
@@ -707,15 +795,12 @@ const getCurrentCardapioDoc = () => {
 
   // CORREÇÃO: INICIALIZAR PLASA/BONO com melhor verificação
   useEffect(() => {
-    if (documentType === "plasa") {
-      const activeMainDoc = activePlasaDoc;
-      
-
+    if (documentType === "plasa" || documentType === "bono") {
+      const activeMainDoc = documentType === "bono" ? activeBonoDoc : activePlasaDoc;
 
       if (isScrolling) return;
-      
-      if (!activeMainDoc || !activeMainDoc.url) {
 
+      if (!activeMainDoc || !activeMainDoc.url) {
         setLoading(false);
         setSavedPageUrls([]);
         setDebugInfo({
@@ -724,7 +809,7 @@ const getCurrentCardapioDoc = () => {
         });
         return;
       }
-      
+
       setSavedPageUrls([]);
       setIsAutomationPaused(false);
       clearAllTimers();
@@ -732,15 +817,13 @@ const getCurrentCardapioDoc = () => {
 
       const docUrl = getBackendUrl(activeMainDoc.url);
 
-      
       if (isImageFile(docUrl) || (docUrl.startsWith('blob:') && activeMainDoc.title.match(/\.(jpg|jpeg|png|gif|webp)$/i))) {
-
         setSavedPageUrls([docUrl]);
         setTotalPages(1);
         setLoading(false);
       } else {
-
-        convertPDFToImages(docUrl);
+        const cacheKey = buildPlasaCacheKey(activeMainDoc);
+        convertPDFToImages(docUrl, { documentId: cacheKey });
       }
     }
 
@@ -749,7 +832,7 @@ const getCurrentCardapioDoc = () => {
         clearAllTimers();
       }
     };
-  }, [documentType, activePlasaDoc?.id, activePlasaDoc?.url]);
+  }, [documentType, activePlasaDoc?.id, activePlasaDoc?.url, activePlasaDoc?.uploadDate, activeBonoDoc?.id, activeBonoDoc?.url, activeBonoDoc?.uploadDate, isScrolling]);
 
   // CORREÇÃO: Inicializar ESCALA com monitoramento do índice de alternância
   useEffect(() => {
@@ -911,13 +994,17 @@ useEffect(() => {
 
       
       const page = await pdf.getPage(1);
-      
-      const originalViewport = page.getViewport({ scale: 1.0 });
-      const maxDimension = Math.max(originalViewport.width, originalViewport.height) || 1;
-      const limitScale = MAX_RENDER_DIMENSION / maxDimension;
-      const baseScale = PDF_SCALE * devicePixelRatio;
-      const appliedScale = limitScale > 0 ? Math.min(baseScale, limitScale) : baseScale;
-      const viewport = page.getViewport({ scale: appliedScale });
+
+      const { originalViewport, viewport, appliedScale, targetScale, limitScale } = buildRenderViewport(page);
+
+      console.log(
+        `📐 ESCALA - Original: ${originalViewport.width}x${originalViewport.height}, ` +
+        `Alvo long edge: ${targetRenderLongEdge.toFixed(0)}px, ` +
+        `Escala desejada: ${targetScale.toFixed(2)}x, ` +
+        `Escala aplicada: ${appliedScale.toFixed(2)}x, ` +
+        `Limite: ${limitScale.toFixed(2)}x, ` +
+        `Resultado: ${viewport.width}x${viewport.height}`
+      );
   
 
   
@@ -1025,14 +1112,15 @@ useEffect(() => {
 
   // CORREÇÃO: Renderizar conteúdo com melhor tratamento de erros
   const renderContent = () => {
-    if (documentType === "plasa" && savedPageUrls.length > 0) {
+    if ((documentType === "plasa" || documentType === "bono") && savedPageUrls.length > 0) {
+      const label = documentType.toUpperCase();
       return (
         <div className="w-full">
           {savedPageUrls.map((pageUrl, index) => (
             <div key={index} className="w-full mb-4">
               <img
                 src={pageUrl}
-                alt={`PLASA - Página ${index + 1}`}
+                alt={`${label} - Página ${index + 1}`}
                 className="w-full h-auto block shadow-sm"
                 style={{ maxWidth: '100%' }}
                 onError={(e) => {
@@ -1170,10 +1258,10 @@ useEffect(() => {
                 </details>
               )}
               <div className="flex gap-2 justify-center">
-                <button 
+                <button
                   onClick={() => {
                     setDebugInfo({});
-                    const activeMainDoc = activePlasaDoc;
+                    const activeMainDoc = documentType === "bono" ? activeBonoDoc : activePlasaDoc;
                     if (activeMainDoc && activeMainDoc.url) {
                       const fullUrl = getBackendUrl(activeMainDoc.url);
                       if (isImageFile(fullUrl)) {
@@ -1203,22 +1291,22 @@ useEffect(() => {
             <>
               <div className="text-6xl mb-4">📄</div>
               <div className="text-gray-600 text-lg">
-                {(documentType === "plasa" && !activePlasaDoc)
-                  ? `Nenhum documento ${documentType.toUpperCase()} ativo` 
+                {((documentType === "plasa" && !activePlasaDoc) || (documentType === "bono" && !activeBonoDoc))
+                  ? `Nenhum documento ${documentType.toUpperCase()} ativo`
                   : loading
                   ? "Processando documento..."
                   : "Preparando visualização..."}
               </div>
-              {(documentType === "plasa" && !activePlasaDoc) && (
+              {((documentType === "plasa" && !activePlasaDoc) || (documentType === "bono" && !activeBonoDoc)) && (
                 <div className="mt-4 text-sm text-gray-500">
                   Vá para o painel administrativo e faça upload de um documento {documentType.toUpperCase()}
                 </div>
               )}
-              {activePlasaDoc && (
+              {((documentType === "plasa" && activePlasaDoc) || (documentType === "bono" && activeBonoDoc)) && (
                 <div className="mt-4 text-xs text-gray-400 bg-gray-50 p-3 rounded">
                   <div className="font-medium">Documento ativo:</div>
-                  <div className="truncate">{activePlasaDoc.title}</div>
-                  <div className="truncate font-mono">{activePlasaDoc.url}</div>
+                  <div className="truncate">{documentType === "bono" ? activeBonoDoc?.title : activePlasaDoc?.title}</div>
+                  <div className="truncate font-mono">{documentType === "bono" ? activeBonoDoc?.url : activePlasaDoc?.url}</div>
                 </div>
               )}
             </>
@@ -1287,7 +1375,7 @@ useEffect(() => {
         {documentType === "plasa" ? (
           <span className="text-white text-lg leading-none">📋</span>
         ) : documentType === "bono" ? (
-          <span className="text-white text-lg leading-none">📋</span>
+          <span className="text-white text-lg leading-none">📰</span>
         ) : documentType === "escala" ? (
           <span className="text-white text-lg leading-none">📅</span>
         ) : documentType === "cardapio" ? (
@@ -1311,6 +1399,8 @@ useEffect(() => {
       }`}>
         {documentType === "plasa" ? (
           activePlasaDoc?.title || "📋 PLASA - PLANO DE SERVIÇO SEMANAL"
+        ) : documentType === "bono" ? (
+          activeBonoDoc?.title || "📰 BONO - BOLETIM INTERNO"
         ) : documentType === "cardapio" ? (
           "CARDÁPIO SEMANAL"
         ) : (
@@ -1420,7 +1510,7 @@ useEffect(() => {
           <div className="flex flex-col items-center justify-center h-full">
             <div className="w-16 h-16 border-4 border-navy border-t-transparent rounded-full animate-spin"></div>
             <p className="mt-4 text-navy text-sm font-medium">
-              {documentType === "plasa" ? "Processando documento..." : "Carregando..."}
+              {documentType === "plasa" || documentType === "bono" ? "Processando documento..." : "Carregando..."}
             </p>
           </div>
         ) : (

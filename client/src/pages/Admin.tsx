@@ -116,6 +116,7 @@ interface MilitaryPersonnel {
 const Admin: React.FC = () => {
  const {
     plasaDocuments,
+    bonoDocuments,
     escalaDocuments,
     cardapioDocuments,
     addDocument,
@@ -136,7 +137,7 @@ const Admin: React.FC = () => {
   
   // Estados para upload de documentos
   const [docUnit, setDocUnit] = useState<"EAGM" | "1DN" | undefined>(undefined);
-  const [selectedDocType, setSelectedDocType] = useState<"plasa" | "escala" | "cardapio">("plasa");
+  const [selectedDocType, setSelectedDocType] = useState<"plasa" | "bono" | "escala" | "cardapio">("plasa");
   const [docTitle, setDocTitle] = useState("");
   const [docUrl, setDocUrl] = useState("");
   const [docCategory, setDocCategory] = useState<"oficial" | "praca" | undefined>(undefined);
@@ -623,7 +624,7 @@ const saveEditOfficer = async () => {
         connected: response.ok,
         lastResponse: response.status,
         lastCheck: new Date(),
-        documents: plasaDocuments.length + escalaDocuments.length
+        documents: plasaDocuments.length + bonoDocuments.length + escalaDocuments.length + cardapioDocuments.length
       }));
       console.log("📢 Resposta do servidor:", response.status, response.ok ? 'OK' : 'ERROR');
     } catch (error) {
@@ -632,7 +633,7 @@ const saveEditOfficer = async () => {
         connected: false,
         lastResponse: null,
         lastCheck: new Date(),
-        documents: plasaDocuments.length + escalaDocuments.length
+        documents: plasaDocuments.length + bonoDocuments.length + escalaDocuments.length + cardapioDocuments.length
       }));
       console.error("❌ Erro de conexão com servidor:", error);
     }
@@ -654,6 +655,13 @@ const saveEditOfficer = async () => {
           name: "PLASA",
           description: "Plano de Serviço",
           color: "bg-blue-50 border-blue-200 text-blue-800"
+        };
+      case "bono":
+        return {
+          icon: "📄",
+          name: "BONO",
+          description: "Boletim Interno",
+          color: "bg-purple-50 border-purple-200 text-purple-800"
         };
       case "escala":
         return {
@@ -1106,7 +1114,7 @@ if (selectedDocType === "cardapio" && !docUnit) {
   
   const removeDocument = async (id: string) => {
     if (confirm("Tem certeza que deseja remover este documento?")) {
-      const doc = [...plasaDocuments, ...escalaDocuments, ...cardapioDocuments].find(d => d.id === id);
+      const doc = [...plasaDocuments, ...bonoDocuments, ...escalaDocuments, ...cardapioDocuments].find(d => d.id === id);
       
       if (doc && doc.url.includes('/uploads/')) {
         try {
@@ -1186,7 +1194,7 @@ if (selectedDocType === "cardapio" && !docUnit) {
     checkServerStatus();
     const interval = setInterval(checkServerStatus, 30000); // A cada 30 segundos
     return () => clearInterval(interval);
-}, [plasaDocuments.length, escalaDocuments.length]);
+}, [plasaDocuments.length, bonoDocuments.length, escalaDocuments.length, cardapioDocuments.length]);
   // Componente de Status do Servidor
   const ServerStatusIndicator = () => (
     <Card className="mb-6">
@@ -1330,10 +1338,10 @@ if (selectedDocType === "cardapio" && !docUnit) {
         <CardContent className="space-y-4 pt-6">
           <div className="space-y-2">
             <Label htmlFor="docType">Tipo de Documento</Label>
-            <Select 
-              value={selectedDocType} 
+            <Select
+              value={selectedDocType}
               onValueChange={(value) => {
-                setSelectedDocType(value as "plasa" | "escala" | "cardapio");
+                setSelectedDocType(value as "plasa" | "bono" | "escala" | "cardapio");
                 if (value !== "escala") {
                   setDocCategory(undefined);
                 }
@@ -1344,6 +1352,7 @@ if (selectedDocType === "cardapio" && !docUnit) {
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="plasa">📄 PLASA - Plano de Serviço</SelectItem>
+                <SelectItem value="bono">📰 BONO - Boletim Interno</SelectItem>
                 <SelectItem value="escala">📋 Escala de Serviço</SelectItem>
                 <SelectItem value="cardapio">🍽️ Cardápio Semanal</SelectItem>
               </SelectContent>
@@ -1391,7 +1400,8 @@ if (selectedDocType === "cardapio" && !docUnit) {
             <Input 
               id="docTitle" 
               placeholder={`Ex: ${
-                selectedDocType === "plasa" ? "PLASA - Junho 2025" : 
+                selectedDocType === "plasa" ? "PLASA - Junho 2025" :
+                selectedDocType === "bono" ? "BONO - 15 de Junho" :
                 selectedDocType === "escala" ? "Escala de Serviço - Junho 2025" :
                 selectedDocType === "cardapio" ? "Cardápio - Semana 25/2025" :
                 "Documento"
@@ -1505,15 +1515,9 @@ if (selectedDocType === "cardapio" && !docUnit) {
                 <li key={doc.id} className="border rounded-md p-3 flex justify-between items-center document-card">
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 mb-1">
-                      <span className="text-lg">
-                        {doc.type === "plasa" ? "📄" : "📋"}
-                      </span>
+                      <span className="text-lg">📄</span>
                       <p className="font-medium truncate">{doc.title}</p>
-                      <span className={`text-xs px-2 py-0.5 rounded-full status-badge ${
-                        doc.type === "plasa" 
-                          ? "bg-blue-100 text-blue-800" 
-                          : "bg-purple-100 text-purple-800"
-                      }`}>
+                      <span className="text-xs px-2 py-0.5 rounded-full status-badge bg-blue-100 text-blue-800">
                         PLASA
                       </span>
                       <TagBadges tags={doc.tags} documentId={doc.id} />
@@ -1576,7 +1580,97 @@ if (selectedDocType === "cardapio" && !docUnit) {
           )}
         </CardContent>
       </Card>
-      
+
+      {/* 📰 BONO Documents */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            📰 Documentos BONO
+            <span className="text-sm font-normal text-gray-500">
+              ({bonoDocuments.length})
+            </span>
+          </CardTitle>
+          <CardDescription>
+            Boletins internos exibidos na alternância automática do painel principal
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          {bonoDocuments.length === 0 ? (
+            <p className="text-muted-foreground text-center py-4">
+              Nenhum documento BONO cadastrado.
+            </p>
+          ) : (
+            <ul className="space-y-2 max-h-48 overflow-y-auto">
+              {bonoDocuments.map((doc) => (
+                <li key={doc.id} className="border rounded-md p-3 flex justify-between items-center document-card">
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2 mb-1">
+                      <span className="text-lg">📰</span>
+                      <p className="font-medium truncate">{doc.title}</p>
+                      <span className="text-xs px-2 py-0.5 rounded-full status-badge bg-purple-100 text-purple-800">
+                        BONO
+                      </span>
+                      <TagBadges tags={doc.tags} documentId={doc.id} />
+                    </div>
+                    <div className="flex items-center gap-4 text-xs text-muted-foreground">
+                      <span className="flex items-center gap-1">
+                        📅 {new Date(doc.uploadDate).toLocaleDateString('pt-BR')}
+                      </span>
+                      {doc.url.includes('/uploads/') && (
+                        <span className="flex items-center gap-1 bg-green-100 text-green-800 px-2 py-0.5 rounded-full status-badge">
+                          🌐 Servidor
+                        </span>
+                      )}
+                      <span className="flex items-center gap-1 bg-purple-100 text-purple-800 px-2 py-0.5 rounded-full status-badge">
+                        📖 Rolagem
+                      </span>
+                    </div>
+                  </div>
+                  <div className="flex gap-1 ml-2">
+                    <Button
+                      variant={doc.active ? "default" : "outline"}
+                      size="sm"
+                      onClick={() => toggleDocActive(doc)}
+                      title={doc.active ? "Documento ativo" : "Documento inativo"}
+                    >
+                      {doc.active ? "✅" : "💤"}
+                    </Button>
+                    <Sheet>
+                      <SheetTrigger asChild>
+                        <Button variant="outline" size="sm" title="Visualizar documento">👁️</Button>
+                      </SheetTrigger>
+                      <SheetContent className="w-[85vw] sm:max-w-4xl">
+                        <SheetHeader>
+                          <SheetTitle>{doc.title}</SheetTitle>
+                          <SheetDescription>
+                            Visualização prévia do documento
+                          </SheetDescription>
+                        </SheetHeader>
+                        <div className="mt-6 h-[80vh]">
+                          <iframe
+                            src={doc.url}
+                            className="w-full h-full border rounded"
+                            title={doc.title}
+                          />
+                        </div>
+                      </SheetContent>
+                    </Sheet>
+                    <Button
+                      variant="destructive"
+                      size="sm"
+                      onClick={() => removeDocument(doc.id)}
+                      title="Remover documento"
+                    >
+                      🗑️
+                    </Button>
+                  </div>
+                </li>
+              ))}
+            </ul>
+          )}
+        </CardContent>
+      </Card>
+
       {/* 📋 ESCALA Documents */}
       <Card>
         <CardHeader>

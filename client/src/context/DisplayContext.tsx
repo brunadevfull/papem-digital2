@@ -16,7 +16,7 @@ export interface PDFDocument {
   id: string;
   title: string;
   url: string;
-  type: "plasa" | "escala" | "cardapio";
+  type: "plasa" | "bono" | "escala" | "cardapio";
   category?: "oficial" | "praca";
   unit?: "EAGM" | "1DN";
   tags?: string[]; // 🏷️ Tags de classificação automática
@@ -30,9 +30,11 @@ type AddDocumentOptions = {
 interface DisplayContextType {
   notices: Notice[];
   plasaDocuments: PDFDocument[];
+  bonoDocuments: PDFDocument[];
   escalaDocuments: PDFDocument[];
   cardapioDocuments: PDFDocument[];
   activePlasaDoc: PDFDocument | null;
+  activeBonoDoc: PDFDocument | null;
   activeEscalaDoc: PDFDocument | null;
   activeCardapioDoc: PDFDocument | null;
   currentEscalaIndex: number;
@@ -71,6 +73,7 @@ export const DisplayProvider: React.FC<DisplayProviderProps> = ({ children }) =>
   // Estados
   const [notices, setNotices] = useState<Notice[]>([]);
   const [plasaDocuments, setPlasaDocuments] = useState<PDFDocument[]>([]);
+  const [bonoDocuments, setBonoDocuments] = useState<PDFDocument[]>([]);
   const [escalaDocuments, setEscalaDocuments] = useState<PDFDocument[]>([]);
   const [cardapioDocuments, setCardapioDocuments] = useState<PDFDocument[]>([]);
   const [currentEscalaIndex, setCurrentEscalaIndex] = useState(0);
@@ -158,6 +161,10 @@ export const DisplayProvider: React.FC<DisplayProviderProps> = ({ children }) =>
 
     if (input.type === "plasa") {
       ensureTag("PLASA");
+    }
+
+    if (input.type === "bono") {
+      ensureTag("BONO");
     }
 
     if (input.type === "escala") {
@@ -577,6 +584,17 @@ const deleteNotice = async (id: string): Promise<boolean> => {
         console.log("📄 Adicionando novo PLASA:", newDoc.title);
         return [...prev, newDoc];
       });
+    } else if (docData.type === "bono") {
+      setBonoDocuments(prev => {
+        const exists = prev.some(doc => doc.url === newDoc.url || doc.url === serverUrl);
+        if (exists) {
+          console.log("📄 Documento BONO já existe, ignorando:", newDoc.url);
+          return prev;
+        }
+
+        console.log("📄 Adicionando novo BONO:", newDoc.title);
+        return [...prev, newDoc];
+      });
     } else if (docData.type === "cardapio") {
       setCardapioDocuments(prev => {
         const exists = prev.some(doc => doc.url === newDoc.url || doc.url === serverUrl);
@@ -625,6 +643,10 @@ const deleteNotice = async (id: string): Promise<boolean> => {
       setPlasaDocuments(prev => prev.map(doc =>
         doc.id === updatedDoc.id ? normalizedDoc : doc
       ));
+    } else if (updatedDoc.type === "bono") {
+      setBonoDocuments(prev => prev.map(doc =>
+        doc.id === updatedDoc.id ? normalizedDoc : doc
+      ));
     } else if (updatedDoc.type === "escala") {
       setEscalaDocuments(prev => prev.map(doc =>
         doc.id === updatedDoc.id ? normalizedDoc : doc
@@ -640,7 +662,7 @@ const deleteNotice = async (id: string): Promise<boolean> => {
     console.log("🗑️ Removendo documento:", id);
     
     // Encontrar o documento para obter o filename
-    const allDocs = [...plasaDocuments, ...escalaDocuments, ...cardapioDocuments];
+    const allDocs = [...plasaDocuments, ...bonoDocuments, ...escalaDocuments, ...cardapioDocuments];
     const docToDelete = allDocs.find(doc => doc.id === id);
     
     if (docToDelete && docToDelete.url.includes('/uploads/')) {
@@ -670,6 +692,7 @@ const deleteNotice = async (id: string): Promise<boolean> => {
     
     // Remover da lista local independentemente do resultado do servidor
     setPlasaDocuments(prev => prev.filter(doc => doc.id !== id));
+    setBonoDocuments(prev => prev.filter(doc => doc.id !== id));
     setCardapioDocuments(prev => prev.filter(doc => doc.id !== id));
     setEscalaDocuments(prev => {
       const newList = prev.filter(doc => doc.id !== id);
@@ -685,6 +708,7 @@ const deleteNotice = async (id: string): Promise<boolean> => {
 
   // Computed values com alternância automática para escalas  
   const activePlasaDoc = plasaDocuments.find(doc => doc.active) || null;
+  const activeBonoDoc = bonoDocuments.find(doc => doc.active) || null;
   const activeCardapioDoc = cardapioDocuments.find(doc => doc.active) || null;
   const activeEscalaDocuments = escalaDocuments.filter(doc => doc.active);
   const activeEscalaDoc = activeEscalaDocuments.length > 0 
@@ -728,7 +752,7 @@ const deleteNotice = async (id: string): Promise<boolean> => {
     if (!isInitializingRef.current) {
 
     }
-  }, [plasaDocuments, escalaDocuments, activePlasaDoc, activeEscalaDoc, currentEscalaIndex, notices]);
+  }, [plasaDocuments, bonoDocuments, escalaDocuments, activePlasaDoc, activeBonoDoc, activeEscalaDoc, currentEscalaIndex, notices]);
 
   // CORREÇÃO: Persistir apenas documentos no localStorage (não avisos)
   useEffect(() => {
@@ -739,6 +763,11 @@ const deleteNotice = async (id: string): Promise<boolean> => {
     try {
       const contextData = {
         plasaDocuments: plasaDocuments.map(doc => ({
+          ...doc,
+          tags: normalizeDocumentTags(doc),
+          uploadDate: doc.uploadDate.toISOString()
+        })),
+        bonoDocuments: bonoDocuments.map(doc => ({
           ...doc,
           tags: normalizeDocumentTags(doc),
           uploadDate: doc.uploadDate.toISOString()
@@ -768,7 +797,7 @@ const deleteNotice = async (id: string): Promise<boolean> => {
     } catch (error) {
       console.error("❌ Erro ao salvar contexto:", error);
     }
-  }, [plasaDocuments, escalaDocuments, cardapioDocuments, currentEscalaIndex, documentAlternateInterval, scrollSpeed, autoRestartDelay]);
+  }, [plasaDocuments, bonoDocuments, escalaDocuments, cardapioDocuments, currentEscalaIndex, documentAlternateInterval, scrollSpeed, autoRestartDelay]);
 
   // Função auxiliar para determinar categoria
   const determineCategory = (filename: string): "oficial" | "praca" | undefined => {
@@ -780,21 +809,16 @@ const deleteNotice = async (id: string): Promise<boolean> => {
 
   // Função para carregar documentos do servidor
   const loadDocumentsFromServer = async () => {
-    const processServerDocument = (serverDoc: any) => {
-      if (!serverDoc) return;
-
-      const rawUrl = typeof serverDoc.url === 'string' ? serverDoc.url : '';
-      const fullUrl = getBackendUrl(rawUrl || '');
-
-      const existsInPlasa = plasaDocuments.some(doc => doc.url === fullUrl);
-      const existsInEscala = escalaDocuments.some(doc => doc.url === fullUrl);
-      const existsInCardapio = cardapioDocuments.some(doc => doc.url === fullUrl);
-
-      if (existsInPlasa || existsInEscala || existsInCardapio) {
-        return;
+    const transformServerDocument = (serverDoc: any): PDFDocument | null => {
+      if (!serverDoc) {
+        return null;
       }
 
-      const allowedTypes: PDFDocument["type"][] = ['plasa', 'escala', 'cardapio'];
+      const rawUrl = typeof serverDoc.url === 'string' ? serverDoc.url : '';
+      const normalizedUrl = normalizeDocumentUrl(rawUrl || '');
+      const finalUrl = getBackendUrl(normalizedUrl || rawUrl || '');
+
+      const allowedTypes: PDFDocument["type"][] = ['plasa', 'bono', 'escala', 'cardapio'];
       const docType = typeof serverDoc.type === 'string' ? serverDoc.type : 'escala';
       const safeType = allowedTypes.includes(docType as PDFDocument["type"])
         ? (docType as PDFDocument["type"])
@@ -821,10 +845,11 @@ const deleteNotice = async (id: string): Promise<boolean> => {
         unit
       });
 
-      const timestampSource = serverDoc.uploadDate || serverDoc.created || serverDoc.createdAt;
+      const timestampSource = serverDoc.uploadDate || serverDoc.updatedAt || serverDoc.created || serverDoc.createdAt;
       const parsedDate = timestampSource ? new Date(timestampSource) : new Date();
       const typeNames = {
         plasa: 'PLASA',
+        bono: 'BONO',
         escala: 'Escala',
         cardapio: 'Cardápio'
       } satisfies Record<PDFDocument['type'], string>;
@@ -834,25 +859,53 @@ const deleteNotice = async (id: string): Promise<boolean> => {
         ? serverDoc.title
         : generatedTitle;
 
-      const docData: Omit<PDFDocument, "id" | "uploadDate"> = {
+      const documentId = serverDoc.id ? String(serverDoc.id) : `server-${generateUniqueId()}`;
+
+      return {
+        id: documentId,
         title: finalTitle,
-        url: rawUrl || fullUrl,
+        url: finalUrl,
         type: safeType,
         category: safeType === 'escala' ? (rawCategory as PDFDocument['category']) : undefined,
         tags: docTags,
         unit,
-        active: serverDoc.active !== false
+        active: serverDoc.active !== false,
+        uploadDate: parsedDate
       };
-
-      addDocument(docData, { persist: false });
     };
 
     try {
       const response = await fetch(getBackendUrl('/api/documents'));
       if (response.ok) {
         const documents = await response.json();
-        if (Array.isArray(documents) && documents.length > 0) {
-          documents.forEach(processServerDocument);
+        if (Array.isArray(documents)) {
+          const normalizedDocs: PDFDocument[] = documents
+            .map(transformServerDocument)
+            .filter((doc: PDFDocument | null): doc is PDFDocument => doc !== null);
+
+          const nextPlasa = normalizedDocs.filter(doc => doc.type === 'plasa');
+          const nextBonos = normalizedDocs.filter(doc => doc.type === 'bono');
+          const nextEscalas = normalizedDocs.filter(doc => doc.type === 'escala');
+          const nextCardapios = normalizedDocs.filter(doc => doc.type === 'cardapio');
+
+          setPlasaDocuments(nextPlasa);
+          setBonoDocuments(nextBonos);
+          setEscalaDocuments(prev => {
+            const activeEscalasBefore = prev.filter(doc => doc.active).length;
+            const next = nextEscalas;
+            const activeEscalas = next.filter(doc => doc.active);
+
+            if (activeEscalas.length === 0) {
+              setCurrentEscalaIndex(0);
+            } else if (currentEscalaIndex >= activeEscalas.length) {
+              setCurrentEscalaIndex(0);
+            } else if (activeEscalasBefore !== activeEscalas.length) {
+              setCurrentEscalaIndex(0);
+            }
+
+            return next;
+          });
+          setCardapioDocuments(nextCardapios);
           return;
         }
       }
@@ -865,7 +918,33 @@ const deleteNotice = async (id: string): Promise<boolean> => {
       if (response.ok) {
         const result = await response.json();
         if (result.documents && Array.isArray(result.documents)) {
-          result.documents.forEach(processServerDocument);
+          const normalizedDocs: PDFDocument[] = result.documents
+            .map(transformServerDocument)
+            .filter((doc: PDFDocument | null): doc is PDFDocument => doc !== null);
+
+          const nextPlasa = normalizedDocs.filter(doc => doc.type === 'plasa');
+          const nextBonos = normalizedDocs.filter(doc => doc.type === 'bono');
+          const nextEscalas = normalizedDocs.filter(doc => doc.type === 'escala');
+          const nextCardapios = normalizedDocs.filter(doc => doc.type === 'cardapio');
+
+          setPlasaDocuments(nextPlasa);
+          setBonoDocuments(nextBonos);
+          setEscalaDocuments(prev => {
+            const activeEscalasBefore = prev.filter(doc => doc.active).length;
+            const next = nextEscalas;
+            const activeEscalas = next.filter(doc => doc.active);
+
+            if (activeEscalas.length === 0) {
+              setCurrentEscalaIndex(0);
+            } else if (currentEscalaIndex >= activeEscalas.length) {
+              setCurrentEscalaIndex(0);
+            } else if (activeEscalasBefore !== activeEscalas.length) {
+              setCurrentEscalaIndex(0);
+            }
+
+            return next;
+          });
+          setCardapioDocuments(nextCardapios);
         }
       }
     } catch (error) {
@@ -902,6 +981,23 @@ const deleteNotice = async (id: string): Promise<boolean> => {
 
               if (validPlasaDocs.length > 0) {
                 setPlasaDocuments(validPlasaDocs);
+
+              }
+            }
+
+            if (data.bonoDocuments && Array.isArray(data.bonoDocuments)) {
+              const validBonoDocs = data.bonoDocuments
+                .filter((doc: any) => doc && doc.id && doc.title && doc.url)
+                .map((doc: any) => ({
+                  ...doc,
+                  url: normalizeDocumentUrl(doc.url),
+                  tags: normalizeDocumentTags(doc),
+                  uploadDate: new Date(doc.uploadDate),
+                  active: doc.active !== false
+                }));
+
+              if (validBonoDocs.length > 0) {
+                setBonoDocuments(validBonoDocs);
 
               }
             }
@@ -1008,9 +1104,11 @@ const deleteNotice = async (id: string): Promise<boolean> => {
   const value: DisplayContextType = {
     notices,
     plasaDocuments,
+    bonoDocuments,
     escalaDocuments,
     cardapioDocuments,
     activePlasaDoc,
+    activeBonoDoc,
     activeEscalaDoc,
     activeCardapioDoc,
     currentEscalaIndex,
