@@ -20,6 +20,7 @@ export interface PDFDocument {
   category?: "oficial" | "praca";
   unit?: "EAGM" | "1DN";
   tags?: string[]; // 🏷️ Tags de classificação automática
+  serverDocumentId?: number;
   active: boolean;
   uploadDate: Date;
 }
@@ -181,28 +182,29 @@ export const DisplayProvider: React.FC<DisplayProviderProps> = ({ children }) =>
     return baseTags;
   };
 
+  const resolveServerDocumentPath = (url: string): string | null => {
+    if (!url) return null;
+    if (url.startsWith('/uploads/')) return url;
+    if (url.startsWith('uploads/')) return `/${url}`;
+    if (url.startsWith('http')) {
+      try {
+        const parsed = new URL(url);
+        return parsed.pathname.startsWith('/uploads/')
+          ? `${parsed.pathname}${parsed.search}`
+          : null;
+      } catch (error) {
+        console.warn('⚠️ URL inválida ao processar documento:', error);
+        return null;
+      }
+    }
+    return null;
+  };
+
   const persistDocumentMetadata = async (
+    localDocumentId: string,
     document: Omit<PDFDocument, "id" | "uploadDate"> & { url: string }
   ) => {
-    const resolveServerPath = (url: string): string | null => {
-      if (!url) return null;
-      if (url.startsWith('/uploads/')) return url;
-      if (url.startsWith('uploads/')) return `/${url}`;
-      if (url.startsWith('http')) {
-        try {
-          const parsed = new URL(url);
-          return parsed.pathname.startsWith('/uploads/')
-            ? `${parsed.pathname}${parsed.search}`
-            : null;
-        } catch (error) {
-          console.warn('⚠️ URL inválida ao persistir documento:', error);
-          return null;
-        }
-      }
-      return null;
-    };
-
-    const serverPath = resolveServerPath(document.url);
+    const serverPath = resolveServerDocumentPath(document.url);
     if (!serverPath) {
       return;
     }
@@ -227,6 +229,26 @@ export const DisplayProvider: React.FC<DisplayProviderProps> = ({ children }) =>
 
       if (!response.ok) {
         console.warn('⚠️ Falha ao persistir metadados do documento:', await response.text().catch(() => response.statusText));
+        return;
+      }
+
+      const persistedDocument = await response.json().catch(() => null);
+
+      if (persistedDocument && typeof persistedDocument.id === 'number') {
+        const applyServerId = (docs: PDFDocument[]) =>
+          docs.map(doc =>
+            doc.id === localDocumentId
+              ? { ...doc, serverDocumentId: persistedDocument.id }
+              : doc
+          );
+
+        if (document.type === 'plasa') {
+          setPlasaDocuments(prev => applyServerId(prev));
+        } else if (document.type === 'escala') {
+          setEscalaDocuments(prev => applyServerId(prev));
+        } else if (document.type === 'cardapio') {
+          setCardapioDocuments(prev => applyServerId(prev));
+        }
       }
     } catch (error) {
       console.warn('⚠️ Não foi possível persistir documento no servidor:', error);
@@ -610,7 +632,7 @@ const deleteNotice = async (id: string): Promise<boolean> => {
     }
 
     if (options.persist ?? true) {
-      void persistDocumentMetadata({ ...normalizedDocData, url: serverUrl });
+      void persistDocumentMetadata(newDoc.id, { ...normalizedDocData, url: serverUrl });
     }
   };
 
@@ -636,13 +658,78 @@ const deleteNotice = async (id: string): Promise<boolean> => {
     }
   };
 
+  const fetchServerDocumentIdByUrl = async (document: PDFDocument): Promise<number | null> => {
+    const serverPath = resolveServerDocumentPath(document.url);
+    if (!serverPath) {
+      return null;
+    }
+
+    try {
+      const response = await fetch(getBackendUrl('/api/documents'));
+      if (!response.ok) {
+        return null;
+      }
+
+      const documents = await response.json().catch(() => null);
+      if (!Array.isArray(documents)) {
+        return null;
+      }
+
+      const matchingDoc = documents.find((serverDoc: any) => {
+        if (!serverDoc || typeof serverDoc.url !== 'string') {
+          return false;
+        }
+
+        const normalizedServerUrl = resolveServerDocumentPath(serverDoc.url) ?? serverDoc.url;
+        return normalizedServerUrl === serverPath;
+      });
+
+      return matchingDoc && typeof matchingDoc.id === 'number'
+        ? matchingDoc.id
+        : null;
+    } catch (error) {
+      console.warn('⚠️ Não foi possível localizar documento no servidor:', error);
+      return null;
+    }
+  };
+
+  const deleteDocumentMetadataOnServer = async (document: PDFDocument) => {
+    const serverDocumentId = typeof document.serverDocumentId === 'number'
+      ? document.serverDocumentId
+      : await fetchServerDocumentIdByUrl(document);
+
+    if (typeof serverDocumentId !== 'number') {
+      console.warn('⚠️ ID do documento no servidor não encontrado para exclusão.');
+      return;
+    }
+
+    try {
+      const response = await fetch(getBackendUrl(`/api/documents/${serverDocumentId}`), {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+
+      if (!response.ok) {
+        console.warn('⚠️ Falha ao remover metadados do documento:', await response.text().catch(() => response.statusText));
+      }
+    } catch (error) {
+      console.warn('⚠️ Não foi possível remover metadados do documento:', error);
+    }
+  };
+
   const deleteDocument = async (id: string) => {
     console.log("🗑️ Removendo documento:", id);
-    
+
     // Encontrar o documento para obter o filename
     const allDocs = [...plasaDocuments, ...escalaDocuments, ...cardapioDocuments];
     const docToDelete = allDocs.find(doc => doc.id === id);
-    
+
+    if (docToDelete) {
+      await deleteDocumentMetadataOnServer(docToDelete);
+    }
+
     if (docToDelete && docToDelete.url.includes('/uploads/')) {
       try {
         // Extrair filename da URL
@@ -841,6 +928,7 @@ const deleteNotice = async (id: string): Promise<boolean> => {
         category: safeType === 'escala' ? (rawCategory as PDFDocument['category']) : undefined,
         tags: docTags,
         unit,
+        serverDocumentId: typeof serverDoc.id === 'number' ? serverDoc.id : undefined,
         active: serverDoc.active !== false
       };
 
