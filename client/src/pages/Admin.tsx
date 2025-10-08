@@ -121,8 +121,10 @@ const Admin: React.FC = () => {
     addDocument,
     updateDocument,
     deleteDocument,
-    documentAlternateInterval,
-    setDocumentAlternateInterval,
+    escalaAlternateInterval,
+    setEscalaAlternateInterval,
+    cardapioAlternateInterval,
+    setCardapioAlternateInterval,
     scrollSpeed,
     setScrollSpeed,
     autoRestartDelay,
@@ -1135,15 +1137,56 @@ if (selectedDocType === "cardapio" && !docUnit) {
     }
   };
   
-  const updateDocumentAlternateInterval = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleEscalaIntervalChange = (
+    e: React.ChangeEvent<HTMLInputElement>,
+    min = 10,
+    max = 300
+  ) => {
     const value = parseInt(e.target.value);
-    if (value >= 10 && value <= 300) {
-      setDocumentAlternateInterval(value * 1000);
-      toast({
-        title: "Intervalo de alternância atualizado",
-        description: `Escalas agora alternam a cada ${value} segundos.`
-      });
+    if (Number.isNaN(value)) {
+      return;
     }
+
+    if (value < min || value > max) {
+      toast({
+        title: "Valor inválido",
+        description: `Informe um valor entre ${min} e ${max} segundos para alternância das escalas.`,
+        variant: "destructive"
+      });
+      return;
+    }
+
+    setEscalaAlternateInterval(value * 1000);
+    toast({
+      title: "Intervalo de escalas atualizado",
+      description: `Escalas agora alternam a cada ${value} segundos.`
+    });
+  };
+
+  const handleCardapioIntervalChange = (
+    e: React.ChangeEvent<HTMLInputElement>,
+    min = 10,
+    max = 300
+  ) => {
+    const value = parseInt(e.target.value);
+    if (Number.isNaN(value)) {
+      return;
+    }
+
+    if (value < min || value > max) {
+      toast({
+        title: "Valor inválido",
+        description: `Informe um valor entre ${min} e ${max} segundos para alternância dos cardápios.`,
+        variant: "destructive"
+      });
+      return;
+    }
+
+    setCardapioAlternateInterval(value * 1000);
+    toast({
+      title: "Intervalo de cardápios atualizado",
+      description: `Cardápios agora alternam a cada ${value} segundos.`
+    });
   };
 
   const handleScrollSpeedChange = (value: string) => {
@@ -1164,17 +1207,6 @@ if (selectedDocType === "cardapio" && !docUnit) {
       toast({
         title: "Intervalo de reinício atualizado",
         description: `PLASA aguardará ${value} segundos no final antes de reiniciar.`
-      });
-    }
-  };
-
-  const handleDocumentAlternateIntervalChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = parseInt(e.target.value);
-    if (value >= 5 && value <= 60) {
-      setDocumentAlternateInterval(value * 1000);
-      toast({
-        title: "Intervalo de alternância atualizado",
-        description: `Escalas agora alternam a cada ${value} segundos.`
       });
     }
   };
@@ -2147,7 +2179,7 @@ if (selectedDocType === "cardapio" && !docUnit) {
                         <div className="space-y-2">
                           <div className="flex items-center">
                             <Label htmlFor="escalaInterval">
-                              ⚖️ Intervalo de Alternância (segundos)
+                              ⚖️ Intervalo das Escalas (segundos)
                             </Label>
                             <HoverCard>
                               <HoverCardTrigger asChild>
@@ -2155,38 +2187,74 @@ if (selectedDocType === "cardapio" && !docUnit) {
                               </HoverCardTrigger>
                               <HoverCardContent className="w-80">
                                 <p className="text-sm">
-   Define quanto tempo cada documento rotativo (escalas e cardápios) será exibido 
-              antes de alternar para o próximo. Este intervalo se aplica a todas as escalas 
-              e cardápios cadastrados.                                </p>
+                                  Define quanto tempo cada escala (Oficiais/Praças) permanece na tela
+                                  antes de alternar para a próxima. Utilize valores menores para ciclos
+                                  rápidos ou maiores para leitura detalhada.
+                                </p>
                               </HoverCardContent>
                             </HoverCard>
                           </div>
 
                           <div className="flex items-center space-x-2">
-                            <Input 
-                              id="escalaInterval" 
-                              type="number" 
-                              min="5" 
-                              max="60" 
+                            <Input
+                              id="escalaInterval"
+                              type="number"
+                              min="5"
+                              max="60"
                               className="w-24"
-                              value={Math.floor(documentAlternateInterval / 1000)}
-                              onChange={handleDocumentAlternateIntervalChange}
+                              value={Math.floor(escalaAlternateInterval / 1000)}
+                              onChange={e => handleEscalaIntervalChange(e, 5, 60)}
                             />
-                            <span className="text-sm text-muted-foreground">segundos </span>
+                            <span className="text-sm text-muted-foreground">segundos</span>
                           </div>
-                            <p className="text-xs text-muted-foreground">
-        Aplica-se a: Escalas de Oficiais/Praças e Cardápios EAGM/1DN
-      </p>
+                          <p className="text-xs text-muted-foreground">
+                            Aplica-se às escalas de Oficiais e Praças exibidas na área principal.
+                          </p>
                         </div>
 
- {/* ✅ NOVO: Nota informativa sobre cardápios */}
-    <div className="p-3 bg-orange-50 rounded-lg border-l-4 border-orange-400">
-      <p className="text-sm text-orange-800">
-        <strong>ℹ️ Nota:</strong> Cardápios e escalas compartilham o mesmo intervalo de alternância configurado acima ({Math.floor(documentAlternateInterval / 1000)} segundos). 
-        Isso garante sincronização entre todos os documentos rotativos.
-      </p>
-    </div>
-  </div>
+                        <div className="space-y-2">
+                          <div className="flex items-center">
+                            <Label htmlFor="cardapioInterval">
+                              🍽️ Intervalo dos Cardápios (segundos)
+                            </Label>
+                            <HoverCard>
+                              <HoverCardTrigger asChild>
+                                <span className="ml-2 text-blue-500 cursor-help text-sm">[?]</span>
+                              </HoverCardTrigger>
+                              <HoverCardContent className="w-80">
+                                <p className="text-sm">
+                                  Controla o tempo em que cada cardápio semanal permanece visível
+                                  antes de alternar para o próximo (EAGM ou 1DN). Permite ajustar o
+                                  ritmo de leitura independentemente das escalas.
+                                </p>
+                              </HoverCardContent>
+                            </HoverCard>
+                          </div>
+
+                          <div className="flex items-center space-x-2">
+                            <Input
+                              id="cardapioInterval"
+                              type="number"
+                              min="5"
+                              max="60"
+                              className="w-24"
+                              value={Math.floor(cardapioAlternateInterval / 1000)}
+                              onChange={e => handleCardapioIntervalChange(e, 5, 60)}
+                            />
+                            <span className="text-sm text-muted-foreground">segundos</span>
+                          </div>
+                          <p className="text-xs text-muted-foreground">
+                            Afeta apenas os cardápios ativos (EAGM e 1DN) exibidos no rodapé direito.
+                          </p>
+                        </div>
+
+                        <div className="p-3 bg-orange-50 rounded-lg border-l-4 border-orange-400">
+                          <p className="text-sm text-orange-800">
+                            <strong>ℹ️ Nota:</strong> Agora é possível definir intervalos independentes
+                            para escalas e cardápios, permitindo personalizar o ritmo de leitura de cada área.
+                          </p>
+                        </div>
+                      </div>
                    
                       <div className="space-y-2">
                         <Label htmlFor="autoRestart">
@@ -2546,38 +2614,76 @@ if (selectedDocType === "cardapio" && !docUnit) {
                     </p>
                   </div>
                   
-                  <div className="space-y-2">
-                    <div className="flex items-center">
-                      <Label htmlFor="documentAlternateInterval">
-                        ⏱️ Intervalo de Alternância entre Escalas (segundos)
-                      </Label>
-                      <HoverCard>
-                        <HoverCardTrigger asChild>
-                          <span className="ml-2 text-blue-500 cursor-help text-sm">[?]</span>
-                        </HoverCardTrigger>
-                        <HoverCardContent className="w-80">
-                          <p className="text-sm">
-                            Define quanto tempo cada escala (Oficiais/Praças) será exibida antes de alternar para a outra. 
-                            Esta configuração só tem efeito quando há mais de uma escala ativa.
-                          </p>
-                        </HoverCardContent>
-                      </HoverCard>
+                  <div className="space-y-6">
+                    <div className="space-y-2">
+                      <div className="flex items-center">
+                        <Label htmlFor="escalaIntervalAdvanced">
+                          ⏱️ Intervalo de Alternância entre Escalas (segundos)
+                        </Label>
+                        <HoverCard>
+                          <HoverCardTrigger asChild>
+                            <span className="ml-2 text-blue-500 cursor-help text-sm">[?]</span>
+                          </HoverCardTrigger>
+                          <HoverCardContent className="w-80">
+                            <p className="text-sm">
+                              Define quanto tempo cada escala (Oficiais/Praças) será exibida antes de
+                              alternar para a próxima. Recomenda-se utilizar valores maiores quando as
+                              escalas possuem muitas informações.
+                            </p>
+                          </HoverCardContent>
+                        </HoverCard>
+                      </div>
+                      <div className="flex items-center space-x-2">
+                        <Input
+                          id="escalaIntervalAdvanced"
+                          type="number"
+                          min="10"
+                          max="300"
+                          className="w-24"
+                          value={escalaAlternateInterval / 1000}
+                          onChange={e => handleEscalaIntervalChange(e, 10, 300)}
+                        />
+                        <span className="text-sm text-muted-foreground">segundos</span>
+                      </div>
+                      <p className="text-xs text-muted-foreground">
+                        Recomendado: tempo suficiente para visualizar cada escala completamente.
+                      </p>
                     </div>
-                    <div className="flex items-center space-x-2">
-                      <Input 
-                        id="documentAlternateInterval" 
-                        type="number" 
-                        min="10" 
-                        max="300" 
-                        className="w-24"
-                        value={documentAlternateInterval / 1000}
-                        onChange={updateDocumentAlternateInterval}
-                      />
-                      <span className="text-sm text-muted-foreground">segundos</span>
+
+                    <div className="space-y-2">
+                      <div className="flex items-center">
+                        <Label htmlFor="cardapioIntervalAdvanced">
+                          🍽️ Intervalo de Alternância entre Cardápios (segundos)
+                        </Label>
+                        <HoverCard>
+                          <HoverCardTrigger asChild>
+                            <span className="ml-2 text-blue-500 cursor-help text-sm">[?]</span>
+                          </HoverCardTrigger>
+                          <HoverCardContent className="w-80">
+                            <p className="text-sm">
+                              Ajusta o tempo de exibição dos cardápios semanais (EAGM/1DN). Utilize
+                              valores diferentes das escalas para destacar melhor as informações
+                              nutricionais.
+                            </p>
+                          </HoverCardContent>
+                        </HoverCard>
+                      </div>
+                      <div className="flex items-center space-x-2">
+                        <Input
+                          id="cardapioIntervalAdvanced"
+                          type="number"
+                          min="10"
+                          max="300"
+                          className="w-24"
+                          value={cardapioAlternateInterval / 1000}
+                          onChange={e => handleCardapioIntervalChange(e, 10, 300)}
+                        />
+                        <span className="text-sm text-muted-foreground">segundos</span>
+                      </div>
+                      <p className="text-xs text-muted-foreground">
+                        Recomendado: valores menores quando houver vários cardápios ativos.
+                      </p>
                     </div>
-                    <p className="text-xs text-muted-foreground">
-                      Recomendado: tempo suficiente para visualizar cada escala completamente.
-                    </p>
                   </div>
 
                   <div className="space-y-2">
