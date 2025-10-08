@@ -230,7 +230,7 @@ export class DatabaseStorage implements IStorage {
         id: row.id,
         title: row.title,
         url: row.url,
-        type: row.type as "plasa" | "bono" | "escala" | "cardapio",
+        type: row.type as PDFDocument["type"],
         category: row.category as "oficial" | "praca" | null,
         active: row.active,
         uploadDate: new Date(row.upload_date)
@@ -250,7 +250,7 @@ export class DatabaseStorage implements IStorage {
         id: row.id,
         title: row.title,
         url: row.url,
-        type: row.type as "plasa" | "bono" | "escala" | "cardapio",
+        type: row.type as PDFDocument["type"],
         category: row.category as "oficial" | "praca" | null,
         active: row.active,
         uploadDate: new Date(row.upload_date)
@@ -281,7 +281,7 @@ export class DatabaseStorage implements IStorage {
         id: row.id,
         title: row.title,
         url: row.url,
-        type: row.type as "plasa" | "bono" | "escala" | "cardapio",
+        type: row.type as PDFDocument["type"],
         category: row.category as "oficial" | "praca" | null,
         active: row.active,
         uploadDate: new Date(row.upload_date)
@@ -314,7 +314,7 @@ export class DatabaseStorage implements IStorage {
         id: row.id,
         title: row.title,
         url: row.url,
-        type: row.type as "plasa" | "bono" | "escala" | "cardapio",
+        type: row.type as PDFDocument["type"],
         category: row.category as "oficial" | "praca" | null,
         active: row.active,
         uploadDate: new Date(row.upload_date)
@@ -364,9 +364,9 @@ export class DatabaseStorage implements IStorage {
       const master = result.rows.find(row => row.duty_role === 'master');
       
       // Formatar nomes no padrão: "1T (RM2-T) KARINE"
-      const officerName = officer ? 
+      const officerName = officer ?
         `${officer.rank.toUpperCase()}${officer.specialty ? ` (${officer.specialty.toUpperCase()})` : ''} ${officer.name}` : '';
-      
+
       const masterName = master ?
         `${master.rank.toUpperCase()}${master.specialty ? ` (${master.specialty.toUpperCase()})` : ''} ${master.name}` : '';
 
@@ -377,8 +377,10 @@ export class DatabaseStorage implements IStorage {
       
       return {
         id: 1, // ID fixo para compatibilidade
-        officerName,
-        masterName,
+        officerId: officer?.id ?? null,
+        masterId: master?.id ?? null,
+        officerName: officerName || null,
+        masterName: masterName || null,
         updatedAt: new Date()
       };
     } catch (error) {
@@ -484,8 +486,10 @@ export class DatabaseStorage implements IStorage {
       
       return {
         id: 1,
-        officerName: officers.officerName,
-        masterName: officers.masterName,
+        officerId: officers.officerId ?? null,
+        masterId: officers.masterId ?? null,
+        officerName: officers.officerName ?? null,
+        masterName: officers.masterName ?? null,
         updatedAt: new Date()
       };
       
@@ -508,6 +512,7 @@ async getMilitaryPersonnel(): Promise<MilitaryPersonnel[]> {
         rank: row.rank as "1t" | "2t" | "ct" | "cc" | "cf" | "1sg" | "2sg" | "3sg",
         specialty: row.specialty || null,
         fullRankName: row.full_rank_name,
+        dutyRole: row.duty_role as "officer" | "master" | null,
         active: row.active,
         createdAt: new Date(row.created_at),
         updatedAt: new Date(row.updated_at)
@@ -538,6 +543,7 @@ async getMilitaryPersonnel(): Promise<MilitaryPersonnel[]> {
         rank: row.rank as "1t" | "2t" | "ct" | "cc" | "cf" | "1sg" | "2sg" | "3sg",
         specialty: row.specialty || null,
         fullRankName: row.full_rank_name,
+        dutyRole: row.duty_role as "officer" | "master" | null,
         active: row.active,
         createdAt: new Date(row.created_at),
         updatedAt: new Date(row.updated_at)
@@ -556,8 +562,8 @@ async getMilitaryPersonnel(): Promise<MilitaryPersonnel[]> {
       console.log(`🎖️ PostgreSQL: Criando ${personnel.type}:`, personnel.name);
       
       const result = await this.pool.query(
-        `INSERT INTO military_personnel (name, type, rank, specialty, full_rank_name, active) 
-         VALUES ($1, $2, $3, $4, $5, $6) 
+        `INSERT INTO military_personnel (name, type, rank, specialty, full_rank_name, duty_role, active)
+         VALUES ($1, $2, $3, $4, $5, $6, $7)
          RETURNING *`,
         [
           personnel.name,
@@ -565,6 +571,7 @@ async getMilitaryPersonnel(): Promise<MilitaryPersonnel[]> {
           personnel.rank,
           personnel.specialty,
           personnel.fullRankName,
+          personnel.dutyRole ?? null,
           personnel.active !== false
         ]
       );
@@ -577,6 +584,7 @@ async getMilitaryPersonnel(): Promise<MilitaryPersonnel[]> {
         rank: row.rank as "1t" | "2t" | "ct" | "cc" | "cf" | "1sg" | "2sg" | "3sg",
         specialty: row.specialty || null,
         fullRankName: row.full_rank_name,
+        dutyRole: row.duty_role as "officer" | "master" | null,
         active: row.active,
         createdAt: new Date(row.created_at),
         updatedAt: new Date(row.updated_at)
@@ -595,9 +603,9 @@ async getMilitaryPersonnel(): Promise<MilitaryPersonnel[]> {
       console.log(`🎖️ PostgreSQL: Atualizando ${personnel.type} ${personnel.id}`);
       
       const result = await this.pool.query(
-        `UPDATE military_personnel 
-         SET name = $1, type = $2, rank = $3, specialty = $4, full_rank_name = $5, active = $6, updated_at = NOW()
-         WHERE id = $7 
+        `UPDATE military_personnel
+         SET name = $1, type = $2, rank = $3, specialty = $4, full_rank_name = $5, duty_role = $6, active = $7, updated_at = NOW()
+         WHERE id = $8
          RETURNING *`,
         [
           personnel.name,
@@ -605,6 +613,7 @@ async getMilitaryPersonnel(): Promise<MilitaryPersonnel[]> {
           personnel.rank,
           personnel.specialty,
           personnel.fullRankName,
+          personnel.dutyRole ?? null,
           personnel.active,
           personnel.id
         ]
@@ -622,6 +631,7 @@ async getMilitaryPersonnel(): Promise<MilitaryPersonnel[]> {
         rank: row.rank as "1t" | "2t" | "ct" | "cc" | "cf" | "1sg" | "2sg" | "3sg",
         specialty: row.specialty || null,
         fullRankName: row.full_rank_name,
+        dutyRole: row.duty_role as "officer" | "master" | null,
         active: row.active,
         createdAt: new Date(row.created_at),
         updatedAt: new Date(row.updated_at)

@@ -395,7 +395,7 @@ export class MemStorage implements IStorage {
       id,
       title: insertDocument.title,
       url: insertDocument.url,
-      type: insertDocument.type as "plasa" | "bono" | "escala" | "cardapio",
+      type: insertDocument.type as PDFDocument["type"],
       category: (insertDocument.category as "oficial" | "praca") ?? null,
       active: insertDocument.active ?? true,
       uploadDate: new Date()
@@ -421,8 +421,10 @@ export class MemStorage implements IStorage {
   async updateDutyOfficers(officers: InsertDutyOfficers): Promise<DutyOfficers> {
     const updatedOfficers: DutyOfficers = {
       id: 1, // Sempre ID 1 pois só temos um registro
-      officerName: officers.officerName || "",
-      masterName: officers.masterName || "",
+      officerId: officers.officerId ?? null,
+      masterId: officers.masterId ?? null,
+      officerName: officers.officerName ?? null,
+      masterName: officers.masterName ?? null,
       updatedAt: new Date()
     };
 
@@ -453,6 +455,7 @@ export class MemStorage implements IStorage {
       rank: personnel.rank as "1t" | "2t" | "ct" | "cc" | "cf" | "1sg" | "2sg" | "3sg",
       specialty: personnel.specialty || null,
       fullRankName: personnel.fullRankName,
+      dutyRole: personnel.dutyRole ?? null,
       active: personnel.active ?? true,
       createdAt: new Date(),
       updatedAt: new Date(),

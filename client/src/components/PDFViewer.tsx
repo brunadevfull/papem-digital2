@@ -3,6 +3,18 @@ import { useDisplay } from "@/context/DisplayContext";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 const IS_DEV_MODE = process.env.NODE_ENV === 'development';
+const PDF_SCALE = 2.0;
+const MAX_RENDER_DIMENSION = 4096;
+const IMAGE_EXPORT_FORMAT = 'image/png';
+
+const getDevicePixelRatio = () => {
+  if (typeof window === 'undefined') {
+    return 1;
+  }
+
+  const ratio = window.devicePixelRatio || 1;
+  return Number.isFinite(ratio) && ratio > 0 ? ratio : 1;
+};
 
 // Configurar PDF.js
 declare global {
@@ -21,7 +33,7 @@ interface DebugInfo {
 }
 
 interface PDFViewerProps {
-  documentType: "plasa" | "escala" | "cardapio";
+  documentType: "plasa" | "bono" | "escala" | "cardapio";
   title: string;
   scrollSpeed?: "slow" | "normal" | "fast";
   autoRestartDelay?: number;
@@ -119,7 +131,14 @@ const PDFViewer: React.FC<PDFViewerProps> = ({
   onScrollComplete
 }) => {
   // CORREÇÃO: Usar currentEscalaIndex do contexto
-  const { activeEscalaDoc, activePlasaDoc, activeCardapioDoc, currentEscalaIndex, escalaDocuments } = useDisplay();
+  const {
+    activeEscalaDoc,
+    activePlasaDoc,
+    activeBonoDoc,
+    activeCardapioDoc,
+    currentEscalaIndex,
+    escalaDocuments
+  } = useDisplay();
   const [totalPages, setTotalPages] = useState(0);
   const [loading, setLoading] = useState(false);
   const [isScrolling, setIsScrolling] = useState(false);
@@ -144,7 +163,7 @@ const PDFViewer: React.FC<PDFViewerProps> = ({
 
   const SCROLL_SPEED = getScrollSpeed();
   const RESTART_DELAY = autoRestartDelay * 1000;
-  const PDF_SCALE = 1.5;
+  const devicePixelRatio = getDevicePixelRatio();
 
   // Função para obter a URL completa do servidor backend - DETECTAR AMBIENTE
   const getBackendUrl = (path: string): string => {
@@ -186,12 +205,13 @@ const PDFViewer: React.FC<PDFViewerProps> = ({
 
   // CORREÇÃO: Função para determinar a URL do documento com alternância
  const getDocumentUrl = () => {
-  if (documentType === "plasa") {
-    if (activePlasaDoc?.url) {
-      console.log("📄 PLASA: Usando documento do admin:", activePlasaDoc.url);
-      return getBackendUrl(activePlasaDoc.url);
+  if (documentType === "plasa" || documentType === "bono") {
+    const activeMainDoc = documentType === "plasa" ? activePlasaDoc : activeBonoDoc;
+    if (activeMainDoc?.url) {
+      console.log(`📄 ${documentType.toUpperCase()}: Usando documento do admin:`, activeMainDoc.url);
+      return getBackendUrl(activeMainDoc.url);
     }
-    console.log("📄 PLASA: Nenhum documento ativo");
+    console.log(`📄 ${documentType.toUpperCase()}: Nenhum documento ativo`);
     return null;
   } else if (documentType === "escala") {
     // CORREÇÃO: Usar a escala atual baseada no índice
@@ -337,18 +357,19 @@ const getCurrentCardapioDoc = () => {
       canvas.toBlob(async (blob) => {
         if (!blob) {
           console.error(`❌ Erro ao converter página ${pageNum} para blob`);
-          resolve(canvas.toDataURL('image/jpeg', 0.85));
+          resolve(canvas.toDataURL(IMAGE_EXPORT_FORMAT));
           return;
         }
 
         try {
           const formData = new FormData();
-          formData.append('file', blob, `plasa-page-${pageNum}.jpg`);
+          const extension = blob.type === 'image/png' ? 'png' : 'jpg';
+          formData.append('file', blob, `plasa-page-${pageNum}.${extension}`);
           formData.append('pageNumber', String(pageNum));
           formData.append('documentId', documentId);
-          
+
           const uploadUrl = getBackendUrl('/api/upload-plasa-page');
-          
+
           const response = await fetch(uploadUrl, {
             method: 'POST',
             body: formData,
@@ -356,19 +377,20 @@ const getCurrentCardapioDoc = () => {
 
           if (response.ok) {
             const result = await response.json();
-            const savedUrl = result.data?.url || result.url || `/plasa-pages/plasa-page-${pageNum}.jpg`;
+            const fallbackFilename = `${documentId}-page-${pageNum}.${extension}`;
+            const savedUrl = result.data?.url || result.url || `/plasa-pages/${fallbackFilename}`;
             const fullSavedUrl = getBackendUrl(savedUrl);
             console.log(`💾 Página ${pageNum} salva no servidor: ${fullSavedUrl}`);
             resolve(fullSavedUrl);
           } else {
             throw new Error(`Erro no servidor: ${response.status}`);
           }
-          
+
         } catch (error) {
           console.warn(`⚠️ Falha ao salvar página ${pageNum} no servidor, usando data URL:`, error);
-          resolve(canvas.toDataURL('image/jpeg', 0.85));
+          resolve(canvas.toDataURL(IMAGE_EXPORT_FORMAT));
         }
-      }, 'image/jpeg', 0.85);
+      }, IMAGE_EXPORT_FORMAT);
     });
   };
 
@@ -480,12 +502,15 @@ const getCurrentCardapioDoc = () => {
           console.log(`📄 Processando página ${pageNum}/${pdf.numPages}`);
           
           const page = await pdf.getPage(pageNum);
-          
-          const originalViewport = page.getViewport({ scale: 1.0 });
-          const scale = Math.min(PDF_SCALE, 2048 / Math.max(originalViewport.width, originalViewport.height));
-          const viewport = page.getViewport({ scale: scale });
 
-          console.log(`📐 Página ${pageNum} - Original: ${originalViewport.width}x${originalViewport.height}, Escala: ${scale}, Final: ${viewport.width}x${viewport.height}`);
+          const originalViewport = page.getViewport({ scale: 1.0 });
+          const maxDimension = Math.max(originalViewport.width, originalViewport.height) || 1;
+          const limitScale = MAX_RENDER_DIMENSION / maxDimension;
+          const baseScale = PDF_SCALE * devicePixelRatio;
+          const appliedScale = limitScale > 0 ? Math.min(baseScale, limitScale) : baseScale;
+          const viewport = page.getViewport({ scale: appliedScale });
+
+          console.log(`📐 Página ${pageNum} - Original: ${originalViewport.width}x${originalViewport.height}, Escala: ${appliedScale}, Final: ${viewport.width}x${viewport.height}`);
 
           const canvas = document.createElement('canvas');
           const context = canvas.getContext('2d', { 
@@ -690,15 +715,12 @@ const getCurrentCardapioDoc = () => {
 
   // CORREÇÃO: INICIALIZAR PLASA/BONO com melhor verificação
   useEffect(() => {
-    if (documentType === "plasa") {
-      const activeMainDoc = activePlasaDoc;
-      
-
+    if (documentType === "plasa" || documentType === "bono") {
+      const activeMainDoc = documentType === "plasa" ? activePlasaDoc : activeBonoDoc;
 
       if (isScrolling) return;
-      
-      if (!activeMainDoc || !activeMainDoc.url) {
 
+      if (!activeMainDoc || !activeMainDoc.url) {
         setLoading(false);
         setSavedPageUrls([]);
         setDebugInfo({
@@ -707,7 +729,7 @@ const getCurrentCardapioDoc = () => {
         });
         return;
       }
-      
+
       setSavedPageUrls([]);
       setIsAutomationPaused(false);
       clearAllTimers();
@@ -715,14 +737,11 @@ const getCurrentCardapioDoc = () => {
 
       const docUrl = getBackendUrl(activeMainDoc.url);
 
-      
       if (isImageFile(docUrl) || (docUrl.startsWith('blob:') && activeMainDoc.title.match(/\.(jpg|jpeg|png|gif|webp)$/i))) {
-
         setSavedPageUrls([docUrl]);
         setTotalPages(1);
         setLoading(false);
       } else {
-
         convertPDFToImages(docUrl);
       }
     }
@@ -732,7 +751,7 @@ const getCurrentCardapioDoc = () => {
         clearAllTimers();
       }
     };
-  }, [documentType, activePlasaDoc?.id, activePlasaDoc?.url]);
+  }, [documentType, activePlasaDoc?.id, activePlasaDoc?.url, activeBonoDoc?.id, activeBonoDoc?.url]);
 
   // CORREÇÃO: Inicializar ESCALA com monitoramento do índice de alternância
   useEffect(() => {
@@ -896,8 +915,11 @@ useEffect(() => {
       const page = await pdf.getPage(1);
       
       const originalViewport = page.getViewport({ scale: 1.0 });
-      const scale = Math.min(1.5, 1024 / Math.max(originalViewport.width, originalViewport.height));
-      const viewport = page.getViewport({ scale: scale });
+      const maxDimension = Math.max(originalViewport.width, originalViewport.height) || 1;
+      const limitScale = MAX_RENDER_DIMENSION / maxDimension;
+      const baseScale = PDF_SCALE * devicePixelRatio;
+      const appliedScale = limitScale > 0 ? Math.min(baseScale, limitScale) : baseScale;
+      const viewport = page.getViewport({ scale: appliedScale });
   
 
   
@@ -939,18 +961,14 @@ useEffect(() => {
         const imageBlob = await new Promise<Blob | null>((resolve) => {
           canvas.toBlob((blob) => {
             resolve(blob);
-          }, 'image/jpeg', 0.85);
+          }, IMAGE_EXPORT_FORMAT);
         });
         
         if (!imageBlob) {
           throw new Error('Falha ao converter canvas para blob');
         }
         
-        const formData = new FormData();
-        formData.append('file', imageBlob, `escala-${documentId}.jpg`);
-        formData.append('documentId', documentId);
-        
-        const imageDataUrl = canvas.toDataURL('image/jpeg', 0.85);
+        const imageDataUrl = canvas.toDataURL(IMAGE_EXPORT_FORMAT);
         
         const saveResponse = await fetch(getBackendUrl('/api/save-escala-cache'), {
           method: 'POST',
@@ -976,7 +994,7 @@ useEffect(() => {
       } catch (saveError) {
         console.log(`⚠️ ESCALA: Falha ao salvar cache, usando dataURL:`, saveError);
         // ✅ Fallback: usar dataURL se não conseguir salvar no servidor
-        const imageDataUrl = canvas.toDataURL('image/jpeg', 0.85);
+        const imageDataUrl = canvas.toDataURL(IMAGE_EXPORT_FORMAT);
         setEscalaImageUrl(imageDataUrl);
       }
       
@@ -1154,10 +1172,10 @@ useEffect(() => {
                 </details>
               )}
               <div className="flex gap-2 justify-center">
-                <button 
+                <button
                   onClick={() => {
                     setDebugInfo({});
-                    const activeMainDoc = activePlasaDoc;
+                    const activeMainDoc = activePrimaryDoc;
                     if (activeMainDoc && activeMainDoc.url) {
                       const fullUrl = getBackendUrl(activeMainDoc.url);
                       if (isImageFile(fullUrl)) {
@@ -1187,22 +1205,22 @@ useEffect(() => {
             <>
               <div className="text-6xl mb-4">📄</div>
               <div className="text-gray-600 text-lg">
-                {(documentType === "plasa" && !activePlasaDoc)
-                  ? `Nenhum documento ${documentType.toUpperCase()} ativo` 
+                {((documentType === "plasa" || documentType === "bono") && !activePrimaryDoc)
+                  ? `Nenhum documento ${documentType.toUpperCase()} ativo`
                   : loading
                   ? "Processando documento..."
                   : "Preparando visualização..."}
               </div>
-              {(documentType === "plasa" && !activePlasaDoc) && (
+              {((documentType === "plasa" || documentType === "bono") && !activePrimaryDoc) && (
                 <div className="mt-4 text-sm text-gray-500">
                   Vá para o painel administrativo e faça upload de um documento {documentType.toUpperCase()}
                 </div>
               )}
-              {activePlasaDoc && (
+              {activePrimaryDoc && (
                 <div className="mt-4 text-xs text-gray-400 bg-gray-50 p-3 rounded">
                   <div className="font-medium">Documento ativo:</div>
-                  <div className="truncate">{activePlasaDoc.title}</div>
-                  <div className="truncate font-mono">{activePlasaDoc.url}</div>
+                  <div className="truncate">{activePrimaryDoc.title}</div>
+                  <div className="truncate font-mono">{activePrimaryDoc.url}</div>
                 </div>
               )}
             </>
@@ -1223,6 +1241,11 @@ useEffect(() => {
 };
 
   const currentEscala = getCurrentEscalaDoc();
+  const activePrimaryDoc = documentType === "plasa"
+    ? activePlasaDoc
+    : documentType === "bono"
+      ? activeBonoDoc
+      : null;
 
   return (
 
@@ -1293,8 +1316,10 @@ useEffect(() => {
           ? "bg-gradient-to-r from-orange-50 via-white to-amber-50 drop-shadow-sm"
           : "bg-gradient-to-r from-white to-blue-100"
       }`}>
-        {documentType === "plasa" ? (
-          activePlasaDoc?.title || "📋 PLASA - PLANO DE SERVIÇO SEMANAL"
+        {documentType === "plasa" || documentType === "bono" ? (
+          activePrimaryDoc?.title || (documentType === "plasa"
+            ? "📋 PLASA - PLANO DE SERVIÇO SEMANAL"
+            : "📋 BONO - BOLETIM DE OCORRÊNCIAS")
         ) : documentType === "cardapio" ? (
           "CARDÁPIO SEMANAL"
         ) : (
