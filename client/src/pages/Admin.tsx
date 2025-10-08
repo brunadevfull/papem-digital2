@@ -625,7 +625,7 @@ const saveEditOfficer = async () => {
         connected: response.ok,
         lastResponse: response.status,
         lastCheck: new Date(),
-        documents: plasaDocuments.length + escalaDocuments.length
+        documents: plasaDocuments.length + escalaDocuments.length + cardapioDocuments.length
       }));
       console.log("📢 Resposta do servidor:", response.status, response.ok ? 'OK' : 'ERROR');
     } catch (error) {
@@ -634,7 +634,7 @@ const saveEditOfficer = async () => {
         connected: false,
         lastResponse: null,
         lastCheck: new Date(),
-        documents: plasaDocuments.length + escalaDocuments.length
+        documents: plasaDocuments.length + escalaDocuments.length + cardapioDocuments.length
       }));
       console.error("❌ Erro de conexão com servidor:", error);
     }
@@ -1218,7 +1218,7 @@ if (selectedDocType === "cardapio" && !docUnit) {
     checkServerStatus();
     const interval = setInterval(checkServerStatus, 30000); // A cada 30 segundos
     return () => clearInterval(interval);
-}, [plasaDocuments.length, escalaDocuments.length]);
+  }, [plasaDocuments.length, escalaDocuments.length, cardapioDocuments.length]);
   // Componente de Status do Servidor
   const ServerStatusIndicator = () => (
     <Card className="mb-6">
