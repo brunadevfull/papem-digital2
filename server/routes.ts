@@ -1254,11 +1254,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Delete uploaded file route
-  app.delete('/api/delete-pdf/:filename', async (req, res) => {
+  app.delete('/api/delete-pdf/:filename(*)', async (req, res) => {
+
     try {
       const { filename } = req.params;
+        const decodedFilename = decodeURIComponent(filename);
+        console.log('🗑️ Tentando deletar:', decodedFilename);
+
+
       const normalizedRelativePath = path
-        .normalize(filename)
+         .normalize(decodedFilename) 
         .replace(/^([./\\])+/, '');
 
       const filePath = path.join(process.cwd(), 'uploads', normalizedRelativePath);

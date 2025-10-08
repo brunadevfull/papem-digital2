@@ -2147,7 +2147,7 @@ if (selectedDocType === "cardapio" && !docUnit) {
                         <div className="space-y-2">
                           <div className="flex items-center">
                             <Label htmlFor="escalaInterval">
-                              ⚖️ Intervalo entre Escalas (segundos)
+                              ⚖️ Intervalo de Alternância (segundos)
                             </Label>
                             <HoverCard>
                               <HoverCardTrigger asChild>
@@ -2155,11 +2155,13 @@ if (selectedDocType === "cardapio" && !docUnit) {
                               </HoverCardTrigger>
                               <HoverCardContent className="w-80">
                                 <p className="text-sm">
-                                  Define quanto tempo cada escala (Oficiais/Praças) será exibida antes de alternar para a outra.
-                                </p>
+   Define quanto tempo cada documento rotativo (escalas e cardápios) será exibido 
+              antes de alternar para o próximo. Este intervalo se aplica a todas as escalas 
+              e cardápios cadastrados.                                </p>
                               </HoverCardContent>
                             </HoverCard>
                           </div>
+
                           <div className="flex items-center space-x-2">
                             <Input 
                               id="escalaInterval" 
@@ -2170,40 +2172,22 @@ if (selectedDocType === "cardapio" && !docUnit) {
                               value={Math.floor(documentAlternateInterval / 1000)}
                               onChange={handleDocumentAlternateIntervalChange}
                             />
-                            <span className="text-sm text-muted-foreground">segundos entre escalas</span>
+                            <span className="text-sm text-muted-foreground">segundos </span>
                           </div>
+                            <p className="text-xs text-muted-foreground">
+        Aplica-se a: Escalas de Oficiais/Praças e Cardápios EAGM/1DN
+      </p>
                         </div>
 
-                        <div className="space-y-2">
-                          <div className="flex items-center">
-                            <Label htmlFor="cardapioInterval">
-                              🍽️ Intervalo do Cardápio (segundos)
-                            </Label>
-                            <HoverCard>
-                              <HoverCardTrigger asChild>
-                                <span className="ml-2 text-blue-500 cursor-help text-sm">[?]</span>
-                              </HoverCardTrigger>
-                              <HoverCardContent className="w-80">
-                                <p className="text-sm">
-                                  Define quanto tempo o cardápio fica visível antes de voltar às escalas.
-                                </p>
-                              </HoverCardContent>
-                            </HoverCard>
-                          </div>
-                          <div className="flex items-center space-x-2">
-                            <Input 
-                              id="cardapioInterval" 
-                              type="number" 
-                              min="10" 
-                              max="120" 
-                              className="w-24"
-                              defaultValue="15"
-                            />
-                            <span className="text-sm text-muted-foreground">segundos para cardápio</span>
-                          </div>
-                        </div>
-                      </div>
-
+ {/* ✅ NOVO: Nota informativa sobre cardápios */}
+    <div className="p-3 bg-orange-50 rounded-lg border-l-4 border-orange-400">
+      <p className="text-sm text-orange-800">
+        <strong>ℹ️ Nota:</strong> Cardápios e escalas compartilham o mesmo intervalo de alternância configurado acima ({Math.floor(documentAlternateInterval / 1000)} segundos). 
+        Isso garante sincronização entre todos os documentos rotativos.
+      </p>
+    </div>
+  </div>
+                   
                       <div className="space-y-2">
                         <Label htmlFor="autoRestart">
                           🔄 Reinício Automático do PLASA

@@ -36,6 +36,7 @@ interface DisplayContextType {
   activeEscalaDoc: PDFDocument | null;
   activeCardapioDoc: PDFDocument | null;
   currentEscalaIndex: number;
+  currentCardapioIndex: number; // ✅ Adicionar
   documentAlternateInterval: number;
   scrollSpeed: "slow" | "normal" | "fast";
   autoRestartDelay: number;
@@ -74,6 +75,8 @@ export const DisplayProvider: React.FC<DisplayProviderProps> = ({ children }) =>
   const [escalaDocuments, setEscalaDocuments] = useState<PDFDocument[]>([]);
   const [cardapioDocuments, setCardapioDocuments] = useState<PDFDocument[]>([]);
   const [currentEscalaIndex, setCurrentEscalaIndex] = useState(0);
+  const [currentCardapioIndex, setCurrentCardapioIndex] = useState(0); // ✅ ADICIONAR
+  const cardapioTimerRef = useRef<NodeJS.Timeout | null>(null); // ✅ ADICIONAR
   const [documentAlternateInterval, setDocumentAlternateInterval] = useState(30000);
   const [scrollSpeed, setScrollSpeed] = useState<"slow" | "normal" | "fast">("normal");
   const [autoRestartDelay, setAutoRestartDelay] = useState(3);
@@ -653,7 +656,7 @@ const deleteNotice = async (id: string): Promise<boolean> => {
     }
   };
 
-  const deleteDocument = async (id: string) => {
+const deleteDocument = async (id: string) => {
     console.log("🗑️ Removendo documento:", id);
     
     // Encontrar o documento para obter o filename
@@ -662,11 +665,23 @@ const deleteNotice = async (id: string): Promise<boolean> => {
     
     if (docToDelete && docToDelete.url.includes('/uploads/')) {
       try {
-        // Extrair filename da URL
-        const filename = docToDelete.url.split('/uploads/')[1];
-        console.log("🗑️ Deletando arquivo do servidor:", filename);
+        // Extrair o caminho completo após /uploads/ (inclui subpasta + arquivo)
+        let filepath = '';
         
-        const response = await fetch(getBackendUrl(`/api/delete-pdf/${filename}`), {
+        // Tratar diferentes formatos de URL
+        if (docToDelete.url.includes('/uploads/')) {
+          const parts = docToDelete.url.split('/uploads/');
+          filepath = parts[1]; // Pega tudo após /uploads/, ex: "plasa/documento.pdf"
+        }
+        
+        // Remover query strings se houver
+        filepath = filepath.split('?')[0];
+        
+        console.log("🗑️ Deletando arquivo do servidor:", filepath);
+        console.log("🗑️ URL original:", docToDelete.url);
+        
+        // Enviar o caminho completo para o backend
+        const response = await fetch(getBackendUrl(`/api/delete-pdf/${encodeURIComponent(filepath)}`), {
           method: 'DELETE',
           headers: {
             'Content-Type': 'application/json',
@@ -702,11 +717,18 @@ const deleteNotice = async (id: string): Promise<boolean> => {
 
   // Computed values com alternância automática para escalas  
   const activePlasaDoc = plasaDocuments.find(doc => doc.active) || null;
-  const activeCardapioDoc = cardapioDocuments.find(doc => doc.active) || null;
+
+  
   const activeEscalaDocuments = escalaDocuments.filter(doc => doc.active);
   const activeEscalaDoc = activeEscalaDocuments.length > 0 
     ? activeEscalaDocuments[currentEscalaIndex % activeEscalaDocuments.length] 
     : null;
+
+const activeCardapioDocuments = cardapioDocuments.filter((doc: PDFDocument) => doc.active);
+const activeCardapioDoc = activeCardapioDocuments.length > 0
+  ? activeCardapioDocuments[currentCardapioIndex % activeCardapioDocuments.length]
+  : null;
+  
 
   // Effect para alternar escalas automaticamente
   useEffect(() => {
@@ -739,7 +761,47 @@ const deleteNotice = async (id: string): Promise<boolean> => {
       }
     };
   }, [activeEscalaDocuments.length, documentAlternateInterval, escalaDocuments]);
+// ✅ ADICIONAR: Effect para alternar cardápios automaticamente
+useEffect(() => {
+  if (cardapioTimerRef.current) {
+    clearInterval(cardapioTimerRef.current);
+    cardapioTimerRef.current = null;
+  }
 
+  if (activeCardapioDocuments.length > 1) {
+    console.log(`🍽️ Iniciando alternância de ${activeCardapioDocuments.length} cardápios`);
+    
+    cardapioTimerRef.current = setInterval(() => {
+      setCurrentCardapioIndex(prevIndex => {
+        const nextIndex = (prevIndex + 1) % activeCardapioDocuments.length;
+        const nextCardapio = activeCardapioDocuments[nextIndex];
+        console.log(`🍽️ Alternando para cardápio ${nextIndex + 1}/${activeCardapioDocuments.length}: ${nextCardapio?.unit || 'N/A'}`);
+        return nextIndex;
+      });
+    }, documentAlternateInterval);
+  } else if (activeCardapioDocuments.length === 1) {
+    console.log(`🍽️ Apenas 1 cardápio ativo, mantendo fixo`);
+    setCurrentCardapioIndex(0);
+  } else {
+    console.log(`⚠️ Nenhum cardápio ativo`);
+  }
+
+  return () => {
+    if (cardapioTimerRef.current) {
+      clearInterval(cardapioTimerRef.current);
+      cardapioTimerRef.current = null;
+    }
+  };
+}, [activeCardapioDocuments.length, documentAlternateInterval, cardapioDocuments]);
+
+// ✅ ADICIONAR: Effect para resetar índice de cardápios
+useEffect(() => {
+  if (activeCardapioDocuments.length === 0) {
+    setCurrentCardapioIndex(0);
+  } else if (currentCardapioIndex >= activeCardapioDocuments.length) {
+    setCurrentCardapioIndex(0);
+  }
+}, [activeCardapioDocuments.length, currentCardapioIndex]);
   // Log das mudanças importantes
   useEffect(() => {
     if (!isInitializingRef.current) {
@@ -905,11 +967,11 @@ const deleteNotice = async (id: string): Promise<boolean> => {
         if (result.documents && Array.isArray(result.documents)) {
           const parsedDocs = result.documents
             .map(processServerDocument)
-            .filter((doc): doc is PDFDocument => doc !== null);
+             .filter((doc: PDFDocument | null): doc is PDFDocument => doc !== null);
 
-          const plasa = parsedDocs.filter(doc => doc.type === 'plasa');
-          const escala = parsedDocs.filter(doc => doc.type === 'escala');
-          const cardapio = parsedDocs.filter(doc => doc.type === 'cardapio');
+          const plasa = parsedDocs.filter((doc: PDFDocument) => doc.type === 'plasa');
+const escala = parsedDocs.filter((doc: PDFDocument) => doc.type === 'escala');
+const cardapio = parsedDocs.filter((doc: PDFDocument) => doc.type === 'cardapio');
 
           setPlasaDocuments(sortDocuments(plasa));
           setEscalaDocuments(sortDocuments(escala));
@@ -1056,32 +1118,34 @@ const deleteNotice = async (id: string): Promise<boolean> => {
   }, [activeEscalaDocuments.length, currentEscalaIndex]);
 
 
+const value: DisplayContextType = {
+  notices,
+  plasaDocuments,
+  escalaDocuments,
+  cardapioDocuments,
+  activePlasaDoc,
+  activeEscalaDoc,
+  activeCardapioDoc, // ✅ Agora está definido acima
+  currentEscalaIndex,
+  currentCardapioIndex, // ✅ Adicionar esta propriedade
+  documentAlternateInterval,
+  scrollSpeed,
+  autoRestartDelay,
+  isLoading,
+  addNotice,
+  updateNotice,
+  deleteNotice,
+  addDocument,
+  updateDocument,
+  deleteDocument,
+  setDocumentAlternateInterval,
+  setScrollSpeed,
+  setAutoRestartDelay,
+  refreshNotices,
+  handleScrollComplete,
+};
 
-  const value: DisplayContextType = {
-    notices,
-    plasaDocuments,
-    escalaDocuments,
-    cardapioDocuments,
-    activePlasaDoc,
-    activeEscalaDoc,
-    activeCardapioDoc,
-    currentEscalaIndex,
-    documentAlternateInterval,
-    scrollSpeed,
-    autoRestartDelay,
-    isLoading,
-    addNotice,
-    updateNotice,
-    deleteNotice,
-    addDocument,
-    updateDocument,
-    deleteDocument,
-    setDocumentAlternateInterval,
-    setScrollSpeed,
-    setAutoRestartDelay,
-    refreshNotices,
-    handleScrollComplete,
-  };
+  
 
   return (
     <DisplayContext.Provider value={value}>
