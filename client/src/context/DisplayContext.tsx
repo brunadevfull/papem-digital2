@@ -883,6 +883,42 @@ useEffect(() => {
     const sortDocuments = (docs: PDFDocument[]) =>
       [...docs].sort((a, b) => b.uploadDate.getTime() - a.uploadDate.getTime());
 
+    const dedupeDocuments = (docs: PDFDocument[]) => {
+      const deduped = new Map<string, PDFDocument>();
+
+      docs.forEach(doc => {
+        const key = getComparableUrl(doc.url);
+        if (!key) {
+          return;
+        }
+
+        const existing = deduped.get(key);
+        if (!existing || doc.uploadDate.getTime() >= existing.uploadDate.getTime()) {
+          deduped.set(key, doc);
+        }
+      });
+
+      return Array.from(deduped.values());
+    };
+
+    const applyDocumentsFromSource = (docs: PDFDocument[], source: 'database' | 'fallback') => {
+      const dedupedDocs = dedupeDocuments(docs);
+
+      const plasa = dedupedDocs.filter(doc => doc.type === 'plasa');
+      const escala = dedupedDocs.filter(doc => doc.type === 'escala');
+      const cardapio = dedupedDocs.filter(doc => doc.type === 'cardapio');
+
+      setPlasaDocuments(sortDocuments(plasa));
+      setEscalaDocuments(sortDocuments(escala));
+      setCardapioDocuments(sortDocuments(cardapio));
+
+      console.info(
+        `📥 Carregados ${dedupedDocs.length} documentos (${plasa.length} PLASA, ${escala.length} Escala, ${cardapio.length} Cardápio) via ${source === 'database' ? '/api/documents' : '/api/list-pdfs'}`
+      );
+
+      return dedupedDocs.length > 0;
+    };
+
     const processServerDocument = (serverDoc: any): PDFDocument | null => {
       if (!serverDoc) return null;
 
@@ -962,14 +998,11 @@ useEffect(() => {
             .map(processServerDocument)
             .filter((doc): doc is PDFDocument => doc !== null);
 
-          const plasa = parsedDocs.filter(doc => doc.type === 'plasa');
-          const escala = parsedDocs.filter(doc => doc.type === 'escala');
-          const cardapio = parsedDocs.filter(doc => doc.type === 'cardapio');
+          if (applyDocumentsFromSource(parsedDocs, 'database')) {
+            return;
+          }
 
-          setPlasaDocuments(sortDocuments(plasa));
-          setEscalaDocuments(sortDocuments(escala));
-          setCardapioDocuments(sortDocuments(cardapio));
-          return;
+          console.info('ℹ️ Nenhum documento válido retornado do banco, utilizando fallback /api/list-pdfs');
         }
       }
     } catch (error) {
@@ -983,15 +1016,13 @@ useEffect(() => {
         if (result.documents && Array.isArray(result.documents)) {
           const parsedDocs = result.documents
             .map(processServerDocument)
-             .filter((doc: PDFDocument | null): doc is PDFDocument => doc !== null);
+            .filter((doc: PDFDocument | null): doc is PDFDocument => doc !== null);
 
-          const plasa = parsedDocs.filter((doc: PDFDocument) => doc.type === 'plasa');
-const escala = parsedDocs.filter((doc: PDFDocument) => doc.type === 'escala');
-const cardapio = parsedDocs.filter((doc: PDFDocument) => doc.type === 'cardapio');
-
-          setPlasaDocuments(sortDocuments(plasa));
-          setEscalaDocuments(sortDocuments(escala));
-          setCardapioDocuments(sortDocuments(cardapio));
+          if (!applyDocumentsFromSource(parsedDocs, 'fallback')) {
+            setPlasaDocuments([]);
+            setEscalaDocuments([]);
+            setCardapioDocuments([]);
+          }
         } else {
           setPlasaDocuments([]);
           setEscalaDocuments([]);
