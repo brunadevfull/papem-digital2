@@ -1,10 +1,12 @@
-import React, { useState, useEffect, useRef, useCallback } from "react";
+import React, { useState, useEffect, useRef, useCallback, useMemo } from "react";
 import { useDisplay } from "@/context/DisplayContext";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 const IS_DEV_MODE = process.env.NODE_ENV === 'development';
 const PDF_SCALE = 2.0;
-const MAX_RENDER_DIMENSION = 4096;
+const MIN_RENDER_SCALE = 2.5;
+const MAX_RENDER_DIMENSION = 8192;
+const DEFAULT_TARGET_LONG_EDGE = 3072;
 const IMAGE_EXPORT_FORMAT = 'image/png';
 
 const getDevicePixelRatio = () => {
@@ -14,6 +16,28 @@ const getDevicePixelRatio = () => {
 
   const ratio = window.devicePixelRatio || 1;
   return Number.isFinite(ratio) && ratio > 0 ? ratio : 1;
+};
+
+const getTargetRenderLongEdge = () => {
+  if (typeof window === 'undefined') {
+    return DEFAULT_TARGET_LONG_EDGE;
+  }
+
+  const candidates = [
+    window.innerWidth,
+    window.innerHeight,
+    window.screen?.width,
+    window.screen?.height
+  ].filter((value): value is number => typeof value === 'number' && Number.isFinite(value) && value > 0);
+
+  if (candidates.length === 0) {
+    return DEFAULT_TARGET_LONG_EDGE;
+  }
+
+  const longestEdge = Math.max(...candidates);
+  const adjustedEdge = longestEdge * 1.25;
+
+  return Math.max(DEFAULT_TARGET_LONG_EDGE, adjustedEdge);
 };
 
 // Configurar PDF.js
@@ -157,6 +181,27 @@ const PDFViewer: React.FC<PDFViewerProps> = ({
   const SCROLL_SPEED = getScrollSpeed();
   const RESTART_DELAY = autoRestartDelay * 1000;
   const devicePixelRatio = getDevicePixelRatio();
+  const targetRenderLongEdge = useMemo(() => getTargetRenderLongEdge(), []);
+
+  const buildRenderViewport = useCallback((page: any) => {
+    const originalViewport = page.getViewport({ scale: 1.0 });
+    const maxDimension = Math.max(originalViewport.width, originalViewport.height) || 1;
+    const limitScale = MAX_RENDER_DIMENSION / maxDimension;
+    const baseScale = Math.max(PDF_SCALE * devicePixelRatio, MIN_RENDER_SCALE);
+    const targetScale = targetRenderLongEdge / maxDimension;
+    const desiredScale = Math.max(baseScale, targetScale);
+    const safeLimit = Number.isFinite(limitScale) && limitScale > 0 ? limitScale : desiredScale;
+    const appliedScale = Math.min(desiredScale, safeLimit);
+    const viewport = page.getViewport({ scale: appliedScale });
+
+    return {
+      originalViewport,
+      viewport,
+      appliedScale,
+      targetScale,
+      limitScale
+    };
+  }, [devicePixelRatio, targetRenderLongEdge]);
 
   // Função para obter a URL completa do servidor backend - DETECTAR AMBIENTE
   const getBackendUrl = (path: string): string => {
@@ -495,14 +540,16 @@ const getCurrentCardapioDoc = () => {
           
           const page = await pdf.getPage(pageNum);
 
-          const originalViewport = page.getViewport({ scale: 1.0 });
-          const maxDimension = Math.max(originalViewport.width, originalViewport.height) || 1;
-          const limitScale = MAX_RENDER_DIMENSION / maxDimension;
-          const baseScale = PDF_SCALE * devicePixelRatio;
-          const appliedScale = limitScale > 0 ? Math.min(baseScale, limitScale) : baseScale;
-          const viewport = page.getViewport({ scale: appliedScale });
+          const { originalViewport, viewport, appliedScale, targetScale, limitScale } = buildRenderViewport(page);
 
-          console.log(`📐 Página ${pageNum} - Original: ${originalViewport.width}x${originalViewport.height}, Escala: ${appliedScale}, Final: ${viewport.width}x${viewport.height}`);
+          console.log(
+            `📐 Página ${pageNum} - Original: ${originalViewport.width}x${originalViewport.height}, ` +
+            `Alvo long edge: ${targetRenderLongEdge.toFixed(0)}px, ` +
+            `Escala desejada: ${targetScale.toFixed(2)}x, ` +
+            `Escala aplicada: ${appliedScale.toFixed(2)}x, ` +
+            `Limite: ${limitScale.toFixed(2)}x, ` +
+            `Resultado: ${viewport.width}x${viewport.height}`
+          );
 
           const canvas = document.createElement('canvas');
           const context = canvas.getContext('2d', { 
@@ -911,13 +958,17 @@ useEffect(() => {
 
       
       const page = await pdf.getPage(1);
-      
-      const originalViewport = page.getViewport({ scale: 1.0 });
-      const maxDimension = Math.max(originalViewport.width, originalViewport.height) || 1;
-      const limitScale = MAX_RENDER_DIMENSION / maxDimension;
-      const baseScale = PDF_SCALE * devicePixelRatio;
-      const appliedScale = limitScale > 0 ? Math.min(baseScale, limitScale) : baseScale;
-      const viewport = page.getViewport({ scale: appliedScale });
+
+      const { originalViewport, viewport, appliedScale, targetScale, limitScale } = buildRenderViewport(page);
+
+      console.log(
+        `📐 ESCALA - Original: ${originalViewport.width}x${originalViewport.height}, ` +
+        `Alvo long edge: ${targetRenderLongEdge.toFixed(0)}px, ` +
+        `Escala desejada: ${targetScale.toFixed(2)}x, ` +
+        `Escala aplicada: ${appliedScale.toFixed(2)}x, ` +
+        `Limite: ${limitScale.toFixed(2)}x, ` +
+        `Resultado: ${viewport.width}x${viewport.height}`
+      );
   
 
   
