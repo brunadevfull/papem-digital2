@@ -15,6 +15,13 @@
       "when": 1759861883455,
       "tag": "0001_add_tags_to_documents",
       "breakpoints": false
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1759968863287,
+      "tag": "0002_add_unit_to_documents",
+      "breakpoints": false
     }
   ]
 }

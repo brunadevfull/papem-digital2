@@ -230,8 +230,9 @@ export class DatabaseStorage implements IStorage {
         id: row.id,
         title: row.title,
         url: row.url,
-        type: row.type as "plasa" | "bono" | "escala" | "cardapio",
+        type: row.type as "plasa" | "escala" | "cardapio",
         category: row.category as "oficial" | "praca" | null,
+        unit: typeof row.unit === 'string' ? (row.unit as "EAGM" | "1DN") : undefined,
         active: row.active,
         uploadDate: new Date(row.upload_date),
         tags: Array.isArray(row.tags) ? row.tags : []
@@ -251,8 +252,9 @@ export class DatabaseStorage implements IStorage {
         id: row.id,
         title: row.title,
         url: row.url,
-        type: row.type as "plasa" | "bono" | "escala" | "cardapio",
+        type: row.type as "plasa" | "escala" | "cardapio",
         category: row.category as "oficial" | "praca" | null,
+        unit: typeof row.unit === 'string' ? (row.unit as "EAGM" | "1DN") : undefined,
         active: row.active,
         uploadDate: new Date(row.upload_date),
         tags: Array.isArray(row.tags) ? row.tags : []
@@ -266,14 +268,15 @@ export class DatabaseStorage implements IStorage {
   async createDocument(insertDocument: InsertDocument): Promise<PDFDocument> {
     try {
       const result = await this.pool.query(
-        `INSERT INTO documents (title, url, type, category, active, tags)
-         VALUES ($1, $2, $3, $4, $5, $6)
+        `INSERT INTO documents (title, url, type, category, unit, active, tags)
+         VALUES ($1, $2, $3, $4, $5, $6, $7)
          RETURNING *`,
         [
           insertDocument.title,
           insertDocument.url,
           insertDocument.type,
           insertDocument.category ?? null,
+          insertDocument.unit ?? null,
           insertDocument.active ?? true,
           Array.isArray(insertDocument.tags) ? insertDocument.tags : []
         ]
@@ -284,8 +287,9 @@ export class DatabaseStorage implements IStorage {
         id: row.id,
         title: row.title,
         url: row.url,
-        type: row.type as "plasa" | "bono" | "escala" | "cardapio",
+        type: row.type as "plasa" | "escala" | "cardapio",
         category: row.category as "oficial" | "praca" | null,
+        unit: typeof row.unit === 'string' ? (row.unit as "EAGM" | "1DN") : undefined,
         active: row.active,
         uploadDate: new Date(row.upload_date),
         tags: Array.isArray(row.tags) ? row.tags : []
@@ -300,14 +304,15 @@ export class DatabaseStorage implements IStorage {
     try {
       const result = await this.pool.query(
         `UPDATE documents
-         SET title = $1, url = $2, type = $3, category = $4, active = $5, tags = $6
-         WHERE id = $7
+         SET title = $1, url = $2, type = $3, category = $4, unit = $5, active = $6, tags = $7
+         WHERE id = $8
          RETURNING *`,
         [
           document.title,
           document.url,
           document.type,
           document.category,
+          document.unit ?? null,
           document.active,
           Array.isArray(document.tags) ? document.tags : [],
           document.id
@@ -319,8 +324,9 @@ export class DatabaseStorage implements IStorage {
         id: row.id,
         title: row.title,
         url: row.url,
-        type: row.type as "plasa" | "bono" | "escala" | "cardapio",
+        type: row.type as "plasa" | "escala" | "cardapio",
         category: row.category as "oficial" | "praca" | null,
+        unit: typeof row.unit === 'string' ? (row.unit as "EAGM" | "1DN") : undefined,
         active: row.active,
         uploadDate: new Date(row.upload_date),
         tags: Array.isArray(row.tags) ? row.tags : []

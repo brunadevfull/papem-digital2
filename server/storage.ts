@@ -395,8 +395,9 @@ export class MemStorage implements IStorage {
       id,
       title: insertDocument.title,
       url: insertDocument.url,
-      type: insertDocument.type as "plasa" | "bono" | "escala" | "cardapio",
+      type: insertDocument.type as "plasa" | "escala" | "cardapio",
       category: (insertDocument.category as "oficial" | "praca") ?? null,
+      unit: insertDocument.unit ?? undefined,
       active: insertDocument.active ?? true,
       uploadDate: new Date(),
       tags: Array.isArray(insertDocument.tags) ? [...insertDocument.tags] : []

@@ -186,6 +186,27 @@ function normalizeTagsInput(input: unknown): string[] {
   return normalized;
 }
 
+function normalizeUnitInput(value: unknown): 'EAGM' | '1DN' | undefined {
+  if (typeof value !== 'string') {
+    return undefined;
+  }
+
+  const normalized = value.trim().toUpperCase();
+  if (!normalized) {
+    return undefined;
+  }
+
+  const compact = normalized.replace(/[^A-Z0-9]/g, '');
+  if (compact === 'EAGM') {
+    return 'EAGM';
+  }
+  if (compact === '1DN' || compact === 'DN1') {
+    return '1DN';
+  }
+
+  return undefined;
+}
+
 
 // Promisify fs functions for async/await
 const writeFile = promisify(fs.writeFile);
@@ -1053,19 +1074,38 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post('/api/documents', async (req, res) => {
     try {
       const body = (req.body ?? {}) as Record<string, unknown>;
-      const tagsSource = body.tags ?? (typeof body.classification === 'object' && body.classification !== null
-        ? (body.classification as any).tags
-        : undefined);
+      const rawClassification = body.classification;
+      const classification = typeof rawClassification === 'object' && rawClassification !== null
+        ? (rawClassification as Record<string, unknown>)
+        : undefined;
+
+      const hasExplicitTags = Object.prototype.hasOwnProperty.call(body, 'tags');
+      const tagsSource = hasExplicitTags
+        ? body['tags']
+        : classification?.['tags'];
       const normalizedTags = normalizeTagsInput(tagsSource);
-      const { classification, ...rest } = body;
+
+      const hasExplicitUnit = Object.prototype.hasOwnProperty.call(body, 'unit');
+      const rawUnitValue = hasExplicitUnit ? body['unit'] : undefined;
+      const classificationUnit = classification ? normalizeUnitInput(classification['unit']) : undefined;
+      const normalizedUnit = hasExplicitUnit
+        ? normalizeUnitInput(rawUnitValue)
+        : classificationUnit;
+
+      const rest: Record<string, unknown> = { ...body };
+      delete rest.classification;
+      delete rest.tags;
+      delete rest.unit;
 
       const validatedData = insertDocumentSchema.parse({
         ...rest,
+        unit: normalizedUnit ?? undefined,
         tags: normalizedTags,
       });
 
       const document = await storage.createDocument({
         ...validatedData,
+        unit: normalizedUnit ?? undefined,
         tags: normalizedTags,
       });
       res.json(document);
@@ -1088,19 +1128,33 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       const body = (req.body ?? {}) as Record<string, unknown>;
-      const classification = body.classification as any;
+      const rawClassification = body.classification;
+      const classification = typeof rawClassification === 'object' && rawClassification !== null
+        ? (rawClassification as Record<string, unknown>)
+        : undefined;
+
       const hasTagsInput = Object.prototype.hasOwnProperty.call(body, 'tags')
         || (classification && Object.prototype.hasOwnProperty.call(classification, 'tags'));
       const tagsSource = hasTagsInput
-        ? body.tags ?? (classification ? classification.tags : undefined)
+        ? body['tags'] ?? (classification ? classification['tags'] : undefined)
         : existingDoc.tags;
       const normalizedTags = normalizeTagsInput(tagsSource);
 
-      const { tags: _ignoredTags, classification: _ignoredClassification, ...rest } = body;
+      const hasExplicitUnit = Object.prototype.hasOwnProperty.call(body, 'unit');
+      const rawUnitValue = hasExplicitUnit ? body['unit'] : undefined;
+      const classificationUnit = classification ? normalizeUnitInput(classification['unit']) : undefined;
+      const normalizedUnitFromBody = hasExplicitUnit ? normalizeUnitInput(rawUnitValue) : undefined;
+      const nextUnit = hasExplicitUnit
+        ? normalizedUnitFromBody
+        : classificationUnit ?? existingDoc.unit;
+
+      const { tags: _ignoredTags, classification: _ignoredClassification, ...restWithUnit } = body;
+      const { unit: _ignoredUnit, ...rest } = restWithUnit as Record<string, unknown> & { unit?: unknown };
 
       const updatedDoc = await storage.updateDocument({
         ...existingDoc,
         ...rest,
+        unit: nextUnit ?? undefined,
         tags: normalizedTags,
       });
       res.json(updatedDoc);

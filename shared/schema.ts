@@ -27,6 +27,7 @@ export const documents = pgTable("documents", {
   url: text("url").notNull(),
   type: text("type").notNull().$type<"plasa" | "escala" | "cardapio">(),
   category: text("category").$type<"oficial" | "praca">(),
+  unit: text("unit").$type<"EAGM" | "1DN">(),
   active: boolean("active").notNull().default(true),
   tags: text("tags").array().default(sql`ARRAY[]::text[]`),
   uploadDate: timestamp("upload_date").defaultNow(),
@@ -73,6 +74,7 @@ export const insertDocumentSchema = createInsertSchema(documents)
   })
   .extend({
     tags: z.array(z.string()).optional(),
+    unit: z.enum(["EAGM", "1DN"]).optional(),
   });
 
 export const insertDutyOfficersSchema = createInsertSchema(dutyOfficers).omit({
@@ -92,12 +94,13 @@ export type Notice = typeof notices.$inferSelect;
 export type InsertNotice = z.infer<typeof insertNoticeSchema>;
 type DocumentSelect = typeof documents.$inferSelect;
 
-export type PDFDocument = Omit<DocumentSelect, "tags"> & {
+export type PDFDocument = Omit<DocumentSelect, "tags" | "unit"> & {
   tags?: string[]; // Tags geradas dinamicamente e persistidas
   unit?: "EAGM" | "1DN"; // Unidade para cardápios
 };
-export type InsertDocument = Omit<z.infer<typeof insertDocumentSchema>, "tags"> & {
+export type InsertDocument = Omit<z.infer<typeof insertDocumentSchema>, "tags" | "unit"> & {
   tags?: string[];
+  unit?: "EAGM" | "1DN";
 };
 export type DutyOfficers = typeof dutyOfficers.$inferSelect;
 export type InsertDutyOfficers = z.infer<typeof insertDutyOfficersSchema>;
