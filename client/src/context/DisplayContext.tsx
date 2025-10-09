@@ -213,7 +213,7 @@ export const DisplayProvider: React.FC<DisplayProviderProps> = ({ children }) =>
       return;
     }
 
-    const payload = {
+    const payload: Record<string, unknown> = {
       title: document.title,
       url: serverPath,
       type: document.type,
@@ -221,6 +221,10 @@ export const DisplayProvider: React.FC<DisplayProviderProps> = ({ children }) =>
       active: document.active,
       tags: normalizeDocumentTags(document),
     };
+
+    if (document.unit) {
+      payload.unit = document.unit;
+    }
 
     try {
       const response = await fetch(getBackendUrl('/api/documents'), {
@@ -873,6 +877,74 @@ useEffect(() => {
     return undefined;
   };
 
+  const normalizeUnitValue = (value: unknown): PDFDocument["unit"] | undefined => {
+    if (typeof value !== "string") {
+      return undefined;
+    }
+
+    const normalized = value.trim().toUpperCase();
+    if (!normalized) {
+      return undefined;
+    }
+
+    if (normalized === "EAGM") {
+      return "EAGM";
+    }
+
+    if (normalized === "1DN") {
+      return "1DN";
+    }
+
+    const compact = normalized.replace(/[^A-Z0-9]/g, "");
+    if (compact === "EAGM") {
+      return "EAGM";
+    }
+
+    if (compact === "1DN" || compact === "DN1") {
+      return "1DN";
+    }
+
+    return undefined;
+  };
+
+  const detectUnitFromText = (text?: string | null): PDFDocument["unit"] | undefined => {
+    if (!text) {
+      return undefined;
+    }
+
+    const normalized = text
+      .toUpperCase()
+      .normalize("NFD")
+      .replace(/[\u0300-\u036f]/g, "");
+
+    const compact = normalized.replace(/[^A-Z0-9]/g, "");
+
+    if (compact.includes("EAGM")) {
+      return "EAGM";
+    }
+
+    if (compact.includes("1DN") || compact.includes("DN1")) {
+      return "1DN";
+    }
+
+    return undefined;
+  };
+
+  const deriveUnitFromTags = (tags: unknown): PDFDocument["unit"] | undefined => {
+    if (!Array.isArray(tags)) {
+      return undefined;
+    }
+
+    for (const rawTag of tags) {
+      const tagUnit = normalizeUnitValue(rawTag);
+      if (tagUnit) {
+        return tagUnit;
+      }
+    }
+
+    return undefined;
+  };
+
   // Função para carregar documentos do servidor
   const loadDocumentsFromServer = async () => {
     const existingDocsMap = new Map<string, PDFDocument>();
@@ -935,15 +1007,36 @@ useEffect(() => {
         ? (docType as PDFDocument["type"])
         : 'escala';
 
+      const existingDoc = existingDocsMap.get(comparableUrl);
       const rawCategory = typeof serverDoc.category === 'string'
         ? serverDoc.category
         : safeType === 'escala'
           ? determineCategory(String(serverDoc.filename || serverDoc.title || ''))
           : undefined;
 
-      const unit = typeof serverDoc.unit === 'string'
-        ? (serverDoc.unit as PDFDocument['unit'])
-        : undefined;
+      let unit: PDFDocument["unit"] | undefined;
+      if (safeType === 'cardapio') {
+        const classificationUnit = serverDoc.classification && typeof serverDoc.classification === 'object'
+          ? normalizeUnitValue((serverDoc.classification as Record<string, unknown>)['unit'])
+          : undefined;
+
+        const tagsUnit = deriveUnitFromTags(serverDoc.tags)
+          ?? (serverDoc.classification && typeof serverDoc.classification === 'object'
+            ? deriveUnitFromTags((serverDoc.classification as Record<string, unknown>)['tags'])
+            : undefined);
+
+        const textUnit = detectUnitFromText(typeof serverDoc.title === 'string' ? serverDoc.title : undefined)
+          ?? detectUnitFromText(typeof serverDoc.filename === 'string' ? serverDoc.filename : undefined)
+          ?? detectUnitFromText(typeof serverDoc.originalname === 'string' ? serverDoc.originalname : undefined)
+          ?? detectUnitFromText(rawUrl)
+          ?? detectUnitFromText(comparableUrl);
+
+        unit = normalizeUnitValue(serverDoc.unit)
+          ?? classificationUnit
+          ?? tagsUnit
+          ?? textUnit
+          ?? (existingDoc?.unit);
+      }
 
       const docTags = normalizeDocumentTags({
         tags: Array.isArray(serverDoc.tags)
@@ -969,7 +1062,6 @@ useEffect(() => {
         ? serverDoc.title
         : generatedTitle;
 
-      const existingDoc = existingDocsMap.get(comparableUrl);
       const activeState = typeof serverDoc.active === 'boolean'
         ? serverDoc.active
         : existingDoc?.active ?? true;
