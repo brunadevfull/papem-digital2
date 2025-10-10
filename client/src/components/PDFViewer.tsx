@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef, useCallback } from "react";
 import { useDisplay } from "@/context/DisplayContext";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { resolveBackendUrl } from "@/utils/backend";
 
 const IS_DEV_MODE = process.env.NODE_ENV === 'development';
 const PDF_SCALE = 2.0;
@@ -159,42 +160,7 @@ const PDFViewer: React.FC<PDFViewerProps> = ({
   const devicePixelRatio = getDevicePixelRatio();
 
   // Função para obter a URL completa do servidor backend - DETECTAR AMBIENTE
-  const getBackendUrl = (path: string): string => {
-    if (path.startsWith('http') || path.startsWith('blob:') || path.startsWith('data:')) {
-      return path;
-    }
-  
-  // 🚨 CORREÇÃO: Usar IP real do servidor para acesso em rede
-  const currentHost = window.location.hostname;
-  const currentPort = window.location.port;
-  
-  // Detectar se estamos no Replit PRIMEIRO
-  const isReplit = currentHost.includes('replit.dev') || currentHost.includes('replit.co');
-  
-  if (isReplit) {
-    const currentOrigin = window.location.origin;
-    if (path.startsWith('/')) {
-      return `${currentOrigin}${path}`;
-    }
-    return `${currentOrigin}/${path}`;
-  }
-  
-  // Se estamos acessando via IP da rede, usar o mesmo IP para backend
-  if (currentHost !== 'localhost' && currentHost !== '127.0.0.1') {
-    console.log(`🌐 PDFViewer: Detectado acesso via rede: ${currentHost}`);
-    
-    if (path.startsWith('/')) {
-      return `http://${currentHost}:5000${path}`;
-    }
-    return `http://${currentHost}:5000/${path}`;
-  }
-  
-  // Desenvolvimento local
-  if (path.startsWith('/')) {
-    return `http://localhost:5000${path}`;
-  }
-  return `http://localhost:5000/${path}`;
-};
+  const getBackendUrl = (path: string): string => resolveBackendUrl(path);
 
   // CORREÇÃO: Função para determinar a URL do documento com alternância
  const getDocumentUrl = () => {

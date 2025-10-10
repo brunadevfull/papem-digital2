@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { Users, AlertCircle, RefreshCw, Clock } from 'lucide-react';
 import { MilitaryInsignia } from './MilitaryInsignia';
 import { OFFICERS_LIST, MASTERS_LIST } from '../../../shared/officersData';
+import { resolveBackendUrl } from '@/utils/backend';
 
 interface DutyOfficers {
   id: number;
@@ -130,35 +131,12 @@ export const DutyOfficersDisplay = () => {
     };
   };
 
-  // Detectar se estamos no Replit ou local
-  const getBackendUrl = (): string => {
-    const currentHost = window.location.hostname;
-    const currentOrigin = window.location.origin;
-
-    // Detectar Replit primeiro (mais específico)
-    const isReplit = currentHost.includes('replit.dev') || currentHost.includes('replit.co');
-    if (isReplit) {
-      console.log(`🌐 DutyOfficers: Detectado Replit, usando mesmo origin: ${currentOrigin}`);
-      return `${currentOrigin}/api/duty-officers`;
-    }
-
-    // Ambiente local
-    if (currentHost === 'localhost' || currentHost === '127.0.0.1') {
-      console.log(`🌐 DutyOfficers: Ambiente local, usando porta 5000`);
-      return `http://localhost:5000/api/duty-officers`;
-    }
-
-    // Fallback para outros ambientes (usar mesmo origin)
-    console.log(`🌐 DutyOfficers: Outro ambiente, usando mesmo origin: ${currentOrigin}`);
-    return `${currentOrigin}/api/duty-officers`;
-  };
-
   const loadOfficers = async () => {
     setLoading(true);
     setError(null);
-    
+
     try {
-      const url = getBackendUrl();
+      const url = resolveBackendUrl('/api/duty-officers');
       console.log('👮 Carregando oficiais de serviço...', url);
       
       const response = await fetch(url);

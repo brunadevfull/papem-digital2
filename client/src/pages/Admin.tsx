@@ -34,6 +34,7 @@ import {
 import { Label } from "@/components/ui/label";
 import { useDisplay, PDFDocument } from "@/context/DisplayContext";
 import { useToast } from "@/hooks/use-toast";
+import { resolveBackendUrl } from "@/utils/backend";
 import { 
   Sheet, 
   SheetContent, 
@@ -580,41 +581,7 @@ const saveEditOfficer = async () => {
   });
   
   // Função para obter URL completa do backend - DETECTAR AMBIENTE
- const getBackendUrl = (path: string): string => {
-  if (path.startsWith('http') || path.startsWith('blob:') || path.startsWith('data:')) {
-    return path;
-  }
-  
-  const currentHost = window.location.hostname;
-  const currentOrigin = window.location.origin;
-  
-  // Detectar se estamos no Replit (prioridade máxima)
-  const isReplit = currentHost.includes('replit.dev') || currentHost.includes('replit.co');
-  
-  if (isReplit) {
-    console.log(`🌐 Admin: Detectado Replit, usando mesmo origin: ${currentOrigin}`);
-    if (path.startsWith('/')) {
-      return `${currentOrigin}${path}`;
-    }
-    return `${currentOrigin}/${path}`;
-  }
-  
-  // Ambiente local (desenvolvimento)
-  if (currentHost === 'localhost' || currentHost === '127.0.0.1') {
-    console.log(`🌐 Admin: Ambiente local, usando porta 5000`);
-    if (path.startsWith('/')) {
-      return `http://localhost:5000${path}`;
-    }
-    return `http://localhost:5000/${path}`;
-  }
-  
-  // Para qualquer outro ambiente, usar o mesmo origin (sem especificar porta)
-  console.log(`🌐 Admin: Outro ambiente (${currentHost}), usando mesmo origin`);
-  if (path.startsWith('/')) {
-    return `${currentOrigin}${path}`;
-  }
-  return `${currentOrigin}/${path}`;
-};
+ const getBackendUrl = (path: string): string => resolveBackendUrl(path);
   
   // Função para verificar status do servidor
   const checkServerStatus = async () => {
