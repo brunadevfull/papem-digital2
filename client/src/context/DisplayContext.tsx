@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useState, ReactNode, useEffect, useRef } from "react";
+import { resolveBackendUrl } from "@/utils/backend";
 
 export interface Notice {
   id: string;
@@ -97,46 +98,7 @@ export const DisplayProvider: React.FC<DisplayProviderProps> = ({ children }) =>
   };
 
   // CORREÇÃO: Função para obter URL completa do backend - DETECTAR AMBIENTE
-  const getBackendUrl = (path: string): string => {
-    if (path.startsWith('http') || path.startsWith('blob:') || path.startsWith('data:')) {
-      return path;
-    }
-
-    // 🚨 CORREÇÃO: Usar IP real do servidor para acesso em rede
-    const currentHost = window.location.hostname;
-    const currentPort = window.location.port;
-
-    // Detectar se estamos no Replit - frontend e backend na mesma porta
-    const isReplit = currentHost.includes('replit.dev') || currentHost.includes('replit.co');
-
-    if (isReplit) {
-      const currentOrigin = window.location.origin;
-
-
-      if (path.startsWith('/')) {
-        return `${currentOrigin}${path}`;
-      }
-      return `${currentOrigin}/${path}`;
-    }
-
-    // Se estamos acessando via IP da rede (não Replit), usar porta 5000
-    if (currentHost !== 'localhost' && currentHost !== '127.0.0.1') {
-
-
-      if (path.startsWith('/')) {
-        return `http://${currentHost}:5000${path}`;
-      }
-      return `http://${currentHost}:5000/${path}`;
-    }
-
-    // Desenvolvimento local - usar porta 5000
-
-
-    if (path.startsWith('/')) {
-      return `http://localhost:5000${path}`;
-    }
-    return `http://localhost:5000/${path}`;
-  };
+  const getBackendUrl = (path: string): string => resolveBackendUrl(path);
 
   // Função utilitária para tratar tags dos documentos
   const normalizeDocumentTags = (input: {

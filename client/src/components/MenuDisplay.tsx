@@ -1,6 +1,7 @@
-import React, { useState, useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { useDisplay } from "@/context/DisplayContext";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { resolveBackendUrl } from "@/utils/backend";
 
 const MenuDisplay: React.FC = () => {
   const { escalaDocuments } = useDisplay();
@@ -66,36 +67,7 @@ const MenuDisplay: React.FC = () => {
     }
   }, [activeMenus.length, currentMenuIndex]);
 
-  // Função para obter URL completa do backend
-  const getBackendUrl = (path: string): string => {
-    if (path.startsWith('http') || path.startsWith('blob:') || path.startsWith('data:')) {
-      return path;
-    }
-    
-    const currentHost = window.location.hostname;
-    
-    if (currentHost !== 'localhost' && currentHost !== '127.0.0.1') {
-      if (path.startsWith('/')) {
-        return `http://${currentHost}:5000${path}`;
-      }
-      return `http://${currentHost}:5000/${path}`;
-    }
-    
-    const isReplit = currentHost.includes('replit.dev') || currentHost.includes('replit.co');
-    
-    if (isReplit) {
-      const currentOrigin = window.location.origin;
-      if (path.startsWith('/')) {
-        return `${currentOrigin}${path}`;
-      }
-      return `${currentOrigin}/${path}`;
-    } else {
-      if (path.startsWith('/')) {
-        return `http://localhost:5000${path}`;
-      }
-      return `http://localhost:5000/${path}`;
-    }
-  };
+  const getBackendUrl = (path: string): string => resolveBackendUrl(path);
 
   if (activeMenus.length === 0) {
     return (
