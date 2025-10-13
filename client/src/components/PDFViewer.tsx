@@ -141,6 +141,8 @@ const PDFViewer: React.FC<PDFViewerProps> = ({
   const [loadingProgress, setLoadingProgress] = useState(0);
   const [debugInfo, setDebugInfo] = useState<DebugInfo>({});
   const [escalaImageUrl, setEscalaImageUrl] = useState<string | null>(null);
+  const [cardapioImageUrl, setCardapioImageUrl] = useState<string | null>(null);
+  const [escalaError, setEscalaError] = useState<string | null>(null);
 
   const scrollerRef = useRef<ContinuousAutoScroller | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -737,13 +739,14 @@ const getCurrentCardapioDoc = () => {
       setEscalaImageUrl(null);
       setLoading(false);
       setTotalPages(1);
-      
+      setEscalaError(null);
+
       if (currentEscala?.url) {
         const docUrl = getBackendUrl(currentEscala.url);
         console.log("🖼️ ESCALA: Processando URL:", docUrl);
-        
+
         const isPDF = docUrl.toLowerCase().includes('.pdf') || currentEscala.title.toLowerCase().includes('.pdf');
-        
+
         if (isPDF) {
           console.log("📄 ESCALA: É um PDF, convertendo para imagem...");
           convertEscalaPDFToImage(docUrl);
@@ -761,33 +764,32 @@ const getCurrentCardapioDoc = () => {
 useEffect(() => {
   if (documentType === "cardapio") {
     const currentCardapio = getCurrentCardapioDoc();
-    
+
     console.log("🔄 CARDÁPIO Effect triggered:", {
       currentCardapio: currentCardapio?.title,
       url: currentCardapio?.url,
       id: currentCardapio?.id 
     });
-    
-    // Resetar estados
-    setEscalaImageUrl(null); // Pode reutilizar ou criar setCardapioImageUrl
+
+    setCardapioImageUrl(null);
     setLoading(false);
     setTotalPages(1);
-    
+
     if (currentCardapio?.url) {
       const docUrl = getBackendUrl(currentCardapio.url);
       console.log("🖼️ CARDÁPIO: Processando URL:", docUrl);
-      
-      const isPDF = docUrl.toLowerCase().includes('.pdf') || currentCardapio.title.toLowerCase().includes('.pdf');
-      
+
+      const isPDF = docUrl.toLowerCase().includes('.pdf') || 
+                    currentCardapio.title.toLowerCase().includes('.pdf');
+
       if (isPDF) {
-        console.log("📄 CARDÁPIO: É um PDF, convertendo para imagem...");
-        convertEscalaPDFToImage(docUrl); // Pode reutilizar a função ou criar uma nova
+        console.log("📄 CARDÁPIO: É um PDF, convertendo...");
+        convertEscalaPDFToImage(docUrl, { target: "cardapio" });
       } else {
-        console.log("🖼️ CARDÁPIO: É uma imagem, usando diretamente");
+        console.log("🖼️ CARDÁPIO: É uma imagem");
+        setCardapioImageUrl(docUrl);
         setLoading(false);
       }
-    } else {
-      setLoading(false);
     }
   }
 }, [documentType, activeCardapioDoc]);
@@ -803,65 +805,73 @@ useEffect(() => {
   };
   
   // NOVA FUNÇÃO: Converter PDF da escala para imagem
-  const convertEscalaPDFToImage = async (pdfUrl: string) => {
-    try {
-      // ✅ NOVO: Obter documentId para o cache
-      const currentEscala = getCurrentEscalaDoc();
-      if (!currentEscala) {
+  const convertEscalaPDFToImage = async (pdfUrl: string, options?: { target?: "escala" | "cardapio" }) => {
+    const target = options?.target ?? "escala";
+    const setImageUrl = target === "cardapio" ? setCardapioImageUrl : setEscalaImageUrl;
 
+    try {
+      if (target === "escala") {
+        setEscalaError(null);
+      }
+
+      const currentDoc = target === "cardapio" ? getCurrentCardapioDoc() : getCurrentEscalaDoc();
+      if (!currentDoc) {
+        console.log(`⚠️ ${target.toUpperCase()}: Nenhum documento encontrado`);
         setLoading(false);
+        if (target === "escala") {
+          setEscalaError("Nenhuma escala ativa");
+        }
         return;
       }
-      
-      const documentId = currentEscala.id;
-      
+
+      const documentId = currentDoc.id;
+      console.log(`🔄 ${target.toUpperCase()}: Iniciando conversão para ID: ${documentId}`);
 
       setLoading(true);
       setLoadingProgress(0);
-  
-      // ✅ NOVO: VERIFICAR CACHE PRIMEIRO
 
-      
-      try {
-        const cacheResponse = await fetch(getBackendUrl(`/api/check-escala-cache/${documentId}`));
-        const cacheResult = await cacheResponse.json();
-        
-        if (cacheResult.success && cacheResult.exists) {
+      if (target === "escala") {
+        try {
+          const cacheResponse = await fetch(getBackendUrl(`/api/check-escala-cache/${documentId}`));
+          const cacheResult = await cacheResponse.json();
 
-          const cachedUrl = getBackendUrl(cacheResult.url);
-          setEscalaImageUrl(cachedUrl);
-          setLoading(false);
-          return; // ✅ SAIR AQUI - USA CACHE
+          if (cacheResult.success && cacheResult.exists) {
+            console.log(`💾 ESCALA: Cache encontrado: ${cacheResult.url}`);
+            const cachedUrl = getBackendUrl(cacheResult.url);
+            setImageUrl(cachedUrl);
+            setLoading(false);
+            return;
+          }
+        } catch (cacheError) {
+          console.warn("⚠️ ESCALA: Erro ao verificar cache:", cacheError);
         }
-      } catch (cacheError) {
-
       }
-      
 
-  
-      // Verificar se não é imagem primeiro
       if (await checkIfImageFile(pdfUrl)) {
-
+        console.log(`🖼️ ${target.toUpperCase()}: Arquivo é imagem, usando diretamente`);
+        setImageUrl(pdfUrl);
         setLoading(false);
         return;
       }
-  
+
+      console.log(`📄 ${target.toUpperCase()}: Carregando PDF.js...`);
       const pdfjsLib = await loadPDFJS();
+
+      console.log(`📥 ${target.toUpperCase()}: Obtendo dados do PDF...`);
       const pdfData = await getPDFData(pdfUrl);
-      
+
       const uint8Array = new Uint8Array(pdfData);
       const header = new TextDecoder().decode(uint8Array.slice(0, 8));
-      
+
       if (!header.startsWith('%PDF')) {
-
-        setEscalaImageUrl(pdfUrl);
+        console.log(`⚠️ ${target.toUpperCase()}: Não é um PDF válido, tentando como imagem`);
+        setImageUrl(pdfUrl);
         setLoading(false);
-
         return;
       }
-      
 
-      
+      console.log(`✅ ${target.toUpperCase()}: PDF válido detectado`);
+
       const loadingTask = pdfjsLib.getDocument({
         data: pdfData,
         verbosity: 0,
@@ -875,109 +885,110 @@ useEffect(() => {
         useSystemFonts: false,
         standardFontDataUrl: null
       });
-      
-      const pdf = await loadingTask.promise;
 
-      
+      const pdf = await loadingTask.promise;
+      console.log(`📄 ${target.toUpperCase()}: PDF carregado - ${pdf.numPages} página(s)`);
+
       const page = await pdf.getPage(1);
-      
+
       const originalViewport = page.getViewport({ scale: 1.0 });
       const maxDimension = Math.max(originalViewport.width, originalViewport.height) || 1;
       const limitScale = MAX_RENDER_DIMENSION / maxDimension;
       const baseScale = PDF_SCALE * devicePixelRatio;
       const appliedScale = limitScale > 0 ? Math.min(baseScale, limitScale) : baseScale;
       const viewport = page.getViewport({ scale: appliedScale });
-  
 
-  
+      console.log(`📐 ${target.toUpperCase()}: Dimensões - ${viewport.width}x${viewport.height} (escala: ${appliedScale})`);
+
       const canvas = document.createElement('canvas');
-      const context = canvas.getContext('2d', { 
+      const context = canvas.getContext('2d', {
         alpha: false,
         willReadFrequently: false
-      })!;
-      
+      });
+
+      if (!context) {
+        throw new Error('Falha ao criar contexto do canvas');
+      }
+
       canvas.height = Math.floor(viewport.height);
       canvas.width = Math.floor(viewport.width);
-      
+
       context.fillStyle = '#FFFFFF';
       context.fillRect(0, 0, canvas.width, canvas.height);
-  
+
       const renderContext = {
         canvasContext: context,
         viewport: viewport,
         background: '#FFFFFF',
         intent: 'display'
       };
-  
 
-      
+      console.log(`🎨 ${target.toUpperCase()}: Renderizando página...`);
+
       const renderPromise = page.render(renderContext).promise;
-      const timeoutPromise = new Promise((_, reject) => 
+      const timeoutPromise = new Promise((_, reject) =>
         setTimeout(() => reject(new Error('Timeout na renderização')), 60000)
       );
-      
+
       await Promise.race([renderPromise, timeoutPromise]);
-      
 
-      
-      // ✅ NOVO: SALVAR NO CACHE APÓS CONVERSÃO
-      try {
+      console.log(`✅ ${target.toUpperCase()}: Página renderizada com sucesso`);
 
-        
-        // CORREÇÃO: Tipagem correta para o Blob
-        const imageBlob = await new Promise<Blob | null>((resolve) => {
-          canvas.toBlob((blob) => {
-            resolve(blob);
-          }, IMAGE_EXPORT_FORMAT);
-        });
-        
-        if (!imageBlob) {
-          throw new Error('Falha ao converter canvas para blob');
+      if (target === "escala") {
+        try {
+          const imageDataUrl = canvas.toDataURL(IMAGE_EXPORT_FORMAT);
+
+          const saveResponse = await fetch(getBackendUrl('/api/save-escala-cache'), {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              escalId: documentId,
+              imageData: imageDataUrl
+            })
+          });
+
+          if (saveResponse.ok) {
+            const saveResult = await saveResponse.json();
+            console.log(`✅ ESCALA: Salvo no servidor: ${saveResult.url}`);
+
+            const cachedUrl = getBackendUrl(saveResult.url);
+            setImageUrl(cachedUrl);
+          } else {
+            throw new Error(`Servidor retornou ${saveResponse.status}`);
+          }
+        } catch (saveError) {
+          console.warn(`⚠️ ESCALA: Falha ao salvar cache, usando dataURL:`, saveError);
+          const imageDataUrl = canvas.toDataURL(IMAGE_EXPORT_FORMAT);
+          setImageUrl(imageDataUrl);
         }
-        
+      } else {
         const imageDataUrl = canvas.toDataURL(IMAGE_EXPORT_FORMAT);
-        
-        const saveResponse = await fetch(getBackendUrl('/api/save-escala-cache'), {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            escalId: documentId,
-            imageData: imageDataUrl
-          })
-        });
-        
-        if (saveResponse.ok) {
-          const saveResult = await saveResponse.json();
-
-          
-          // ✅ Usar URL do servidor ao invés de dataURL
-          const cachedUrl = getBackendUrl(saveResult.url);
-          setEscalaImageUrl(cachedUrl);
-        } else {
-          throw new Error('Falha ao salvar no servidor');
-        }
-      } catch (saveError) {
-        console.log(`⚠️ ESCALA: Falha ao salvar cache, usando dataURL:`, saveError);
-        // ✅ Fallback: usar dataURL se não conseguir salvar no servidor
-        const imageDataUrl = canvas.toDataURL(IMAGE_EXPORT_FORMAT);
-        setEscalaImageUrl(imageDataUrl);
+        setImageUrl(imageDataUrl);
       }
-      
+
       page.cleanup();
       pdf.destroy();
-      
+
       setLoading(false);
-      console.log(`🎉 ESCALA: Conversão concluída!`);
-      
+      console.log(`🎉 ${target.toUpperCase()}: Conversão concluída com sucesso!`);
+
     } catch (error) {
-      console.error('❌ ESCALA: Erro na conversão:', error);
-       const currentEscala = getCurrentEscalaDoc();
-  if (currentEscala?.url) {
-    console.log('⚠️ Usando PDF direto como fallback');
-    setEscalaImageUrl(null); // Isso faz renderContent usar docUrl direto
-     }
+      console.error(`❌ ${target.toUpperCase()}: Erro crítico na conversão:`, error);
+
+      const errorMsg = error instanceof Error ? error.message : String(error);
+      if (target === "escala") {
+        setEscalaError(errorMsg);
+      }
+
+      const currentDoc = target === "cardapio" ? getCurrentCardapioDoc() : getCurrentEscalaDoc();
+      if (currentDoc?.url) {
+        console.log(`⚠️ ${target.toUpperCase()}: Tentando usar arquivo original como fallback`);
+        const directUrl = getBackendUrl(currentDoc.url);
+        setImageUrl(directUrl);
+      }
+
       setLoading(false);
     }
   };
@@ -1037,36 +1048,74 @@ useEffect(() => {
     } else if (documentType === "escala") {
       const docUrl = getDocumentUrl();
       const currentEscala = getCurrentEscalaDoc();
-      
+
       console.log("🖼️ ESCALA: Renderizando", {
         docUrl,
-        escalaImageUrl: escalaImageUrl,
+        escalaImageUrl,
+        escalaError,
         loading,
         currentEscala: currentEscala?.title
       });
-      
+
+      if (escalaError && !loading) {
+        return (
+          <div className="w-full h-full flex items-center justify-center p-4">
+            <div className="text-center max-w-md">
+              <div className="text-6xl mb-4">⚠️</div>
+              <div className="text-red-600 font-bold text-lg mb-2">Erro ao carregar escala</div>
+              <div className="text-gray-600 text-sm mb-4">{escalaError}</div>
+
+              {docUrl && (
+                <div className="space-y-2">
+                  <button
+                    onClick={() => {
+                      setEscalaError(null);
+                      setEscalaImageUrl(null);
+                      convertEscalaPDFToImage(docUrl);
+                    }}
+                    className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 text-sm"
+                  >
+                    🔄 Tentar Novamente
+                  </button>
+
+                  <div className="text-xs text-gray-500 mt-2">
+                    Ou tente fazer upload de uma imagem (JPG/PNG) ao invés de PDF
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+        );
+      }
+
       return (
         <div className="w-full h-full flex items-center justify-center p-4">
-          {escalaImageUrl && escalaImageUrl !== 'convertida' && escalaImageUrl !== 'nenhuma' ? (
+          {escalaImageUrl ? (
             <img
               src={escalaImageUrl}
-              alt="Escala de Serviço Convertida"
+              alt="Escala de Serviço"
               className="max-w-full max-h-full object-contain shadow-lg"
+              onError={(e) => {
+                console.error("❌ ESCALA: Erro ao carregar imagem:", escalaImageUrl);
+                setEscalaError("Falha ao exibir a imagem da escala");
+                (e.target as HTMLImageElement).style.display = 'none';
+              }}
               onLoad={() => {
-                console.log(`✅ Escala convertida carregada com sucesso`);
+                console.log(`✅ ESCALA: Imagem carregada com sucesso`);
               }}
             />
           ) : docUrl ? (
             <img
               src={docUrl}
-              alt="Escala de Serviço"
+              alt="Escala de Serviço (Original)"
               className="max-w-full max-h-full object-contain shadow-lg"
               onError={(e) => {
-                console.error("❌ Erro ao carregar escala:", docUrl);
-                (e.target as HTMLImageElement).src = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAwIiBoZWlnaHQ9IjMwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iNDAwIiBoZWlnaHQ9IjMwMCIgZmlsbD0iI2Y4ZjhmOCIvPjx0ZXh0IHg9IjIwMCIgeT0iMTUwIiBmb250LWZhbWlseT0iQXJpYWwiIGZvbnQtc2l6ZT0iMTgiIGZpbGw9IiM5OTkiIHRleHQtYW5jaG9yPSJtaWRkbGUiPkVycm8gYW8gY2FycmVnYXIgZXNjYWxhPC90ZXh0Pjwvc3ZnPg==';
+                console.error("❌ ESCALA: Erro ao carregar arquivo original:", docUrl);
+                setEscalaError("Falha ao carregar o arquivo da escala");
+                (e.target as HTMLImageElement).style.display = 'none';
               }}
               onLoad={() => {
-                console.log(`✅ Escala carregada com sucesso: ${docUrl}`);
+                console.log(`✅ ESCALA: Arquivo original carregado`);
               }}
             />
           ) : (
@@ -1079,42 +1128,54 @@ useEffect(() => {
         </div>
       );
     } else if (documentType === "cardapio") {
-  const docUrl = getDocumentUrl();
-  const currentCardapio = getCurrentCardapioDoc();
-  
-  return (
-    <div className="w-full h-full flex items-center justify-center p-4">
-      {escalaImageUrl && escalaImageUrl !== 'convertida' && escalaImageUrl !== 'nenhuma' ? (
-        <img
-          src={escalaImageUrl}
-          alt="Cardápio Semanal Convertido"
-          className="max-w-full max-h-full object-contain shadow-lg"
-          onLoad={() => {
-            console.log(`✅ Cardápio convertido carregado com sucesso`);
-          }}
-        />
-      ) : docUrl ? (
-        <img
-          src={docUrl}
-          alt="Cardápio Semanal"
-          className="max-w-full max-h-full object-contain shadow-lg"
-          onError={(e) => {
-            console.error("❌ Erro ao carregar cardápio:", docUrl);
-            (e.target as HTMLImageElement).src = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAwIiBoZWlnaHQ9IjMwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iNDAwIiBoZWlnaHQ9IjMwMCIgZmlsbD0iI2Y4ZjhmOCIvPjx0ZXh0IHg9IjIwMCIgeT0iMTUwIiBmb250LWZhbWlseT0iQXJpYWwiIGZvbnQtc2l6ZT0iMTgiIGZpbGw9IiM5OTkiIHRleHQtYW5jaG9yPSJtaWRkbGUiPkVycm8gYW8gY2FycmVnYXIgY2FyZMOhcGlvPC90ZXh0Pjwvc3ZnPg==';
-          }}
-          onLoad={() => {
-            console.log(`✅ Cardápio carregado com sucesso: ${docUrl}`);
-          }}
-        />
-      ) : (
-        <div className="text-center text-gray-500">
-          <div className="text-4xl mb-4">🍽️</div>
-          <div>Nenhum cardápio ativo</div>
-          <div className="text-sm mt-2">Adicione um cardápio no painel administrativo</div>
+      const docUrl = getDocumentUrl();
+      const currentCardapio = getCurrentCardapioDoc();
+
+      console.log("🖼️ CARDÁPIO: Renderizando", {
+        docUrl,
+        cardapioImageUrl,
+        loading,
+        currentCardapio: currentCardapio?.title
+      });
+
+      return (
+        <div className="w-full h-full flex items-center justify-center p-4">
+          {cardapioImageUrl ? (
+            <img
+              src={cardapioImageUrl}
+              alt="Cardápio Semanal"
+              className="max-w-full max-h-full object-contain shadow-lg"
+              onError={(e) => {
+                console.error("❌ CARDÁPIO: Erro ao carregar imagem:", cardapioImageUrl);
+                (e.target as HTMLImageElement).style.display = 'none';
+              }}
+              onLoad={() => {
+                console.log(`✅ CARDÁPIO: Imagem carregada com sucesso`);
+              }}
+            />
+          ) : docUrl ? (
+            <img
+              src={docUrl}
+              alt="Cardápio Semanal (Original)"
+              className="max-w-full max-h-full object-contain shadow-lg"
+              onError={(e) => {
+                console.error("❌ CARDÁPIO: Erro ao carregar arquivo original:", docUrl);
+                (e.target as HTMLImageElement).style.display = 'none';
+              }}
+              onLoad={() => {
+                console.log(`✅ CARDÁPIO: Arquivo original carregado`);
+              }}
+            />
+          ) : (
+            <div className="text-center text-gray-500">
+              <div className="text-4xl mb-4">🍽️</div>
+              <div>Nenhum cardápio ativo</div>
+              <div className="text-sm mt-2">Adicione um cardápio no painel administrativo</div>
+            </div>
+          )}
         </div>
-      )}
-    </div>
-  );}
+      );
+    }
     
 
     return (
