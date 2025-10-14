@@ -51,6 +51,8 @@ CREATE TABLE IF NOT EXISTS documents (
   filename TEXT NOT NULL,
   file_path TEXT NOT NULL,
   type TEXT,
+  unit TEXT CHECK (unit IN ('EAGM', '1DN')),
+  tags TEXT[] NOT NULL DEFAULT ARRAY[]::text[],
   upload_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   active BOOLEAN DEFAULT true,
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,

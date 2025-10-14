@@ -67,6 +67,11 @@ npm install
 npm run dev
 ```
 
+### Banco de Dados
+
+- Execute as migrações em `migrations/` (ou reaplique o `setup-database.sql` atualizado) **antes** de iniciar o servidor.
+- Certifique-se de que a tabela `documents` possua as colunas `tags text[] NOT NULL DEFAULT ARRAY[]::text[]` e `unit text CHECK (unit IN ('EAGM', '1DN'))` para que o `storage.createDocument` consiga inserir registros sem erros.
+
 ### Instalação Offline (Oracle Linux)
 ```bash
 # 1. Preparar pacote (máquina com internet)

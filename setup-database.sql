@@ -36,6 +36,8 @@ CREATE TABLE IF NOT EXISTS documents (
     url TEXT NOT NULL,
     type TEXT NOT NULL CHECK (type IN ('plasa', 'bono', 'escala', 'cardapio')),
     category TEXT CHECK (category IN ('oficial', 'praca')),
+    unit TEXT CHECK (unit IN ('EAGM', '1DN')),
+    tags TEXT[] NOT NULL DEFAULT ARRAY[]::text[],
     active BOOLEAN NOT NULL DEFAULT true,
     upload_date TIMESTAMP DEFAULT NOW()
 );
