@@ -834,8 +834,12 @@ useEffect(() => {
   // Função auxiliar para determinar categoria
   const determineCategory = (filename: string): "oficial" | "praca" | undefined => {
     const lowerFilename = filename.toLowerCase();
-    if (lowerFilename.includes('oficial')) return 'oficial';
-    if (lowerFilename.includes('praca')) return 'praca';
+    const normalizedFilename = lowerFilename
+      .normalize("NFD")
+      .replace(/[\u0300-\u036f]/g, "");
+
+    if (normalizedFilename.includes('oficial')) return 'oficial';
+    if (normalizedFilename.includes('praca')) return 'praca';
     return undefined;
   };
 
@@ -970,11 +974,15 @@ useEffect(() => {
         : 'escala';
 
       const existingDoc = existingDocsMap.get(comparableUrl);
-      const rawCategory = typeof serverDoc.category === 'string'
-        ? serverDoc.category
-        : safeType === 'escala'
+      const normalizedCategory = typeof serverDoc.category === 'string'
+        ? determineCategory(serverDoc.category)
+        : undefined;
+
+      const rawCategory = normalizedCategory
+        ?? (safeType === 'escala'
           ? determineCategory(String(serverDoc.filename || serverDoc.title || ''))
-          : undefined;
+          : undefined)
+        ?? (existingDoc?.category as PDFDocument['category'] | undefined);
 
       let unit: PDFDocument["unit"] | undefined;
       if (safeType === 'cardapio') {
