@@ -112,7 +112,7 @@ app.use((req, res, next) => {
     serveStatic(app);
   }
 
-  const port = 5000;
+  const port = 5001;
   const networkIPs = getNetworkIPs();
   
   // ESCUTAR EM TODAS AS INTERFACES POSSÍVEIS

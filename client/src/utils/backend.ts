@@ -1,7 +1,7 @@
 const ABSOLUTE_WITH_SCHEME = /^https?:\/\//i;
 const SPECIAL_PROTOCOL = /^(?:blob|data):/i;
 
-const DEFAULT_BACKEND_PORT = (import.meta.env.VITE_BACKEND_PORT ?? '5000').trim();
+const DEFAULT_BACKEND_PORT = (import.meta.env.VITE_BACKEND_PORT ?? '5001').trim();
 const EXPLICIT_BACKEND_BASE = import.meta.env.VITE_BACKEND_URL?.trim();
 const DEFAULT_BACKEND_SCHEME = 'http:';
 
