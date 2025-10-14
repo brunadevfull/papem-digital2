@@ -951,10 +951,16 @@ useEffect(() => {
 
           if (saveResponse.ok) {
             const saveResult = await saveResponse.json();
-            console.log(`✅ ESCALA: Salvo no servidor: ${saveResult.url}`);
+            const cachedPath = saveResult?.data?.url ?? saveResult?.url;
 
-            const cachedUrl = getBackendUrl(saveResult.url);
-            setImageUrl(cachedUrl);
+            if (cachedPath) {
+              const resolvedCachedUrl = getBackendUrl(cachedPath);
+              console.log(`✅ ESCALA: Salvo no servidor. Caminho resolvido: ${resolvedCachedUrl}`);
+              setImageUrl(resolvedCachedUrl);
+            } else {
+              console.warn('⚠️ ESCALA: Resposta do servidor sem URL, usando dataURL.');
+              setImageUrl(imageDataUrl);
+            }
           } else {
             throw new Error(`Servidor retornou ${saveResponse.status}`);
           }
