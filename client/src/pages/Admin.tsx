@@ -1339,50 +1339,44 @@ if (selectedDocType === "cardapio" && !docUnit) {
         </CardTitle>
       </CardHeader>
       <CardContent>
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 place-items-center">
           {/* Status de Conexão */}
-          <div className={`p-3 rounded-lg border ${
-            serverStatus.connected 
-              ? 'bg-green-50 border-green-200 text-green-800' 
+          <div className={`p-3 rounded-lg border flex flex-col items-center text-center gap-2 ${
+            serverStatus.connected
+              ? 'bg-green-50 border-green-200 text-green-800'
               : 'bg-red-50 border-red-200 text-red-800'
           }`}>
-            <div className="flex items-center gap-2">
-              <div className={`w-3 h-3 rounded-full ${
-                serverStatus.connected ? 'bg-green-500' : 'bg-red-500'
-              }`}></div>
-              <span className="font-medium">
-                {serverStatus.connected ? 'Conectado' : 'Desconectado'}
-              </span>
-            </div>
-            <div className="text-sm mt-1">
+            <div className={`w-3 h-3 rounded-full ${
+              serverStatus.connected ? 'bg-green-500' : 'bg-red-500'
+            }`}></div>
+            <span className="font-medium">
+              {serverStatus.connected ? 'Conectado' : 'Desconectado'}
+            </span>
+            <div className="text-sm">
               {serverStatus.lastResponse ? `HTTP ${serverStatus.lastResponse}` : 'Sem resposta'}
             </div>
           </div>
 
-     
+
 
           {/* Documentos */}
-          <div className="p-3 rounded-lg border bg-purple-50 border-purple-200 text-purple-800">
-            <div className="flex items-center gap-2">
-              <span className="text-lg">📁</span>
-              <span className="font-medium">Documentos</span>
-            </div>
-            <div className="text-sm mt-1">
+          <div className="p-3 rounded-lg border bg-purple-50 border-purple-200 text-purple-800 flex flex-col items-center text-center gap-2">
+            <span className="text-lg">📁</span>
+            <span className="font-medium">Documentos</span>
+            <div className="text-sm">
               {serverStatus.documents} carregados
             </div>
           </div>
 
           {/* Última Verificação */}
-          <div className="p-3 rounded-lg border bg-gray-50 border-gray-200 text-gray-800">
-            <div className="flex items-center gap-2">
-              <span className="text-lg">⏰</span>
-              <span className="font-medium">Última Check</span>
-            </div>
-            <div className="text-sm mt-1">
-              {serverStatus.lastCheck 
-                ? serverStatus.lastCheck.toLocaleTimeString('pt-BR', { 
-                    hour: '2-digit', 
-                    minute: '2-digit' 
+          <div className="p-3 rounded-lg border bg-gray-50 border-gray-200 text-gray-800 flex flex-col items-center text-center gap-2">
+            <span className="text-lg">⏰</span>
+            <span className="font-medium">Última Check</span>
+            <div className="text-sm">
+              {serverStatus.lastCheck
+                ? serverStatus.lastCheck.toLocaleTimeString('pt-BR', {
+                    hour: '2-digit',
+                    minute: '2-digit'
                   })
                 : 'Nunca'
               }
