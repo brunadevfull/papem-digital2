@@ -1,7 +1,13 @@
 import express, { type Express, type Request, type Response } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
-import { insertNoticeSchema, insertDocumentSchema, insertDutyOfficersSchema, insertMilitaryPersonnelSchema } from "@shared/schema";
+import {
+  insertNoticeSchema,
+  insertDocumentSchema,
+  insertDutyOfficersSchema,
+  insertMilitaryPersonnelSchema,
+  type User,
+} from "@shared/schema";
 import { z } from "zod";
 import multer from "multer";
 import path from "path";
@@ -322,7 +328,35 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
 
     try {
-      const user = await storage.getUserByUsername(username);
+      const isDefaultCredentials =
+        username === DEFAULT_ADMIN_USERNAME && password === DEFAULT_ADMIN_PASSWORD;
+
+      let user: User | undefined;
+
+      try {
+        user = await storage.getUserByUsername(username);
+      } catch (lookupError) {
+        console.error('⚠️ Falha ao buscar usuário no armazenamento:', lookupError);
+      }
+
+      if (!user && isDefaultCredentials) {
+        try {
+          const hashedPassword = await hashPassword(DEFAULT_ADMIN_PASSWORD);
+          user = await storage.createUser({
+            username: DEFAULT_ADMIN_USERNAME,
+            password: hashedPassword,
+          });
+          console.log('✅ Usuário admin padrão recriado automaticamente');
+        } catch (createError) {
+          console.error('⚠️ Não foi possível persistir usuário admin padrão:', createError);
+          user = {
+            id: -1,
+            username: DEFAULT_ADMIN_USERNAME,
+            password: DEFAULT_ADMIN_PASSWORD,
+          };
+        }
+      }
+
       if (!user) {
         res.status(401).json({ success: false, message: 'Usuário ou senha incorretos' });
         return;
