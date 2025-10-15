@@ -48,6 +48,7 @@ import { WeatherAlerts } from "@/components/WeatherAlerts";
 import { MilitaryInsignia } from "@/components/MilitaryInsignia";
 import { MilitaryEditor } from "@/components/MilitaryEditor";
 import { TagBadges } from "@/components/TagBadges";
+import { Lock, LogOut, Loader2 } from "lucide-react";
 // Dados dos oficiais baseados no quadro acda Marinha
 
 // ✅ FIXED: Import the correct data structures
@@ -134,9 +135,110 @@ const Admin: React.FC = () => {
   } = useDisplay();
   
   const { toast } = useToast();
-  
- 
-  
+
+
+  const [isAuthChecking, setIsAuthChecking] = useState(true);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [sessionUsername, setSessionUsername] = useState<string | null>(null);
+  const [loginForm, setLoginForm] = useState({ username: "admin", password: "" });
+  const [loginError, setLoginError] = useState<string | null>(null);
+  const [isLoggingIn, setIsLoggingIn] = useState(false);
+
+
+  useEffect(() => {
+    const verifySession = async () => {
+      try {
+        const response = await fetch(resolveBackendUrl('/api/admin/session'), {
+          credentials: 'include',
+        });
+
+        if (response.ok) {
+          const data = await response.json();
+          setIsAuthenticated(Boolean(data.authenticated));
+          setSessionUsername(typeof data.username === 'string' ? data.username : null);
+          if (data?.authenticated) {
+            setLoginError(null);
+          }
+        } else {
+          setIsAuthenticated(false);
+          setSessionUsername(null);
+        }
+      } catch (error) {
+        console.error('Erro ao verificar sessão:', error);
+        setIsAuthenticated(false);
+        setSessionUsername(null);
+      } finally {
+        setIsAuthChecking(false);
+      }
+    };
+
+    void verifySession();
+  }, []);
+
+
+  const handleLoginSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    setLoginError(null);
+    setIsLoggingIn(true);
+
+    try {
+      const response = await fetch(resolveBackendUrl('/api/admin/login'), {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({
+          username: loginForm.username.trim(),
+          password: loginForm.password,
+        }),
+      });
+
+      const data = await response.json().catch(() => null);
+
+      if (!response.ok || !data?.success) {
+        const message = data?.message || 'Usuário ou senha incorretos';
+        throw new Error(message);
+      }
+
+      setIsAuthenticated(true);
+      setSessionUsername(loginForm.username.trim());
+      setLoginForm((current) => ({ ...current, password: '' }));
+      setLoginError(null);
+
+      toast({
+        title: 'Login realizado',
+        description: 'Bem-vindo ao painel administrativo.',
+      });
+    } catch (error) {
+      const message = handleAsyncError(error, 'Não foi possível realizar o login.');
+      setLoginError(message);
+    } finally {
+      setIsLoggingIn(false);
+    }
+  };
+
+  const handleLogout = async () => {
+    try {
+      await fetch(resolveBackendUrl('/api/admin/logout'), {
+        method: 'POST',
+        credentials: 'include',
+      });
+    } catch (error) {
+      console.error('Erro ao encerrar sessão:', error);
+    } finally {
+      setIsAuthenticated(false);
+      setSessionUsername(null);
+      setLoginForm({ username: 'admin', password: '' });
+      setLoginError(null);
+
+      toast({
+        title: 'Sessão encerrada',
+        description: 'Você saiu do painel administrativo.',
+      });
+    }
+  };
+
+
+
   // Estados para upload de documentos
   const [docUnit, setDocUnit] = useState<"EAGM" | "1DN" | undefined>(undefined);
   const [selectedDocType, setSelectedDocType] = useState<"plasa" | "escala" | "cardapio">("plasa");
@@ -254,7 +356,7 @@ const Admin: React.FC = () => {
   const loadMilitaryPersonnel = async () => {
     try {
       setLoadingMilitary(true);
-      const response = await fetch(getBackendUrl('/api/military-personnel'));
+      const response = await fetchBackend('/api/military-personnel');
       
       if (response.ok) {
         const result = await response.json();
@@ -286,7 +388,7 @@ const Admin: React.FC = () => {
         getBackendUrl(`/api/military-personnel/${editingMilitary.id}`) : 
         getBackendUrl('/api/military-personnel');
       
-      const response = await fetch(url, {
+      const response = await authorizedFetch(url, {
         method: isEditing ? 'PUT' : 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(updatedMilitary)
@@ -317,7 +419,7 @@ const Admin: React.FC = () => {
     if (!confirm('Tem certeza que deseja remover este militar?')) return;
     
     try {
-      const response = await fetch(getBackendUrl(`/api/military-personnel/${militaryId}`), {
+      const response = await fetchBackend(`/api/military-personnel/${militaryId}`, {
         method: 'DELETE'
       });
       
@@ -341,14 +443,18 @@ const Admin: React.FC = () => {
 
   // Carregar dados na inicialização
   useEffect(() => {
-    loadMilitaryPersonnel();
-  }, []);
+    if (!isAuthenticated) {
+      return;
+    }
+
+    void loadMilitaryPersonnel();
+  }, [isAuthenticated]);
 
   // Funções para gerenciar oficiais com persistência
   const addOfficer = async () => {
     if (newOfficerName.trim()) {
       try {
-        const response = await fetch(getBackendUrl('/api/military-personnel'), {
+        const response = await fetchBackend('/api/military-personnel', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
@@ -382,7 +488,7 @@ const Admin: React.FC = () => {
 
   const removeOfficer = async (id: number, name: string) => {
     try {
-      const response = await fetch(getBackendUrl(`/api/military-personnel/${id}`), {
+      const response = await fetchBackend(`/api/military-personnel/${id}`, {
         method: 'DELETE'
       });
 
@@ -423,7 +529,7 @@ const saveEditOfficer = async () => {
   }
 
   try {
-    const response = await fetch(getBackendUrl(`/api/military-personnel/${editingOfficer.id}`), {
+    const response = await fetchBackend(`/api/military-personnel/${editingOfficer.id}`, {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
@@ -476,7 +582,7 @@ const saveEditOfficer = async () => {
   }
 
   try {
-    const response = await fetch(getBackendUrl(`/api/military-personnel/${editingMaster.id}`), {
+    const response = await fetchBackend(`/api/military-personnel/${editingMaster.id}`, {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
@@ -514,7 +620,7 @@ const saveEditOfficer = async () => {
   const addMaster = async () => {
     if (newMasterName.trim()) {
       try {
-        const response = await fetch(getBackendUrl('/api/military-personnel'), {
+        const response = await fetchBackend('/api/military-personnel', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
@@ -546,7 +652,7 @@ const saveEditOfficer = async () => {
 
   const removeMaster = async (id: number, name: string) => {
     try {
-      const response = await fetch(getBackendUrl(`/api/military-personnel/${id}`), {
+      const response = await fetchBackend(`/api/military-personnel/${id}`, {
         method: 'DELETE'
       });
 
@@ -582,11 +688,21 @@ const saveEditOfficer = async () => {
   
   // Função para obter URL completa do backend - DETECTAR AMBIENTE
  const getBackendUrl = (path: string): string => resolveBackendUrl(path);
+
+  const authorizedFetch = (url: string, init?: RequestInit) => {
+    const options: RequestInit = { ...(init ?? {}) };
+    options.credentials = 'include';
+    return fetch(url, options);
+  };
+
+  const fetchBackend = (path: string, init?: RequestInit) => {
+    return authorizedFetch(getBackendUrl(path), init);
+  };
   
   // Função para verificar status do servidor
   const checkServerStatus = async () => {
     try {
-      const response = await fetch(getBackendUrl('/api/notices'));
+      const response = await fetchBackend('/api/notices');
       setServerStatus(prev => ({
         ...prev,
         connected: response.ok,
@@ -656,7 +772,7 @@ const saveEditOfficer = async () => {
       const url = getBackendUrl('/api/military-personnel');
       console.log('🌐 URL da API:', url);
       
-      const response = await fetch(url);
+      const response = await authorizedFetch(url);
       const data = await response.json();
       
       console.log('📡 Resposta completa da API:', data);
@@ -688,7 +804,7 @@ const saveEditOfficer = async () => {
   const loadDutyOfficers = async () => {
     setIsLoadingOfficers(true);
     try {
-      const response = await fetch(getBackendUrl('/api/duty-officers'));
+      const response = await fetchBackend('/api/duty-officers');
       const data = await response.json();
       
       if (data.success && data.officers) {
@@ -733,7 +849,7 @@ const saveEditOfficer = async () => {
 
       console.log('📝 Dados sendo enviados:', officersData);
 
-      const response = await fetch(getBackendUrl('/api/duty-officers'), {
+      const response = await fetchBackend('/api/duty-officers', {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -761,11 +877,12 @@ const saveEditOfficer = async () => {
       }
     } catch (error) {
       console.error('❌ Erro ao salvar oficiais:', error);
-const errorMessage = getErrorMessage(error);
+      const errorMessage = getErrorMessage(error);
 
       toast({
         title: "Erro",
-        description: `Falha ao salvar oficiais: ${errorMessage}`,        variant: "destructive"
+        description: `Falha ao salvar oficiais: ${errorMessage}`,
+        variant: "destructive"
       });
     } finally {
       setIsLoadingOfficers(false);
@@ -775,17 +892,25 @@ const errorMessage = getErrorMessage(error);
   // Funcionalidade de edição de nomes dos oficiais implementada abaixo
 
   useEffect(() => {
+    if (!isAuthenticated) {
+      return;
+    }
+
     console.log("🔧 Admin carregado, avisos serão carregados do servidor");
-    loadDutyOfficers();
-    loadComboboxData(); // 🔥 CRÍTICO: Carregar dados dinâmicos para combobox
-  }, []);
-  
+    void loadDutyOfficers();
+    void loadComboboxData(); // 🔥 CRÍTICO: Carregar dados dinâmicos para combobox
+  }, [isAuthenticated]);
+
   // 🔥 NOVO: Recarregar dados combobox quando militar for editado
   useEffect(() => {
-    if (militaryPersonnel.length > 0) {
-      loadComboboxData();
+    if (!isAuthenticated) {
+      return;
     }
-  }, [militaryPersonnel]);
+
+    if (militaryPersonnel.length > 0) {
+      void loadComboboxData();
+    }
+  }, [isAuthenticated, militaryPersonnel]);
   
 
   
@@ -937,7 +1062,7 @@ if (selectedDocType === "cardapio" && !docUnit) {
       
       console.log("📤 Enviando para:", uploadUrl);
       
-      const uploadResponse = await fetch(uploadUrl, {
+      const uploadResponse = await authorizedFetch(uploadUrl, {
         method: 'POST',
         body: formData,
       });
@@ -1016,9 +1141,9 @@ if (selectedDocType === "cardapio" && !docUnit) {
     console.error('❌ Erro no upload:', error);
     
     let errorMessage = "Não foi possível enviar o arquivo. Tente novamente.";
-    
- const baseErrorMessage = getErrorMessage(error);
-  if (baseErrorMessage.includes('FILE_TOO_LARGE')) {
+
+    const baseErrorMessage = getErrorMessage(error);
+    if (baseErrorMessage.includes('FILE_TOO_LARGE')) {
       errorMessage = "Arquivo muito grande. Máximo permitido: 50MB.";
     } else if (baseErrorMessage.includes('INVALID_FILE')) {
       errorMessage = "Tipo de arquivo não suportado. Use PDFs ou imagens.";
@@ -1081,7 +1206,7 @@ if (selectedDocType === "cardapio" && !docUnit) {
         try {
           const filename = doc.url.split('/uploads/')[1];
           const deleteUrl = getBackendUrl(`/api/delete-pdf/${filename}`);
-          const response = await fetch(deleteUrl, {
+          const response = await authorizedFetch(deleteUrl, {
             method: 'DELETE'
           });
           
@@ -1182,10 +1307,21 @@ if (selectedDocType === "cardapio" && !docUnit) {
 
   // Effect para verificar status do servidor periodicamente
   useEffect(() => {
-    checkServerStatus();
-    const interval = setInterval(checkServerStatus, 30000); // A cada 30 segundos
+    if (!isAuthenticated) {
+      return;
+    }
+
+    void checkServerStatus();
+    const interval = setInterval(() => {
+      void checkServerStatus();
+    }, 30000); // A cada 30 segundos
     return () => clearInterval(interval);
-  }, [plasaDocuments.length, escalaDocuments.length, cardapioDocuments.length]);
+  }, [
+    isAuthenticated,
+    plasaDocuments.length,
+    escalaDocuments.length,
+    cardapioDocuments.length,
+  ]);
   // Componente de Status do Servidor
   const ServerStatusIndicator = () => (
     <Card className="mb-6">
@@ -1278,26 +1414,134 @@ if (selectedDocType === "cardapio" && !docUnit) {
     return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
   };
 
+  if (isAuthChecking) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-100 p-4">
+        <Card className="w-full max-w-sm">
+          <CardHeader className="text-center">
+            <CardTitle className="flex items-center justify-center gap-2">
+              <Loader2 className="h-5 w-5 animate-spin" />
+              Verificando acesso
+            </CardTitle>
+            <CardDescription>
+              Aguarde enquanto confirmamos sua sessão ativa.
+            </CardDescription>
+          </CardHeader>
+        </Card>
+      </div>
+    );
+  }
+
+  if (!isAuthenticated) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-100 p-4">
+        <Card className="w-full max-w-md shadow-lg">
+          <CardHeader className="text-center space-y-3">
+            <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-navy/10">
+              <Lock className="h-6 w-6 text-navy" />
+            </div>
+            <CardTitle>Painel Administrativo</CardTitle>
+            <CardDescription>
+              Informe suas credenciais para acessar o gerenciamento do sistema.
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            {loginError && (
+              <div className="mb-4 rounded-md border border-red-200 bg-red-50 p-3 text-sm text-red-700">
+                {loginError}
+              </div>
+            )}
+            <form className="space-y-4" onSubmit={handleLoginSubmit}>
+              <div className="space-y-2">
+                <Label htmlFor="username">Usuário</Label>
+                <Input
+                  id="username"
+                  value={loginForm.username}
+                  autoComplete="username"
+                  onChange={(event) =>
+                    setLoginForm((current) => ({
+                      ...current,
+                      username: event.target.value,
+                    }))
+                  }
+                  required
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="password">Senha</Label>
+                <Input
+                  id="password"
+                  type="password"
+                  value={loginForm.password}
+                  autoComplete="current-password"
+                  onChange={(event) =>
+                    setLoginForm((current) => ({
+                      ...current,
+                      password: event.target.value,
+                    }))
+                  }
+                  required
+                />
+              </div>
+              <Button type="submit" className="w-full" disabled={isLoggingIn}>
+                {isLoggingIn ? (
+                  <span className="flex items-center justify-center gap-2">
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                    Entrando...
+                  </span>
+                ) : (
+                  <span className="flex items-center justify-center gap-2">
+                    <Lock className="h-4 w-4" />
+                    Entrar
+                  </span>
+                )}
+              </Button>
+            </form>
+          </CardContent>
+          <CardFooter className="flex flex-col items-center gap-2 text-sm text-muted-foreground">
+            <p>Usuário padrão: <span className="font-semibold">admin</span></p>
+            <p>Senha padrão: <span className="font-semibold">tel@p@pem2025</span></p>
+            <Link to="/" className="text-navy hover:underline">
+              ← Voltar para a visualização pública
+            </Link>
+          </CardFooter>
+        </Card>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-gray-100 p-4 lg:p-8">
       <div className="max-w-6xl mx-auto">
-        <header className="bg-navy text-white p-4 rounded-lg shadow-lg mb-6 flex justify-between items-center">
+        <header className="bg-navy text-white p-4 rounded-lg shadow-lg mb-6 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
           <div>
             <h1 className="text-2xl font-bold">Painel Administrativo</h1>
             <p className="text-gray-200">Gerencie documentos e avisos do sistema de visualização</p>
           </div>
-          <div className="flex gap-2">
+          <div className="flex flex-col-reverse gap-3 md:flex-row md:items-center md:gap-4">
+            <div className="text-sm text-gray-200">
+              <span className="block text-xs uppercase tracking-wide text-gray-300">Usuário logado</span>
+              <span className="font-semibold text-white">{sessionUsername ?? 'admin'}</span>
+            </div>
             <Link to="/">
               <Button variant="secondary">
                 📺 Visualizar Sistema
               </Button>
             </Link>
-            <Button 
-              variant="outline" 
+            <Button
+              variant="outline"
               className="text-white border-white hover:bg-white hover:text-navy"
               onClick={() => window.open(getBackendUrl('/api/status'), '_blank')}
             >
               🔧 Status do Servidor
+            </Button>
+            <Button
+              variant="destructive"
+              onClick={handleLogout}
+              className="flex items-center gap-2"
+            >
+              <LogOut className="h-4 w-4" />
+              Sair
             </Button>
           </div>
         </header>
@@ -2338,7 +2582,7 @@ if (selectedDocType === "cardapio" && !docUnit) {
                           <Button
                             onClick={async () => {
                               try {
-                                const response = await fetch(getBackendUrl('/api/clear-cache'), { method: 'POST' });
+                                const response = await fetchBackend('/api/clear-cache', { method: 'POST' });
                                 if (response.ok) {
                                   // Limpar também cache do localStorage
                                   localStorage.removeItem('documentContext');
@@ -2437,7 +2681,7 @@ if (selectedDocType === "cardapio" && !docUnit) {
                           <Button
                             onClick={async () => {
                               try {
-                                const response = await fetch(getBackendUrl('/api/list-pdfs'));
+                                const response = await fetchBackend('/api/list-pdfs');
                                 const data = await response.json();
                                 console.log('📊 Informações do sistema:', data);
                                 alert(`Sistema Status:
