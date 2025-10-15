@@ -2346,449 +2346,441 @@ if (selectedDocType === "cardapio" && !docUnit) {
 
           {/* Aba de Sistema */}
           <TabsContent value="sistema">
-            <Tabs defaultValue="sistema" className="w-full">
-              <TabsList className="w-full mb-4">
-                <TabsTrigger value="sistema" className="flex-1">⚙️ Sistema</TabsTrigger>
-                <TabsTrigger value="militares" className="flex-1">👥 Militares</TabsTrigger>
-              </TabsList>
-              
-              {/* Sub-aba Sistema */}
-              <TabsContent value="sistema">
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                  {/* Card de Configurações do Sistema */}
-                  <Card>
-                    <CardHeader>
-                      <CardTitle>⚙️ Configurações do Sistema</CardTitle>
-                      <CardDescription>
-                        Ajuste os parâmetros de funcionamento do sistema de visualização
-                      </CardDescription>
-                    </CardHeader>
-                    <CardContent className="space-y-6">
-                      <div className="space-y-2">
-                        <Label htmlFor="scrollSpeed">
-                          🏃‍♂️ Velocidade de Rolagem do PLASA
-                        </Label>
-                        <div className="flex items-center space-x-2">
-                          <Select value={scrollSpeed} onValueChange={handleScrollSpeedChange}>
-                            <SelectTrigger className="w-32">
-                              <SelectValue placeholder="Velocidade" />
-                            </SelectTrigger>
-                            <SelectContent>
-                              <SelectItem value="slow">🐌 Lenta</SelectItem>
-                              <SelectItem value="normal">🚶‍♂️ Normal</SelectItem>
-                              <SelectItem value="fast">🏃‍♂️ Rápida</SelectItem>
-                            </SelectContent>
-                          </Select>
-                          <span className="text-sm text-muted-foreground">velocidade de scroll</span>
-                        </div>
-                        <p className="text-xs text-muted-foreground">
-                          Define a velocidade com que o PLASA rola automaticamente pela tela.
-                        </p>
-                      </div>
-                      
-                      <div className="space-y-4">
-                        <div className="space-y-2">
-                          <div className="flex items-center">
-                            <Label htmlFor="escalaInterval">
-                              ⚖️ Intervalo das Escalas (segundos)
-                            </Label>
-                            <HoverCard>
-                              <HoverCardTrigger asChild>
-                                <span className="ml-2 text-blue-500 cursor-help text-sm">[?]</span>
-                              </HoverCardTrigger>
-                              <HoverCardContent className="w-80">
-                                <p className="text-sm">
-                                  Define quanto tempo cada escala (Oficiais/Praças) permanece na tela
-                                  antes de alternar para a próxima. Utilize valores menores para ciclos
-                                  rápidos ou maiores para leitura detalhada.
-                                </p>
-                              </HoverCardContent>
-                            </HoverCard>
-                          </div>
-
-                          <div className="flex items-center space-x-2">
-                            <Input
-                              id="escalaInterval"
-                              type="number"
-                              min="5"
-                              max="60"
-                              className="w-24"
-                              value={Math.floor(escalaAlternateInterval / 1000)}
-                              onChange={e => handleEscalaIntervalChange(e, 5, 60)}
-                            />
-                            <span className="text-sm text-muted-foreground">segundos</span>
-                          </div>
-                          <p className="text-xs text-muted-foreground">
-                            Aplica-se às escalas de Oficiais e Praças exibidas na área principal.
-                          </p>
-                        </div>
-
-                        <div className="space-y-2">
-                          <div className="flex items-center">
-                            <Label htmlFor="cardapioInterval">
-                              🍽️ Intervalo dos Cardápios (segundos)
-                            </Label>
-                            <HoverCard>
-                              <HoverCardTrigger asChild>
-                                <span className="ml-2 text-blue-500 cursor-help text-sm">[?]</span>
-                              </HoverCardTrigger>
-                              <HoverCardContent className="w-80">
-                                <p className="text-sm">
-                                  Controla o tempo em que cada cardápio semanal permanece visível
-                                  antes de alternar para o próximo (EAGM ou 1DN). Permite ajustar o
-                                  ritmo de leitura independentemente das escalas.
-                                </p>
-                              </HoverCardContent>
-                            </HoverCard>
-                          </div>
-
-                          <div className="flex items-center space-x-2">
-                            <Input
-                              id="cardapioInterval"
-                              type="number"
-                              min="5"
-                              max="60"
-                              className="w-24"
-                              value={Math.floor(cardapioAlternateInterval / 1000)}
-                              onChange={e => handleCardapioIntervalChange(e, 5, 60)}
-                            />
-                            <span className="text-sm text-muted-foreground">segundos</span>
-                          </div>
-                          <p className="text-xs text-muted-foreground">
-                            Afeta apenas os cardápios ativos (EAGM e 1DN) exibidos no rodapé direito.
-                          </p>
-                        </div>
-
-                        <div className="p-3 bg-orange-50 rounded-lg border-l-4 border-orange-400">
-                          <p className="text-sm text-orange-800">
-                            <strong>ℹ️ Nota:</strong> Agora é possível definir intervalos independentes
-                            para escalas e cardápios, permitindo personalizar o ritmo de leitura de cada área.
-                          </p>
-                        </div>
-                      </div>
-                   
-                      <div className="space-y-2">
-                        <Label htmlFor="autoRestart">
-                          🔄 Reinício Automático do PLASA
-                        </Label>
-                        <div className="flex items-center space-x-2">
-                          <Input 
-                            id="autoRestart" 
-                            type="number" 
-                            min="2" 
-                            max="10" 
-                            className="w-24"
-                            value={autoRestartDelay}
-                            onChange={handleAutoRestartChange}
-                          />
-                          <span className="text-sm text-muted-foreground">segundos no final</span>
-                        </div>
-                        <p className="text-xs text-muted-foreground">
-                          Tempo de pausa no final do PLASA antes de reiniciar do topo.
-                        </p>
-                      </div>
-                    </CardContent>
-                  </Card>
-
-                  {/* Card de Debug do Sistema */}
-                  <Card>
-                    <CardHeader>
-                      <CardTitle>🔍 Informações do Sistema</CardTitle>
-                      <CardDescription>
-                        Status e informações técnicas do sistema
-                      </CardDescription>
-                    </CardHeader>
-                    <CardContent className="space-y-4">
-                      <div className="p-4 bg-blue-50 rounded-lg">
-                        <h4 className="font-medium mb-2 text-blue-800">📊 Status do Servidor</h4>
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
-                          <div>
-                            <p><strong>Conectado:</strong> {serverStatus.connected ? '✅ Sim' : '❌ Não'}</p>
-                            <p><strong>Última resposta:</strong> {serverStatus.lastResponse || 'N/A'}</p>
-                            <p><strong>Documentos:</strong> {serverStatus.documents}</p>
-                          </div>
-                          <div>
-                            <p><strong>Última verificação:</strong> {serverStatus.lastCheck ? serverStatus.lastCheck.toLocaleTimeString('pt-BR') : 'Nunca'}</p>
-                          </div>
-                        </div>
-                      </div>
-
-                      <div className="space-y-2">
-                        <Button 
-                          onClick={checkServerStatus}
-                          disabled={isLoading}
-                          className="w-full"
-                        >
-                          {isLoading ? 'Verificando...' : '🔄 Verificar Status do Servidor'}
-                        </Button>
-                        
-
-                      </div>
-
-                      <div className="p-4 bg-green-50 rounded-lg border-l-4 border-green-500">
-                        <h4 className="font-medium mb-2 text-green-800">💡 Dicas de Debug</h4>
-                        <ul className="list-disc pl-5 space-y-1 text-sm text-green-700">
-                          <li>Verifique o console do navegador (F12) para logs detalhados</li>
-                          <li>O botão "Listar Documentos" mostra todos os PDFs no servidor</li>
-                          <li>Status do servidor é atualizado automaticamente</li>
-                          <li>Documentos são processados em background</li>
-                        </ul>
-                      </div>
-                    </CardContent>
-                  </Card>
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              {/* Card de Configurações do Sistema */}
+              <Card>
+                <CardHeader>
+                  <CardTitle>⚙️ Configurações do Sistema</CardTitle>
+                  <CardDescription>
+                    Ajuste os parâmetros de funcionamento do sistema de visualização
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-6">
+                  <div className="space-y-2">
+                    <Label htmlFor="scrollSpeed">
+                      🏃‍♂️ Velocidade de Rolagem do PLASA
+                    </Label>
+                    <div className="flex items-center space-x-2">
+                      <Select value={scrollSpeed} onValueChange={handleScrollSpeedChange}>
+                        <SelectTrigger className="w-32">
+                          <SelectValue placeholder="Velocidade" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="slow">🐌 Lenta</SelectItem>
+                          <SelectItem value="normal">🚶‍♂️ Normal</SelectItem>
+                          <SelectItem value="fast">🏃‍♂️ Rápida</SelectItem>
+                        </SelectContent>
+                      </Select>
+                      <span className="text-sm text-muted-foreground">velocidade de scroll</span>
+                    </div>
+                    <p className="text-xs text-muted-foreground">
+                      Define a velocidade com que o PLASA rola automaticamente pela tela.
+                    </p>
+                  </div>
                   
-                  {/* Card de Logs do Sistema */}
-                  <Card>
-                    <CardHeader>
-                      <CardTitle>📋 Logs do Sistema</CardTitle>
-                      <CardDescription>
-                        Informações técnicas e logs de funcionamento
-                      </CardDescription>
-                    </CardHeader>
-                    <CardContent>
-                      <div className="space-y-2 max-h-64 overflow-y-auto text-sm font-mono bg-gray-100 p-3 rounded">
-                        <div>✅ Sistema iniciado com sucesso</div>
-                        <div>📡 Backend conectado: {getBackendUrl('/api/status')}</div>
-                        <div>🔄 Auto-refresh ativo a cada 30 segundos</div>
-                        <div>📱 Interface responsiva carregada</div>
-                        <div>🎯 Componentes Radix UI inicializados</div>
+                  <div className="space-y-4">
+                    <div className="space-y-2">
+                      <div className="flex items-center">
+                        <Label htmlFor="escalaInterval">
+                          ⚖️ Intervalo das Escalas (segundos)
+                        </Label>
+                        <HoverCard>
+                          <HoverCardTrigger asChild>
+                            <span className="ml-2 text-blue-500 cursor-help text-sm">[?]</span>
+                          </HoverCardTrigger>
+                          <HoverCardContent className="w-80">
+                            <p className="text-sm">
+                              Define quanto tempo cada escala (Oficiais/Praças) permanece na tela
+                              antes de alternar para a próxima. Utilize valores menores para ciclos
+                              rápidos ou maiores para leitura detalhada.
+                            </p>
+                          </HoverCardContent>
+                        </HoverCard>
                       </div>
-                    </CardContent>
-                  </Card>
 
-             
+                      <div className="flex items-center space-x-2">
+                        <Input
+                          id="escalaInterval"
+                          type="number"
+                          min="5"
+                          max="60"
+                          className="w-24"
+                          value={Math.floor(escalaAlternateInterval / 1000)}
+                          onChange={e => handleEscalaIntervalChange(e, 5, 60)}
+                        />
+                        <span className="text-sm text-muted-foreground">segundos</span>
+                      </div>
+                      <p className="text-xs text-muted-foreground">
+                        Aplica-se às escalas de Oficiais e Praças exibidas na área principal.
+                      </p>
+                    </div>
 
-                  {/* Card de Manutenção do Sistema */}
-                  <Card className="lg:col-span-2">
-                    <CardHeader className="bg-orange-50">
-                      <CardTitle className="flex items-center gap-2">
-                        🔧 Manutenção do Sistema
-                      </CardTitle>
-                      <CardDescription>
-                        Ferramentas de manutenção e limpeza do sistema
-                      </CardDescription>
-                    </CardHeader>
-                    <CardContent className="space-y-6 pt-6">
-                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                        {/* Limpeza de Cache */}
-                        <div className="p-4 bg-yellow-50 rounded-lg border border-yellow-200">
-                          <div className="flex items-center gap-2 mb-3">
-                            <span className="text-lg">🧹</span>
-                            <h4 className="font-medium text-yellow-800">Limpeza de Cache</h4>
-                          </div>
-                          <p className="text-sm text-yellow-700 mb-3">
-                            Limpa cache de PDFs e páginas processadas no servidor.
-                          </p>
-                          <Button
-                            onClick={async () => {
-                              try {
-                                const response = await fetchBackend('/api/clear-cache', { method: 'POST' });
-                                if (response.ok) {
-                                  // Limpar também cache do localStorage
-                                  localStorage.removeItem('documentContext');
-                                  localStorage.removeItem('noticeContext');
-                                  localStorage.removeItem('lastDisplayState');
-                                  
-                                  toast({
-                                    title: "Cache limpo",
-                                    description: "Cache do servidor e navegador foi limpo com sucesso"
-                                  });
-                                } else {
-                                  throw new Error('Falha na requisição');
-                                }
-                              } catch (error) {
-                                toast({
-                                  title: "Erro na limpeza",
-                                  description: "Não foi possível limpar o cache do servidor",
-                                  variant: "destructive"
-                                });
-                              }
-                            }}
-                            variant="outline"
-                            size="sm"
-                            className="w-full border-yellow-300 text-yellow-700 hover:bg-yellow-100"
-                          >
-                            Limpar Cache
-                          </Button>
-                        </div>
+                    <div className="space-y-2">
+                      <div className="flex items-center">
+                        <Label htmlFor="cardapioInterval">
+                          🍽️ Intervalo dos Cardápios (segundos)
+                        </Label>
+                        <HoverCard>
+                          <HoverCardTrigger asChild>
+                            <span className="ml-2 text-blue-500 cursor-help text-sm">[?]</span>
+                          </HoverCardTrigger>
+                          <HoverCardContent className="w-80">
+                            <p className="text-sm">
+                              Controla o tempo em que cada cardápio semanal permanece visível
+                              antes de alternar para o próximo (EAGM ou 1DN). Permite ajustar o
+                              ritmo de leitura independentemente das escalas.
+                            </p>
+                          </HoverCardContent>
+                        </HoverCard>
+                      </div>
 
-                        {/* Limpar Cache do Navegador */}
-                        <div className="p-4 bg-purple-50 rounded-lg border border-purple-200">
-                          <div className="flex items-center gap-2 mb-3">
-                            <span className="text-lg">💻</span>
-                            <h4 className="font-medium text-purple-800">Cache do Navegador</h4>
-                          </div>
-                          <p className="text-sm text-purple-700 mb-3">
-                            Limpa dados salvos localmente no navegador.
-                          </p>
-                          <Button
-                            onClick={() => {
-                              // Limpar localStorage
-                              localStorage.clear();
+                      <div className="flex items-center space-x-2">
+                        <Input
+                          id="cardapioInterval"
+                          type="number"
+                          min="5"
+                          max="60"
+                          className="w-24"
+                          value={Math.floor(cardapioAlternateInterval / 1000)}
+                          onChange={e => handleCardapioIntervalChange(e, 5, 60)}
+                        />
+                        <span className="text-sm text-muted-foreground">segundos</span>
+                      </div>
+                      <p className="text-xs text-muted-foreground">
+                        Afeta apenas os cardápios ativos (EAGM e 1DN) exibidos no rodapé direito.
+                      </p>
+                    </div>
+
+                    <div className="p-3 bg-orange-50 rounded-lg border-l-4 border-orange-400">
+                      <p className="text-sm text-orange-800">
+                        <strong>ℹ️ Nota:</strong> Agora é possível definir intervalos independentes
+                        para escalas e cardápios, permitindo personalizar o ritmo de leitura de cada área.
+                      </p>
+                    </div>
+                  </div>
+               
+                  <div className="space-y-2">
+                    <Label htmlFor="autoRestart">
+                      🔄 Reinício Automático do PLASA
+                    </Label>
+                    <div className="flex items-center space-x-2">
+                      <Input 
+                        id="autoRestart" 
+                        type="number" 
+                        min="2" 
+                        max="10" 
+                        className="w-24"
+                        value={autoRestartDelay}
+                        onChange={handleAutoRestartChange}
+                      />
+                      <span className="text-sm text-muted-foreground">segundos no final</span>
+                    </div>
+                    <p className="text-xs text-muted-foreground">
+                      Tempo de pausa no final do PLASA antes de reiniciar do topo.
+                    </p>
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Card de Debug do Sistema */}
+              <Card>
+                <CardHeader>
+                  <CardTitle>🔍 Informações do Sistema</CardTitle>
+                  <CardDescription>
+                    Status e informações técnicas do sistema
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="p-4 bg-blue-50 rounded-lg">
+                    <h4 className="font-medium mb-2 text-blue-800">📊 Status do Servidor</h4>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                      <div>
+                        <p><strong>Conectado:</strong> {serverStatus.connected ? '✅ Sim' : '❌ Não'}</p>
+                        <p><strong>Última resposta:</strong> {serverStatus.lastResponse || 'N/A'}</p>
+                        <p><strong>Documentos:</strong> {serverStatus.documents}</p>
+                      </div>
+                      <div>
+                        <p><strong>Última verificação:</strong> {serverStatus.lastCheck ? serverStatus.lastCheck.toLocaleTimeString('pt-BR') : 'Nunca'}</p>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="space-y-2">
+                    <Button 
+                      onClick={checkServerStatus}
+                      disabled={isLoading}
+                      className="w-full"
+                    >
+                      {isLoading ? 'Verificando...' : '🔄 Verificar Status do Servidor'}
+                    </Button>
+                    
+
+                  </div>
+
+                  <div className="p-4 bg-green-50 rounded-lg border-l-4 border-green-500">
+                    <h4 className="font-medium mb-2 text-green-800">💡 Dicas de Debug</h4>
+                    <ul className="list-disc pl-5 space-y-1 text-sm text-green-700">
+                      <li>Verifique o console do navegador (F12) para logs detalhados</li>
+                      <li>O botão "Listar Documentos" mostra todos os PDFs no servidor</li>
+                      <li>Status do servidor é atualizado automaticamente</li>
+                      <li>Documentos são processados em background</li>
+                    </ul>
+                  </div>
+                </CardContent>
+              </Card>
+              
+              {/* Card de Logs do Sistema */}
+              <Card>
+                <CardHeader>
+                  <CardTitle>📋 Logs do Sistema</CardTitle>
+                  <CardDescription>
+                    Informações técnicas e logs de funcionamento
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-2 max-h-64 overflow-y-auto text-sm font-mono bg-gray-100 p-3 rounded">
+                    <div>✅ Sistema iniciado com sucesso</div>
+                    <div>📡 Backend conectado: {getBackendUrl('/api/status')}</div>
+                    <div>🔄 Auto-refresh ativo a cada 30 segundos</div>
+                    <div>📱 Interface responsiva carregada</div>
+                    <div>🎯 Componentes Radix UI inicializados</div>
+                  </div>
+                </CardContent>
+              </Card>
+
+         
+
+              {/* Card de Manutenção do Sistema */}
+              <Card className="lg:col-span-2">
+                <CardHeader className="bg-orange-50">
+                  <CardTitle className="flex items-center gap-2">
+                    🔧 Manutenção do Sistema
+                  </CardTitle>
+                  <CardDescription>
+                    Ferramentas de manutenção e limpeza do sistema
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-6 pt-6">
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                    {/* Limpeza de Cache */}
+                    <div className="p-4 bg-yellow-50 rounded-lg border border-yellow-200">
+                      <div className="flex items-center gap-2 mb-3">
+                        <span className="text-lg">🧹</span>
+                        <h4 className="font-medium text-yellow-800">Limpeza de Cache</h4>
+                      </div>
+                      <p className="text-sm text-yellow-700 mb-3">
+                        Limpa cache de PDFs e páginas processadas no servidor.
+                      </p>
+                      <Button
+                        onClick={async () => {
+                          try {
+                            const response = await fetchBackend('/api/clear-cache', { method: 'POST' });
+                            if (response.ok) {
+                              // Limpar também cache do localStorage
+                              localStorage.removeItem('documentContext');
+                              localStorage.removeItem('noticeContext');
+                              localStorage.removeItem('lastDisplayState');
                               
-                              // Limpar sessionStorage
-                              sessionStorage.clear();
-                              
-                              // Forçar reload da página
                               toast({
                                 title: "Cache limpo",
-                                description: "Recarregando página..."
+                                description: "Cache do servidor e navegador foi limpo com sucesso"
                               });
-                              
-                              setTimeout(() => {
-                                window.location.reload();
-                              }, 1000);
-                            }}
+                            } else {
+                              throw new Error('Falha na requisição');
+                            }
+                          } catch (error) {
+                            toast({
+                              title: "Erro na limpeza",
+                              description: "Não foi possível limpar o cache do servidor",
+                              variant: "destructive"
+                            });
+                          }
+                        }}
+                        variant="outline"
+                        size="sm"
+                        className="w-full border-yellow-300 text-yellow-700 hover:bg-yellow-100"
+                      >
+                        Limpar Cache
+                      </Button>
+                    </div>
+
+                    {/* Limpar Cache do Navegador */}
+                    <div className="p-4 bg-purple-50 rounded-lg border border-purple-200">
+                      <div className="flex items-center gap-2 mb-3">
+                        <span className="text-lg">💻</span>
+                        <h4 className="font-medium text-purple-800">Cache do Navegador</h4>
+                      </div>
+                      <p className="text-sm text-purple-700 mb-3">
+                        Limpa dados salvos localmente no navegador.
+                      </p>
+                      <Button
+                        onClick={() => {
+                          // Limpar localStorage
+                          localStorage.clear();
+                          
+                          // Limpar sessionStorage
+                          sessionStorage.clear();
+                          
+                          // Forçar reload da página
+                          toast({
+                            title: "Cache limpo",
+                            description: "Recarregando página..."
+                          });
+                          
+                          setTimeout(() => {
+                            window.location.reload();
+                          }, 1000);
+                        }}
+                        variant="outline"
+                        size="sm"
+                        className="w-full border-purple-300 text-purple-700 hover:bg-purple-100"
+                      >
+                        Limpar e Recarregar
+                      </Button>
+                    </div>
+
+                    {/* Recarregar Dados */}
+                    <div className="p-4 bg-blue-50 rounded-lg border border-blue-200">
+                      <div className="flex items-center gap-2 mb-3">
+                        <span className="text-lg">🔄</span>
+                        <h4 className="font-medium text-blue-800">Recarregar Dados</h4>
+                      </div>
+                      <p className="text-sm text-blue-700 mb-3">
+                        Força recarga dos dados do servidor para sincronização.
+                      </p>
+                      <Button
+                        onClick={() => {
+                          // Força recarregamento da página para sincronizar dados
+                          window.location.reload();
+                        }}
+                        variant="outline"
+                        size="sm"
+                        className="w-full border-blue-300 text-blue-700 hover:bg-blue-100"
+                      >
+                        Recarregar
+                      </Button>
+                    </div>
+
+                    {/* Informações do Sistema */}
+                    <div className="p-4 bg-green-50 rounded-lg border border-green-200">
+                      <div className="flex items-center gap-2 mb-3">
+                        <span className="text-lg">📋</span>
+                        <h4 className="font-medium text-green-800">Info Sistema</h4>
+                      </div>
+                      <p className="text-sm text-green-700 mb-3">
+                        Ver informações detalhadas sobre arquivos e uso do sistema.
+                      </p>
+                      <Button
+                        onClick={async () => {
+                          try {
+                            const response = await fetchBackend('/api/list-pdfs');
+                            const data = await response.json();
+                            console.log('📊 Informações do sistema:', data);
+                            alert(`Sistema Status:
+  • Documentos: ${data.files ? data.files.length : 0}
+  • Backend: Online
+  • Storage: Operacional
+  • Última verificação: ${new Date().toLocaleString('pt-BR')}`);
+                          } catch (error) {
+                            console.error('Erro ao obter informações:', error);
+                            alert('Erro ao acessar informações do sistema');
+                          }
+                        }}
+                        variant="outline"
+                        size="sm"
+                        className="w-full border-green-300 text-green-700 hover:bg-green-100"
+                      >
+                        Ver Info
+                      </Button>
+                    </div>
+
+                    {/* Ajuda do Sistema */}
+                    <div className="p-4 bg-purple-50 rounded-lg border border-purple-200">
+                      <div className="flex items-center gap-2 mb-3">
+                        <span className="text-lg">❓</span>
+                        <h4 className="font-medium text-purple-800">Como Funciona</h4>
+                      </div>
+                      <p className="text-sm text-purple-700 mb-3">
+                        Entenda como o sistema processa e exibe documentos.
+                      </p>
+                      <Sheet>
+                        <SheetTrigger asChild>
+                          <Button
                             variant="outline"
                             size="sm"
                             className="w-full border-purple-300 text-purple-700 hover:bg-purple-100"
                           >
-                            Limpar e Recarregar
+                            Ver Ajuda
                           </Button>
-                        </div>
+                        </SheetTrigger>
+                        <SheetContent className="w-[400px] sm:w-[540px]">
+                          <SheetHeader>
+                            <SheetTitle>📖 Como Funciona o Sistema</SheetTitle>
+                            <SheetDescription>
+                              Guia completo de funcionamento do sistema de visualização
+                            </SheetDescription>
+                          </SheetHeader>
+                          <div className="mt-6 space-y-6 max-h-[80vh] overflow-y-auto">
+                            <div>
+                              <h3 className="font-semibold mb-2">📄 PLASA (Plano de Serviço)</h3>
+                              <ul className="text-sm space-y-1 text-gray-600">
+                                <li>• PDFs são automaticamente convertidos para imagens</li>
+                                <li>• Rola automaticamente do início ao fim</li>
+                                <li>• Reinicia após intervalo configurável</li>
+                                <li>• Apenas um PLASA ativo por vez</li>
+                                <li>• Velocidade de rolagem configurável</li>
+                              </ul>
+                            </div>
 
-                        {/* Recarregar Dados */}
-                        <div className="p-4 bg-blue-50 rounded-lg border border-blue-200">
-                          <div className="flex items-center gap-2 mb-3">
-                            <span className="text-lg">🔄</span>
-                            <h4 className="font-medium text-blue-800">Recarregar Dados</h4>
+                            <div>
+                              <h3 className="font-semibold mb-2">📋 Escalas de Serviço</h3>
+                              <ul className="text-sm space-y-1 text-gray-600">
+                                <li>• Suportam PDFs e imagens diretas</li>
+                                <li>• Alternância automática no intervalo configurado</li>
+                                <li>• Suporte a categorias: Oficiais e Praças</li>
+                                <li>• Múltiplas escalas ativas simultaneamente</li>
+                                <li>• Exibição estática (sem scroll)</li>
+                              </ul>
+                            </div>
+
+                            <div>
+                              <h3 className="font-semibold mb-2">📢 Avisos Importantes</h3>
+                              <ul className="text-sm space-y-1 text-gray-600">
+                                <li>• Salvos no servidor backend</li>
+                                <li>• Alternância automática entre múltiplos avisos</li>
+                                <li>• Prioridades: Alta, Média, Baixa</li>
+                                <li>• Período de validade configurável</li>
+                                <li>• Sincronização entre dispositivos</li>
+                              </ul>
+                            </div>
+
+                            <div>
+                              <h3 className="font-semibold mb-2">🔧 Conversão PDF para Imagem</h3>
+                              <p className="text-sm text-gray-600">
+                                O sistema converte automaticamente PDFs para imagens (JPG) para máxima 
+                                compatibilidade e evitar problemas de CORS ou fontes faltando. As imagens 
+                                são armazenadas no servidor para carregamento rápido.
+                              </p>
+                            </div>
+
+                            <div>
+                              <h3 className="font-semibold mb-2">💡 Dicas de Uso</h3>
+                              <ul className="text-sm space-y-1 text-gray-600">
+                                <li>• Use PDFs com orientação paisagem para melhor qualidade</li>
+                                <li>• Imagens (JPG/PNG) são processadas mais rapidamente</li>
+                                <li>• Sistema mantém cache para performance</li>
+                                <li>• Avisos "Alta" prioridade têm destaque vermelho</li>
+                                <li>• Documentos inativos ficam salvos mas não aparecem</li>
+                              </ul>
+                            </div>
                           </div>
-                          <p className="text-sm text-blue-700 mb-3">
-                            Força recarga dos dados do servidor para sincronização.
-                          </p>
-                          <Button
-                            onClick={() => {
-                              // Força recarregamento da página para sincronizar dados
-                              window.location.reload();
-                            }}
-                            variant="outline"
-                            size="sm"
-                            className="w-full border-blue-300 text-blue-700 hover:bg-blue-100"
-                          >
-                            Recarregar
-                          </Button>
-                        </div>
-
-                        {/* Informações do Sistema */}
-                        <div className="p-4 bg-green-50 rounded-lg border border-green-200">
-                          <div className="flex items-center gap-2 mb-3">
-                            <span className="text-lg">📋</span>
-                            <h4 className="font-medium text-green-800">Info Sistema</h4>
-                          </div>
-                          <p className="text-sm text-green-700 mb-3">
-                            Ver informações detalhadas sobre arquivos e uso do sistema.
-                          </p>
-                          <Button
-                            onClick={async () => {
-                              try {
-                                const response = await fetchBackend('/api/list-pdfs');
-                                const data = await response.json();
-                                console.log('📊 Informações do sistema:', data);
-                                alert(`Sistema Status:
-• Documentos: ${data.files ? data.files.length : 0}
-• Backend: Online
-• Storage: Operacional
-• Última verificação: ${new Date().toLocaleString('pt-BR')}`);
-                              } catch (error) {
-                                console.error('Erro ao obter informações:', error);
-                                alert('Erro ao acessar informações do sistema');
-                              }
-                            }}
-                            variant="outline"
-                            size="sm"
-                            className="w-full border-green-300 text-green-700 hover:bg-green-100"
-                          >
-                            Ver Info
-                          </Button>
-                        </div>
-
-                        {/* Ajuda do Sistema */}
-                        <div className="p-4 bg-purple-50 rounded-lg border border-purple-200">
-                          <div className="flex items-center gap-2 mb-3">
-                            <span className="text-lg">❓</span>
-                            <h4 className="font-medium text-purple-800">Como Funciona</h4>
-                          </div>
-                          <p className="text-sm text-purple-700 mb-3">
-                            Entenda como o sistema processa e exibe documentos.
-                          </p>
-                          <Sheet>
-                            <SheetTrigger asChild>
-                              <Button
-                                variant="outline"
-                                size="sm"
-                                className="w-full border-purple-300 text-purple-700 hover:bg-purple-100"
-                              >
-                                Ver Ajuda
-                              </Button>
-                            </SheetTrigger>
-                            <SheetContent className="w-[400px] sm:w-[540px]">
-                              <SheetHeader>
-                                <SheetTitle>📖 Como Funciona o Sistema</SheetTitle>
-                                <SheetDescription>
-                                  Guia completo de funcionamento do sistema de visualização
-                                </SheetDescription>
-                              </SheetHeader>
-                              <div className="mt-6 space-y-6 max-h-[80vh] overflow-y-auto">
-                                <div>
-                                  <h3 className="font-semibold mb-2">📄 PLASA (Plano de Serviço)</h3>
-                                  <ul className="text-sm space-y-1 text-gray-600">
-                                    <li>• PDFs são automaticamente convertidos para imagens</li>
-                                    <li>• Rola automaticamente do início ao fim</li>
-                                    <li>• Reinicia após intervalo configurável</li>
-                                    <li>• Apenas um PLASA ativo por vez</li>
-                                    <li>• Velocidade de rolagem configurável</li>
-                                  </ul>
-                                </div>
-
-                                <div>
-                                  <h3 className="font-semibold mb-2">📋 Escalas de Serviço</h3>
-                                  <ul className="text-sm space-y-1 text-gray-600">
-                                    <li>• Suportam PDFs e imagens diretas</li>
-                                    <li>• Alternância automática no intervalo configurado</li>
-                                    <li>• Suporte a categorias: Oficiais e Praças</li>
-                                    <li>• Múltiplas escalas ativas simultaneamente</li>
-                                    <li>• Exibição estática (sem scroll)</li>
-                                  </ul>
-                                </div>
-
-                                <div>
-                                  <h3 className="font-semibold mb-2">📢 Avisos Importantes</h3>
-                                  <ul className="text-sm space-y-1 text-gray-600">
-                                    <li>• Salvos no servidor backend</li>
-                                    <li>• Alternância automática entre múltiplos avisos</li>
-                                    <li>• Prioridades: Alta, Média, Baixa</li>
-                                    <li>• Período de validade configurável</li>
-                                    <li>• Sincronização entre dispositivos</li>
-                                  </ul>
-                                </div>
-
-                                <div>
-                                  <h3 className="font-semibold mb-2">🔧 Conversão PDF para Imagem</h3>
-                                  <p className="text-sm text-gray-600">
-                                    O sistema converte automaticamente PDFs para imagens (JPG) para máxima 
-                                    compatibilidade e evitar problemas de CORS ou fontes faltando. As imagens 
-                                    são armazenadas no servidor para carregamento rápido.
-                                  </p>
-                                </div>
-
-                                <div>
-                                  <h3 className="font-semibold mb-2">💡 Dicas de Uso</h3>
-                                  <ul className="text-sm space-y-1 text-gray-600">
-                                    <li>• Use PDFs com orientação paisagem para melhor qualidade</li>
-                                    <li>• Imagens (JPG/PNG) são processadas mais rapidamente</li>
-                                    <li>• Sistema mantém cache para performance</li>
-                                    <li>• Avisos "Alta" prioridade têm destaque vermelho</li>
-                                    <li>• Documentos inativos ficam salvos mas não aparecem</li>
-                                  </ul>
-                                </div>
-                              </div>
-                            </SheetContent>
-                          </Sheet>
-                        </div>
-                      </div>
-                    </CardContent>
-                  </Card>
-              </div>
+                        </SheetContent>
+                      </Sheet>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+          </div>
             </TabsContent>
             
             {/* Sub-aba Automação */}
@@ -3079,176 +3071,7 @@ if (selectedDocType === "cardapio" && !docUnit) {
                 </CardContent>
               </Card>
 
-
-                </div>
-              </TabsContent>
-              
-              {/* Sub-aba Militares */}
-              <TabsContent value="militares">
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                  
-                  {/* Seção de Gerenciamento de Militares Completo */}
-                  <Card className="lg:col-span-2 border-green-200">
-                    <CardHeader className="bg-green-50">
-                      <div className="flex justify-between items-center">
-                        <div>
-                          <CardTitle className="flex items-center gap-2">
-                            <span>🎖️</span> Gerenciar Militares
-                          </CardTitle>
-                          <CardDescription>
-                            Lista completa de militares cadastrados com opções de edição
-                          </CardDescription>
-                        </div>
-                        <Button 
-                          onClick={() => {
-                            setEditingMilitary(null);
-                            setMilitaryEditorOpen(true);
-                          }}
-                          className="bg-green-600 hover:bg-green-700"
-                        >
-                          ➕ Novo Militar
-                        </Button>
-                      </div>
-                    </CardHeader>
-                    <CardContent className="pt-6">
-                      {loadingMilitary ? (
-                        <div className="text-center py-8">
-                          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-green-600 mx-auto"></div>
-                          <p className="mt-2 text-muted-foreground">Carregando militares...</p>
-                        </div>
-                      ) : (
-                        <div className="space-y-6">
-                          {militaryPersonnel.length === 0 ? (
-                            <div className="text-center py-8 text-muted-foreground">
-                              <p>Nenhum militar cadastrado</p>
-                            </div>
-                          ) : (
-                            <>
-                              {/* Seção de Oficiais */}
-                              {militaryPersonnel.filter(m => m.type === 'officer').length > 0 && (
-                                <div className="space-y-4">
-                                  <div className="flex items-center gap-2 pb-2 border-b">
-                                    <h3 className="text-lg font-semibold text-navy">👮 Oficiais</h3>
-                                    <span className="text-sm text-muted-foreground">
-                                      ({militaryPersonnel.filter(m => m.type === 'officer').length})
-                                    </span>
-                                  </div>
-                                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
-                                    {militaryPersonnel.filter(m => m.type === 'officer').map((military) => (
-                                      <div 
-                                        key={military.id} 
-                                        className="p-3 border rounded-lg hover:shadow-md transition-shadow bg-blue-50 border-blue-200"
-                                      >
-                                        <div className="flex justify-between items-start mb-2">
-                                          <div className="flex-1">
-                                            <div className="font-semibold text-sm text-blue-800">
-                                              {military.rank.toUpperCase()} ({(military as any).specialty?.toUpperCase() || 'S/E'})
-                                            </div>
-                                            <div className="text-base font-bold text-navy">
-                                              {military.name.toUpperCase()}
-                                            </div>
-                                          </div>
-                                          <div className="flex gap-1">
-                                            <Button
-                                              variant="outline"
-                                              size="sm"
-                                              onClick={() => handleEditMilitary(military)}
-                                              className="text-blue-600 border-blue-200 hover:bg-blue-100 h-7 w-7 p-0"
-                                            >
-                                              ✏️
-                                            </Button>
-                                            <Button
-                                              variant="outline"
-                                              size="sm"
-                                              onClick={() => handleDeleteMilitary(military.id)}
-                                              className="text-red-600 border-red-200 hover:bg-red-50 h-7 w-7 p-0"
-                                            >
-                                              🗑️
-                                            </Button>
-                                          </div>
-                                        </div>
-                                      </div>
-                                    ))}
-                                  </div>
-                                </div>
-                              )}
-
-                              {/* Seção de Praças */}
-                              {militaryPersonnel.filter(m => m.type === 'master').length > 0 && (
-                                <div className="space-y-4">
-                                  <div className="flex items-center gap-2 pb-2 border-b">
-                                    <h3 className="text-lg font-semibold text-green-700">🎖️ Praças</h3>
-                                    <span className="text-sm text-muted-foreground">
-                                      ({militaryPersonnel.filter(m => m.type === 'master').length})
-                                    </span>
-                                  </div>
-                                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
-                                    {militaryPersonnel.filter(m => m.type === 'master').map((military) => (
-                                      <div 
-                                        key={military.id} 
-                                        className="p-3 border rounded-lg hover:shadow-md transition-shadow bg-green-50 border-green-200"
-                                      >
-                                        <div className="flex justify-between items-start mb-2">
-                                          <div className="flex-1">
-                                            <div className="font-semibold text-sm text-green-800">
-                                              {military.rank.toUpperCase()} ({(military as any).specialty?.toUpperCase() || 'S/E'})
-                                            </div>
-                                            <div className="text-base font-bold text-navy">
-                                              {military.name.toUpperCase()}
-                                            </div>
-                                          </div>
-                                          <div className="flex gap-1">
-                                            <Button
-                                              variant="outline"
-                                              size="sm"
-                                              onClick={() => handleEditMilitary(military)}
-                                              className="text-green-600 border-green-200 hover:bg-green-100 h-7 w-7 p-0"
-                                            >
-                                              ✏️
-                                            </Button>
-                                            <Button
-                                              variant="outline"
-                                              size="sm"
-                                              onClick={() => handleDeleteMilitary(military.id)}
-                                              className="text-red-600 border-red-200 hover:bg-red-50 h-7 w-7 p-0"
-                                            >
-                                              🗑️
-                                            </Button>
-                                          </div>
-                                        </div>
-                                      </div>
-                                    ))}
-                                  </div>
-                                </div>
-                              )}
-
-                              {/* Estatísticas */}
-                              <div className="border-t pt-4 text-sm text-muted-foreground bg-gray-50 p-3 rounded">
-                                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                                  <div className="text-center">
-                                    <div className="text-2xl font-bold text-navy">{militaryPersonnel.length}</div>
-                                    <div>Total de Militares</div>
-                                  </div>
-                                  <div className="text-center">
-                                    <div className="text-2xl font-bold text-blue-600">{militaryPersonnel.filter(m => m.type === 'officer').length}</div>
-                                    <div>Oficiais</div>
-                                  </div>
-                                  <div className="text-center">
-                                    <div className="text-2xl font-bold text-green-600">{militaryPersonnel.filter(m => m.type === 'master').length}</div>
-                                    <div>Praças</div>
-                                  </div>
-                                </div>
-                              </div>
-                            </>
-                          )}
-                        </div>
-                      )}
-                    </CardContent>
-                  </Card>
-                  
-                </div>
-              </TabsContent>
-            </Tabs>
+            </div>
           </TabsContent>
 
           {/* Dialog do Editor de Militares */}
