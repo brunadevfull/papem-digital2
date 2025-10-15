@@ -1747,19 +1747,23 @@ if (selectedDocType === "cardapio" && !docUnit) {
               {plasaDocuments.map((doc) => (
                 <li key={doc.id} className="border rounded-md p-3 flex justify-between items-center document-card">
                   <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2 mb-1">
+                    <div className="flex flex-wrap items-start gap-2 mb-1">
                       <span className="text-lg">
                         {doc.type === "plasa" ? "📄" : "📋"}
                       </span>
                       <p className="font-medium truncate">{doc.title}</p>
                       <span className={`text-xs px-2 py-0.5 rounded-full status-badge ${
-                        doc.type === "plasa" 
-                          ? "bg-blue-100 text-blue-800" 
+                        doc.type === "plasa"
+                          ? "bg-blue-100 text-blue-800"
                           : "bg-purple-100 text-purple-800"
                       }`}>
                         PLASA
                       </span>
-                      <TagBadges tags={doc.tags} documentId={doc.id} />
+                      <TagBadges
+                        tags={doc.tags}
+                        documentId={doc.id}
+                        className={(doc.tags?.length ?? 0) > 2 ? "w-full" : ""}
+                      />
                     </div>
                     <div className="flex items-center gap-4 text-xs text-muted-foreground">
                       <span className="flex items-center gap-1">
@@ -1843,19 +1847,23 @@ if (selectedDocType === "cardapio" && !docUnit) {
               {escalaDocuments.filter(doc => doc.type === "escala").map((doc) => (
                 <li key={doc.id} className="border rounded-md p-3 flex justify-between items-center document-card">
                   <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2 mb-1">
+                    <div className="flex flex-wrap items-start gap-2 mb-1">
                       <span className="text-lg">📋</span>
                       <p className="font-medium truncate">{doc.title}</p>
                       {doc.category && (
                         <span className={`text-xs px-2 py-0.5 rounded-full status-badge ${
-                          doc.category === "oficial" 
-                            ? "bg-blue-100 text-blue-800" 
+                          doc.category === "oficial"
+                            ? "bg-blue-100 text-blue-800"
                             : "bg-green-100 text-green-800"
                         }`}>
                           {doc.category === "oficial" ? "👨‍✈️ Oficiais" : "👨‍🔧 Praças"}
                         </span>
                       )}
-                      <TagBadges tags={doc.tags} documentId={doc.id} />
+                      <TagBadges
+                        tags={doc.tags}
+                        documentId={doc.id}
+                        className={(doc.tags?.length ?? 0) > 2 ? "w-full" : ""}
+                      />
                     </div>
                     <div className="flex items-center gap-4 text-xs text-muted-foreground">
                       <span className="flex items-center gap-1">
@@ -1939,23 +1947,27 @@ if (selectedDocType === "cardapio" && !docUnit) {
               {cardapioDocuments.map((doc) => (
                 <li key={doc.id} className="border rounded-md p-3 flex justify-between items-center document-card">
                   <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2 mb-1">
+                    <div className="flex flex-wrap items-start gap-2 mb-1">
                       <span className="text-lg">🍽️</span>
                       <p className="font-medium truncate">{doc.title}</p>
                       <span className="text-xs bg-orange-100 text-orange-800 px-2 py-0.5 rounded-full status-badge">
                         CARDÁPIO
                       </span>
-                        {doc.unit && (
-                          <span className={`text-xs px-2 py-0.5 rounded-full status-badge ${
-                            doc.unit === "EAGM" 
-                              ? "bg-blue-100 text-blue-800" 
-                              : "bg-green-100 text-green-800"
-                          }`}>
-                            {doc.unit === "EAGM" ? "🏢 EAGM" : "⚓ 1º DN"}
-                          </span>
-                        )}
-                        <TagBadges tags={doc.tags} documentId={doc.id} />
-                                            </div>
+                      {doc.unit && (
+                        <span className={`text-xs px-2 py-0.5 rounded-full status-badge ${
+                          doc.unit === "EAGM"
+                            ? "bg-blue-100 text-blue-800"
+                            : "bg-green-100 text-green-800"
+                        }`}>
+                          {doc.unit === "EAGM" ? "🏢 EAGM" : "⚓ 1º DN"}
+                        </span>
+                      )}
+                      <TagBadges
+                        tags={doc.tags}
+                        documentId={doc.id}
+                        className={(doc.tags?.length ?? 0) > 2 ? "w-full" : ""}
+                      />
+                    </div>
                     <div className="flex items-center gap-4 text-xs text-muted-foreground">
                       <span className="flex items-center gap-1">
                         📅 {new Date(doc.uploadDate).toLocaleDateString('pt-BR')}
