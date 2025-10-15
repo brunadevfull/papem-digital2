@@ -59,7 +59,7 @@ const Index = () => {
             return `${currentOrigin}/api/duty-officers`;
           }
           if (currentHost === 'localhost' || currentHost === '127.0.0.1') {
-            return `http://localhost:5000/api/duty-officers`;
+            return `http://localhost:5001/api/duty-officers`;
           }
           return `${currentOrigin}/api/duty-officers`;
         };
