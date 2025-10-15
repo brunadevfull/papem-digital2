@@ -439,8 +439,7 @@ const getCurrentCardapioDoc = () => {
         maxImageSize: 1024 * 1024 * 10,
         isEvalSupported: false,
         fontExtraProperties: false,
-        useSystemFonts: false,
-        standardFontDataUrl: null
+        useSystemFonts: true
       });
       
       const pdf = await loadingTask.promise;
@@ -882,8 +881,7 @@ useEffect(() => {
         maxImageSize: 1024 * 1024 * 10,
         isEvalSupported: false,
         fontExtraProperties: false,
-        useSystemFonts: false,
-        standardFontDataUrl: null
+        useSystemFonts: true
       });
 
       const pdf = await loadingTask.promise;
