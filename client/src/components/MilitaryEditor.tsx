@@ -30,28 +30,32 @@ const RANKS = {
   ]
 };
 
-const SPECIALTIES = [
-  { value: 'IM', label: 'IM - Intendência da Marinha' },
-  { value: 'T', label: 'T - Transmissões' },
-  { value: 'QC-IM', label: 'QC-IM - Quadro Complementar Intendência' },
-  { value: 'RM2-T', label: 'RM2-T - Reserva Mobilizável Transmissões' },
-  { value: 'AA', label: 'AA - Administração' },
-  { value: 'PD', label: 'PD - Processamento de Dados' },
-  { value: 'CL', label: 'CL - Contabilidade' },
-  { value: 'ES', label: 'ES - Escrita' },
-  { value: 'EP', label: 'EP - Educação Física' },
-  { value: 'PL', label: 'PL - Paiol' },
-  { value: 'QI', label: 'QI - Química (Química Industrial)' },
-  { value: 'SI', label: 'SI - Sinais' },
-  { value: 'AD', label: 'AD - Administração' },
-  { value: 'EL', label: 'EL - Eletricidade' },
-  { value: 'MR', label: 'MR - Manobras e Reparos' },
-  { value: 'MO', label: 'MO - Motores' },
-  { value: 'BA', label: 'BA - Barbeiro' },
-  { value: 'AM', label: 'AM - Armamento' },
-  { value: 'CI', label: 'CI - Comunicações' },
-  { value: 'OS', label: 'OS - Operador de Sonar' }
-];
+const SPECIALTIES = {
+  officer: [
+    { value: 'QC-IM', label: 'QC-IM' },
+    { value: 'IM', label: 'IM' },
+    { value: 'T', label: 'T' },
+    { value: 'RM2-T', label: 'RM2-T' },
+    { value: 'AA', label: 'AA' }
+  ],
+  master: [
+    { value: 'PD', label: 'PD - Processamento de Dados' },
+    { value: 'CL', label: 'CL - Contabilidade' },
+    { value: 'ES', label: 'ES - Escrita' },
+    { value: 'EP', label: 'EP - Educação Física' },
+    { value: 'PL', label: 'PL - Paiol' },
+    { value: 'QI', label: 'QI - Química (Química Industrial)' },
+    { value: 'SI', label: 'SI - Sinais' },
+    { value: 'AD', label: 'AD - Administração' },
+    { value: 'EL', label: 'EL - Eletricidade' },
+    { value: 'MR', label: 'MR - Manobras e Reparos' },
+    { value: 'MO', label: 'MO - Motores' },
+    { value: 'BA', label: 'BA - Barbeiro' },
+    { value: 'AM', label: 'AM - Armamento' },
+    { value: 'CI', label: 'CI - Comunicações' },
+    { value: 'OS', label: 'OS - Operador de Sonar' }
+  ]
+} satisfies Record<'officer' | 'master', { value: string; label: string }[]>;
 
 const createFormState = (data?: MilitaryPersonnel | null) => ({
   name: data?.name ?? '',
@@ -96,7 +100,7 @@ export function MilitaryEditor({ isOpen, onClose, military, onSave }: MilitaryEd
   };
 
   const currentRankData = RANKS[formData.type].find(r => r.value === formData.rank);
-  const currentSpecialtyData = SPECIALTIES.find(s => s.value === formData.specialty);
+  const specialtyOptions = SPECIALTIES[formData.type];
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
@@ -169,7 +173,7 @@ export function MilitaryEditor({ isOpen, onClose, military, onSave }: MilitaryEd
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="none">Sem especialidade</SelectItem>
-                {SPECIALTIES.map((spec) => (
+                {specialtyOptions.map((spec) => (
                   <SelectItem key={spec.value} value={spec.value}>
                     {spec.label}
                   </SelectItem>
