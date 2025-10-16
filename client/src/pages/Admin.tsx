@@ -240,8 +240,8 @@ const Admin: React.FC = () => {
   // Estados para upload de documentos
   const [docUnit, setDocUnit] = useState<"EAGM" | "1DN" | undefined>(undefined);
   const [selectedDocType, setSelectedDocType] = useState<
-    "plasa" | "escala" | "cardapio" | ""
-  >("");
+    "plasa" | "escala" | "cardapio" | null
+  >(null);
   const [docTitle, setDocTitle] = useState("");
   const [docUrl, setDocUrl] = useState("");
   const [docCategory, setDocCategory] = useState<"oficial" | "praca" | undefined>(undefined);
@@ -1187,7 +1187,7 @@ const handleDocumentSubmit = async (e: React.FormEvent) => {
     setSelectedFile(null);
     setDocCategory(undefined);
     setDocUnit(undefined);
-    setSelectedDocType("");
+    setSelectedDocType(null);
 
     const fileInput = document.getElementById('docFile') as HTMLInputElement;
     if (fileInput) {
@@ -1565,7 +1565,7 @@ const handleDocumentSubmit = async (e: React.FormEvent) => {
           <div className="space-y-2">
             <Label htmlFor="docType">Tipo de Documento</Label>
             <Select
-              value={selectedDocType || undefined}
+              value={selectedDocType ?? ""}
               onValueChange={(value) => {
                 setSelectedDocType(value as "plasa" | "escala" | "cardapio");
                 if (value !== "escala") {
