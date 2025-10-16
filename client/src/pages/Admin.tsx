@@ -241,8 +241,8 @@ const Admin: React.FC = () => {
   // Estados para upload de documentos
   const [docUnit, setDocUnit] = useState<"EAGM" | "1DN" | undefined>(undefined);
   const [selectedDocType, setSelectedDocType] = useState<
-    "plasa" | "escala" | "cardapio" | undefined
-  >(undefined);
+    "plasa" | "escala" | "cardapio" | ""
+  >("");
   const [docTitle, setDocTitle] = useState("");
   const [docUrl, setDocUrl] = useState("");
   const [docCategory, setDocCategory] = useState<"oficial" | "praca" | undefined>(undefined);
@@ -1008,8 +1008,10 @@ const handleDocumentSubmit = async (e: React.FormEvent) => {
     return;
   }
 
+  const docType = selectedDocType as "plasa" | "escala" | "cardapio";
+
   // Substituir a validação existente por:
-  if (selectedDocType === "escala" && !docCategory) {
+  if (docType === "escala" && !docCategory) {
     toast({
       title: "Erro",
       description: "Selecione a categoria da escala (Oficial ou Praça).",
@@ -1018,7 +1020,7 @@ const handleDocumentSubmit = async (e: React.FormEvent) => {
     return;
   }
 
-  if (selectedDocType === "cardapio" && !docUnit) {
+  if (docType === "cardapio" && !docUnit) {
     toast({
       title: "Erro",
       description: "Selecione a unidade do cardápio (EAGM ou 1DN).",
@@ -1028,7 +1030,7 @@ const handleDocumentSubmit = async (e: React.FormEvent) => {
   }
 
   // ✅ DECLARE typeInfo UMA VEZ SÓ aqui no início
-  const typeInfo = getDocumentTypeInfo(selectedDocType);
+  const typeInfo = getDocumentTypeInfo(docType);
 
   try {
     setIsUploading(true);
@@ -1046,15 +1048,15 @@ const handleDocumentSubmit = async (e: React.FormEvent) => {
       const formData = new FormData();
       formData.append('pdf', selectedFile);
       
-      formData.append('type', selectedDocType);
+      formData.append('type', docType);
       formData.append('title', docTitle);
       
-      if (selectedDocType === "escala" && docCategory) {
+      if (docType === "escala" && docCategory) {
         formData.append('category', docCategory);
 
       }
 
-      if (selectedDocType === "cardapio" && docUnit) {
+      if (docType === "cardapio" && docUnit) {
         formData.append('unit', docUnit);
       }
 
@@ -1098,8 +1100,8 @@ const handleDocumentSubmit = async (e: React.FormEvent) => {
       console.log("📄 Adicionando documento ao contexto:", {
         title: docTitle,
         url: fullUrl,
-        type: selectedDocType,
-        category: selectedDocType === "escala" ? docCategory : undefined
+        type: docType,
+        category: docType === "escala" ? docCategory : undefined
       });
       
       const uploadTags = Array.isArray(uploadResult.data?.tags)
@@ -1107,13 +1109,13 @@ const handleDocumentSubmit = async (e: React.FormEvent) => {
         : [];
 
       const uploadUnit = (uploadResult.data?.unit as PDFDocument['unit'] | undefined)
-        ?? (selectedDocType === "cardapio" ? docUnit : undefined);
+        ?? (docType === "cardapio" ? docUnit : undefined);
 
       addDocument({
         title: docTitle,
         url: serverRelativeUrl,
-        type: selectedDocType,
-        category: selectedDocType === "escala" ? docCategory : undefined,
+        type: docType,
+        category: docType === "escala" ? docCategory : undefined,
         unit: uploadUnit,
         tags: uploadTags,
         active: true
@@ -1131,9 +1133,9 @@ const handleDocumentSubmit = async (e: React.FormEvent) => {
       addDocument({
         title: docTitle,
         url: fullUrl,
-        type: selectedDocType,
-        category: selectedDocType === "escala" ? docCategory : undefined,
-        unit: selectedDocType === "cardapio" ? docUnit : undefined,
+        type: docType,
+        category: docType === "escala" ? docCategory : undefined,
+        unit: docType === "cardapio" ? docUnit : undefined,
         tags: [],
         active: true
       });
@@ -1186,7 +1188,7 @@ const handleDocumentSubmit = async (e: React.FormEvent) => {
     setSelectedFile(null);
     setDocCategory(undefined);
     setDocUnit(undefined);
-    setSelectedDocType(undefined);
+    setSelectedDocType("");
 
     const fileInput = document.getElementById('docFile') as HTMLInputElement;
     if (fileInput) {
@@ -1564,7 +1566,7 @@ const handleDocumentSubmit = async (e: React.FormEvent) => {
           <div className="space-y-2">
             <Label htmlFor="docType">Tipo de Documento</Label>
             <Select
-              value={selectedDocType}
+              value={selectedDocType || undefined}
               onValueChange={(value) => {
                 setSelectedDocType(value as "plasa" | "escala" | "cardapio");
                 if (value !== "escala") {
