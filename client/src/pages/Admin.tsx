@@ -241,7 +241,9 @@ const Admin: React.FC = () => {
 
   // Estados para upload de documentos
   const [docUnit, setDocUnit] = useState<"EAGM" | "1DN" | undefined>(undefined);
-  const [selectedDocType, setSelectedDocType] = useState<"plasa" | "escala" | "cardapio">("plasa");
+  const [selectedDocType, setSelectedDocType] = useState<
+    "plasa" | "escala" | "cardapio" | undefined
+  >(undefined);
   const [docTitle, setDocTitle] = useState("");
   const [docUrl, setDocUrl] = useState("");
   const [docCategory, setDocCategory] = useState<"oficial" | "praca" | undefined>(undefined);
@@ -997,25 +999,34 @@ const handleDocumentSubmit = async (e: React.FormEvent) => {
     });
     return;
   }
-  
- // Substituir a validação existente por:
-if (selectedDocType === "escala" && !docCategory) {
-  toast({
-    title: "Erro",
-    description: "Selecione a categoria da escala (Oficial ou Praça).",
-    variant: "destructive"
-  });
-  return;
-}
 
-if (selectedDocType === "cardapio" && !docUnit) {
-  toast({
-    title: "Erro",
-    description: "Selecione a unidade do cardápio (EAGM ou 1DN).",
-    variant: "destructive"
-  });
-  return;
-}
+  if (!selectedDocType) {
+    toast({
+      title: "Erro",
+      description: "Selecione o tipo de documento antes de enviar.",
+      variant: "destructive"
+    });
+    return;
+  }
+
+  // Substituir a validação existente por:
+  if (selectedDocType === "escala" && !docCategory) {
+    toast({
+      title: "Erro",
+      description: "Selecione a categoria da escala (Oficial ou Praça).",
+      variant: "destructive"
+    });
+    return;
+  }
+
+  if (selectedDocType === "cardapio" && !docUnit) {
+    toast({
+      title: "Erro",
+      description: "Selecione a unidade do cardápio (EAGM ou 1DN).",
+      variant: "destructive"
+    });
+    return;
+  }
 
   // ✅ DECLARE typeInfo UMA VEZ SÓ aqui no início
   const typeInfo = getDocumentTypeInfo(selectedDocType);
@@ -1045,8 +1056,8 @@ if (selectedDocType === "cardapio" && !docUnit) {
       }
 
       if (selectedDocType === "cardapio" && docUnit) {
-  formData.append('unit', docUnit);
-}
+        formData.append('unit', docUnit);
+      }
 
       const progressInterval = setInterval(() => {
         setUploadProgress(prev => {
@@ -1176,7 +1187,8 @@ if (selectedDocType === "cardapio" && !docUnit) {
     setSelectedFile(null);
     setDocCategory(undefined);
     setDocUnit(undefined);
-    
+    setSelectedDocType(undefined);
+
     const fileInput = document.getElementById('docFile') as HTMLInputElement;
     if (fileInput) {
       fileInput.value = '';
@@ -1567,12 +1579,15 @@ if (selectedDocType === "cardapio" && !docUnit) {
         <CardContent className="space-y-4 pt-6">
           <div className="space-y-2">
             <Label htmlFor="docType">Tipo de Documento</Label>
-            <Select 
-              value={selectedDocType} 
+            <Select
+              value={selectedDocType}
               onValueChange={(value) => {
                 setSelectedDocType(value as "plasa" | "escala" | "cardapio");
                 if (value !== "escala") {
                   setDocCategory(undefined);
+                }
+                if (value !== "cardapio") {
+                  setDocUnit(undefined);
                 }
               }}
             >
