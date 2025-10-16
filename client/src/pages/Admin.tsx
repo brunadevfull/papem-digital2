@@ -1752,7 +1752,7 @@ const handleDocumentSubmit = async (e: React.FormEvent) => {
               Nenhum documento PLASA cadastrado.
             </p>
           ) : (
-            <ul className="space-y-2 max-h-48 overflow-y-auto">
+            <ul className="space-y-2">
               {plasaDocuments.map((doc) => (
                 <li key={doc.id} className="border rounded-md p-3 flex justify-between items-center document-card">
                   <div className="flex-1 min-w-0">
@@ -1852,7 +1852,7 @@ const handleDocumentSubmit = async (e: React.FormEvent) => {
               Nenhuma escala cadastrada.
             </p>
           ) : (
-            <ul className="space-y-2 max-h-48 overflow-y-auto">
+            <ul className="space-y-2">
               {escalaDocuments.filter(doc => doc.type === "escala").map((doc) => (
                 <li key={doc.id} className="border rounded-md p-3 flex justify-between items-center document-card">
                   <div className="flex-1 min-w-0">
@@ -1952,7 +1952,7 @@ const handleDocumentSubmit = async (e: React.FormEvent) => {
               Nenhum cardápio cadastrado.
             </p>
           ) : (
-            <ul className="space-y-2 max-h-48 overflow-y-auto">
+            <ul className="space-y-2">
               {cardapioDocuments.map((doc) => (
                 <li key={doc.id} className="border rounded-md p-3 flex justify-between items-center document-card">
                   <div className="flex-1 min-w-0">
