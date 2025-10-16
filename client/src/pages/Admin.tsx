@@ -241,7 +241,9 @@ const Admin: React.FC = () => {
 
   // Estados para upload de documentos
   const [docUnit, setDocUnit] = useState<"EAGM" | "1DN" | undefined>(undefined);
-  const [selectedDocType, setSelectedDocType] = useState<"plasa" | "escala" | "cardapio">("plasa");
+  const [selectedDocType, setSelectedDocType] = useState<
+    "plasa" | "escala" | "cardapio" | undefined
+  >(undefined);
   const [docTitle, setDocTitle] = useState("");
   const [docUrl, setDocUrl] = useState("");
   const [docCategory, setDocCategory] = useState<"oficial" | "praca" | undefined>(undefined);
@@ -979,7 +981,16 @@ const saveEditOfficer = async () => {
 
 const handleDocumentSubmit = async (e: React.FormEvent) => {
   e.preventDefault();
-  
+
+  if (!selectedDocType) {
+    toast({
+      title: "Erro",
+      description: "Selecione o tipo de documento.",
+      variant: "destructive"
+    });
+    return;
+  }
+
   if (!docTitle) {
     toast({
       title: "Erro",
@@ -1176,6 +1187,7 @@ if (selectedDocType === "cardapio" && !docUnit) {
     setSelectedFile(null);
     setDocCategory(undefined);
     setDocUnit(undefined);
+    setSelectedDocType(undefined);
     
     const fileInput = document.getElementById('docFile') as HTMLInputElement;
     if (fileInput) {
@@ -1567,12 +1579,15 @@ if (selectedDocType === "cardapio" && !docUnit) {
         <CardContent className="space-y-4 pt-6">
           <div className="space-y-2">
             <Label htmlFor="docType">Tipo de Documento</Label>
-            <Select 
-              value={selectedDocType} 
+            <Select
+              value={selectedDocType ?? undefined}
               onValueChange={(value) => {
                 setSelectedDocType(value as "plasa" | "escala" | "cardapio");
                 if (value !== "escala") {
                   setDocCategory(undefined);
+                }
+                if (value !== "cardapio") {
+                  setDocUnit(undefined);
                 }
               }}
             >
