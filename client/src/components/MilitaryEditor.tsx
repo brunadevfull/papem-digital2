@@ -44,25 +44,24 @@ const SPECIALTIES = [
   { value: 'QI', label: 'QI - Química Industrial' }
 ];
 
+const createFormState = (data?: MilitaryPersonnel | null) => ({
+  name: data?.name ?? '',
+  rank: data?.rank ?? '',
+  specialty: data?.specialty ?? 'none',
+  type: (data?.type ?? 'officer') as 'officer' | 'master'
+});
+
 export function MilitaryEditor({ isOpen, onClose, military, onSave }: MilitaryEditorProps) {
-  const [formData, setFormData] = useState({
-    name: military?.name || '',
-    rank: military?.rank || '',
-    specialty: military?.specialty || 'none',
-    type: military?.type || 'officer' as 'officer' | 'master'
-  });
+  const [formData, setFormData] = useState(() => createFormState(military));
   const [loading, setLoading] = useState(false);
 
   React.useEffect(() => {
-    if (military) {
-      setFormData({
-        name: military.name,
-        rank: military.rank,
-        specialty: military.specialty || 'none',
-        type: military.type
-      });
+    if (isOpen) {
+      setFormData(createFormState(military));
+    } else {
+      setFormData(createFormState());
     }
-  }, [military]);
+  }, [isOpen, military]);
 
   const handleSave = async () => {
     if (!formData.name.trim() || !formData.rank) return;
@@ -106,7 +105,7 @@ export function MilitaryEditor({ isOpen, onClose, military, onSave }: MilitaryEd
             <Select 
               value={formData.type} 
               onValueChange={(value: 'officer' | 'master') => {
-                setFormData({ ...formData, type: value, rank: '', specialty: '' });
+                setFormData({ ...formData, type: value, rank: '', specialty: 'none' });
               }}
             >
               <SelectTrigger>

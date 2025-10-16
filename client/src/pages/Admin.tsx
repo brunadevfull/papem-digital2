@@ -45,7 +45,6 @@ import {
 } from "@/components/ui/sheet";
 import { HoverCard, HoverCardContent, HoverCardTrigger } from "@/components/ui/hover-card";
 import { WeatherAlerts } from "@/components/WeatherAlerts";
-import { MilitaryInsignia } from "@/components/MilitaryInsignia";
 import { MilitaryEditor } from "@/components/MilitaryEditor";
 import { TagBadges } from "@/components/TagBadges";
 import { Lock, LogOut, Loader2 } from "lucide-react";
@@ -286,7 +285,7 @@ const Admin: React.FC = () => {
     console.log('🔄 Convertendo para display:', fullName, 'tipo:', type);
     
     // Se já está no formato correto (ex: "1T (IM) ELIEZER"), extrair dados
-    const formatoCorreto = /^([A-Z0-9]+)\s*(?:\(([A-Z-]+)\))?\s+(.+)$/;
+    const formatoCorreto = /^([A-Z0-9]+)\s*(?:\(([A-Z0-9-]+)\))?\s+(.+)$/;
     const match = fullName.match(formatoCorreto);
     
     if (match) {
@@ -2028,9 +2027,9 @@ const handleDocumentSubmit = async (e: React.FormEvent) => {
                       <div className="space-y-2">
                         <Label htmlFor="officerName">Nome do Oficial</Label>
                         <Select 
-                          value={(() => {
-                            // Se o nome já está formatado, extrair apenas o nome base
-                            const match = dutyOfficers.officerName?.match(/^[A-Z0-9]+\s*(?:\([A-Z-]+\))?\s+(.+)$/);
+                            value={(() => {
+                              // Se o nome já está formatado, extrair apenas o nome base
+                              const match = dutyOfficers.officerName?.match(/^[A-Z0-9]+\s*(?:\([A-Z0-9-]+\))?\s+(.+)$/);
                             return match ? match[1] : dutyOfficers.officerName || "";
                           })()} 
                           onValueChange={(value) => {
@@ -2082,9 +2081,9 @@ const handleDocumentSubmit = async (e: React.FormEvent) => {
                       <div className="space-y-2">
                         <Label htmlFor="masterName">Nome do Contramestre</Label>
                         <Select 
-                          value={(() => {
-                            // Se o nome já está formatado, extrair apenas o nome base
-                            const match = dutyOfficers.masterName?.match(/^[A-Z0-9]+\s*(?:\([A-Z-]+\))?\s+(.+)$/);
+                            value={(() => {
+                              // Se o nome já está formatado, extrair apenas o nome base
+                              const match = dutyOfficers.masterName?.match(/^[A-Z0-9]+\s*(?:\([A-Z0-9-]+\))?\s+(.+)$/);
                             return match ? match[1] : dutyOfficers.masterName || "";
                           })()} 
                           onValueChange={(value) => {
@@ -2166,18 +2165,7 @@ const handleDocumentSubmit = async (e: React.FormEvent) => {
                               <div className="flex items-center gap-2">
                                 {(() => {
                                   const converted = convertToDisplayFormat(dutyOfficers.officerName, 'officer');
-                                  return (
-                                    <>
-                                      {converted.rank && converted.specialty && (
-                                        <MilitaryInsignia 
-                                          rank={converted.rank.toLowerCase()} 
-                                          specialty={converted.specialty.toLowerCase()} 
-                                          size="sm"
-                                        />
-                                      )}
-                                      <span>{converted.displayName}</span>
-                                    </>
-                                  );
+                                  return <span>{converted.displayName}</span>;
                                 })()}
                               </div>
                             ) : (
@@ -2193,18 +2181,7 @@ const handleDocumentSubmit = async (e: React.FormEvent) => {
                               <div className="flex items-center gap-2">
                                 {(() => {
                                   const converted = convertToDisplayFormat(dutyOfficers.masterName, 'master');
-                                  return (
-                                    <>
-                                      {converted.rank && converted.specialty && (
-                                        <MilitaryInsignia 
-                                          rank={converted.rank.toLowerCase()} 
-                                          specialty={converted.specialty.toLowerCase()} 
-                                          size="sm"
-                                        />
-                                      )}
-                                      <span>{converted.displayName}</span>
-                                    </>
-                                  );
+                                  return <span>{converted.displayName}</span>;
                                 })()}
                               </div>
                             ) : (
