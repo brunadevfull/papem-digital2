@@ -121,7 +121,6 @@ const Admin: React.FC = () => {
     escalaDocuments,
     cardapioDocuments,
     addDocument,
-    updateDocument,
     deleteDocument,
     escalaAlternateInterval,
     setEscalaAlternateInterval,
@@ -1194,22 +1193,7 @@ const handleDocumentSubmit = async (e: React.FormEvent) => {
       fileInput.value = '';
     }
   };
-  
 
-  
- 
-  
-  // Funções para documentos
-    const toggleDocActive = (doc: PDFDocument) => {
-    updateDocument({ ...doc, active: !doc.active });
-    const typeInfo = getDocumentTypeInfo(doc.type);
-    toast({
-      title: doc.active ? `${typeInfo.name} desativado` : `${typeInfo.name} ativado`,
-      description: `O documento "${doc.title}" foi ${doc.active ? "desativado" : "ativado"}.`
-    });
-  };
-
-  
   const removeDocument = async (id: string) => {
     if (confirm("Tem certeza que deseja remover este documento?")) {
       const doc = [...plasaDocuments, ...escalaDocuments, ...cardapioDocuments].find(d => d.id === id);
@@ -1788,15 +1772,7 @@ const handleDocumentSubmit = async (e: React.FormEvent) => {
                       </span>
                     </div>
                   </div>
-                  <div className="flex gap-1 ml-2">
-                    <Button 
-                      variant={doc.active ? "default" : "outline"} 
-                      size="sm"
-                      onClick={() => toggleDocActive(doc)}
-                      title={doc.active ? "Documento ativo" : "Documento inativo"}
-                    >
-                      {doc.active ? "✅" : "💤"}
-                    </Button>
+                  <div className="flex items-center gap-2 ml-2">
                     <Sheet>
                       <SheetTrigger asChild>
                         <Button variant="outline" size="sm" title="Visualizar documento">👁️</Button>
@@ -1888,15 +1864,7 @@ const handleDocumentSubmit = async (e: React.FormEvent) => {
                       </span>
                     </div>
                   </div>
-                  <div className="flex gap-1 ml-2">
-                    <Button 
-                      variant={doc.active ? "default" : "outline"} 
-                      size="sm"
-                      onClick={() => toggleDocActive(doc)}
-                      title={doc.active ? "Escala ativa" : "Escala inativa"}
-                    >
-                      {doc.active ? "✅" : "💤"}
-                    </Button>
+                  <div className="flex items-center gap-2 ml-2">
                     <Sheet>
                       <SheetTrigger asChild>
                         <Button variant="outline" size="sm" title="Visualizar escala">👁️</Button>
@@ -1991,15 +1959,7 @@ const handleDocumentSubmit = async (e: React.FormEvent) => {
                       </span>
                     </div>
                   </div>
-                  <div className="flex gap-1 ml-2">
-                    <Button 
-                      variant={doc.active ? "default" : "outline"} 
-                      size="sm"
-                      onClick={() => toggleDocActive(doc)}
-                      title={doc.active ? "Cardápio ativo" : "Cardápio inativo"}
-                    >
-                      {doc.active ? "✅" : "💤"}
-                    </Button>
+                  <div className="flex items-center gap-2 ml-2">
                     <Sheet>
                       <SheetTrigger asChild>
                         <Button variant="outline" size="sm" title="Visualizar cardápio">👁️</Button>
