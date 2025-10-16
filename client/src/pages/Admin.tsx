@@ -979,204 +979,194 @@ const saveEditOfficer = async () => {
     }
   };
 
-const handleDocumentSubmit = async (e: React.FormEvent) => {
-  e.preventDefault();
+  const handleDocumentSubmit = async (event: React.FormEvent) => {
+    event.preventDefault();
 
-  if (!selectedDocType) {
-    toast({
-      title: "Erro",
-      description: "Selecione o tipo de documento.",
-      variant: "destructive"
-    });
-    return;
-  }
-
-  if (!docTitle) {
-    toast({
-      title: "Erro",
-      description: "Título é obrigatório.",
-      variant: "destructive"
-    });
-    return;
-  }
-
-  if (!selectedFile && !docUrl) {
-    toast({
-      title: "Erro",
-      description: "Selecione um arquivo ou forneça uma URL.",
-      variant: "destructive"
-    });
-    return;
-  }
-  
- // Substituir a validação existente por:
-if (selectedDocType === "escala" && !docCategory) {
-  toast({
-    title: "Erro",
-    description: "Selecione a categoria da escala (Oficial ou Praça).",
-    variant: "destructive"
-  });
-  return;
-}
-
-if (selectedDocType === "cardapio" && !docUnit) {
-  toast({
-    title: "Erro",
-    description: "Selecione a unidade do cardápio (EAGM ou 1DN).",
-    variant: "destructive"
-  });
-  return;
-}
-
-  // ✅ DECLARE typeInfo UMA VEZ SÓ aqui no início
-  const typeInfo = getDocumentTypeInfo(selectedDocType);
-
-  try {
-    setIsUploading(true);
-    setUploadProgress(0);
-    
-    if (selectedFile) {
-      console.log("📤 Iniciando upload do arquivo:", selectedFile.name);
-      
-      // ✅ USE a variável typeInfo já declarada (sem const)
+    if (!selectedDocType) {
       toast({
-        title: "Upload em andamento...",
-        description: `Enviando ${typeInfo.name} ${selectedFile.name} para o servidor...`
+        title: "Erro",
+        description: "Selecione o tipo de documento.",
+        variant: "destructive"
       });
+      return;
+    }
 
-      const formData = new FormData();
-      formData.append('pdf', selectedFile);
-      
-      formData.append('type', selectedDocType);
-      formData.append('title', docTitle);
-      
-      if (selectedDocType === "escala" && docCategory) {
-        formData.append('category', docCategory);
+    if (!docTitle) {
+      toast({
+        title: "Erro",
+        description: "Título é obrigatório.",
+        variant: "destructive"
+      });
+      return;
+    }
 
-      }
+    if (!selectedFile && !docUrl) {
+      toast({
+        title: "Erro",
+        description: "Selecione um arquivo ou forneça uma URL.",
+        variant: "destructive"
+      });
+      return;
+    }
 
-      if (selectedDocType === "cardapio" && docUnit) {
-  formData.append('unit', docUnit);
-}
+    if (selectedDocType === "escala" && !docCategory) {
+      toast({
+        title: "Erro",
+        description: "Selecione a categoria da escala (Oficial ou Praça).",
+        variant: "destructive"
+      });
+      return;
+    }
 
-      const progressInterval = setInterval(() => {
-        setUploadProgress(prev => {
-          if (prev >= 90) {
-            clearInterval(progressInterval);
-            return 90;
-          }
-          return prev + 10;
+    if (selectedDocType === "cardapio" && !docUnit) {
+      toast({
+        title: "Erro",
+        description: "Selecione a unidade do cardápio (EAGM ou 1DN).",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    const typeInfo = getDocumentTypeInfo(selectedDocType);
+
+    try {
+      setIsUploading(true);
+      setUploadProgress(0);
+
+      if (selectedFile) {
+        console.log("📤 Iniciando upload do arquivo:", selectedFile.name);
+
+        toast({
+          title: "Upload em andamento...",
+          description: `Enviando ${typeInfo.name} ${selectedFile.name} para o servidor...`
         });
-      }, 200);
 
-      const uploadUrl = getBackendUrl('/api/upload-pdf');
-      
-      console.log("📤 Enviando para:", uploadUrl);
-      
-      const uploadResponse = await authorizedFetch(uploadUrl, {
-        method: 'POST',
-        body: formData,
-      });
+        const formData = new FormData();
+        formData.append('pdf', selectedFile);
+        formData.append('type', selectedDocType);
+        formData.append('title', docTitle);
 
-      clearInterval(progressInterval);
-      setUploadProgress(100);
+        if (selectedDocType === "escala" && docCategory) {
+          formData.append('category', docCategory);
+        }
 
-      if (!uploadResponse.ok) {
-        const errorData = await uploadResponse.json().catch(() => ({}));
-        throw new Error(errorData.error || `Erro HTTP: ${uploadResponse.status}`);
+        if (selectedDocType === "cardapio" && docUnit) {
+          formData.append('unit', docUnit);
+        }
+
+        const progressInterval = setInterval(() => {
+          setUploadProgress((previousProgress) => {
+            if (previousProgress >= 90) {
+              clearInterval(progressInterval);
+              return 90;
+            }
+            return previousProgress + 10;
+          });
+        }, 200);
+
+        const uploadUrl = getBackendUrl('/api/upload-pdf');
+
+        console.log("📤 Enviando para:", uploadUrl);
+
+        const uploadResponse = await authorizedFetch(uploadUrl, {
+          method: 'POST',
+          body: formData,
+        });
+
+        clearInterval(progressInterval);
+        setUploadProgress(100);
+
+        if (!uploadResponse.ok) {
+          const errorData = await uploadResponse.json().catch(() => ({}));
+          throw new Error(errorData.error || `Erro HTTP: ${uploadResponse.status}`);
+        }
+
+        const uploadResult = await uploadResponse.json();
+        console.log("✅ Upload realizado com sucesso:", uploadResult);
+
+        if (!uploadResult.success) {
+          throw new Error(uploadResult.error || 'Upload falhou');
+        }
+
+        const serverRelativeUrl = String(uploadResult.data.url || '');
+        const fullUrl = getBackendUrl(serverRelativeUrl);
+
+        console.log("📄 Adicionando documento ao contexto:", {
+          title: docTitle,
+          url: fullUrl,
+          type: selectedDocType,
+          category: selectedDocType === "escala" ? docCategory : undefined
+        });
+
+        const uploadTags = Array.isArray(uploadResult.data?.tags)
+          ? uploadResult.data.tags
+          : [];
+
+        const uploadUnit = (uploadResult.data?.unit as PDFDocument['unit'] | undefined)
+          ?? (selectedDocType === "cardapio" ? docUnit : undefined);
+
+        addDocument({
+          title: docTitle,
+          url: serverRelativeUrl,
+          type: selectedDocType,
+          category: selectedDocType === "escala" ? docCategory : undefined,
+          unit: uploadUnit,
+          tags: uploadTags,
+          active: true
+        });
+
+        toast({
+          title: "Sucesso!",
+          description: `${typeInfo.name} enviado e salvo com sucesso.`
+        });
+      } else if (docUrl && !docUrl.startsWith('blob:')) {
+        const fullUrl = docUrl.startsWith('http') ? docUrl : getBackendUrl(docUrl);
+
+        addDocument({
+          title: docTitle,
+          url: fullUrl,
+          type: selectedDocType,
+          category: selectedDocType === "escala" ? docCategory : undefined,
+          unit: selectedDocType === "cardapio" ? docUnit : undefined,
+          tags: [],
+          active: true
+        });
+
+        toast({
+          title: "Sucesso!",
+          description: `${typeInfo.name} adicionado com sucesso.`
+        });
       }
 
-      const uploadResult = await uploadResponse.json();
-      console.log("✅ Upload realizado com sucesso:", uploadResult);
+      resetForm();
+    } catch (error) {
+      console.error('❌ Erro no upload:', error);
 
-      if (!uploadResult.success) {
-        throw new Error(uploadResult.error || 'Upload falhou');
+      let errorMessage = "Não foi possível enviar o arquivo. Tente novamente.";
+
+      const baseErrorMessage = getErrorMessage(error);
+      if (baseErrorMessage.includes('FILE_TOO_LARGE')) {
+        errorMessage = "Arquivo muito grande. Máximo permitido: 50MB.";
+      } else if (baseErrorMessage.includes('INVALID_FILE')) {
+        errorMessage = "Tipo de arquivo não suportado. Use PDFs ou imagens.";
+      } else if (baseErrorMessage.includes('MISSING_FIELDS')) {
+        errorMessage = "Dados obrigatórios estão faltando.";
+      } else if (baseErrorMessage.includes('fetch')) {
+        errorMessage = "Erro de conexão. Verifique se o servidor está rodando.";
+      } else if (baseErrorMessage !== 'Erro desconhecido') {
+        errorMessage = `Erro: ${baseErrorMessage}`;
       }
 
-      const serverRelativeUrl = String(uploadResult.data.url || '');
-      const fullUrl = getBackendUrl(serverRelativeUrl);
-      
-      console.log("📄 Adicionando documento ao contexto:", {
-        title: docTitle,
-        url: fullUrl,
-        type: selectedDocType,
-        category: selectedDocType === "escala" ? docCategory : undefined
-      });
-      
-      const uploadTags = Array.isArray(uploadResult.data?.tags)
-        ? uploadResult.data.tags
-        : [];
-
-      const uploadUnit = (uploadResult.data?.unit as PDFDocument['unit'] | undefined)
-        ?? (selectedDocType === "cardapio" ? docUnit : undefined);
-
-      addDocument({
-        title: docTitle,
-        url: serverRelativeUrl,
-        type: selectedDocType,
-        category: selectedDocType === "escala" ? docCategory : undefined,
-        unit: uploadUnit,
-        tags: uploadTags,
-        active: true
-      });
-      
-      // ✅ USE a variável typeInfo já declarada (sem const)
       toast({
-        title: "Sucesso!",
-        description: `${typeInfo.name} enviado e salvo com sucesso.`
+        title: "Erro no upload",
+        description: errorMessage,
+        variant: "destructive"
       });
-      
-    } else if (docUrl && !docUrl.startsWith('blob:')) {
-      const fullUrl = docUrl.startsWith('http') ? docUrl : getBackendUrl(docUrl);
-      
-      addDocument({
-        title: docTitle,
-        url: fullUrl,
-        type: selectedDocType,
-        category: selectedDocType === "escala" ? docCategory : undefined,
-        unit: selectedDocType === "cardapio" ? docUnit : undefined,
-        tags: [],
-        active: true
-      });
-      
-      // ✅ USE a variável typeInfo já declarada (sem const)
-      toast({
-        title: "Sucesso!",
-        description: `${typeInfo.name} adicionado com sucesso.`
-      });
+    } finally {
+      setIsUploading(false);
+      setUploadProgress(0);
     }
-    
-    resetForm();
-
-  } catch (error) {
-    console.error('❌ Erro no upload:', error);
-    
-    let errorMessage = "Não foi possível enviar o arquivo. Tente novamente.";
-
-    const baseErrorMessage = getErrorMessage(error);
-    if (baseErrorMessage.includes('FILE_TOO_LARGE')) {
-      errorMessage = "Arquivo muito grande. Máximo permitido: 50MB.";
-    } else if (baseErrorMessage.includes('INVALID_FILE')) {
-      errorMessage = "Tipo de arquivo não suportado. Use PDFs ou imagens.";
-    } else if (baseErrorMessage.includes('MISSING_FIELDS')) {
-      errorMessage = "Dados obrigatórios estão faltando.";
-    } else if (baseErrorMessage.includes('fetch')) {
-      errorMessage = "Erro de conexão. Verifique se o servidor está rodando.";
-    } else if (baseErrorMessage !== 'Erro desconhecido') {
-      errorMessage = `Erro: ${baseErrorMessage}`;
-    }
-    
-    
-    toast({
-      title: "Erro no upload",
-      description: errorMessage,
-      variant: "destructive"
-    });
-  } finally {
-    setIsUploading(false);
-    setUploadProgress(0);
-  }
-};
+  };
 
   const resetForm = () => {
     setDocTitle("");
