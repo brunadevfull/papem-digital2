@@ -36,12 +36,21 @@ const SPECIALTIES = [
   { value: 'QC-IM', label: 'QC-IM - Quadro Complementar Intendência' },
   { value: 'RM2-T', label: 'RM2-T - Reserva Mobilizável Transmissões' },
   { value: 'AA', label: 'AA - Administração' },
-  { value: 'PD', label: 'PD - Praticagem' },
-  { value: 'CL', label: 'CL - Comunicações' },
-  { value: 'ES', label: 'ES - Eletrônica' },
-  { value: 'EP', label: 'EP - Engenharia' },
-  { value: 'PL', label: 'PL - Pilotagem' },
-  { value: 'QI', label: 'QI - Química Industrial' }
+  { value: 'PD', label: 'PD - Processamento de Dados' },
+  { value: 'CL', label: 'CL - Contabilidade' },
+  { value: 'ES', label: 'ES - Escrita' },
+  { value: 'EP', label: 'EP - Educação Física' },
+  { value: 'PL', label: 'PL - Paiol' },
+  { value: 'QI', label: 'QI - Química (Química Industrial)' },
+  { value: 'SI', label: 'SI - Sinais' },
+  { value: 'AD', label: 'AD - Administração' },
+  { value: 'EL', label: 'EL - Eletricidade' },
+  { value: 'MR', label: 'MR - Manobras e Reparos' },
+  { value: 'MO', label: 'MO - Motores' },
+  { value: 'BA', label: 'BA - Barbeiro' },
+  { value: 'AM', label: 'AM - Armamento' },
+  { value: 'CI', label: 'CI - Comunicações' },
+  { value: 'OS', label: 'OS - Operador de Sonar' }
 ];
 
 const createFormState = (data?: MilitaryPersonnel | null) => ({
