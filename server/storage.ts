@@ -1,4 +1,4 @@
-import { users, notices, documents, dutyOfficers, militaryPersonnel, type User, type InsertUser, type Notice, type InsertNotice, type PDFDocument, type InsertDocument, type DutyOfficers, type InsertDutyOfficers, type MilitaryPersonnel, type InsertMilitaryPersonnel } from "@shared/schema";
+import { users, notices, documents, militaryPersonnel, type User, type InsertUser, type Notice, type InsertNotice, type PDFDocument, type InsertDocument, type DutyOfficers, type InsertDutyOfficers, type MilitaryPersonnel, type InsertMilitaryPersonnel } from "@shared/schema";
 import { DatabaseStorage } from "./db-storage";
 
 export interface IStorage {
@@ -429,6 +429,8 @@ export class MemStorage implements IStorage {
       id: 1, // Sempre ID 1 pois só temos um registro
       officerName: officers.officerName || "",
       masterName: officers.masterName || "",
+      officerRank: officers.officerRank,
+      masterRank: officers.masterRank,
       updatedAt: new Date()
     };
 

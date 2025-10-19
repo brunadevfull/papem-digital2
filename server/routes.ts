@@ -4,9 +4,10 @@ import { storage } from "./storage";
 import {
   insertNoticeSchema,
   insertDocumentSchema,
-  insertDutyOfficersSchema,
+  dutyOfficersPayloadSchema,
   insertMilitaryPersonnelSchema,
   type User,
+  type DutyOfficersPayload,
 } from "@shared/schema";
 import { z } from "zod";
 import multer from "multer";
@@ -1669,7 +1670,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       console.log('📝 Dados recebidos:', req.body);
       
       // Validar dados de entrada
-      const validatedData = insertDutyOfficersSchema.parse(req.body);
+      const validatedData: DutyOfficersPayload = dutyOfficersPayloadSchema.parse(req.body);
       
       const updatedOfficers = await storage.updateDutyOfficers(validatedData);
       

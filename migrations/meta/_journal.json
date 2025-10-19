@@ -29,6 +29,13 @@
       "when": 1760000000000,
       "tag": "0003_update_admin_password",
       "breakpoints": false
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1760903228444,
+      "tag": "0004_remove_duty_officers",
+      "breakpoints": false
     }
   ]
 }

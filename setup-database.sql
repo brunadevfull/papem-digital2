@@ -29,7 +29,6 @@ CREATE TABLE IF NOT EXISTS notices (
     updated_at TIMESTAMP DEFAULT NOW()
 );
 
--- Tabela de documentos
 CREATE TABLE IF NOT EXISTS documents (
     id SERIAL PRIMARY KEY,
     title TEXT NOT NULL,
@@ -40,14 +39,6 @@ CREATE TABLE IF NOT EXISTS documents (
     tags TEXT[] NOT NULL DEFAULT ARRAY[]::text[],
     active BOOLEAN NOT NULL DEFAULT true,
     upload_date TIMESTAMP DEFAULT NOW()
-);
-
--- Tabela de oficiais de serviço (estrutura simplificada)
-CREATE TABLE IF NOT EXISTS duty_officers (
-    id SERIAL PRIMARY KEY,
-    officer_name TEXT NOT NULL DEFAULT '', -- Nome completo com graduação: "1º Tenente KARINE"
-    master_name TEXT NOT NULL DEFAULT '',  -- Nome completo com graduação: "1º Sargento RAFAELA"
-    updated_at TIMESTAMP DEFAULT NOW()
 );
 
 -- Índices para performance
@@ -80,13 +71,8 @@ $$ language 'plpgsql';
 
 -- Aplicar trigger nas tabelas relevantes
 DROP TRIGGER IF EXISTS update_notices_updated_at ON notices;
-CREATE TRIGGER update_notices_updated_at 
-    BEFORE UPDATE ON notices 
-    FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
-
-DROP TRIGGER IF EXISTS update_duty_officers_updated_at ON duty_officers;
-CREATE TRIGGER update_duty_officers_updated_at 
-    BEFORE UPDATE ON duty_officers 
+CREATE TRIGGER update_notices_updated_at
+    BEFORE UPDATE ON notices
     FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 
 -- Permissões (ajustar conforme necessário)

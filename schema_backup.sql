@@ -62,44 +62,6 @@ ALTER SEQUENCE public.documents_id_seq OWNED BY public.documents.id;
 
 
 --
--- Name: duty_officers; Type: TABLE; Schema: public; Owner: postgres
---
-
-CREATE TABLE public.duty_officers (
-    id integer NOT NULL,
-    officer_name text,
-    master_name text,
-    updated_at timestamp without time zone DEFAULT CURRENT_TIMESTAMP,
-    officer_id integer,
-    master_id integer
-);
-
-
-ALTER TABLE public.duty_officers OWNER TO postgres;
-
---
--- Name: duty_officers_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
---
-
-CREATE SEQUENCE public.duty_officers_id_seq
-    AS integer
-    START WITH 1
-    INCREMENT BY 1
-    NO MINVALUE
-    NO MAXVALUE
-    CACHE 1;
-
-
-ALTER SEQUENCE public.duty_officers_id_seq OWNER TO postgres;
-
---
--- Name: duty_officers_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
---
-
-ALTER SEQUENCE public.duty_officers_id_seq OWNED BY public.duty_officers.id;
-
-
---
 -- Name: military_personnel; Type: TABLE; Schema: public; Owner: postgres
 --
 
@@ -230,13 +192,6 @@ ALTER TABLE ONLY public.documents ALTER COLUMN id SET DEFAULT nextval('public.do
 
 
 --
--- Name: duty_officers id; Type: DEFAULT; Schema: public; Owner: postgres
---
-
-ALTER TABLE ONLY public.duty_officers ALTER COLUMN id SET DEFAULT nextval('public.duty_officers_id_seq'::regclass);
-
-
---
 -- Name: military_personnel id; Type: DEFAULT; Schema: public; Owner: postgres
 --
 
@@ -263,14 +218,6 @@ ALTER TABLE ONLY public.users ALTER COLUMN id SET DEFAULT nextval('public.users_
 
 ALTER TABLE ONLY public.documents
     ADD CONSTRAINT documents_pkey PRIMARY KEY (id);
-
-
---
--- Name: duty_officers duty_officers_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
---
-
-ALTER TABLE ONLY public.duty_officers
-    ADD CONSTRAINT duty_officers_pkey PRIMARY KEY (id);
 
 
 --
@@ -303,22 +250,6 @@ ALTER TABLE ONLY public.users
 
 ALTER TABLE ONLY public.users
     ADD CONSTRAINT users_username_key UNIQUE (username);
-
-
---
--- Name: duty_officers duty_officers_master_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
---
-
-ALTER TABLE ONLY public.duty_officers
-    ADD CONSTRAINT duty_officers_master_id_fkey FOREIGN KEY (master_id) REFERENCES public.military_personnel(id);
-
-
---
--- Name: duty_officers duty_officers_officer_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
---
-
-ALTER TABLE ONLY public.duty_officers
-    ADD CONSTRAINT duty_officers_officer_id_fkey FOREIGN KEY (officer_id) REFERENCES public.military_personnel(id);
 
 
 --
