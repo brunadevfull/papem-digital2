@@ -77,8 +77,14 @@ const dutyOfficerRankValues = ["1t", "2t", "ct"] as const;
 const dutyMasterRankValues = ["3sg", "2sg", "1sg"] as const;
 
 const dutyOfficerNameSchema = z
-  .string()
-  .transform(value => value.trim())
+  .union([z.string(), z.null(), z.undefined()])
+  .transform(value => {
+    if (typeof value === "string") {
+      return value.trim();
+    }
+
+    return "";
+  })
   .optional()
   .default("");
 
