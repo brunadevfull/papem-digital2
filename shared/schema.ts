@@ -1,5 +1,5 @@
 import { sql } from "drizzle-orm";
-import { pgTable, text, serial, integer, boolean, timestamp } from "drizzle-orm/pg-core";
+import { pgTable, text, serial, boolean, timestamp } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 
@@ -31,16 +31,6 @@ export const documents = pgTable("documents", {
   active: boolean("active").notNull().default(true),
   tags: text("tags").array().default(sql`ARRAY[]::text[]`),
   uploadDate: timestamp("upload_date").defaultNow(),
-});
-
-export const dutyOfficers = pgTable("duty_officers", {
-  id: serial("id").primaryKey(),
-  officerId: integer("officer_id").references(() => militaryPersonnel.id),
-  masterId: integer("master_id").references(() => militaryPersonnel.id),
-  // Campos legados para compatibilidade durante migração
-  officerName: text("officer_name").default(""),
-  masterName: text("master_name").default(""),
-  updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });
 
 export const militaryPersonnel = pgTable("military_personnel", {
@@ -77,15 +67,26 @@ export const insertDocumentSchema = createInsertSchema(documents)
     unit: z.enum(["EAGM", "1DN"]).optional(),
   });
 
-export const insertDutyOfficersSchema = createInsertSchema(dutyOfficers).omit({
-  id: true,
-  updatedAt: true,
-});
-
 export const insertMilitaryPersonnelSchema = createInsertSchema(militaryPersonnel).omit({
   id: true,
   createdAt: true,
   updatedAt: true,
+});
+
+const dutyOfficerRankValues = ["1t", "2t", "ct"] as const;
+const dutyMasterRankValues = ["3sg", "2sg", "1sg"] as const;
+
+const dutyOfficerNameSchema = z
+  .string()
+  .transform(value => value.trim())
+  .optional()
+  .default("");
+
+export const dutyOfficersPayloadSchema = z.object({
+  officerName: dutyOfficerNameSchema,
+  masterName: dutyOfficerNameSchema,
+  officerRank: z.enum(dutyOfficerRankValues).optional(),
+  masterRank: z.enum(dutyMasterRankValues).optional(),
 });
 
 export type InsertUser = z.infer<typeof insertUserSchema>;
@@ -102,7 +103,17 @@ export type InsertDocument = Omit<z.infer<typeof insertDocumentSchema>, "tags" |
   tags?: string[];
   unit?: "EAGM" | "1DN";
 };
-export type DutyOfficers = typeof dutyOfficers.$inferSelect;
-export type InsertDutyOfficers = z.infer<typeof insertDutyOfficersSchema>;
+export type DutyOfficerRank = (typeof dutyOfficerRankValues)[number];
+export type DutyMasterRank = (typeof dutyMasterRankValues)[number];
+export type DutyOfficersPayload = z.infer<typeof dutyOfficersPayloadSchema>;
+export type InsertDutyOfficers = DutyOfficersPayload;
+export type DutyOfficers = {
+  id: number;
+  officerName: string;
+  masterName: string;
+  officerRank?: DutyOfficersPayload["officerRank"];
+  masterRank?: DutyOfficersPayload["masterRank"];
+  updatedAt: Date;
+};
 export type MilitaryPersonnel = typeof militaryPersonnel.$inferSelect;
 export type InsertMilitaryPersonnel = z.infer<typeof insertMilitaryPersonnelSchema>;

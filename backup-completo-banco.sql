@@ -59,21 +59,11 @@ CREATE TABLE IF NOT EXISTS documents (
   updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
--- Tabela de oficiais de serviço
-CREATE TABLE IF NOT EXISTS duty_officers (
-  id SERIAL PRIMARY KEY,
-  officer_name TEXT,
-  master_name TEXT,
-  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-  officer_id INTEGER REFERENCES military_personnel(id),
-  master_id INTEGER REFERENCES military_personnel(id)
-);
 
 -- 2. INSERIR TODOS OS DADOS
 -- ========================================
 
 -- Limpar tabelas antes de inserir (para restore limpo)
-TRUNCATE TABLE duty_officers CASCADE;
 TRUNCATE TABLE military_personnel RESTART IDENTITY CASCADE;
 TRUNCATE TABLE notices RESTART IDENTITY CASCADE;
 TRUNCATE TABLE documents RESTART IDENTITY CASCADE;
@@ -137,23 +127,16 @@ INSERT INTO military_personnel (id, name, rank, type, specialty, full_rank_name,
 INSERT INTO notices (id, title, content, priority, start_date, end_date, active, created_at, updated_at) VALUES
 (1, 'teste', 'teste', 'medium', '2025-07-06 20:54:39.158', '2025-07-07 20:54:39.158', true, '2025-07-06 20:54:57.474142', '2025-07-06 20:54:57.474142');
 
--- INSERIR OFICIAIS DE SERVIÇO
--- ========================================
-
-INSERT INTO duty_officers (id, officer_name, master_name, updated_at, officer_id, master_id) VALUES
-(1, '1T (IM) ALEXANDRIA', '1SG (CL) CARLA2', '2025-07-08 04:12:22.943846', 10, 26);
-
 -- RESETAR SEQUENCES PARA PRÓXIMOS INSERTS
 -- ========================================
 
 SELECT setval('military_personnel_id_seq', 53, true);
 SELECT setval('notices_id_seq', 1, true);
-SELECT setval('duty_officers_id_seq', 1, true);
 SELECT setval('documents_id_seq', 1, false);
 SELECT setval('users_id_seq', 1, false);
 
 -- ========================================
 -- FIM DO BACKUP
--- Total: 47 militares, 1 aviso, 1 oficial de serviço
+-- Total: 47 militares, 1 aviso
 -- Para restaurar: psql -d sua_base < backup-completo-banco.sql
 -- ========================================
