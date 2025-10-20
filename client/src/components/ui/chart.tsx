@@ -287,9 +287,29 @@ const ChartLegendContent = React.forwardRef<
           const key = `${nameKey || item.dataKey || "value"}`
           const itemConfig = getPayloadConfigFromPayload(config, item, key)
 
+          const fallbackLabel =
+            (typeof item.value === "string" && item.value.trim().length > 0
+              ? item.value
+              : undefined) ??
+            (typeof item.value === "number"
+              ? item.value.toLocaleString()
+              : undefined) ??
+            (typeof item.dataKey === "string" && item.dataKey.trim().length > 0
+              ? item.dataKey
+              : undefined) ??
+            key
+
+          const legendLabel = itemConfig?.label ?? fallbackLabel
+
+          const legendKey = `${key}-${
+            typeof item.value === "string" || typeof item.value === "number"
+              ? item.value
+              : ""
+          }`
+
           return (
             <div
-              key={item.value}
+              key={legendKey}
               className={cn(
                 "flex items-center gap-1.5 [&>svg]:h-3 [&>svg]:w-3 [&>svg]:text-muted-foreground"
               )}
@@ -304,7 +324,13 @@ const ChartLegendContent = React.forwardRef<
                   }}
                 />
               )}
-              {itemConfig?.label}
+              {typeof legendLabel === "string" || typeof legendLabel === "number" ? (
+                <span className="text-xs font-medium text-foreground">
+                  {legendLabel}
+                </span>
+              ) : (
+                legendLabel
+              )}
             </div>
           )
         })}
