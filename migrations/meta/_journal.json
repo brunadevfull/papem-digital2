@@ -36,6 +36,13 @@
       "when": 1760903228444,
       "tag": "0004_remove_duty_officers",
       "breakpoints": false
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1761903228444,
+      "tag": "0005_create_duty_assignments",
+      "breakpoints": false
     }
   ]
 }
