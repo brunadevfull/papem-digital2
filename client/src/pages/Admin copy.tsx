@@ -44,6 +44,7 @@ import {
   SheetTrigger 
 } from "@/components/ui/sheet";
 import { HoverCard, HoverCardContent, HoverCardTrigger } from "@/components/ui/hover-card";
+import { resolveBackendUrl } from "@/utils/backend";
 
 const Admin: React.FC = () => {
   const { 
@@ -104,31 +105,11 @@ const Admin: React.FC = () => {
   
   // Função para obter URL completa do backend - DETECTAR AMBIENTE
   const getBackendUrl = (path: string): string => {
-    if (path.startsWith('http') || path.startsWith('blob:') || path.startsWith('data:')) {
+    if (!path || path.startsWith('http') || path.startsWith('blob:') || path.startsWith('data:')) {
       return path;
     }
-    
-    // Detectar se estamos no Replit ou desenvolvimento local
-    const isReplit = window.location.hostname.includes('replit.dev') || window.location.hostname.includes('replit.co');
-    
-    if (isReplit) {
-      // No Replit, usar o mesmo domínio atual
-      const currentOrigin = window.location.origin;
-      
-      if (path.startsWith('/')) {
-        return `${currentOrigin}${path}`;
-      }
-      return `${currentOrigin}/${path}`;
-    } else {
-      // Desenvolvimento local - usar localhost:5000
-      const backendPort = '5000';
-      const backendHost = 'localhost';
-      
-      if (path.startsWith('/')) {
-        return `http://${backendHost}:${backendPort}${path}`;
-      }
-      return `http://${backendHost}:${backendPort}/${path}`;
-    }
+
+    return resolveBackendUrl(path);
   };
   
   // Função para verificar status do servidor

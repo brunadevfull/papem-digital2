@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Sistema Display Marinha - Gerador de Pacote Offline Completo
-# Versão otimizada para Replit com TODAS as dependências
+# Versão otimizada para produção com TODAS as dependências
 
 set -e
 
