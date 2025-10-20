@@ -304,7 +304,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   if (process.env.DATABASE_URL) {
     sessionOptions.store = new PgSession({
       conString: process.env.DATABASE_URL,
-      tableName: 'sessions',
+      tableName: 'session',
       createTableIfMissing: true,
     });
   }
