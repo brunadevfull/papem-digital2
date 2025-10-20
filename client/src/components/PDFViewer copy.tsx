@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef, useCallback } from "react";
 import { useDisplay } from "@/context/DisplayContext";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { resolveBackendUrl } from "@/utils/backend";
 
 const IS_DEV_MODE = process.env.NODE_ENV === 'development';
 
@@ -140,31 +141,11 @@ const PDFViewer: React.FC<PDFViewerProps> = ({
 
   // Função para obter a URL completa do servidor backend - DETECTAR AMBIENTE
   const getBackendUrl = (path: string): string => {
-    if (path.startsWith('http') || path.startsWith('blob:') || path.startsWith('data:')) {
+    if (!path || path.startsWith('http') || path.startsWith('blob:') || path.startsWith('data:')) {
       return path;
     }
-    
-    // Detectar se estamos no Replit ou desenvolvimento local
-    const isReplit = window.location.hostname.includes('replit.dev') || window.location.hostname.includes('replit.co');
-    
-    if (isReplit) {
-      // No Replit, usar o mesmo domínio atual
-      const currentOrigin = window.location.origin;
-      
-      if (path.startsWith('/')) {
-        return `${currentOrigin}${path}`;
-      }
-      return `${currentOrigin}/${path}`;
-    } else {
-      // Desenvolvimento local - usar localhost:5000
-      const backendPort = '5000';
-      const backendHost = 'localhost';
-      
-      if (path.startsWith('/')) {
-        return `http://${backendHost}:${backendPort}${path}`;
-      }
-      return `http://${backendHost}:${backendPort}/${path}`;
-    }
+
+    return resolveBackendUrl(path);
   };
 
   // CORREÇÃO: Função para determinar a URL do documento com alternância

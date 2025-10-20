@@ -2,7 +2,7 @@
 
 ## Situação Atual
 
-O sistema está funcionando perfeitamente no Replit com todas as funcionalidades implementadas:
+O sistema está funcionando perfeitamente em ambiente de desenvolvimento com todas as funcionalidades implementadas:
 
 - ✅ Horário do pôr do sol corrigido (17:18 para Rio de Janeiro)
 - ✅ Layout responsivo completo (mobile, tablet, desktop)
@@ -10,9 +10,9 @@ O sistema está funcionando perfeitamente no Replit com todas as funcionalidades
 - ✅ Cache inteligente e auto-restart implementados
 - ✅ Todas as 335 dependências npm instaladas
 
-## Problema com Empacotamento no Replit
+## Problema com Empacotamento em Plataformas Online
 
-O ambiente Replit tem limitações para criar pacotes offline devido a:
+Algumas plataformas de desenvolvimento em nuvem têm limitações para criar pacotes offline devido a:
 - Restrições no sistema de arquivos virtual
 - Problemas com links simbólicos no node_modules
 - Timeouts em downloads grandes
@@ -31,10 +31,10 @@ set -e
 
 echo "=== Criando Pacote Offline - Sistema Display Marinha ==="
 
-# Baixar código fonte do Replit
+# Baixar código fonte do repositório
 echo "📥 Baixando código fonte..."
 git clone https://github.com/seu-usuario/sistema-display-marinha.git || {
-    echo "Baixe o código fonte manualmente do Replit"
+    echo "Baixe o código fonte manualmente do repositório"
     echo "Ou copie todos os arquivos para um diretório local"
 }
 
@@ -200,7 +200,7 @@ echo "4. sudo ./install/instalar.sh"
 
 Se preferir fazer manualmente:
 
-1. **Baixar código fonte completo do Replit**
+1. **Baixar código fonte completo do repositório**
 2. **Em uma máquina com internet, executar:**
    ```bash
    npm install  # Instalar todas as dependências
@@ -281,7 +281,7 @@ Após criar o pacote, teste em uma VM Oracle Linux limpa:
 
 ## Suporte
 
-O sistema está totalmente funcional no Replit. O pacote offline permitirá a mesma funcionalidade em Oracle Linux sem internet, incluindo:
+O sistema está totalmente funcional no ambiente de desenvolvimento padrão. O pacote offline permitirá a mesma funcionalidade em Oracle Linux sem internet, incluindo:
 
 - Exibição automática de PLASA com scroll
 - Rotação de escalas a cada 30 segundos  
