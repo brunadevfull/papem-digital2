@@ -851,16 +851,27 @@ const saveEditOfficer = async () => {
     try {
       const response = await fetchBackend('/api/duty-officers');
       const data = await response.json();
-      
+
       if (data.success && data.officers) {
         console.log('👮 Dados carregados do servidor:', data.officers);
+        const validFromDate = data.officers.validFrom
+          ? new Date(data.officers.validFrom)
+          : undefined;
+        const updatedAtDate = data.officers.updatedAt
+          ? new Date(data.officers.updatedAt)
+          : undefined;
+
         setDutyOfficers({
           officerName: data.officers.officerName || "",
           officerRank: data.officers.officerRank || "1t",
           masterName: data.officers.masterName || "",
           masterRank: data.officers.masterRank || "3sg",
-          validFrom: data.officers.validFrom,
-          updatedAt: data.officers.updatedAt
+          validFrom: validFromDate && !Number.isNaN(validFromDate.getTime())
+            ? validFromDate.toISOString()
+            : undefined,
+          updatedAt: updatedAtDate && !Number.isNaN(updatedAtDate.getTime())
+            ? updatedAtDate.toISOString()
+            : undefined
         });
       }
     } catch (error) {
@@ -884,14 +895,25 @@ const saveEditOfficer = async () => {
     setIsLoadingOfficers(true);
     try {
       console.log('💾 Salvando oficiais:', dutyOfficers);
-      
+
       // Os nomes já estão no formato correto (ex: "1T (IM) ALEXANDRIA")
       // Apenas passar diretamente para o servidor
+      const validFromDate = (() => {
+        if (dutyOfficers.validFrom) {
+          const parsed = new Date(dutyOfficers.validFrom);
+          if (!Number.isNaN(parsed.getTime())) {
+            return parsed.toISOString();
+          }
+        }
+        return new Date().toISOString();
+      })();
+
       const officersData = {
         officerName: dutyOfficers.officerName,
         masterName: dutyOfficers.masterName,
         officerRank: dutyOfficers.officerRank,
-        masterRank: dutyOfficers.masterRank
+        masterRank: dutyOfficers.masterRank,
+        validFrom: validFromDate
       };
 
       console.log('📝 Dados sendo enviados:', officersData);
