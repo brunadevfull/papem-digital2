@@ -108,6 +108,7 @@ interface MilitaryPersonnel {
   name: string;
   type: 'officer' | 'master';
   rank: string;
+  specialty?: string | null;
   fullRankName?: string;
   active?: boolean;
 }
@@ -261,14 +262,14 @@ const Admin: React.FC = () => {
   const [isLoadingOfficers, setIsLoadingOfficers] = useState(false);
   
   // 🔥 NOVO: Estados para dados dinâmicos da combobox
-  const [availableOfficers, setAvailableOfficers] = useState<any[]>([]);
-  const [availableMasters, setAvailableMasters] = useState<any[]>([]);
+  const [availableOfficers, setAvailableOfficers] = useState<MilitaryPersonnel[]>([]);
+  const [availableMasters, setAvailableMasters] = useState<MilitaryPersonnel[]>([]);
   const [isLoadingComboboxData, setIsLoadingComboboxData] = useState(false);
 
   // Estados para edição de militares - agora carregados da API
 
-  const [dbOfficers, setDbOfficers] = useState<any[]>([]);
-  const [dbMasters, setDbMasters] = useState<any[]>([]);
+  const [dbOfficers, setDbOfficers] = useState<MilitaryPersonnel[]>([]);
+  const [dbMasters, setDbMasters] = useState<MilitaryPersonnel[]>([]);
   const [newOfficerName, setNewOfficerName] = useState("");
   const [newMasterName, setNewMasterName] = useState("");
   const [editingOfficer, setEditingOfficer] = useState<{id: number, name: string} | null>(null);
@@ -279,6 +280,48 @@ const Admin: React.FC = () => {
   const [militaryEditorOpen, setMilitaryEditorOpen] = useState(false);
   const [editingMilitary, setEditingMilitary] = useState<MilitaryPersonnel | null>(null);
   const [militaryPersonnel, setMilitaryPersonnel] = useState<MilitaryPersonnel[]>([]);
+
+  const formatRankWithSpecialty = (
+    rank?: string | null,
+    specialty?: string | null
+  ) => {
+    const rankText = rank ? rank.toUpperCase() : "";
+    const specialtyText = specialty ? ` (${specialty.toUpperCase()})` : "";
+    return `${rankText}${specialtyText}`.trim();
+  };
+
+  const formatMilitaryLabel = (
+    military: Pick<MilitaryPersonnel, "rank" | "specialty" | "name"> | null | undefined
+  ) => {
+    if (!military) {
+      return "";
+    }
+
+    const baseRank = formatRankWithSpecialty(military.rank, military.specialty);
+    const rankPart = baseRank
+      ? `${baseRank}${military.specialty ? "" : " (S/E)"}`.trim()
+      : "";
+    const namePart = military.name ? military.name.toUpperCase() : "";
+    return [rankPart, namePart].filter(Boolean).join(" ");
+  };
+
+  const resolveFullRankName = (
+    military: Pick<MilitaryPersonnel, "rank" | "fullRankName"> | null | undefined
+  ) => {
+    if (!military) {
+      return "";
+    }
+
+    if (military.fullRankName) {
+      return military.fullRankName;
+    }
+
+    if (!military.rank) {
+      return "";
+    }
+
+    return RANK_FULL_NAME_MAP[military.rank as keyof typeof RANK_FULL_NAME_MAP] ?? "";
+  };
 
   // Função para converter nomes salvos no banco para formato de exibição correto
   const convertToDisplayFormat = (fullName: string, type: 'officer' | 'master'): { displayName: string; rank: string; specialty: string | null; name: string } => {
@@ -360,15 +403,15 @@ const Admin: React.FC = () => {
       setLoadingMilitary(true);
       const response = await fetchBackend('/api/military-personnel');
       
-      if (response.ok) {
-        const result = await response.json();
-        const personnel = result.data || [];
-        
-        setDbOfficers(personnel.filter((p: any) => p.type === 'officer'));
-        setDbMasters(personnel.filter((p: any) => p.type === 'master'));
-        
-        // Atualizar lista completa para o editor
-        setMilitaryPersonnel(personnel);
+        if (response.ok) {
+          const result = await response.json();
+          const personnel = (result.data || []) as MilitaryPersonnel[];
+
+          setDbOfficers(personnel.filter(p => p.type === 'officer'));
+          setDbMasters(personnel.filter(p => p.type === 'master'));
+
+          // Atualizar lista completa para o editor
+          setMilitaryPersonnel(personnel);
       }
     } catch (error) {
       console.error('Erro ao carregar militares:', error);
@@ -2036,14 +2079,14 @@ const handleDocumentSubmit = async (e: React.FormEvent) => {
                               const match = dutyOfficers.officerName?.match(/^[A-Z0-9]+\s*(?:\([A-Z0-9-]+\))?\s+(.+)$/);
                             return match ? match[1] : dutyOfficers.officerName || "";
                           })()} 
-                          onValueChange={(value) => {
-                            console.log('🔄 Selecionando oficial:', value);
-                            const officer = availableOfficers.find(o => o.name === value);
-                            console.log('👮 Oficial encontrado:', officer);
-                            // Criar nome formatado imediatamente
-                            const formattedName = officer ? 
-                              `${officer.rank.toUpperCase()}${officer.specialty ? ` (${officer.specialty.toUpperCase()})` : ''} ${officer.name}` : 
-                              value;
+                            onValueChange={(value) => {
+                              console.log('🔄 Selecionando oficial:', value);
+                              const officer = availableOfficers.find(o => o.name === value);
+                              console.log('👮 Oficial encontrado:', officer);
+                              // Criar nome formatado imediatamente
+                              const formattedName = officer ?
+                                formatMilitaryLabel(officer) :
+                                value.toUpperCase();
                             
                             const newOfficers = {
                               ...dutyOfficers, 
@@ -2061,7 +2104,7 @@ const handleDocumentSubmit = async (e: React.FormEvent) => {
                           <SelectContent>
                             {availableOfficers.map((officer, index) => (
                               <SelectItem key={`officer-${index}-${officer.name}`} value={officer.name}>
-                                {officer.name}
+                                {formatMilitaryLabel(officer)}
                               </SelectItem>
                             ))}
                             {isLoadingComboboxData && (
@@ -2090,14 +2133,14 @@ const handleDocumentSubmit = async (e: React.FormEvent) => {
                               const match = dutyOfficers.masterName?.match(/^[A-Z0-9]+\s*(?:\([A-Z0-9-]+\))?\s+(.+)$/);
                             return match ? match[1] : dutyOfficers.masterName || "";
                           })()} 
-                          onValueChange={(value) => {
-                            console.log('🔄 Selecionando contramestre:', value);
-                            const master = availableMasters.find(m => m.name === value);
-                            console.log('⚓ Contramestre encontrado:', master);
-                            // Criar nome formatado imediatamente
-                            const formattedMasterName = master ? 
-                              `${master.rank.toUpperCase()}${master.specialty ? ` (${master.specialty.toUpperCase()})` : ''} ${master.name}` : 
-                              value;
+                            onValueChange={(value) => {
+                              console.log('🔄 Selecionando contramestre:', value);
+                              const master = availableMasters.find(m => m.name === value);
+                              console.log('⚓ Contramestre encontrado:', master);
+                              // Criar nome formatado imediatamente
+                              const formattedMasterName = master ?
+                                formatMilitaryLabel(master) :
+                                value.toUpperCase();
                             
                             setDutyOfficers({
                               ...dutyOfficers, 
@@ -2113,7 +2156,7 @@ const handleDocumentSubmit = async (e: React.FormEvent) => {
                           <SelectContent>
                             {availableMasters.map((master, index) => (
                               <SelectItem key={`master-${index}-${master.name}`} value={master.name}>
-                                {master.name}
+                                {formatMilitaryLabel(master)}
                               </SelectItem>
                             ))}
                             {isLoadingComboboxData && (
@@ -2765,8 +2808,13 @@ const handleDocumentSubmit = async (e: React.FormEvent) => {
                                     <div className="flex justify-between items-start mb-2">
                                       <div className="flex-1">
                                         <div className="font-semibold text-sm text-blue-800">
-                                          {military.rank.toUpperCase()} ({(military as any).specialty?.toUpperCase() || 'S/E'})
+                                          {`${formatRankWithSpecialty(military.rank, military.specialty)}${military.specialty ? '' : ' (S/E)'}`}
                                         </div>
+                                        {resolveFullRankName(military) && (
+                                          <div className="text-xs text-blue-700/80">
+                                            {resolveFullRankName(military)}
+                                          </div>
+                                        )}
                                         <div className="text-base font-bold text-navy">
                                           {military.name.toUpperCase()}
                                         </div>
@@ -2814,8 +2862,13 @@ const handleDocumentSubmit = async (e: React.FormEvent) => {
                                     <div className="flex justify-between items-start mb-2">
                                       <div className="flex-1">
                                         <div className="font-semibold text-sm text-green-800">
-                                          {military.rank.toUpperCase()} ({(military as any).specialty?.toUpperCase() || 'S/E'})
+                                          {`${formatRankWithSpecialty(military.rank, military.specialty)}${military.specialty ? '' : ' (S/E)'}`}
                                         </div>
+                                        {resolveFullRankName(military) && (
+                                          <div className="text-xs text-green-700/80">
+                                            {resolveFullRankName(military)}
+                                          </div>
+                                        )}
                                         <div className="text-base font-bold text-navy">
                                           {military.name.toUpperCase()}
                                         </div>
@@ -2932,8 +2985,13 @@ const handleDocumentSubmit = async (e: React.FormEvent) => {
                                         <div className="flex justify-between items-start mb-2">
                                           <div className="flex-1">
                                             <div className="font-semibold text-sm text-blue-800">
-                                              {military.rank.toUpperCase()} ({(military as any).specialty?.toUpperCase() || 'S/E'})
+                                              {`${formatRankWithSpecialty(military.rank, military.specialty)}${military.specialty ? '' : ' (S/E)'}`}
                                             </div>
+                                            {resolveFullRankName(military) && (
+                                              <div className="text-xs text-blue-700/80">
+                                                {resolveFullRankName(military)}
+                                              </div>
+                                            )}
                                             <div className="text-base font-bold text-navy">
                                               {military.name.toUpperCase()}
                                             </div>
@@ -2981,8 +3039,13 @@ const handleDocumentSubmit = async (e: React.FormEvent) => {
                                         <div className="flex justify-between items-start mb-2">
                                           <div className="flex-1">
                                             <div className="font-semibold text-sm text-green-800">
-                                              {military.rank.toUpperCase()} ({(military as any).specialty?.toUpperCase() || 'S/E'})
+                                              {`${formatRankWithSpecialty(military.rank, military.specialty)}${military.specialty ? '' : ' (S/E)'}`}
                                             </div>
+                                            {resolveFullRankName(military) && (
+                                              <div className="text-xs text-green-700/80">
+                                                {resolveFullRankName(military)}
+                                              </div>
+                                            )}
                                             <div className="text-base font-bold text-navy">
                                               {military.name.toUpperCase()}
                                             </div>
