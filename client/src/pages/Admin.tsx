@@ -254,7 +254,9 @@ const Admin: React.FC = () => {
     officerName: "",
     officerRank: "1t" as "1t" | "2t" | "ct",
     masterName: "",
-    masterRank: "3sg" as "3sg" | "2sg" | "1sg"
+    masterRank: "3sg" as "3sg" | "2sg" | "1sg",
+    validFrom: undefined as string | undefined,
+    updatedAt: undefined as string | undefined
   });
   const [isLoadingOfficers, setIsLoadingOfficers] = useState(false);
   
@@ -813,7 +815,9 @@ const saveEditOfficer = async () => {
           officerName: data.officers.officerName || "",
           officerRank: data.officers.officerRank || "1t",
           masterName: data.officers.masterName || "",
-          masterRank: data.officers.masterRank || "3sg"
+          masterRank: data.officers.masterRank || "3sg",
+          validFrom: data.officers.validFrom,
+          updatedAt: data.officers.updatedAt
         });
       }
     } catch (error) {

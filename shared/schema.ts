@@ -40,10 +40,19 @@ export const militaryPersonnel = pgTable("military_personnel", {
   type: text("type").notNull().$type<"officer" | "master">(),
   specialty: text("specialty"),
   fullRankName: text("full_rank_name").notNull(),
-  dutyRole: text("duty_role").$type<"officer" | "master" | null>(), // 🔥 NOVO: Papel no serviço (officer, master ou null)
   active: boolean("active").notNull().default(true),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const dutyAssignments = pgTable("duty_assignments", {
+  id: serial("id").primaryKey(),
+  officerName: text("officer_name").notNull(),
+  officerRank: text("officer_rank").$type<"1t" | "2t" | "ct" | null>(),
+  masterName: text("master_name").notNull(),
+  masterRank: text("master_rank").$type<"3sg" | "2sg" | "1sg" | null>(),
+  validFrom: timestamp("valid_from").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
 });
 
 export const insertUserSchema = createInsertSchema(users).pick({
@@ -93,6 +102,19 @@ export const dutyOfficersPayloadSchema = z.object({
   masterName: dutyOfficerNameSchema,
   officerRank: z.enum(dutyOfficerRankValues).optional(),
   masterRank: z.enum(dutyMasterRankValues).optional(),
+  validFrom: z
+    .union([z.string(), z.date()])
+    .optional()
+    .transform(value => {
+      if (!value) return undefined;
+
+      const date = value instanceof Date ? value : new Date(value);
+      if (Number.isNaN(date.getTime())) {
+        throw new Error("Invalid validFrom date");
+      }
+
+      return date;
+    }),
 });
 
 export type InsertUser = z.infer<typeof insertUserSchema>;
@@ -119,6 +141,7 @@ export type DutyOfficers = {
   masterName: string;
   officerRank?: DutyOfficersPayload["officerRank"];
   masterRank?: DutyOfficersPayload["masterRank"];
+  validFrom: Date;
   updatedAt: Date;
 };
 export type MilitaryPersonnel = typeof militaryPersonnel.$inferSelect;

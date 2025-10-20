@@ -41,11 +41,37 @@ CREATE TABLE IF NOT EXISTS documents (
     upload_date TIMESTAMP DEFAULT NOW()
 );
 
+-- Tabela de militares cadastrados
+CREATE TABLE IF NOT EXISTS military_personnel (
+    id SERIAL PRIMARY KEY,
+    name TEXT NOT NULL,
+    rank TEXT NOT NULL,
+    type TEXT NOT NULL CHECK (type IN ('officer', 'master')),
+    specialty TEXT,
+    full_rank_name TEXT NOT NULL,
+    active BOOLEAN NOT NULL DEFAULT true,
+    created_at TIMESTAMP DEFAULT NOW(),
+    updated_at TIMESTAMP DEFAULT NOW()
+);
+
+-- Tabela dedicada para registrar oficiais/contramestres do dia
+CREATE TABLE IF NOT EXISTS duty_assignments (
+    id SERIAL PRIMARY KEY,
+    officer_name TEXT NOT NULL,
+    officer_rank TEXT,
+    master_name TEXT NOT NULL,
+    master_rank TEXT,
+    valid_from TIMESTAMP NOT NULL DEFAULT NOW(),
+    updated_at TIMESTAMP NOT NULL DEFAULT NOW()
+);
+
 -- Índices para performance
 CREATE INDEX IF NOT EXISTS idx_notices_active ON notices(active);
 CREATE INDEX IF NOT EXISTS idx_notices_dates ON notices(start_date, end_date);
 CREATE INDEX IF NOT EXISTS idx_documents_type ON documents(type);
 CREATE INDEX IF NOT EXISTS idx_documents_active ON documents(active);
+CREATE INDEX IF NOT EXISTS idx_military_personnel_type ON military_personnel(type);
+CREATE INDEX IF NOT EXISTS idx_duty_assignments_valid_from ON duty_assignments(valid_from DESC, updated_at DESC);
 
 -- Inserir usuário padrão admin com hash no formato salt:hash (senha: tel@p@pem2025)
 INSERT INTO users (username, password)
@@ -73,6 +99,16 @@ $$ language 'plpgsql';
 DROP TRIGGER IF EXISTS update_notices_updated_at ON notices;
 CREATE TRIGGER update_notices_updated_at
     BEFORE UPDATE ON notices
+    FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+
+DROP TRIGGER IF EXISTS update_military_personnel_updated_at ON military_personnel;
+CREATE TRIGGER update_military_personnel_updated_at
+    BEFORE UPDATE ON military_personnel
+    FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+
+DROP TRIGGER IF EXISTS update_duty_assignments_updated_at ON duty_assignments;
+CREATE TRIGGER update_duty_assignments_updated_at
+    BEFORE UPDATE ON duty_assignments
     FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 
 -- Permissões (ajustar conforme necessário)

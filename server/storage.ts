@@ -425,13 +425,16 @@ export class MemStorage implements IStorage {
   }
 
   async updateDutyOfficers(officers: InsertDutyOfficers): Promise<DutyOfficers> {
+    const now = new Date();
+    const validFromDate = officers.validFrom ?? now;
     const updatedOfficers: DutyOfficers = {
-      id: 1, // Sempre ID 1 pois só temos um registro
+      id: (this.dutyOfficers?.id ?? 0) + 1,
       officerName: officers.officerName || "",
       masterName: officers.masterName || "",
       officerRank: officers.officerRank,
       masterRank: officers.masterRank,
-      updatedAt: new Date()
+      validFrom: validFromDate instanceof Date ? validFromDate : new Date(validFromDate),
+      updatedAt: now
     };
 
     this.dutyOfficers = updatedOfficers;

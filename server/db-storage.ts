@@ -349,54 +349,34 @@ export class DatabaseStorage implements IStorage {
 
   // ===== DUTY OFFICERS =====
   async getDutyOfficers(): Promise<DutyOfficers | null> {
-    console.log('👮 PostgreSQL: Buscando oficiais de serviço (sistema unificado)...');
-    
+    console.log('👮 PostgreSQL: Buscando oficiais de serviço (tabela dedicada)...');
+
     try {
-      // 🔥 NOVO SISTEMA: Buscar militares marcados como duty_role
-      const result = await this.pool.query(`
-        SELECT 
-          id,
-          name,
-          rank,
-          specialty,
-          type,
-          duty_role,
-          updated_at
-        FROM military_personnel 
-        WHERE duty_role IS NOT NULL
-        ORDER BY type DESC, rank ASC
-      `);
-      
+      const result = await this.pool.query(
+        `SELECT id, officer_name, officer_rank, master_name, master_rank, valid_from, updated_at
+         FROM duty_assignments
+         ORDER BY valid_from DESC, updated_at DESC
+         LIMIT 1`
+      );
+
       if (result.rows.length === 0) {
-        console.log('👮 PostgreSQL: Nenhum oficial de serviço encontrado');
+        console.log('👮 PostgreSQL: Nenhum registro de serviço encontrado');
         return null;
       }
 
-      const officer = result.rows.find(row => row.duty_role === 'officer');
-      const master = result.rows.find(row => row.duty_role === 'master');
-      
-      // Formatar nomes no padrão: "1T (RM2-T) KARINE"
-      const officerName = officer ? 
-        `${officer.rank.toUpperCase()}${officer.specialty ? ` (${officer.specialty.toUpperCase()})` : ''} ${officer.name}` : '';
-      
-      const masterName = master ?
-        `${master.rank.toUpperCase()}${master.specialty ? ` (${master.specialty.toUpperCase()})` : ''} ${master.name}` : '';
-
-      console.log('👮 PostgreSQL: Oficiais encontrados (sistema unificado):', {
-        officerName,
-        masterName,
-        officerRank: officer?.rank,
-        masterRank: master?.rank,
-      });
-
-      return {
-        id: 1, // ID fixo para compatibilidade
-        officerName,
-        masterName,
-        officerRank: officer?.rank as DutyOfficers['officerRank'],
-        masterRank: master?.rank as DutyOfficers['masterRank'],
-        updatedAt: new Date()
+      const row = result.rows[0];
+      const officers: DutyOfficers = {
+        id: row.id,
+        officerName: row.officer_name ?? '',
+        masterName: row.master_name ?? '',
+        officerRank: (row.officer_rank ?? undefined) as DutyOfficers['officerRank'],
+        masterRank: (row.master_rank ?? undefined) as DutyOfficers['masterRank'],
+        validFrom: new Date(row.valid_from),
+        updatedAt: new Date(row.updated_at),
       };
+
+      console.log('👮 PostgreSQL: Registro atual de serviço localizado:', officers);
+      return officers;
     } catch (error) {
       console.error('❌ PostgreSQL: Erro ao buscar oficiais de serviço:', error);
       return null;
@@ -404,127 +384,37 @@ export class DatabaseStorage implements IStorage {
   }
 
   async updateDutyOfficers(officers: InsertDutyOfficers): Promise<DutyOfficers> {
-    console.log('📝 PostgreSQL: Atualizando oficiais de serviço (sistema unificado):', officers);
+    console.log('📝 PostgreSQL: Registrando oficial/contramestre do dia:', officers);
 
     try {
-      // 🔥 NOVO SISTEMA: Limpar duty_role de todos os militares
-      await this.pool.query('UPDATE military_personnel SET duty_role = NULL');
+      const validFromDate = officers.validFrom ?? new Date();
 
-      const parseDutyOfficerName = (formattedName: string) => {
-        if (!formattedName) return null;
+      const result = await this.pool.query(
+        `INSERT INTO duty_assignments (officer_name, officer_rank, master_name, master_rank, valid_from, updated_at)
+         VALUES ($1, $2, $3, $4, $5, NOW())
+         RETURNING id, officer_name, officer_rank, master_name, master_rank, valid_from, updated_at`,
+        [
+          officers.officerName ?? '',
+          officers.officerRank ?? null,
+          officers.masterName ?? '',
+          officers.masterRank ?? null,
+          validFromDate,
+        ]
+      );
 
-        const match = formattedName.match(/^(\w+)(?:\s*\(([^)]+)\))?\s+(.+)$/);
-        if (!match) return null;
-
-        return {
-          rank: match[1].toLowerCase(),
-          specialty: match[2] || null,
-          name: match[3],
-        };
+      const row = result.rows[0];
+      const updatedOfficers: DutyOfficers = {
+        id: row.id,
+        officerName: row.officer_name ?? '',
+        masterName: row.master_name ?? '',
+        officerRank: (row.officer_rank ?? undefined) as DutyOfficers['officerRank'],
+        masterRank: (row.master_rank ?? undefined) as DutyOfficers['masterRank'],
+        validFrom: new Date(row.valid_from),
+        updatedAt: new Date(row.updated_at),
       };
 
-      let updatedOfficer: any = null;
-      let updatedMaster: any = null;
-      let resolvedOfficerRank: DutyOfficers['officerRank'] = officers.officerRank;
-      let resolvedMasterRank: DutyOfficers['masterRank'] = officers.masterRank;
-
-      if (officers.officerName) {
-        const parsedOfficer = parseDutyOfficerName(officers.officerName);
-        const searchName = parsedOfficer?.name ?? officers.officerName;
-        const normalizedRank = (officers.officerRank ?? parsedOfficer?.rank ?? '').toLowerCase();
-
-        let result = await this.pool.query(
-          normalizedRank
-            ? `UPDATE military_personnel
-                 SET duty_role = 'officer'
-               WHERE UPPER(name) = UPPER($1) AND rank = $2
-               RETURNING *`
-            : `UPDATE military_personnel
-                 SET duty_role = 'officer'
-               WHERE UPPER(name) = UPPER($1)
-               RETURNING *`,
-          normalizedRank ? [searchName, normalizedRank] : [searchName],
-        );
-
-        if (result.rows.length === 0) {
-          console.log(`🔍 Buscando oficial por nome parcial${normalizedRank ? ' (usando graduação)' : ''}: ${searchName}`);
-          result = await this.pool.query(
-            normalizedRank
-              ? `UPDATE military_personnel
-                   SET duty_role = 'officer'
-                 WHERE UPPER(name) LIKE '%' || UPPER($1) || '%' AND rank = $2
-                 RETURNING *`
-              : `UPDATE military_personnel
-                   SET duty_role = 'officer'
-                 WHERE UPPER(name) LIKE '%' || UPPER($1) || '%'
-                 RETURNING *`,
-            normalizedRank ? [searchName, normalizedRank] : [searchName],
-          );
-        }
-
-        if (result.rows.length > 0) {
-          updatedOfficer = result.rows[0];
-          resolvedOfficerRank = (updatedOfficer.rank ?? normalizedRank ?? undefined) as DutyOfficers['officerRank'];
-          console.log(`✅ Oficial definido: ${(resolvedOfficerRank ?? parsedOfficer?.rank ?? '').toUpperCase()} ${updatedOfficer.name}`);
-        } else {
-          console.log(`❌ Oficial não encontrado: ${(normalizedRank || parsedOfficer?.rank || '').toUpperCase()} ${searchName}`);
-        }
-      }
-
-      if (officers.masterName) {
-        const parsedMaster = parseDutyOfficerName(officers.masterName);
-        const searchName = parsedMaster?.name ?? officers.masterName;
-        const normalizedRank = (officers.masterRank ?? parsedMaster?.rank ?? '').toLowerCase();
-
-        let result = await this.pool.query(
-          normalizedRank
-            ? `UPDATE military_personnel
-                 SET duty_role = 'master'
-               WHERE UPPER(name) = UPPER($1) AND rank = $2
-               RETURNING *`
-            : `UPDATE military_personnel
-                 SET duty_role = 'master'
-               WHERE UPPER(name) = UPPER($1)
-               RETURNING *`,
-          normalizedRank ? [searchName, normalizedRank] : [searchName],
-        );
-
-        if (result.rows.length === 0) {
-          console.log(`🔍 Buscando contramestre por nome parcial${normalizedRank ? ' (usando graduação)' : ''}: ${searchName}`);
-          result = await this.pool.query(
-            normalizedRank
-              ? `UPDATE military_personnel
-                   SET duty_role = 'master'
-                 WHERE UPPER(name) LIKE '%' || UPPER($1) || '%' AND rank = $2
-                 RETURNING *`
-              : `UPDATE military_personnel
-                   SET duty_role = 'master'
-                 WHERE UPPER(name) LIKE '%' || UPPER($1) || '%'
-                 RETURNING *`,
-            normalizedRank ? [searchName, normalizedRank] : [searchName],
-          );
-        }
-
-        if (result.rows.length > 0) {
-          updatedMaster = result.rows[0];
-          resolvedMasterRank = (updatedMaster.rank ?? normalizedRank ?? undefined) as DutyOfficers['masterRank'];
-          console.log(`✅ Contramestre definido: ${(resolvedMasterRank ?? parsedMaster?.rank ?? '').toUpperCase()} ${updatedMaster.name}`);
-        } else {
-          console.log(`❌ Contramestre não encontrado: ${(normalizedRank || parsedMaster?.rank || '').toUpperCase()} ${searchName}`);
-        }
-      }
-
-      console.log('✅ PostgreSQL: Sistema unificado atualizado com sucesso');
-
-      return {
-        id: 1,
-        officerName: officers.officerName,
-        masterName: officers.masterName,
-        officerRank: resolvedOfficerRank,
-        masterRank: resolvedMasterRank,
-        updatedAt: new Date(),
-      };
-
+      console.log('✅ PostgreSQL: Registro de serviço criado:', updatedOfficers);
+      return updatedOfficers;
     } catch (error) {
       console.error('❌ PostgreSQL: Erro ao atualizar oficiais de serviço:', error);
       throw error;
