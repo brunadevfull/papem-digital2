@@ -103,7 +103,14 @@ export function MilitaryEditor({ isOpen, onClose, military, onSave }: MilitaryEd
   const specialtyOptions = SPECIALTIES[formData.type];
 
   return (
-    <Dialog open={isOpen} onOpenChange={onClose}>
+    <Dialog
+      open={isOpen}
+      onOpenChange={(open) => {
+        if (!open) {
+          onClose();
+        }
+      }}
+    >
       <DialogContent className="max-w-md">
         <DialogHeader>
           <DialogTitle>
