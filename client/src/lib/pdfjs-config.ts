@@ -1,8 +1,9 @@
-import { GlobalWorkerOptions } from 'pdfjs-dist';
+import { GlobalWorkerOptions } from 'pdfjs-dist/build/pdf';
+import pdfWorker from 'pdfjs-dist/build/pdf.worker?url';
 
-// Configurar o worker do PDF.js
-const pdfjsWorkerSrc = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/${GlobalWorkerOptions.workerSrc ? GlobalWorkerOptions.workerSrc.split('/').slice(-2)[0] : '3.11.174'}/pdf.worker.min.js`;
+// Configurar o worker do PDF.js usando o arquivo empacotado localmente
+const workerSrc = new URL(pdfWorker, import.meta.url).toString();
 
-GlobalWorkerOptions.workerSrc = pdfjsWorkerSrc;
+GlobalWorkerOptions.workerSrc = workerSrc;
 
 export default GlobalWorkerOptions;

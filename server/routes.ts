@@ -1,12 +1,22 @@
-import express, { type Express } from "express";
+import express, { type Express, type Request, type Response } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
-import { insertNoticeSchema, insertDocumentSchema, insertDutyOfficersSchema, insertMilitaryPersonnelSchema } from "@shared/schema";
+import {
+  insertNoticeSchema,
+  insertDocumentSchema,
+  dutyOfficersPayloadSchema,
+  insertMilitaryPersonnelSchema,
+  type User,
+  type DutyOfficersPayload,
+} from "@shared/schema";
 import { z } from "zod";
 import multer from "multer";
 import path from "path";
 import fs from "fs";
 import { promisify } from "util";
+import session from "express-session";
+import connectPgSimple from "connect-pg-simple";
+import crypto from "crypto";
 
 // 🔥 NOVO: Sistema de classificação inteligente de documentos
 interface DocumentClassification {
@@ -207,6 +217,67 @@ function normalizeUnitInput(value: unknown): 'EAGM' | '1DN' | undefined {
   return undefined;
 }
 
+const DEFAULT_ADMIN_USERNAME = 'admin';
+const DEFAULT_ADMIN_PASSWORD = 'tel@p@pem2025';
+
+function hashPassword(password: string): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const salt = crypto.randomBytes(16).toString('hex');
+    crypto.scrypt(password, salt, 64, (error, derivedKey) => {
+      if (error) {
+        reject(error);
+        return;
+      }
+      resolve(`${salt}:${derivedKey.toString('hex')}`);
+    });
+  });
+}
+
+function verifyPassword(password: string, storedHash: string): Promise<boolean> {
+  return new Promise((resolve, reject) => {
+    if (!storedHash.includes(':')) {
+      resolve(storedHash === password);
+      return;
+    }
+
+    const [salt, key] = storedHash.split(':');
+    crypto.scrypt(password, salt, 64, (error, derivedKey) => {
+      if (error) {
+        reject(error);
+        return;
+      }
+
+      const storedBuffer = Buffer.from(key, 'hex');
+      const derivedBuffer = Buffer.from(derivedKey);
+
+      if (storedBuffer.length !== derivedBuffer.length) {
+        resolve(false);
+        return;
+      }
+
+      resolve(crypto.timingSafeEqual(storedBuffer, derivedBuffer));
+    });
+  });
+}
+
+async function ensureDefaultAdminUser(): Promise<void> {
+  try {
+    const existing = await storage.getUserByUsername(DEFAULT_ADMIN_USERNAME);
+    if (!existing) {
+      const hashedPassword = await hashPassword(DEFAULT_ADMIN_PASSWORD);
+      await storage.createUser({
+        username: DEFAULT_ADMIN_USERNAME,
+        password: hashedPassword,
+      });
+      console.log('👮 Usuário admin padrão criado no banco de dados');
+    } else {
+      console.log('👮 Usuário admin padrão já existe');
+    }
+  } catch (error) {
+    console.error('❌ Falha ao garantir usuário admin padrão:', error);
+  }
+}
+
 
 // Promisify fs functions for async/await
 const writeFile = promisify(fs.writeFile);
@@ -217,6 +288,131 @@ const unlink = promisify(fs.unlink);
 const access = promisify(fs.access);
 
 export async function registerRoutes(app: Express): Promise<Server> {
+  const PgSession = connectPgSimple(session);
+  const sessionOptions: session.SessionOptions = {
+    secret: process.env.SESSION_SECRET || 'papem-digital-session',
+    resave: false,
+    saveUninitialized: false,
+    cookie: {
+      httpOnly: true,
+      maxAge: 24 * 60 * 60 * 1000,
+      sameSite: 'lax',
+      secure: process.env.NODE_ENV === 'production',
+    },
+  };
+
+  if (process.env.DATABASE_URL) {
+    sessionOptions.store = new PgSession({
+      conString: process.env.DATABASE_URL,
+      tableName: 'session',
+      createTableIfMissing: true,
+    });
+  }
+
+  app.use(session(sessionOptions));
+
+  await ensureDefaultAdminUser();
+
+  app.get('/api/admin/session', (req: Request, res: Response) => {
+    res.json({
+      authenticated: Boolean(req.session?.userId),
+      username: req.session?.username ?? null,
+    });
+  });
+
+  app.post('/api/admin/login', async (req: Request, res: Response) => {
+    const { username, password } = req.body ?? {};
+
+    if (typeof username !== 'string' || typeof password !== 'string') {
+      res.status(400).json({ success: false, message: 'Credenciais inválidas' });
+      return;
+    }
+
+    try {
+      const isDefaultCredentials =
+        username === DEFAULT_ADMIN_USERNAME && password === DEFAULT_ADMIN_PASSWORD;
+
+      let user: User | undefined;
+
+      try {
+        user = await storage.getUserByUsername(username);
+      } catch (lookupError) {
+        console.error('⚠️ Falha ao buscar usuário no armazenamento:', lookupError);
+      }
+
+      if (!user && isDefaultCredentials) {
+        try {
+          const hashedPassword = await hashPassword(DEFAULT_ADMIN_PASSWORD);
+          user = await storage.createUser({
+            username: DEFAULT_ADMIN_USERNAME,
+            password: hashedPassword,
+          });
+          console.log('✅ Usuário admin padrão recriado automaticamente');
+        } catch (createError) {
+          console.error('⚠️ Não foi possível persistir usuário admin padrão:', createError);
+          user = {
+            id: -1,
+            username: DEFAULT_ADMIN_USERNAME,
+            password: DEFAULT_ADMIN_PASSWORD,
+          };
+        }
+      }
+
+      if (!user) {
+        res.status(401).json({ success: false, message: 'Usuário ou senha incorretos' });
+        return;
+      }
+
+      const isValid = await verifyPassword(password, user.password);
+      if (!isValid) {
+        res.status(401).json({ success: false, message: 'Usuário ou senha incorretos' });
+        return;
+      }
+
+      await new Promise<void>((resolve, reject) => {
+        req.session.regenerate((regenerateError) => {
+          if (regenerateError) {
+            reject(regenerateError);
+            return;
+          }
+
+          req.session.userId = user.id;
+          req.session.username = user.username;
+
+          req.session.save((saveError) => {
+            if (saveError) {
+              reject(saveError);
+            } else {
+              resolve();
+            }
+          });
+        });
+      });
+
+      res.json({ success: true, message: 'Autenticado com sucesso' });
+    } catch (error) {
+      console.error('❌ Erro durante login:', error);
+      res.status(500).json({ success: false, message: 'Erro ao autenticar' });
+    }
+  });
+
+  app.post('/api/admin/logout', (req: Request, res: Response) => {
+    if (!req.session) {
+      res.json({ success: true });
+      return;
+    }
+
+    req.session.destroy((error) => {
+      if (error) {
+        console.error('❌ Erro ao encerrar sessão:', error);
+        res.status(500).json({ success: false, message: 'Erro ao sair' });
+        return;
+      }
+
+      res.json({ success: true });
+    });
+  });
+
   // Create uploads directory if it doesn't exist
   const uploadsDir = path.join(process.cwd(), 'uploads');
   if (!fs.existsSync(uploadsDir)) {
@@ -1474,7 +1670,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       console.log('📝 Dados recebidos:', req.body);
       
       // Validar dados de entrada
-      const validatedData = insertDutyOfficersSchema.parse(req.body);
+      const validatedData: DutyOfficersPayload = dutyOfficersPayloadSchema.parse(req.body);
       
       const updatedOfficers = await storage.updateDutyOfficers(validatedData);
       

@@ -8,14 +8,14 @@ interface TagBadgesProps {
 
 export function TagBadges({ tags, documentId, className = "" }: TagBadgesProps) {
   if (!tags || tags.length === 0) return null;
-  
+
   return (
-    <div className={`flex flex-wrap gap-1 ${className}`}>
+    <div className={`flex flex-wrap gap-2 mt-1 mb-1 ${className}`}>
       {tags.map((tag, index) => (
         <Badge
           key={index}
           variant="secondary"
-          className="text-xs"
+          className="px-2 py-1 text-xs font-medium"
           data-testid={`tag-${tag.toLowerCase()}-${documentId}`}
         >
           {tag}

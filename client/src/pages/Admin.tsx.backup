@@ -35,15 +35,16 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { useDisplay, Notice, PDFDocument } from "@/context/DisplayContext";
 import { useToast } from "@/hooks/use-toast";
-import { 
-  Sheet, 
-  SheetContent, 
-  SheetDescription, 
-  SheetHeader, 
-  SheetTitle, 
-  SheetTrigger 
+import {
+  Sheet,
+  SheetContent,
+  SheetDescription,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger
 } from "@/components/ui/sheet";
 import { HoverCard, HoverCardContent, HoverCardTrigger } from "@/components/ui/hover-card";
+import { resolveBackendUrl } from "@/utils/backend";
 // Dados dos oficiais baseados no quadro da Marinha
 const OFFICERS_DATA = [
   { name: "CT (IM) YAGO", rank: "ct" as const },
@@ -230,40 +231,11 @@ const Admin: React.FC = () => {
   
   // Função para obter URL completa do backend - DETECTAR AMBIENTE
  const getBackendUrl = (path: string): string => {
-  if (path.startsWith('http') || path.startsWith('blob:') || path.startsWith('data:')) {
+  if (!path || path.startsWith('http') || path.startsWith('blob:') || path.startsWith('data:')) {
     return path;
   }
-  
-  // 🚨 CORREÇÃO: Usar IP real do servidor para acesso em rede
-  const currentHost = window.location.hostname;
-  const currentPort = window.location.port;
-  
-  // Se estamos acessando via IP da rede, usar o mesmo IP para backend
-  if (currentHost !== 'localhost' && currentHost !== '127.0.0.1') {
-    console.log(`🌐 Detectado acesso via rede: ${currentHost}`);
-    
-    if (path.startsWith('/')) {
-      return `http://${currentHost}:5000${path}`;
-    }
-    return `http://${currentHost}:5000/${path}`;
-  }
-  
-  // Detectar se estamos no Replit
-  const isReplit = currentHost.includes('replit.dev') || currentHost.includes('replit.co');
-  
-  if (isReplit) {
-    const currentOrigin = window.location.origin;
-    if (path.startsWith('/')) {
-      return `${currentOrigin}${path}`;
-    }
-    return `${currentOrigin}/${path}`;
-  } else {
-    // Desenvolvimento local
-    if (path.startsWith('/')) {
-      return `http://localhost:5000${path}`;
-    }
-    return `http://localhost:5000/${path}`;
-  }
+
+  return resolveBackendUrl(path);
 };
   
   // Função para verificar status do servidor

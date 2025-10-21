@@ -5,6 +5,7 @@ import { DutyOfficersDisplay } from "@/components/DutyOfficersDisplay";
 import { useDisplay } from "@/context/DisplayContext";
 import { getSunsetWithLabel } from "@/utils/sunsetUtils";
 import { getCurrentTemperature } from "@/utils/temperatureUtils";
+import { resolveBackendUrl } from "@/utils/backend";
 import logoPAPEM from "@assets/logoPAPEM_1751352314977.png";
 
 const Index = () => {
@@ -51,20 +52,7 @@ const Index = () => {
   useEffect(() => {
     const fetchOfficers = async () => {
       try {
-        const getBackendUrl = (): string => {
-          const currentHost = window.location.hostname;
-          const currentOrigin = window.location.origin;
-          const isReplit = currentHost.includes('replit.dev');
-          if (isReplit) {
-            return `${currentOrigin}/api/duty-officers`;
-          }
-          if (currentHost === 'localhost' || currentHost === '127.0.0.1') {
-            return `http://localhost:5000/api/duty-officers`;
-          }
-          return `${currentOrigin}/api/duty-officers`;
-        };
-
-        const response = await fetch(getBackendUrl());
+        const response = await fetch(resolveBackendUrl('/api/duty-officers'));
         if (response.ok) {
           const data = await response.json();
           if (data.success) {

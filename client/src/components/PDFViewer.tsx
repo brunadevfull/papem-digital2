@@ -243,22 +243,21 @@ const getCurrentCardapioDoc = () => {
     if (window.pdfjsLib) return window.pdfjsLib;
 
     console.log("📚 Carregando PDF.js...");
-    return new Promise((resolve, reject) => {
-      const script = document.createElement('script');
-      script.src = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js';
-      script.onload = () => {
-        window.pdfjsLib.GlobalWorkerOptions.workerSrc = 
-          'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
-        window.pdfjsLib.GlobalWorkerOptions.verbosity = 0;
-        console.log("✅ PDF.js carregado com sucesso");
-        resolve(window.pdfjsLib);
-      };
-      script.onerror = () => {
-        console.error("❌ Erro ao carregar PDF.js");
-        reject(new Error('Falha ao carregar PDF.js'));
-      };
-      document.head.appendChild(script);
-    });
+
+    try {
+      const pdfjsModule = await import("pdfjs-dist/build/pdf");
+      const { default: pdfWorker } = await import("pdfjs-dist/build/pdf.worker?url");
+
+      pdfjsModule.GlobalWorkerOptions.workerSrc = pdfWorker;
+      pdfjsModule.GlobalWorkerOptions.verbosity = 0;
+
+      window.pdfjsLib = pdfjsModule;
+      console.log("✅ PDF.js carregado com sucesso");
+      return pdfjsModule;
+    } catch (error) {
+      console.error("❌ Erro ao carregar PDF.js", error);
+      throw error;
+    }
   };
 
   // Função melhorada para obter dados do PDF com tratamento de CORS
@@ -439,8 +438,7 @@ const getCurrentCardapioDoc = () => {
         maxImageSize: 1024 * 1024 * 10,
         isEvalSupported: false,
         fontExtraProperties: false,
-        useSystemFonts: false,
-        standardFontDataUrl: null
+        useSystemFonts: true
       });
       
       const pdf = await loadingTask.promise;
@@ -882,8 +880,7 @@ useEffect(() => {
         maxImageSize: 1024 * 1024 * 10,
         isEvalSupported: false,
         fontExtraProperties: false,
-        useSystemFonts: false,
-        standardFontDataUrl: null
+        useSystemFonts: true
       });
 
       const pdf = await loadingTask.promise;
@@ -951,10 +948,16 @@ useEffect(() => {
 
           if (saveResponse.ok) {
             const saveResult = await saveResponse.json();
-            console.log(`✅ ESCALA: Salvo no servidor: ${saveResult.url}`);
+            const cachedPath = saveResult?.data?.url ?? saveResult?.url;
 
-            const cachedUrl = getBackendUrl(saveResult.url);
-            setImageUrl(cachedUrl);
+            if (cachedPath) {
+              const resolvedCachedUrl = getBackendUrl(cachedPath);
+              console.log(`✅ ESCALA: Salvo no servidor. Caminho resolvido: ${resolvedCachedUrl}`);
+              setImageUrl(resolvedCachedUrl);
+            } else {
+              console.warn('⚠️ ESCALA: Resposta do servidor sem URL, usando dataURL.');
+              setImageUrl(imageDataUrl);
+            }
           } else {
             throw new Error(`Servidor retornou ${saveResponse.status}`);
           }

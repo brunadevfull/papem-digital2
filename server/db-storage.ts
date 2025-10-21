@@ -1,13 +1,46 @@
 // server/db-storage.ts - VERSÃO CORRIGIDA PARA TIPOS
 import { Pool } from 'pg';
 import { IStorage } from "./storage";
-import { 
-  type User, type InsertUser, 
+import {
+  type User, type InsertUser,
   type Notice, type InsertNotice,
   type PDFDocument, type InsertDocument,
   type DutyOfficers, type InsertDutyOfficers,
   type MilitaryPersonnel, type InsertMilitaryPersonnel
 } from "@shared/schema";
+
+const RANK_PREFIX_PATTERN = /^([A-Z0-9]+)\s*(?:\([A-Z0-9-]+\))?\s+(.+)$/;
+
+const sanitizeDutyName = (value: string | null | undefined): string => {
+  if (!value) {
+    return "";
+  }
+
+  const trimmed = value.trim().toUpperCase();
+  if (!trimmed) {
+    return "";
+  }
+
+  const match = trimmed.match(RANK_PREFIX_PATTERN);
+  if (match) {
+    return match[2].trim();
+  }
+
+  return trimmed;
+};
+
+const normalizeDutyRank = (value: string | null | undefined): string | undefined => {
+  if (!value) {
+    return undefined;
+  }
+
+  const trimmed = value.trim();
+  if (!trimmed) {
+    return undefined;
+  }
+
+  return trimmed.toUpperCase();
+};
 
 export class DatabaseStorage implements IStorage {
   private pool: Pool;
@@ -349,50 +382,34 @@ export class DatabaseStorage implements IStorage {
 
   // ===== DUTY OFFICERS =====
   async getDutyOfficers(): Promise<DutyOfficers | null> {
-    console.log('👮 PostgreSQL: Buscando oficiais de serviço (sistema unificado)...');
-    
+    console.log('👮 PostgreSQL: Buscando oficiais de serviço (tabela dedicada)...');
+
     try {
-      // 🔥 NOVO SISTEMA: Buscar militares marcados como duty_role
-      const result = await this.pool.query(`
-        SELECT 
-          id,
-          name,
-          rank,
-          specialty,
-          type,
-          duty_role,
-          updated_at
-        FROM military_personnel 
-        WHERE duty_role IS NOT NULL
-        ORDER BY type DESC, rank ASC
-      `);
-      
+      const result = await this.pool.query(
+        `SELECT id, officer_name, officer_rank, master_name, master_rank, valid_from, updated_at
+         FROM duty_assignments
+         ORDER BY valid_from DESC, updated_at DESC
+         LIMIT 1`
+      );
+
       if (result.rows.length === 0) {
-        console.log('👮 PostgreSQL: Nenhum oficial de serviço encontrado');
+        console.log('👮 PostgreSQL: Nenhum registro de serviço encontrado');
         return null;
       }
 
-      const officer = result.rows.find(row => row.duty_role === 'officer');
-      const master = result.rows.find(row => row.duty_role === 'master');
-      
-      // Formatar nomes no padrão: "1T (RM2-T) KARINE"
-      const officerName = officer ? 
-        `${officer.rank.toUpperCase()}${officer.specialty ? ` (${officer.specialty.toUpperCase()})` : ''} ${officer.name}` : '';
-      
-      const masterName = master ?
-        `${master.rank.toUpperCase()}${master.specialty ? ` (${master.specialty.toUpperCase()})` : ''} ${master.name}` : '';
-
-      console.log('👮 PostgreSQL: Oficiais encontrados (sistema unificado):', {
-        officerName,
-        masterName
-      });
-      
-      return {
-        id: 1, // ID fixo para compatibilidade
-        officerName,
-        masterName,
-        updatedAt: new Date()
+      const row = result.rows[0];
+      const officers: DutyOfficers = {
+        id: row.id,
+        officerName: sanitizeDutyName(row.officer_name),
+        masterName: sanitizeDutyName(row.master_name),
+        officerRank: normalizeDutyRank(row.officer_rank),
+        masterRank: normalizeDutyRank(row.master_rank),
+        validFrom: new Date(row.valid_from),
+        updatedAt: new Date(row.updated_at),
       };
+
+      console.log('👮 PostgreSQL: Registro atual de serviço localizado:', officers);
+      return officers;
     } catch (error) {
       console.error('❌ PostgreSQL: Erro ao buscar oficiais de serviço:', error);
       return null;
@@ -400,107 +417,41 @@ export class DatabaseStorage implements IStorage {
   }
 
   async updateDutyOfficers(officers: InsertDutyOfficers): Promise<DutyOfficers> {
-    console.log('📝 PostgreSQL: Atualizando oficiais de serviço (sistema unificado):', officers);
-    
+    console.log('📝 PostgreSQL: Registrando oficial/contramestre do dia:', officers);
+
     try {
-      // 🔥 NOVO SISTEMA: Limpar duty_role de todos os militares
-      await this.pool.query('UPDATE military_personnel SET duty_role = NULL');
-      
-      // Extrair informações dos nomes formatados (ex: "1T (RM2-T) KARINE")
-      const parseOfficerName = (formattedName: string) => {
-        if (!formattedName) return null;
-        
-        // Regex para extrair: "1T (RM2-T) KARINE" -> rank: "1T", specialty: "RM2-T", name: "KARINE"
-        const match = formattedName.match(/^(\w+)(?:\s*\(([^)]+)\))?\s+(.+)$/);
-        if (!match) return null;
-        
-        return {
-          rank: match[1].toLowerCase(),
-          specialty: match[2] || null,
-          name: match[3]
-        };
+      const validFromDate = officers.validFrom ?? new Date();
+      const sanitizedOfficerName = sanitizeDutyName(officers.officerName ?? "");
+      const sanitizedMasterName = sanitizeDutyName(officers.masterName ?? "");
+      const normalizedOfficerRank = normalizeDutyRank(officers.officerRank) ?? null;
+      const normalizedMasterRank = normalizeDutyRank(officers.masterRank) ?? null;
+
+      const result = await this.pool.query(
+        `INSERT INTO duty_assignments (officer_name, officer_rank, master_name, master_rank, valid_from, updated_at)
+         VALUES ($1, $2, $3, $4, $5, NOW())
+         RETURNING id, officer_name, officer_rank, master_name, master_rank, valid_from, updated_at`,
+        [
+          sanitizedOfficerName,
+          normalizedOfficerRank,
+          sanitizedMasterName,
+          normalizedMasterRank,
+          validFromDate,
+        ]
+      );
+
+      const row = result.rows[0];
+      const updatedOfficers: DutyOfficers = {
+        id: row.id,
+        officerName: sanitizeDutyName(row.officer_name),
+        masterName: sanitizeDutyName(row.master_name),
+        officerRank: normalizeDutyRank(row.officer_rank),
+        masterRank: normalizeDutyRank(row.master_rank),
+        validFrom: new Date(row.valid_from),
+        updatedAt: new Date(row.updated_at),
       };
-      
-      let updatedOfficer = null;
-      let updatedMaster = null;
-      
-      // Processar oficial
-      if (officers.officerName) {
-        const officerInfo = parseOfficerName(officers.officerName);
-        if (officerInfo) {
-          // 🔥 MELHORADO: Buscar por nome parcial se não encontrar exato
-          let result = await this.pool.query(
-            `UPDATE military_personnel 
-             SET duty_role = 'officer' 
-             WHERE UPPER(name) = UPPER($1) AND rank = $2 
-             RETURNING *`,
-            [officerInfo.name, officerInfo.rank]
-          );
-          
-          if (result.rows.length === 0) {
-            // Tentar busca por nome parcial (ex: "ALEXANDRIA" encontra "ALEXANDRIA TESTE")
-            console.log(`🔍 Buscando oficial por nome parcial: ${officerInfo.name}`);
-            result = await this.pool.query(
-              `UPDATE military_personnel 
-               SET duty_role = 'officer' 
-               WHERE UPPER(name) LIKE '%' || UPPER($1) || '%' AND rank = $2 
-               RETURNING *`,
-              [officerInfo.name, officerInfo.rank]
-            );
-          }
-          
-          if (result.rows.length > 0) {
-            updatedOfficer = result.rows[0];
-            console.log(`✅ Oficial definido: ${officerInfo.rank.toUpperCase()} ${updatedOfficer.name}`);
-          } else {
-            console.log(`❌ Oficial não encontrado: ${officerInfo.rank.toUpperCase()} ${officerInfo.name}`);
-          }
-        }
-      }
-      
-      // Processar contramestre
-      if (officers.masterName) {
-        const masterInfo = parseOfficerName(officers.masterName);
-        if (masterInfo) {
-          // 🔥 MELHORADO: Buscar por nome parcial se não encontrar exato
-          let result = await this.pool.query(
-            `UPDATE military_personnel 
-             SET duty_role = 'master' 
-             WHERE UPPER(name) = UPPER($1) AND rank = $2 
-             RETURNING *`,
-            [masterInfo.name, masterInfo.rank]
-          );
-          
-          if (result.rows.length === 0) {
-            // Tentar busca por nome parcial
-            console.log(`🔍 Buscando contramestre por nome parcial: ${masterInfo.name}`);
-            result = await this.pool.query(
-              `UPDATE military_personnel 
-               SET duty_role = 'master' 
-               WHERE UPPER(name) LIKE '%' || UPPER($1) || '%' AND rank = $2 
-               RETURNING *`,
-              [masterInfo.name, masterInfo.rank]
-            );
-          }
-          
-          if (result.rows.length > 0) {
-            updatedMaster = result.rows[0];
-            console.log(`✅ Contramestre definido: ${masterInfo.rank.toUpperCase()} ${updatedMaster.name}`);
-          } else {
-            console.log(`❌ Contramestre não encontrado: ${masterInfo.rank.toUpperCase()} ${masterInfo.name}`);
-          }
-        }
-      }
-      
-      console.log('✅ PostgreSQL: Sistema unificado atualizado com sucesso');
-      
-      return {
-        id: 1,
-        officerName: officers.officerName,
-        masterName: officers.masterName,
-        updatedAt: new Date()
-      };
-      
+
+      console.log('✅ PostgreSQL: Registro de serviço criado:', updatedOfficers);
+      return updatedOfficers;
     } catch (error) {
       console.error('❌ PostgreSQL: Erro ao atualizar oficiais de serviço:', error);
       throw error;

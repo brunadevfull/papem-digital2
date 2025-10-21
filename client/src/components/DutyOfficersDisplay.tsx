@@ -6,8 +6,10 @@ import { resolveBackendUrl } from '@/utils/backend';
 
 interface DutyOfficers {
   id: number;
-  officerName: string; // Nome completo com graduação: "1º Tenente KARINE"
-  masterName: string; // Nome completo com graduação: "1º Sargento RAFAELA"
+  officerName: string;
+  officerRank?: string | null;
+  masterName: string;
+  masterRank?: string | null;
   updatedAt: string;
 }
 
@@ -230,10 +232,15 @@ export const DutyOfficersDisplay = () => {
           <div className="flex items-center gap-2">
             <span className="text-xs text-blue-300 font-medium">Oficial:</span>
             {(() => {
-              const officerData = extractMilitaryData(officers.officerName, 'officer');
+              const officerFullName = [officers.officerRank, officers.officerName]
+                .filter(Boolean)
+                .join(' ')
+                .trim();
+              const officerLabel = officerFullName || officers.officerName;
+              const officerData = extractMilitaryData(officerLabel, 'officer');
               return officerData ? (
                 <div className="flex items-center gap-2">
-                  <MilitaryInsignia 
+                  <MilitaryInsignia
                     rank={officerData.rank}
                     specialty={officerData.specialty}
                     size="sm"
@@ -244,21 +251,26 @@ export const DutyOfficersDisplay = () => {
                 </div>
               ) : (
                 <span className="text-white font-semibold text-sm">
-                  {officers.officerName}
+                  {officerLabel}
                 </span>
               );
             })()}
           </div>
         )}
-        
+
         {officers.masterName && (
           <div className="flex items-center gap-2">
             <span className="text-xs text-blue-300 font-medium">Contramestre:</span>
             {(() => {
-              const masterData = extractMilitaryData(officers.masterName, 'master');
+              const masterFullName = [officers.masterRank, officers.masterName]
+                .filter(Boolean)
+                .join(' ')
+                .trim();
+              const masterLabel = masterFullName || officers.masterName;
+              const masterData = extractMilitaryData(masterLabel, 'master');
               return masterData ? (
                 <div className="flex items-center gap-2">
-                  <MilitaryInsignia 
+                  <MilitaryInsignia
                     rank={masterData.rank}
                     specialty={masterData.specialty}
                     size="sm"
@@ -269,7 +281,7 @@ export const DutyOfficersDisplay = () => {
                 </div>
               ) : (
                 <span className="text-white font-semibold text-sm">
-                  {officers.masterName}
+                  {masterLabel}
                 </span>
               );
             })()}

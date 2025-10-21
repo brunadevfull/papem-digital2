@@ -1,5 +1,38 @@
-import { users, notices, documents, dutyOfficers, militaryPersonnel, type User, type InsertUser, type Notice, type InsertNotice, type PDFDocument, type InsertDocument, type DutyOfficers, type InsertDutyOfficers, type MilitaryPersonnel, type InsertMilitaryPersonnel } from "@shared/schema";
+import { users, notices, documents, militaryPersonnel, type User, type InsertUser, type Notice, type InsertNotice, type PDFDocument, type InsertDocument, type DutyOfficers, type InsertDutyOfficers, type MilitaryPersonnel, type InsertMilitaryPersonnel } from "@shared/schema";
 import { DatabaseStorage } from "./db-storage";
+
+const RANK_PREFIX_PATTERN = /^([A-Z0-9]+)\s*(?:\([A-Z0-9-]+\))?\s+(.+)$/;
+
+const sanitizeDutyName = (value: string | null | undefined): string => {
+  if (!value) {
+    return "";
+  }
+
+  const trimmed = value.trim().toUpperCase();
+  if (!trimmed) {
+    return "";
+  }
+
+  const match = trimmed.match(RANK_PREFIX_PATTERN);
+  if (match) {
+    return match[2].trim();
+  }
+
+  return trimmed;
+};
+
+const normalizeDutyRank = (value: string | null | undefined): string | undefined => {
+  if (!value) {
+    return undefined;
+  }
+
+  const trimmed = value.trim();
+  if (!trimmed) {
+    return undefined;
+  }
+
+  return trimmed.toUpperCase();
+};
 
 export interface IStorage {
   getUser(id: number): Promise<User | undefined>;
@@ -425,11 +458,20 @@ export class MemStorage implements IStorage {
   }
 
   async updateDutyOfficers(officers: InsertDutyOfficers): Promise<DutyOfficers> {
+    const now = new Date();
+    const validFromDate = officers.validFrom ?? now;
+    const sanitizedOfficerName = sanitizeDutyName(officers.officerName ?? "");
+    const sanitizedMasterName = sanitizeDutyName(officers.masterName ?? "");
+    const normalizedOfficerRank = normalizeDutyRank(officers.officerRank);
+    const normalizedMasterRank = normalizeDutyRank(officers.masterRank);
     const updatedOfficers: DutyOfficers = {
-      id: 1, // Sempre ID 1 pois só temos um registro
-      officerName: officers.officerName || "",
-      masterName: officers.masterName || "",
-      updatedAt: new Date()
+      id: (this.dutyOfficers?.id ?? 0) + 1,
+      officerName: sanitizedOfficerName,
+      masterName: sanitizedMasterName,
+      officerRank: normalizedOfficerRank,
+      masterRank: normalizedMasterRank,
+      validFrom: validFromDate instanceof Date ? validFromDate : new Date(validFromDate),
+      updatedAt: now
     };
 
     this.dutyOfficers = updatedOfficers;

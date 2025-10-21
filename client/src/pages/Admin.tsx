@@ -45,9 +45,9 @@ import {
 } from "@/components/ui/sheet";
 import { HoverCard, HoverCardContent, HoverCardTrigger } from "@/components/ui/hover-card";
 import { WeatherAlerts } from "@/components/WeatherAlerts";
-import { MilitaryInsignia } from "@/components/MilitaryInsignia";
 import { MilitaryEditor } from "@/components/MilitaryEditor";
 import { TagBadges } from "@/components/TagBadges";
+import { Lock, LogOut, Loader2 } from "lucide-react";
 // Dados dos oficiais baseados no quadro acda Marinha
 
 // ✅ FIXED: Import the correct data structures
@@ -108,6 +108,7 @@ interface MilitaryPersonnel {
   name: string;
   type: 'officer' | 'master';
   rank: string;
+  specialty?: string | null;
   fullRankName?: string;
   active?: boolean;
 }
@@ -120,7 +121,6 @@ const Admin: React.FC = () => {
     escalaDocuments,
     cardapioDocuments,
     addDocument,
-    updateDocument,
     deleteDocument,
     escalaAlternateInterval,
     setEscalaAlternateInterval,
@@ -134,12 +134,115 @@ const Admin: React.FC = () => {
   } = useDisplay();
   
   const { toast } = useToast();
-  
- 
-  
+
+
+  const [isAuthChecking, setIsAuthChecking] = useState(true);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [sessionUsername, setSessionUsername] = useState<string | null>(null);
+  const [loginForm, setLoginForm] = useState({ username: "admin", password: "" });
+  const [loginError, setLoginError] = useState<string | null>(null);
+  const [isLoggingIn, setIsLoggingIn] = useState(false);
+
+
+  useEffect(() => {
+    const verifySession = async () => {
+      try {
+        const response = await fetch(resolveBackendUrl('/api/admin/session'), {
+          credentials: 'include',
+        });
+
+        if (response.ok) {
+          const data = await response.json();
+          setIsAuthenticated(Boolean(data.authenticated));
+          setSessionUsername(typeof data.username === 'string' ? data.username : null);
+          if (data?.authenticated) {
+            setLoginError(null);
+          }
+        } else {
+          setIsAuthenticated(false);
+          setSessionUsername(null);
+        }
+      } catch (error) {
+        console.error('Erro ao verificar sessão:', error);
+        setIsAuthenticated(false);
+        setSessionUsername(null);
+      } finally {
+        setIsAuthChecking(false);
+      }
+    };
+
+    void verifySession();
+  }, []);
+
+
+  const handleLoginSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    setLoginError(null);
+    setIsLoggingIn(true);
+
+    try {
+      const response = await fetch(resolveBackendUrl('/api/admin/login'), {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({
+          username: loginForm.username.trim(),
+          password: loginForm.password,
+        }),
+      });
+
+      const data = await response.json().catch(() => null);
+
+      if (!response.ok || !data?.success) {
+        const message = data?.message || 'Usuário ou senha incorretos';
+        throw new Error(message);
+      }
+
+      setIsAuthenticated(true);
+      setSessionUsername(loginForm.username.trim());
+      setLoginForm((current) => ({ ...current, password: '' }));
+      setLoginError(null);
+
+      toast({
+        title: 'Login realizado',
+        description: 'Bem-vindo ao painel administrativo.',
+      });
+    } catch (error) {
+      const message = handleAsyncError(error, 'Não foi possível realizar o login.');
+      setLoginError(message);
+    } finally {
+      setIsLoggingIn(false);
+    }
+  };
+
+  const handleLogout = async () => {
+    try {
+      await fetch(resolveBackendUrl('/api/admin/logout'), {
+        method: 'POST',
+        credentials: 'include',
+      });
+    } catch (error) {
+      console.error('Erro ao encerrar sessão:', error);
+    } finally {
+      setIsAuthenticated(false);
+      setSessionUsername(null);
+      setLoginForm({ username: 'admin', password: '' });
+      setLoginError(null);
+
+      toast({
+        title: 'Sessão encerrada',
+        description: 'Você saiu do painel administrativo.',
+      });
+    }
+  };
+
+
+
   // Estados para upload de documentos
   const [docUnit, setDocUnit] = useState<"EAGM" | "1DN" | undefined>(undefined);
-  const [selectedDocType, setSelectedDocType] = useState<"plasa" | "escala" | "cardapio">("plasa");
+  const [selectedDocType, setSelectedDocType] = useState<
+    "plasa" | "escala" | "cardapio" | null
+  >(null);
   const [docTitle, setDocTitle] = useState("");
   const [docUrl, setDocUrl] = useState("");
   const [docCategory, setDocCategory] = useState<"oficial" | "praca" | undefined>(undefined);
@@ -150,21 +253,23 @@ const Admin: React.FC = () => {
   // Estados para oficiais de serviço
   const [dutyOfficers, setDutyOfficers] = useState({
     officerName: "",
-    officerRank: "1t" as "1t" | "2t" | "ct",
+    officerRank: undefined as string | undefined,
     masterName: "",
-    masterRank: "3sg" as "3sg" | "2sg" | "1sg"
+    masterRank: undefined as string | undefined,
+    validFrom: undefined as string | undefined,
+    updatedAt: undefined as string | undefined
   });
   const [isLoadingOfficers, setIsLoadingOfficers] = useState(false);
   
   // 🔥 NOVO: Estados para dados dinâmicos da combobox
-  const [availableOfficers, setAvailableOfficers] = useState<any[]>([]);
-  const [availableMasters, setAvailableMasters] = useState<any[]>([]);
+  const [availableOfficers, setAvailableOfficers] = useState<MilitaryPersonnel[]>([]);
+  const [availableMasters, setAvailableMasters] = useState<MilitaryPersonnel[]>([]);
   const [isLoadingComboboxData, setIsLoadingComboboxData] = useState(false);
 
   // Estados para edição de militares - agora carregados da API
 
-  const [dbOfficers, setDbOfficers] = useState<any[]>([]);
-  const [dbMasters, setDbMasters] = useState<any[]>([]);
+  const [dbOfficers, setDbOfficers] = useState<MilitaryPersonnel[]>([]);
+  const [dbMasters, setDbMasters] = useState<MilitaryPersonnel[]>([]);
   const [newOfficerName, setNewOfficerName] = useState("");
   const [newMasterName, setNewMasterName] = useState("");
   const [editingOfficer, setEditingOfficer] = useState<{id: number, name: string} | null>(null);
@@ -176,6 +281,82 @@ const Admin: React.FC = () => {
   const [editingMilitary, setEditingMilitary] = useState<MilitaryPersonnel | null>(null);
   const [militaryPersonnel, setMilitaryPersonnel] = useState<MilitaryPersonnel[]>([]);
 
+  const formatRankWithSpecialty = (
+    rank?: string | null,
+    specialty?: string | null
+  ) => {
+    const rankText = rank ? rank.toUpperCase() : "";
+    const specialtyText = specialty ? ` (${specialty.toUpperCase()})` : "";
+    return `${rankText}${specialtyText}`.trim();
+  };
+
+  const DUTY_NAME_PATTERN = /^([A-Z0-9]+)\s*(?:\([A-Z0-9-]+\))?\s+(.+)$/;
+
+  const normalizeDutyNameValue = (value?: string | null): string => {
+    if (!value) {
+      return "";
+    }
+
+    const trimmed = value.trim();
+    if (!trimmed) {
+      return "";
+    }
+
+    const upper = trimmed.toUpperCase();
+    const match = upper.match(DUTY_NAME_PATTERN);
+    if (match) {
+      return match[2].trim();
+    }
+
+    return upper;
+  };
+
+  const normalizeDutyRankValue = (value?: string | null): string | undefined => {
+    if (!value) {
+      return undefined;
+    }
+
+    const trimmed = value.trim();
+    if (!trimmed) {
+      return undefined;
+    }
+
+    return trimmed.toUpperCase();
+  };
+
+  const formatMilitaryLabel = (
+    military: Pick<MilitaryPersonnel, "rank" | "specialty" | "name"> | null | undefined
+  ) => {
+    if (!military) {
+      return "";
+    }
+
+    const baseRank = formatRankWithSpecialty(military.rank, military.specialty);
+    const rankPart = baseRank
+      ? `${baseRank}${military.specialty ? "" : " (S/E)"}`.trim()
+      : "";
+    const namePart = military.name ? military.name.toUpperCase() : "";
+    return [rankPart, namePart].filter(Boolean).join(" ");
+  };
+
+  const resolveFullRankName = (
+    military: Pick<MilitaryPersonnel, "rank" | "fullRankName"> | null | undefined
+  ) => {
+    if (!military) {
+      return "";
+    }
+
+    if (military.fullRankName) {
+      return military.fullRankName;
+    }
+
+    if (!military.rank) {
+      return "";
+    }
+
+    return RANK_FULL_NAME_MAP[military.rank as keyof typeof RANK_FULL_NAME_MAP] ?? "";
+  };
+
   // Função para converter nomes salvos no banco para formato de exibição correto
   const convertToDisplayFormat = (fullName: string, type: 'officer' | 'master'): { displayName: string; rank: string; specialty: string | null; name: string } => {
     if (!fullName) return { displayName: '', rank: '', specialty: null, name: '' };
@@ -183,7 +364,7 @@ const Admin: React.FC = () => {
     console.log('🔄 Convertendo para display:', fullName, 'tipo:', type);
     
     // Se já está no formato correto (ex: "1T (IM) ELIEZER"), extrair dados
-    const formatoCorreto = /^([A-Z0-9]+)\s*(?:\(([A-Z-]+)\))?\s+(.+)$/;
+    const formatoCorreto = /^([A-Z0-9]+)\s*(?:\(([A-Z0-9-]+)\))?\s+(.+)$/;
     const match = fullName.match(formatoCorreto);
     
     if (match) {
@@ -254,17 +435,17 @@ const Admin: React.FC = () => {
   const loadMilitaryPersonnel = async () => {
     try {
       setLoadingMilitary(true);
-      const response = await fetch(getBackendUrl('/api/military-personnel'));
+      const response = await fetchBackend('/api/military-personnel');
       
-      if (response.ok) {
-        const result = await response.json();
-        const personnel = result.data || [];
-        
-        setDbOfficers(personnel.filter((p: any) => p.type === 'officer'));
-        setDbMasters(personnel.filter((p: any) => p.type === 'master'));
-        
-        // Atualizar lista completa para o editor
-        setMilitaryPersonnel(personnel);
+        if (response.ok) {
+          const result = await response.json();
+          const personnel = (result.data || []) as MilitaryPersonnel[];
+
+          setDbOfficers(personnel.filter(p => p.type === 'officer'));
+          setDbMasters(personnel.filter(p => p.type === 'master'));
+
+          // Atualizar lista completa para o editor
+          setMilitaryPersonnel(personnel);
       }
     } catch (error) {
       console.error('Erro ao carregar militares:', error);
@@ -286,7 +467,7 @@ const Admin: React.FC = () => {
         getBackendUrl(`/api/military-personnel/${editingMilitary.id}`) : 
         getBackendUrl('/api/military-personnel');
       
-      const response = await fetch(url, {
+      const response = await authorizedFetch(url, {
         method: isEditing ? 'PUT' : 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(updatedMilitary)
@@ -317,7 +498,7 @@ const Admin: React.FC = () => {
     if (!confirm('Tem certeza que deseja remover este militar?')) return;
     
     try {
-      const response = await fetch(getBackendUrl(`/api/military-personnel/${militaryId}`), {
+      const response = await fetchBackend(`/api/military-personnel/${militaryId}`, {
         method: 'DELETE'
       });
       
@@ -341,14 +522,18 @@ const Admin: React.FC = () => {
 
   // Carregar dados na inicialização
   useEffect(() => {
-    loadMilitaryPersonnel();
-  }, []);
+    if (!isAuthenticated) {
+      return;
+    }
+
+    void loadMilitaryPersonnel();
+  }, [isAuthenticated]);
 
   // Funções para gerenciar oficiais com persistência
   const addOfficer = async () => {
     if (newOfficerName.trim()) {
       try {
-        const response = await fetch(getBackendUrl('/api/military-personnel'), {
+        const response = await fetchBackend('/api/military-personnel', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
@@ -382,7 +567,7 @@ const Admin: React.FC = () => {
 
   const removeOfficer = async (id: number, name: string) => {
     try {
-      const response = await fetch(getBackendUrl(`/api/military-personnel/${id}`), {
+      const response = await fetchBackend(`/api/military-personnel/${id}`, {
         method: 'DELETE'
       });
 
@@ -423,7 +608,7 @@ const saveEditOfficer = async () => {
   }
 
   try {
-    const response = await fetch(getBackendUrl(`/api/military-personnel/${editingOfficer.id}`), {
+    const response = await fetchBackend(`/api/military-personnel/${editingOfficer.id}`, {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
@@ -476,7 +661,7 @@ const saveEditOfficer = async () => {
   }
 
   try {
-    const response = await fetch(getBackendUrl(`/api/military-personnel/${editingMaster.id}`), {
+    const response = await fetchBackend(`/api/military-personnel/${editingMaster.id}`, {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
@@ -514,7 +699,7 @@ const saveEditOfficer = async () => {
   const addMaster = async () => {
     if (newMasterName.trim()) {
       try {
-        const response = await fetch(getBackendUrl('/api/military-personnel'), {
+        const response = await fetchBackend('/api/military-personnel', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
@@ -546,7 +731,7 @@ const saveEditOfficer = async () => {
 
   const removeMaster = async (id: number, name: string) => {
     try {
-      const response = await fetch(getBackendUrl(`/api/military-personnel/${id}`), {
+      const response = await fetchBackend(`/api/military-personnel/${id}`, {
         method: 'DELETE'
       });
 
@@ -582,11 +767,21 @@ const saveEditOfficer = async () => {
   
   // Função para obter URL completa do backend - DETECTAR AMBIENTE
  const getBackendUrl = (path: string): string => resolveBackendUrl(path);
+
+  const authorizedFetch = (url: string, init?: RequestInit) => {
+    const options: RequestInit = { ...(init ?? {}) };
+    options.credentials = 'include';
+    return fetch(url, options);
+  };
+
+  const fetchBackend = (path: string, init?: RequestInit) => {
+    return authorizedFetch(getBackendUrl(path), init);
+  };
   
   // Função para verificar status do servidor
   const checkServerStatus = async () => {
     try {
-      const response = await fetch(getBackendUrl('/api/notices'));
+      const response = await fetchBackend('/api/notices');
       setServerStatus(prev => ({
         ...prev,
         connected: response.ok,
@@ -656,7 +851,7 @@ const saveEditOfficer = async () => {
       const url = getBackendUrl('/api/military-personnel');
       console.log('🌐 URL da API:', url);
       
-      const response = await fetch(url);
+      const response = await authorizedFetch(url);
       const data = await response.json();
       
       console.log('📡 Resposta completa da API:', data);
@@ -688,16 +883,29 @@ const saveEditOfficer = async () => {
   const loadDutyOfficers = async () => {
     setIsLoadingOfficers(true);
     try {
-      const response = await fetch(getBackendUrl('/api/duty-officers'));
+      const response = await fetchBackend('/api/duty-officers');
       const data = await response.json();
-      
+
       if (data.success && data.officers) {
         console.log('👮 Dados carregados do servidor:', data.officers);
+        const validFromDate = data.officers.validFrom
+          ? new Date(data.officers.validFrom)
+          : undefined;
+        const updatedAtDate = data.officers.updatedAt
+          ? new Date(data.officers.updatedAt)
+          : undefined;
+
         setDutyOfficers({
-          officerName: data.officers.officerName || "",
-          officerRank: data.officers.officerRank || "1t",
-          masterName: data.officers.masterName || "",
-          masterRank: data.officers.masterRank || "3sg"
+          officerName: normalizeDutyNameValue(data.officers.officerName),
+          officerRank: normalizeDutyRankValue(data.officers.officerRank),
+          masterName: normalizeDutyNameValue(data.officers.masterName),
+          masterRank: normalizeDutyRankValue(data.officers.masterRank),
+          validFrom: validFromDate && !Number.isNaN(validFromDate.getTime())
+            ? validFromDate.toISOString()
+            : undefined,
+          updatedAt: updatedAtDate && !Number.isNaN(updatedAtDate.getTime())
+            ? updatedAtDate.toISOString()
+            : undefined
         });
       }
     } catch (error) {
@@ -721,19 +929,33 @@ const saveEditOfficer = async () => {
     setIsLoadingOfficers(true);
     try {
       console.log('💾 Salvando oficiais:', dutyOfficers);
-      
-      // Os nomes já estão no formato correto (ex: "1T (IM) ALEXANDRIA")
-      // Apenas passar diretamente para o servidor
+
+      const sanitizedOfficerName = normalizeDutyNameValue(dutyOfficers.officerName);
+      const sanitizedMasterName = normalizeDutyNameValue(dutyOfficers.masterName);
+      const normalizedOfficerRank = normalizeDutyRankValue(dutyOfficers.officerRank);
+      const normalizedMasterRank = normalizeDutyRankValue(dutyOfficers.masterRank);
+
+      const validFromDate = (() => {
+        if (dutyOfficers.validFrom) {
+          const parsed = new Date(dutyOfficers.validFrom);
+          if (!Number.isNaN(parsed.getTime())) {
+            return parsed.toISOString();
+          }
+        }
+        return new Date().toISOString();
+      })();
+
       const officersData = {
-        officerName: dutyOfficers.officerName,
-        masterName: dutyOfficers.masterName,
-        officerRank: dutyOfficers.officerRank,
-        masterRank: dutyOfficers.masterRank
+        officerName: sanitizedOfficerName,
+        masterName: sanitizedMasterName,
+        officerRank: normalizedOfficerRank,
+        masterRank: normalizedMasterRank,
+        validFrom: validFromDate
       };
 
       console.log('📝 Dados sendo enviados:', officersData);
 
-      const response = await fetch(getBackendUrl('/api/duty-officers'), {
+      const response = await fetchBackend('/api/duty-officers', {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -761,11 +983,12 @@ const saveEditOfficer = async () => {
       }
     } catch (error) {
       console.error('❌ Erro ao salvar oficiais:', error);
-const errorMessage = getErrorMessage(error);
+      const errorMessage = getErrorMessage(error);
 
       toast({
         title: "Erro",
-        description: `Falha ao salvar oficiais: ${errorMessage}`,        variant: "destructive"
+        description: `Falha ao salvar oficiais: ${errorMessage}`,
+        variant: "destructive"
       });
     } finally {
       setIsLoadingOfficers(false);
@@ -775,17 +998,25 @@ const errorMessage = getErrorMessage(error);
   // Funcionalidade de edição de nomes dos oficiais implementada abaixo
 
   useEffect(() => {
+    if (!isAuthenticated) {
+      return;
+    }
+
     console.log("🔧 Admin carregado, avisos serão carregados do servidor");
-    loadDutyOfficers();
-    loadComboboxData(); // 🔥 CRÍTICO: Carregar dados dinâmicos para combobox
-  }, []);
-  
+    void loadDutyOfficers();
+    void loadComboboxData(); // 🔥 CRÍTICO: Carregar dados dinâmicos para combobox
+  }, [isAuthenticated]);
+
   // 🔥 NOVO: Recarregar dados combobox quando militar for editado
   useEffect(() => {
-    if (militaryPersonnel.length > 0) {
-      loadComboboxData();
+    if (!isAuthenticated) {
+      return;
     }
-  }, [militaryPersonnel]);
+
+    if (militaryPersonnel.length > 0) {
+      void loadComboboxData();
+    }
+  }, [isAuthenticated, militaryPersonnel]);
   
 
   
@@ -872,28 +1103,39 @@ const handleDocumentSubmit = async (e: React.FormEvent) => {
     });
     return;
   }
-  
- // Substituir a validação existente por:
-if (selectedDocType === "escala" && !docCategory) {
-  toast({
-    title: "Erro",
-    description: "Selecione a categoria da escala (Oficial ou Praça).",
-    variant: "destructive"
-  });
-  return;
-}
 
-if (selectedDocType === "cardapio" && !docUnit) {
-  toast({
-    title: "Erro",
-    description: "Selecione a unidade do cardápio (EAGM ou 1DN).",
-    variant: "destructive"
-  });
-  return;
-}
+  if (!selectedDocType) {
+    toast({
+      title: "Erro",
+      description: "Selecione o tipo de documento antes de enviar.",
+      variant: "destructive"
+    });
+    return;
+  }
+
+  const docType = selectedDocType as "plasa" | "escala" | "cardapio";
+
+  // Substituir a validação existente por:
+  if (docType === "escala" && !docCategory) {
+    toast({
+      title: "Erro",
+      description: "Selecione a categoria da escala (Oficial ou Praça).",
+      variant: "destructive"
+    });
+    return;
+  }
+
+  if (docType === "cardapio" && !docUnit) {
+    toast({
+      title: "Erro",
+      description: "Selecione a unidade do cardápio (EAGM ou 1DN).",
+      variant: "destructive"
+    });
+    return;
+  }
 
   // ✅ DECLARE typeInfo UMA VEZ SÓ aqui no início
-  const typeInfo = getDocumentTypeInfo(selectedDocType);
+  const typeInfo = getDocumentTypeInfo(docType);
 
   try {
     setIsUploading(true);
@@ -911,17 +1153,17 @@ if (selectedDocType === "cardapio" && !docUnit) {
       const formData = new FormData();
       formData.append('pdf', selectedFile);
       
-      formData.append('type', selectedDocType);
+      formData.append('type', docType);
       formData.append('title', docTitle);
       
-      if (selectedDocType === "escala" && docCategory) {
+      if (docType === "escala" && docCategory) {
         formData.append('category', docCategory);
 
       }
 
-      if (selectedDocType === "cardapio" && docUnit) {
-  formData.append('unit', docUnit);
-}
+      if (docType === "cardapio" && docUnit) {
+        formData.append('unit', docUnit);
+      }
 
       const progressInterval = setInterval(() => {
         setUploadProgress(prev => {
@@ -937,7 +1179,7 @@ if (selectedDocType === "cardapio" && !docUnit) {
       
       console.log("📤 Enviando para:", uploadUrl);
       
-      const uploadResponse = await fetch(uploadUrl, {
+      const uploadResponse = await authorizedFetch(uploadUrl, {
         method: 'POST',
         body: formData,
       });
@@ -963,8 +1205,8 @@ if (selectedDocType === "cardapio" && !docUnit) {
       console.log("📄 Adicionando documento ao contexto:", {
         title: docTitle,
         url: fullUrl,
-        type: selectedDocType,
-        category: selectedDocType === "escala" ? docCategory : undefined
+        type: docType,
+        category: docType === "escala" ? docCategory : undefined
       });
       
       const uploadTags = Array.isArray(uploadResult.data?.tags)
@@ -972,13 +1214,13 @@ if (selectedDocType === "cardapio" && !docUnit) {
         : [];
 
       const uploadUnit = (uploadResult.data?.unit as PDFDocument['unit'] | undefined)
-        ?? (selectedDocType === "cardapio" ? docUnit : undefined);
+        ?? (docType === "cardapio" ? docUnit : undefined);
 
       addDocument({
         title: docTitle,
         url: serverRelativeUrl,
-        type: selectedDocType,
-        category: selectedDocType === "escala" ? docCategory : undefined,
+        type: docType,
+        category: docType === "escala" ? docCategory : undefined,
         unit: uploadUnit,
         tags: uploadTags,
         active: true
@@ -996,9 +1238,9 @@ if (selectedDocType === "cardapio" && !docUnit) {
       addDocument({
         title: docTitle,
         url: fullUrl,
-        type: selectedDocType,
-        category: selectedDocType === "escala" ? docCategory : undefined,
-        unit: selectedDocType === "cardapio" ? docUnit : undefined,
+        type: docType,
+        category: docType === "escala" ? docCategory : undefined,
+        unit: docType === "cardapio" ? docUnit : undefined,
         tags: [],
         active: true
       });
@@ -1016,9 +1258,9 @@ if (selectedDocType === "cardapio" && !docUnit) {
     console.error('❌ Erro no upload:', error);
     
     let errorMessage = "Não foi possível enviar o arquivo. Tente novamente.";
-    
- const baseErrorMessage = getErrorMessage(error);
-  if (baseErrorMessage.includes('FILE_TOO_LARGE')) {
+
+    const baseErrorMessage = getErrorMessage(error);
+    if (baseErrorMessage.includes('FILE_TOO_LARGE')) {
       errorMessage = "Arquivo muito grande. Máximo permitido: 50MB.";
     } else if (baseErrorMessage.includes('INVALID_FILE')) {
       errorMessage = "Tipo de arquivo não suportado. Use PDFs ou imagens.";
@@ -1051,28 +1293,14 @@ if (selectedDocType === "cardapio" && !docUnit) {
     setSelectedFile(null);
     setDocCategory(undefined);
     setDocUnit(undefined);
-    
+    setSelectedDocType(null);
+
     const fileInput = document.getElementById('docFile') as HTMLInputElement;
     if (fileInput) {
       fileInput.value = '';
     }
   };
-  
 
-  
- 
-  
-  // Funções para documentos
-    const toggleDocActive = (doc: PDFDocument) => {
-    updateDocument({ ...doc, active: !doc.active });
-    const typeInfo = getDocumentTypeInfo(doc.type);
-    toast({
-      title: doc.active ? `${typeInfo.name} desativado` : `${typeInfo.name} ativado`,
-      description: `O documento "${doc.title}" foi ${doc.active ? "desativado" : "ativado"}.`
-    });
-  };
-
-  
   const removeDocument = async (id: string) => {
     if (confirm("Tem certeza que deseja remover este documento?")) {
       const doc = [...plasaDocuments, ...escalaDocuments, ...cardapioDocuments].find(d => d.id === id);
@@ -1081,7 +1309,7 @@ if (selectedDocType === "cardapio" && !docUnit) {
         try {
           const filename = doc.url.split('/uploads/')[1];
           const deleteUrl = getBackendUrl(`/api/delete-pdf/${filename}`);
-          const response = await fetch(deleteUrl, {
+          const response = await authorizedFetch(deleteUrl, {
             method: 'DELETE'
           });
           
@@ -1182,10 +1410,21 @@ if (selectedDocType === "cardapio" && !docUnit) {
 
   // Effect para verificar status do servidor periodicamente
   useEffect(() => {
-    checkServerStatus();
-    const interval = setInterval(checkServerStatus, 30000); // A cada 30 segundos
+    if (!isAuthenticated) {
+      return;
+    }
+
+    void checkServerStatus();
+    const interval = setInterval(() => {
+      void checkServerStatus();
+    }, 30000); // A cada 30 segundos
     return () => clearInterval(interval);
-  }, [plasaDocuments.length, escalaDocuments.length, cardapioDocuments.length]);
+  }, [
+    isAuthenticated,
+    plasaDocuments.length,
+    escalaDocuments.length,
+    cardapioDocuments.length,
+  ]);
   // Componente de Status do Servidor
   const ServerStatusIndicator = () => (
     <Card className="mb-6">
@@ -1203,50 +1442,44 @@ if (selectedDocType === "cardapio" && !docUnit) {
         </CardTitle>
       </CardHeader>
       <CardContent>
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 items-stretch">
           {/* Status de Conexão */}
-          <div className={`p-3 rounded-lg border ${
-            serverStatus.connected 
-              ? 'bg-green-50 border-green-200 text-green-800' 
+          <div className={`p-3 rounded-lg border flex flex-col items-start text-left gap-3 ${
+            serverStatus.connected
+              ? 'bg-green-50 border-green-200 text-green-800'
               : 'bg-red-50 border-red-200 text-red-800'
           }`}>
-            <div className="flex items-center gap-2">
-              <div className={`w-3 h-3 rounded-full ${
-                serverStatus.connected ? 'bg-green-500' : 'bg-red-500'
-              }`}></div>
-              <span className="font-medium">
-                {serverStatus.connected ? 'Conectado' : 'Desconectado'}
-              </span>
-            </div>
-            <div className="text-sm mt-1">
+            <div className={`w-3 h-3 rounded-full ${
+              serverStatus.connected ? 'bg-green-500' : 'bg-red-500'
+            }`}></div>
+            <span className="font-medium">
+              {serverStatus.connected ? 'Conectado' : 'Desconectado'}
+            </span>
+            <div className="text-sm">
               {serverStatus.lastResponse ? `HTTP ${serverStatus.lastResponse}` : 'Sem resposta'}
             </div>
           </div>
 
-     
+
 
           {/* Documentos */}
-          <div className="p-3 rounded-lg border bg-purple-50 border-purple-200 text-purple-800">
-            <div className="flex items-center gap-2">
-              <span className="text-lg">📁</span>
-              <span className="font-medium">Documentos</span>
-            </div>
-            <div className="text-sm mt-1">
+          <div className="p-3 rounded-lg border bg-purple-50 border-purple-200 text-purple-800 flex flex-col items-start text-left gap-3">
+            <span className="text-xl">📁</span>
+            <span className="font-medium">Documentos</span>
+            <div className="text-sm">
               {serverStatus.documents} carregados
             </div>
           </div>
 
           {/* Última Verificação */}
-          <div className="p-3 rounded-lg border bg-gray-50 border-gray-200 text-gray-800">
-            <div className="flex items-center gap-2">
-              <span className="text-lg">⏰</span>
-              <span className="font-medium">Última Check</span>
-            </div>
-            <div className="text-sm mt-1">
-              {serverStatus.lastCheck 
-                ? serverStatus.lastCheck.toLocaleTimeString('pt-BR', { 
-                    hour: '2-digit', 
-                    minute: '2-digit' 
+          <div className="p-3 rounded-lg border bg-gray-50 border-gray-200 text-gray-800 flex flex-col items-start text-left gap-3">
+            <span className="text-xl">⏰</span>
+            <span className="font-medium">Última Check</span>
+            <div className="text-sm">
+              {serverStatus.lastCheck
+                ? serverStatus.lastCheck.toLocaleTimeString('pt-BR', {
+                    hour: '2-digit',
+                    minute: '2-digit'
                   })
                 : 'Nunca'
               }
@@ -1278,26 +1511,134 @@ if (selectedDocType === "cardapio" && !docUnit) {
     return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
   };
 
+  if (isAuthChecking) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-100 p-4">
+        <Card className="w-full max-w-sm">
+          <CardHeader className="text-center">
+            <CardTitle className="flex items-center justify-center gap-2">
+              <Loader2 className="h-5 w-5 animate-spin" />
+              Verificando acesso
+            </CardTitle>
+            <CardDescription>
+              Aguarde enquanto confirmamos sua sessão ativa.
+            </CardDescription>
+          </CardHeader>
+        </Card>
+      </div>
+    );
+  }
+
+  if (!isAuthenticated) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-100 p-4">
+        <Card className="w-full max-w-md shadow-lg">
+          <CardHeader className="text-center space-y-3">
+            <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-navy/10">
+              <Lock className="h-6 w-6 text-navy" />
+            </div>
+            <CardTitle>Painel Administrativo</CardTitle>
+            <CardDescription>
+              Informe suas credenciais para acessar o gerenciamento do sistema.
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            {loginError && (
+              <div className="mb-4 rounded-md border border-red-200 bg-red-50 p-3 text-sm text-red-700">
+                {loginError}
+              </div>
+            )}
+            <form className="space-y-4" onSubmit={handleLoginSubmit}>
+              <div className="space-y-2">
+                <Label htmlFor="username">Usuário</Label>
+                <Input
+                  id="username"
+                  value={loginForm.username}
+                  autoComplete="username"
+                  onChange={(event) =>
+                    setLoginForm((current) => ({
+                      ...current,
+                      username: event.target.value,
+                    }))
+                  }
+                  required
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="password">Senha</Label>
+                <Input
+                  id="password"
+                  type="password"
+                  value={loginForm.password}
+                  autoComplete="current-password"
+                  onChange={(event) =>
+                    setLoginForm((current) => ({
+                      ...current,
+                      password: event.target.value,
+                    }))
+                  }
+                  required
+                />
+              </div>
+              <Button type="submit" className="w-full" disabled={isLoggingIn}>
+                {isLoggingIn ? (
+                  <span className="flex items-center justify-center gap-2">
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                    Entrando...
+                  </span>
+                ) : (
+                  <span className="flex items-center justify-center gap-2">
+                    <Lock className="h-4 w-4" />
+                    Entrar
+                  </span>
+                )}
+              </Button>
+            </form>
+          </CardContent>
+          <CardFooter className="flex flex-col items-center gap-2 text-sm text-muted-foreground">
+            <p>Usuário padrão: <span className="font-semibold">admin</span></p>
+            <p>Senha padrão: <span className="font-semibold">tel@p@pem2025</span></p>
+            <Link to="/" className="text-navy hover:underline">
+              ← Voltar para a visualização pública
+            </Link>
+          </CardFooter>
+        </Card>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-gray-100 p-4 lg:p-8">
       <div className="max-w-6xl mx-auto">
-        <header className="bg-navy text-white p-4 rounded-lg shadow-lg mb-6 flex justify-between items-center">
+        <header className="bg-navy text-white p-4 rounded-lg shadow-lg mb-6 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
           <div>
             <h1 className="text-2xl font-bold">Painel Administrativo</h1>
             <p className="text-gray-200">Gerencie documentos e avisos do sistema de visualização</p>
           </div>
-          <div className="flex gap-2">
+          <div className="flex flex-col-reverse gap-3 md:flex-row md:items-center md:gap-4">
+            <div className="text-sm text-gray-200">
+              <span className="block text-xs uppercase tracking-wide text-gray-300">Usuário logado</span>
+              <span className="font-semibold text-white">{sessionUsername ?? 'admin'}</span>
+            </div>
             <Link to="/">
               <Button variant="secondary">
                 📺 Visualizar Sistema
               </Button>
             </Link>
-            <Button 
-              variant="outline" 
+            <Button
+              variant="outline"
               className="text-white border-white hover:bg-white hover:text-navy"
               onClick={() => window.open(getBackendUrl('/api/status'), '_blank')}
             >
               🔧 Status do Servidor
+            </Button>
+            <Button
+              variant="destructive"
+              onClick={handleLogout}
+              className="flex items-center gap-2"
+            >
+              <LogOut className="h-4 w-4" />
+              Sair
             </Button>
           </div>
         </header>
@@ -1329,12 +1670,15 @@ if (selectedDocType === "cardapio" && !docUnit) {
         <CardContent className="space-y-4 pt-6">
           <div className="space-y-2">
             <Label htmlFor="docType">Tipo de Documento</Label>
-            <Select 
-              value={selectedDocType} 
+            <Select
+              value={selectedDocType ?? ""}
               onValueChange={(value) => {
                 setSelectedDocType(value as "plasa" | "escala" | "cardapio");
                 if (value !== "escala") {
                   setDocCategory(undefined);
+                }
+                if (value !== "cardapio") {
+                  setDocUnit(undefined);
                 }
               }}
             >
@@ -1499,23 +1843,27 @@ if (selectedDocType === "cardapio" && !docUnit) {
               Nenhum documento PLASA cadastrado.
             </p>
           ) : (
-            <ul className="space-y-2 max-h-48 overflow-y-auto">
+            <ul className="space-y-2">
               {plasaDocuments.map((doc) => (
                 <li key={doc.id} className="border rounded-md p-3 flex justify-between items-center document-card">
                   <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2 mb-1">
+                    <div className="flex flex-wrap items-start gap-2 mb-1">
                       <span className="text-lg">
                         {doc.type === "plasa" ? "📄" : "📋"}
                       </span>
                       <p className="font-medium truncate">{doc.title}</p>
                       <span className={`text-xs px-2 py-0.5 rounded-full status-badge ${
-                        doc.type === "plasa" 
-                          ? "bg-blue-100 text-blue-800" 
+                        doc.type === "plasa"
+                          ? "bg-blue-100 text-blue-800"
                           : "bg-purple-100 text-purple-800"
                       }`}>
                         PLASA
                       </span>
-                      <TagBadges tags={doc.tags} documentId={doc.id} />
+                      <TagBadges
+                        tags={doc.tags}
+                        documentId={doc.id}
+                        className={(doc.tags?.length ?? 0) > 2 ? "w-full" : ""}
+                      />
                     </div>
                     <div className="flex items-center gap-4 text-xs text-muted-foreground">
                       <span className="flex items-center gap-1">
@@ -1531,15 +1879,7 @@ if (selectedDocType === "cardapio" && !docUnit) {
                       </span>
                     </div>
                   </div>
-                  <div className="flex gap-1 ml-2">
-                    <Button 
-                      variant={doc.active ? "default" : "outline"} 
-                      size="sm"
-                      onClick={() => toggleDocActive(doc)}
-                      title={doc.active ? "Documento ativo" : "Documento inativo"}
-                    >
-                      {doc.active ? "✅" : "💤"}
-                    </Button>
+                  <div className="flex items-center gap-2 ml-2">
                     <Sheet>
                       <SheetTrigger asChild>
                         <Button variant="outline" size="sm" title="Visualizar documento">👁️</Button>
@@ -1595,23 +1935,27 @@ if (selectedDocType === "cardapio" && !docUnit) {
               Nenhuma escala cadastrada.
             </p>
           ) : (
-            <ul className="space-y-2 max-h-48 overflow-y-auto">
+            <ul className="space-y-2">
               {escalaDocuments.filter(doc => doc.type === "escala").map((doc) => (
                 <li key={doc.id} className="border rounded-md p-3 flex justify-between items-center document-card">
                   <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2 mb-1">
+                    <div className="flex flex-wrap items-start gap-2 mb-1">
                       <span className="text-lg">📋</span>
                       <p className="font-medium truncate">{doc.title}</p>
                       {doc.category && (
                         <span className={`text-xs px-2 py-0.5 rounded-full status-badge ${
-                          doc.category === "oficial" 
-                            ? "bg-blue-100 text-blue-800" 
+                          doc.category === "oficial"
+                            ? "bg-blue-100 text-blue-800"
                             : "bg-green-100 text-green-800"
                         }`}>
                           {doc.category === "oficial" ? "👨‍✈️ Oficiais" : "👨‍🔧 Praças"}
                         </span>
                       )}
-                      <TagBadges tags={doc.tags} documentId={doc.id} />
+                      <TagBadges
+                        tags={doc.tags}
+                        documentId={doc.id}
+                        className={(doc.tags?.length ?? 0) > 2 ? "w-full" : ""}
+                      />
                     </div>
                     <div className="flex items-center gap-4 text-xs text-muted-foreground">
                       <span className="flex items-center gap-1">
@@ -1627,15 +1971,7 @@ if (selectedDocType === "cardapio" && !docUnit) {
                       </span>
                     </div>
                   </div>
-                  <div className="flex gap-1 ml-2">
-                    <Button 
-                      variant={doc.active ? "default" : "outline"} 
-                      size="sm"
-                      onClick={() => toggleDocActive(doc)}
-                      title={doc.active ? "Escala ativa" : "Escala inativa"}
-                    >
-                      {doc.active ? "✅" : "💤"}
-                    </Button>
+                  <div className="flex items-center gap-2 ml-2">
                     <Sheet>
                       <SheetTrigger asChild>
                         <Button variant="outline" size="sm" title="Visualizar escala">👁️</Button>
@@ -1691,27 +2027,31 @@ if (selectedDocType === "cardapio" && !docUnit) {
               Nenhum cardápio cadastrado.
             </p>
           ) : (
-            <ul className="space-y-2 max-h-48 overflow-y-auto">
+            <ul className="space-y-2">
               {cardapioDocuments.map((doc) => (
                 <li key={doc.id} className="border rounded-md p-3 flex justify-between items-center document-card">
                   <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2 mb-1">
+                    <div className="flex flex-wrap items-start gap-2 mb-1">
                       <span className="text-lg">🍽️</span>
                       <p className="font-medium truncate">{doc.title}</p>
                       <span className="text-xs bg-orange-100 text-orange-800 px-2 py-0.5 rounded-full status-badge">
                         CARDÁPIO
                       </span>
-                        {doc.unit && (
-                          <span className={`text-xs px-2 py-0.5 rounded-full status-badge ${
-                            doc.unit === "EAGM" 
-                              ? "bg-blue-100 text-blue-800" 
-                              : "bg-green-100 text-green-800"
-                          }`}>
-                            {doc.unit === "EAGM" ? "🏢 EAGM" : "⚓ 1º DN"}
-                          </span>
-                        )}
-                        <TagBadges tags={doc.tags} documentId={doc.id} />
-                                            </div>
+                      {doc.unit && (
+                        <span className={`text-xs px-2 py-0.5 rounded-full status-badge ${
+                          doc.unit === "EAGM"
+                            ? "bg-blue-100 text-blue-800"
+                            : "bg-green-100 text-green-800"
+                        }`}>
+                          {doc.unit === "EAGM" ? "🏢 EAGM" : "⚓ 1º DN"}
+                        </span>
+                      )}
+                      <TagBadges
+                        tags={doc.tags}
+                        documentId={doc.id}
+                        className={(doc.tags?.length ?? 0) > 2 ? "w-full" : ""}
+                      />
+                    </div>
                     <div className="flex items-center gap-4 text-xs text-muted-foreground">
                       <span className="flex items-center gap-1">
                         📅 {new Date(doc.uploadDate).toLocaleDateString('pt-BR')}
@@ -1726,15 +2066,7 @@ if (selectedDocType === "cardapio" && !docUnit) {
                       </span>
                     </div>
                   </div>
-                  <div className="flex gap-1 ml-2">
-                    <Button 
-                      variant={doc.active ? "default" : "outline"} 
-                      size="sm"
-                      onClick={() => toggleDocActive(doc)}
-                      title={doc.active ? "Cardápio ativo" : "Cardápio inativo"}
-                    >
-                      {doc.active ? "✅" : "💤"}
-                    </Button>
+                  <div className="flex items-center gap-2 ml-2">
                     <Sheet>
                       <SheetTrigger asChild>
                         <Button variant="outline" size="sm" title="Visualizar cardápio">👁️</Button>
@@ -1773,97 +2105,6 @@ if (selectedDocType === "cardapio" && !docUnit) {
     </div>
   </div>
 
-  {/* Informações sobre como funciona */}
-  <Card className="mt-6">
-    <CardHeader>
-      <CardTitle>❓ Como Funciona o Sistema de Documentos</CardTitle>
-      <CardDescription>
-        Entenda como o sistema processa e exibe os diferentes tipos de documentos
-      </CardDescription>
-    </CardHeader>
-    <CardContent>
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        <div className="bg-blue-50 p-4 rounded-lg">
-          <h4 className="font-medium mb-2 flex items-center gap-2">
-            📄 PLASA (Plano de Serviço)
-          </h4>
-          <ul className="list-disc pl-5 space-y-1 text-sm text-blue-700">
-            <li>PDFs convertidos automaticamente para imagens</li>
-            <li>Rola automaticamente do início ao fim</li>
-            <li>Reinicia após intervalo configurável</li>
-            <li>Velocidade de rolagem ajustável</li>
-            <li>Exibido no lado esquerdo da tela</li>
-          </ul>
-        </div>
-        
-        <div className="bg-purple-50 p-4 rounded-lg">
-          <h4 className="font-medium mb-2 flex items-center gap-2">
-           📋 PLASA (Plano de Serviço Semanal)
-          </h4>
-          <ul className="list-disc pl-5 space-y-1 text-sm text-purple-700">
-            <li>Mesmo comportamento do PLASA</li>
-            <li>Rolagem automática contínua</li>
-            <li>Alternância com PLASA no lado esquerdo</li>
-            <li>Conversão automática PDF → Imagem</li>
-            <li>Cache inteligente no servidor</li>
-          </ul>
-        </div>
-
-        <div className="bg-green-50 p-4 rounded-lg">
-          <h4 className="font-medium mb-2 flex items-center gap-2">
-            📋 Escalas de Serviço
-          </h4>
-          <ul className="list-disc pl-5 space-y-1 text-sm text-green-700">
-            <li>Exibição estática (sem scroll)</li>
-            <li>Alternância automática entre escalas</li>
-            <li>Categorias: Oficiais e Praças</li>
-            <li>Intervalo de alternância configurável</li>
-            <li>Exibido no lado direito da tela</li>
-          </ul>
-        </div>
-
-        <div className="bg-orange-50 p-4 rounded-lg">
-          <h4 className="font-medium mb-2 flex items-center gap-2">
-            🍽️ Cardápios Semanais
-          </h4>
-          <ul className="list-disc pl-5 space-y-1 text-sm text-orange-700">
-            <li>Alternância automática entre cardápios</li>
-            <li>Exibição estática como as escalas</li>
-            <li>Mesmo intervalo de alternância</li>
-            <li>Cache para melhor performance</li>
-            <li>Rotaciona junto com as escalas</li>
-          </ul>
-        </div>
-      </div>
-      
-      <div className="mt-6 p-4 bg-navy/5 rounded-lg border-l-4 border-navy">
-        <h4 className="font-medium mb-2 text-navy">🔧 Conversão PDF para Imagem</h4>
-        <p className="text-sm text-navy/80">
-          O sistema converte automaticamente PDFs para imagens (JPG) para garantir máxima compatibilidade 
-          e evitar problemas de CORS, fontes faltando, ou incompatibilidades de navegador. 
-          As imagens são armazenadas no servidor e carregadas rapidamente através de cache inteligente.
-        </p>
-      </div>
-      
-      <div className="mt-4 p-4 bg-green-50 rounded-lg border-l-4 border-green-500">
-        <h4 className="font-medium mb-2 text-green-800">💡 Dicas de Uso</h4>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <ul className="list-disc pl-5 space-y-1 text-sm text-green-700">
-            <li>Para melhor qualidade, use PDFs com orientação paisagem</li>
-            <li>Imagens (JPG/PNG) são processadas mais rapidamente que PDFs</li>
-            <li>O sistema mantém cache das páginas convertidas</li>
-            <li>Documentos inativos permanecem salvos mas não são exibidos</li>
-          </ul>
-          <ul className="list-disc pl-5 space-y-1 text-sm text-green-700">
-            <li>PLASA: Ideal para documentos longos que precisam ser lidos</li>
-            <li>Escalas/Cardápios: Ideal para informações que precisam ser vistas rapidamente</li>
-            <li>Use nomes descritivos nos títulos para melhor organização</li>
-            <li>Cache evita reprocessamento desnecessário</li>
-          </ul>
-        </div>
-      </div>
-    </CardContent>
-  </Card>
 </TabsContent>
 
 
@@ -1891,25 +2132,26 @@ if (selectedDocType === "cardapio" && !docUnit) {
 
                       <div className="space-y-2">
                         <Label htmlFor="officerName">Nome do Oficial</Label>
-                        <Select 
-                          value={(() => {
-                            // Se o nome já está formatado, extrair apenas o nome base
-                            const match = dutyOfficers.officerName?.match(/^[A-Z0-9]+\s*(?:\([A-Z-]+\))?\s+(.+)$/);
-                            return match ? match[1] : dutyOfficers.officerName || "";
-                          })()} 
+                        <Select
+                          value={normalizeDutyNameValue(dutyOfficers.officerName)}
                           onValueChange={(value) => {
                             console.log('🔄 Selecionando oficial:', value);
-                            const officer = availableOfficers.find(o => o.name === value);
+                            const officer = availableOfficers.find(
+                              o => normalizeDutyNameValue(o.name) === value
+                            );
                             console.log('👮 Oficial encontrado:', officer);
-                            // Criar nome formatado imediatamente
-                            const formattedName = officer ? 
-                              `${officer.rank.toUpperCase()}${officer.specialty ? ` (${officer.specialty.toUpperCase()})` : ''} ${officer.name}` : 
-                              value;
-                            
+
+                            const normalizedName = officer
+                              ? normalizeDutyNameValue(officer.name)
+                              : normalizeDutyNameValue(value);
+                            const formattedRank = officer
+                              ? formatRankWithSpecialty(officer.rank, officer.specialty || null)
+                              : normalizeDutyRankValue(dutyOfficers.officerRank);
+
                             const newOfficers = {
-                              ...dutyOfficers, 
-                              officerName: formattedName,
-                              officerRank: officer?.rank as "1t" | "2t" | "ct" || dutyOfficers.officerRank
+                              ...dutyOfficers,
+                              officerName: normalizedName,
+                              officerRank: formattedRank ?? dutyOfficers.officerRank,
                             };
                             console.log('🔄 Novo estado dos oficiais:', newOfficers);
                             setDutyOfficers(newOfficers);
@@ -1921,8 +2163,11 @@ if (selectedDocType === "cardapio" && !docUnit) {
                           </SelectTrigger>
                           <SelectContent>
                             {availableOfficers.map((officer, index) => (
-                              <SelectItem key={`officer-${index}-${officer.name}`} value={officer.name}>
-                                {officer.name}
+                              <SelectItem
+                                key={`officer-${index}-${officer.name}`}
+                                value={normalizeDutyNameValue(officer.name)}
+                              >
+                                {formatMilitaryLabel(officer)}
                               </SelectItem>
                             ))}
                             {isLoadingComboboxData && (
@@ -1945,25 +2190,26 @@ if (selectedDocType === "cardapio" && !docUnit) {
 
                       <div className="space-y-2">
                         <Label htmlFor="masterName">Nome do Contramestre</Label>
-                        <Select 
-                          value={(() => {
-                            // Se o nome já está formatado, extrair apenas o nome base
-                            const match = dutyOfficers.masterName?.match(/^[A-Z0-9]+\s*(?:\([A-Z-]+\))?\s+(.+)$/);
-                            return match ? match[1] : dutyOfficers.masterName || "";
-                          })()} 
+                        <Select
+                          value={normalizeDutyNameValue(dutyOfficers.masterName)}
                           onValueChange={(value) => {
                             console.log('🔄 Selecionando contramestre:', value);
-                            const master = availableMasters.find(m => m.name === value);
+                            const master = availableMasters.find(
+                              m => normalizeDutyNameValue(m.name) === value
+                            );
                             console.log('⚓ Contramestre encontrado:', master);
-                            // Criar nome formatado imediatamente
-                            const formattedMasterName = master ? 
-                              `${master.rank.toUpperCase()}${master.specialty ? ` (${master.specialty.toUpperCase()})` : ''} ${master.name}` : 
-                              value;
-                            
+
+                            const normalizedName = master
+                              ? normalizeDutyNameValue(master.name)
+                              : normalizeDutyNameValue(value);
+                            const formattedRank = master
+                              ? formatRankWithSpecialty(master.rank, master.specialty || null)
+                              : normalizeDutyRankValue(dutyOfficers.masterRank);
+
                             setDutyOfficers({
-                              ...dutyOfficers, 
-                              masterName: formattedMasterName,
-                              masterRank: master?.rank as "1sg" | "2sg" | "3sg" || dutyOfficers.masterRank
+                              ...dutyOfficers,
+                              masterName: normalizedName,
+                              masterRank: formattedRank ?? dutyOfficers.masterRank
                             });
                           }}
                           disabled={isLoadingOfficers}
@@ -1973,8 +2219,11 @@ if (selectedDocType === "cardapio" && !docUnit) {
                           </SelectTrigger>
                           <SelectContent>
                             {availableMasters.map((master, index) => (
-                              <SelectItem key={`master-${index}-${master.name}`} value={master.name}>
-                                {master.name}
+                              <SelectItem
+                                key={`master-${index}-${master.name}`}
+                                value={normalizeDutyNameValue(master.name)}
+                              >
+                                {formatMilitaryLabel(master)}
                               </SelectItem>
                             ))}
                             {isLoadingComboboxData && (
@@ -2030,18 +2279,7 @@ if (selectedDocType === "cardapio" && !docUnit) {
                               <div className="flex items-center gap-2">
                                 {(() => {
                                   const converted = convertToDisplayFormat(dutyOfficers.officerName, 'officer');
-                                  return (
-                                    <>
-                                      {converted.rank && converted.specialty && (
-                                        <MilitaryInsignia 
-                                          rank={converted.rank.toLowerCase()} 
-                                          specialty={converted.specialty.toLowerCase()} 
-                                          size="sm"
-                                        />
-                                      )}
-                                      <span>{converted.displayName}</span>
-                                    </>
-                                  );
+                                  return <span>{converted.displayName}</span>;
                                 })()}
                               </div>
                             ) : (
@@ -2057,18 +2295,7 @@ if (selectedDocType === "cardapio" && !docUnit) {
                               <div className="flex items-center gap-2">
                                 {(() => {
                                   const converted = convertToDisplayFormat(dutyOfficers.masterName, 'master');
-                                  return (
-                                    <>
-                                      {converted.rank && converted.specialty && (
-                                        <MilitaryInsignia 
-                                          rank={converted.rank.toLowerCase()} 
-                                          specialty={converted.specialty.toLowerCase()} 
-                                          size="sm"
-                                        />
-                                      )}
-                                      <span>{converted.displayName}</span>
-                                    </>
-                                  );
+                                  return <span>{converted.displayName}</span>;
                                 })()}
                               </div>
                             ) : (
@@ -2338,7 +2565,7 @@ if (selectedDocType === "cardapio" && !docUnit) {
                           <Button
                             onClick={async () => {
                               try {
-                                const response = await fetch(getBackendUrl('/api/clear-cache'), { method: 'POST' });
+                                const response = await fetchBackend('/api/clear-cache', { method: 'POST' });
                                 if (response.ok) {
                                   // Limpar também cache do localStorage
                                   localStorage.removeItem('documentContext');
@@ -2437,7 +2664,7 @@ if (selectedDocType === "cardapio" && !docUnit) {
                           <Button
                             onClick={async () => {
                               try {
-                                const response = await fetch(getBackendUrl('/api/list-pdfs'));
+                                const response = await fetchBackend('/api/list-pdfs');
                                 const data = await response.json();
                                 console.log('📊 Informações do sistema:', data);
                                 alert(`Sistema Status:
@@ -2458,89 +2685,6 @@ if (selectedDocType === "cardapio" && !docUnit) {
                           </Button>
                         </div>
 
-                        {/* Ajuda do Sistema */}
-                        <div className="p-4 bg-purple-50 rounded-lg border border-purple-200">
-                          <div className="flex items-center gap-2 mb-3">
-                            <span className="text-lg">❓</span>
-                            <h4 className="font-medium text-purple-800">Como Funciona</h4>
-                          </div>
-                          <p className="text-sm text-purple-700 mb-3">
-                            Entenda como o sistema processa e exibe documentos.
-                          </p>
-                          <Sheet>
-                            <SheetTrigger asChild>
-                              <Button
-                                variant="outline"
-                                size="sm"
-                                className="w-full border-purple-300 text-purple-700 hover:bg-purple-100"
-                              >
-                                Ver Ajuda
-                              </Button>
-                            </SheetTrigger>
-                            <SheetContent className="w-[400px] sm:w-[540px]">
-                              <SheetHeader>
-                                <SheetTitle>📖 Como Funciona o Sistema</SheetTitle>
-                                <SheetDescription>
-                                  Guia completo de funcionamento do sistema de visualização
-                                </SheetDescription>
-                              </SheetHeader>
-                              <div className="mt-6 space-y-6 max-h-[80vh] overflow-y-auto">
-                                <div>
-                                  <h3 className="font-semibold mb-2">📄 PLASA (Plano de Serviço)</h3>
-                                  <ul className="text-sm space-y-1 text-gray-600">
-                                    <li>• PDFs são automaticamente convertidos para imagens</li>
-                                    <li>• Rola automaticamente do início ao fim</li>
-                                    <li>• Reinicia após intervalo configurável</li>
-                                    <li>• Apenas um PLASA ativo por vez</li>
-                                    <li>• Velocidade de rolagem configurável</li>
-                                  </ul>
-                                </div>
-
-                                <div>
-                                  <h3 className="font-semibold mb-2">📋 Escalas de Serviço</h3>
-                                  <ul className="text-sm space-y-1 text-gray-600">
-                                    <li>• Suportam PDFs e imagens diretas</li>
-                                    <li>• Alternância automática no intervalo configurado</li>
-                                    <li>• Suporte a categorias: Oficiais e Praças</li>
-                                    <li>• Múltiplas escalas ativas simultaneamente</li>
-                                    <li>• Exibição estática (sem scroll)</li>
-                                  </ul>
-                                </div>
-
-                                <div>
-                                  <h3 className="font-semibold mb-2">📢 Avisos Importantes</h3>
-                                  <ul className="text-sm space-y-1 text-gray-600">
-                                    <li>• Salvos no servidor backend</li>
-                                    <li>• Alternância automática entre múltiplos avisos</li>
-                                    <li>• Prioridades: Alta, Média, Baixa</li>
-                                    <li>• Período de validade configurável</li>
-                                    <li>• Sincronização entre dispositivos</li>
-                                  </ul>
-                                </div>
-
-                                <div>
-                                  <h3 className="font-semibold mb-2">🔧 Conversão PDF para Imagem</h3>
-                                  <p className="text-sm text-gray-600">
-                                    O sistema converte automaticamente PDFs para imagens (JPG) para máxima 
-                                    compatibilidade e evitar problemas de CORS ou fontes faltando. As imagens 
-                                    são armazenadas no servidor para carregamento rápido.
-                                  </p>
-                                </div>
-
-                                <div>
-                                  <h3 className="font-semibold mb-2">💡 Dicas de Uso</h3>
-                                  <ul className="text-sm space-y-1 text-gray-600">
-                                    <li>• Use PDFs com orientação paisagem para melhor qualidade</li>
-                                    <li>• Imagens (JPG/PNG) são processadas mais rapidamente</li>
-                                    <li>• Sistema mantém cache para performance</li>
-                                    <li>• Avisos "Alta" prioridade têm destaque vermelho</li>
-                                    <li>• Documentos inativos ficam salvos mas não aparecem</li>
-                                  </ul>
-                                </div>
-                              </div>
-                            </SheetContent>
-                          </Sheet>
-                        </div>
                       </div>
                     </CardContent>
                   </Card>
@@ -2731,8 +2875,13 @@ if (selectedDocType === "cardapio" && !docUnit) {
                                     <div className="flex justify-between items-start mb-2">
                                       <div className="flex-1">
                                         <div className="font-semibold text-sm text-blue-800">
-                                          {military.rank.toUpperCase()} ({(military as any).specialty?.toUpperCase() || 'S/E'})
+                                          {`${formatRankWithSpecialty(military.rank, military.specialty)}${military.specialty ? '' : ' (S/E)'}`}
                                         </div>
+                                        {resolveFullRankName(military) && (
+                                          <div className="text-xs text-blue-700/80">
+                                            {resolveFullRankName(military)}
+                                          </div>
+                                        )}
                                         <div className="text-base font-bold text-navy">
                                           {military.name.toUpperCase()}
                                         </div>
@@ -2780,8 +2929,13 @@ if (selectedDocType === "cardapio" && !docUnit) {
                                     <div className="flex justify-between items-start mb-2">
                                       <div className="flex-1">
                                         <div className="font-semibold text-sm text-green-800">
-                                          {military.rank.toUpperCase()} ({(military as any).specialty?.toUpperCase() || 'S/E'})
+                                          {`${formatRankWithSpecialty(military.rank, military.specialty)}${military.specialty ? '' : ' (S/E)'}`}
                                         </div>
+                                        {resolveFullRankName(military) && (
+                                          <div className="text-xs text-green-700/80">
+                                            {resolveFullRankName(military)}
+                                          </div>
+                                        )}
                                         <div className="text-base font-bold text-navy">
                                           {military.name.toUpperCase()}
                                         </div>
@@ -2898,8 +3052,13 @@ if (selectedDocType === "cardapio" && !docUnit) {
                                         <div className="flex justify-between items-start mb-2">
                                           <div className="flex-1">
                                             <div className="font-semibold text-sm text-blue-800">
-                                              {military.rank.toUpperCase()} ({(military as any).specialty?.toUpperCase() || 'S/E'})
+                                              {`${formatRankWithSpecialty(military.rank, military.specialty)}${military.specialty ? '' : ' (S/E)'}`}
                                             </div>
+                                            {resolveFullRankName(military) && (
+                                              <div className="text-xs text-blue-700/80">
+                                                {resolveFullRankName(military)}
+                                              </div>
+                                            )}
                                             <div className="text-base font-bold text-navy">
                                               {military.name.toUpperCase()}
                                             </div>
@@ -2947,8 +3106,13 @@ if (selectedDocType === "cardapio" && !docUnit) {
                                         <div className="flex justify-between items-start mb-2">
                                           <div className="flex-1">
                                             <div className="font-semibold text-sm text-green-800">
-                                              {military.rank.toUpperCase()} ({(military as any).specialty?.toUpperCase() || 'S/E'})
+                                              {`${formatRankWithSpecialty(military.rank, military.specialty)}${military.specialty ? '' : ' (S/E)'}`}
                                             </div>
+                                            {resolveFullRankName(military) && (
+                                              <div className="text-xs text-green-700/80">
+                                                {resolveFullRankName(military)}
+                                              </div>
+                                            )}
                                             <div className="text-base font-bold text-navy">
                                               {military.name.toUpperCase()}
                                             </div>
