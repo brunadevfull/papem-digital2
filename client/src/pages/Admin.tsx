@@ -51,15 +51,14 @@ import { Lock, LogOut, Loader2 } from "lucide-react";
 // Dados dos oficiais baseados no quadro acda Marinha
 
 // ✅ FIXED: Import the correct data structures
-import {
-  OFFICERS_LIST,
-  MASTERS_LIST,
-  type OfficerData,
+import { 
+  OFFICERS_LIST, 
+  MASTERS_LIST, 
+  type OfficerData, 
   type MasterData,
   RANK_DISPLAY_MAP,
   RANK_FULL_NAME_MAP
 } from "@/data/officersData";
-import { normalizeDutyNameValue } from "./dutyNameUtils";
 
 
 const getErrorMessage = (error: unknown): string => {
@@ -99,7 +98,7 @@ const OFFICERS_DATA = OFFICERS_LIST.map(officer => ({
 const MASTERS_DATA = MASTERS_LIST.map(master => ({
   name: master.name,
   rank: master.rank,
-  specialty: master.specialty || null,
+  specialty: master.specialty || null, 
   fullRankName: master.fullRankName
 }));
 
@@ -289,6 +288,27 @@ const Admin: React.FC = () => {
     const rankText = rank ? rank.toUpperCase() : "";
     const specialtyText = specialty ? ` (${specialty.toUpperCase()})` : "";
     return `${rankText}${specialtyText}`.trim();
+  };
+
+  const DUTY_NAME_PATTERN = /^([A-Z0-9]+)\s*(?:\([A-Z0-9-]+\))?\s+(.+)$/;
+
+  const normalizeDutyNameValue = (value?: string | null): string => {
+    if (!value) {
+      return "";
+    }
+
+    const trimmed = value.trim();
+    if (!trimmed) {
+      return "";
+    }
+
+    const upper = trimmed.toUpperCase();
+    const match = upper.match(DUTY_NAME_PATTERN);
+    if (match) {
+      return match[2].trim();
+    }
+
+    return upper;
   };
 
   const normalizeDutyRankValue = (value?: string | null): string | undefined => {
@@ -2113,19 +2133,17 @@ const handleDocumentSubmit = async (e: React.FormEvent) => {
                       <div className="space-y-2">
                         <Label htmlFor="officerName">Nome do Oficial</Label>
                         <Select
-                          value={dutyOfficers.officerName
-                            ? dutyOfficers.officerName.toUpperCase()
-                            : undefined}
+                          value={normalizeDutyNameValue(dutyOfficers.officerName)}
                           onValueChange={(value) => {
                             console.log('🔄 Selecionando oficial:', value);
                             const officer = availableOfficers.find(
-                              o => o.name?.toUpperCase() === value
+                              o => normalizeDutyNameValue(o.name) === value
                             );
                             console.log('👮 Oficial encontrado:', officer);
 
-                            const normalizedName = normalizeDutyNameValue(
-                              officer?.name ?? value
-                            );
+                            const normalizedName = officer
+                              ? normalizeDutyNameValue(officer.name)
+                              : normalizeDutyNameValue(value);
                             const formattedRank = officer
                               ? formatRankWithSpecialty(officer.rank, officer.specialty || null)
                               : normalizeDutyRankValue(dutyOfficers.officerRank);
@@ -2146,8 +2164,8 @@ const handleDocumentSubmit = async (e: React.FormEvent) => {
                           <SelectContent>
                             {availableOfficers.map((officer, index) => (
                               <SelectItem
-                                key={`officer-${officer.id ?? index}-${officer.name}`}
-                                value={officer.name.toUpperCase()}
+                                key={`officer-${index}-${officer.name}`}
+                                value={normalizeDutyNameValue(officer.name)}
                               >
                                 {formatMilitaryLabel(officer)}
                               </SelectItem>
@@ -2173,19 +2191,17 @@ const handleDocumentSubmit = async (e: React.FormEvent) => {
                       <div className="space-y-2">
                         <Label htmlFor="masterName">Nome do Contramestre</Label>
                         <Select
-                          value={dutyOfficers.masterName
-                            ? dutyOfficers.masterName.toUpperCase()
-                            : undefined}
+                          value={normalizeDutyNameValue(dutyOfficers.masterName)}
                           onValueChange={(value) => {
                             console.log('🔄 Selecionando contramestre:', value);
                             const master = availableMasters.find(
-                              m => m.name?.toUpperCase() === value
+                              m => normalizeDutyNameValue(m.name) === value
                             );
                             console.log('⚓ Contramestre encontrado:', master);
 
-                            const normalizedName = normalizeDutyNameValue(
-                              master?.name ?? value
-                            );
+                            const normalizedName = master
+                              ? normalizeDutyNameValue(master.name)
+                              : normalizeDutyNameValue(value);
                             const formattedRank = master
                               ? formatRankWithSpecialty(master.rank, master.specialty || null)
                               : normalizeDutyRankValue(dutyOfficers.masterRank);
@@ -2204,8 +2220,8 @@ const handleDocumentSubmit = async (e: React.FormEvent) => {
                           <SelectContent>
                             {availableMasters.map((master, index) => (
                               <SelectItem
-                                key={`master-${master.id ?? index}-${master.name}`}
-                                value={master.name.toUpperCase()}
+                                key={`master-${index}-${master.name}`}
+                                value={normalizeDutyNameValue(master.name)}
                               >
                                 {formatMilitaryLabel(master)}
                               </SelectItem>
