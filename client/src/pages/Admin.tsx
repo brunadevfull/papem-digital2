@@ -963,74 +963,23 @@ const saveEditOfficer = async () => {
         body: JSON.stringify(officersData),
       });
 
-      let data: unknown;
-      try {
-        data = await response.json();
-      } catch (parseError) {
-        console.warn('Não foi possível analisar a resposta JSON ao salvar oficiais:', parseError);
-        data = null;
-      }
-
-      const parsedData = (data ?? {}) as {
-        success?: boolean;
-        error?: unknown;
-        message?: unknown;
-        details?: unknown;
-      };
-
-      const responseErrorMessage = (() => {
-        const candidateMessages: unknown[] = [
-          parsedData.error,
-          parsedData.details,
-          parsedData.message,
-        ];
-
-        for (const candidate of candidateMessages) {
-          if (!candidate) {
-            continue;
-          }
-
-          if (typeof candidate === 'string') {
-            return candidate;
-          }
-
-          if (Array.isArray(candidate)) {
-            const joined = candidate
-              .map(item => (typeof item === 'string' ? item : JSON.stringify(item)))
-              .join(', ');
-            if (joined) {
-              return joined;
-            }
-          }
-
-          if (typeof candidate === 'object') {
-            try {
-              return JSON.stringify(candidate);
-            } catch {
-              // ignore serialization errors
-            }
-          }
-        }
-
-        return `HTTP ${response.status}: ${response.statusText || 'Erro desconhecido'}`;
-      })();
-
       if (!response.ok) {
-        throw new Error(responseErrorMessage);
+        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
       }
 
-      console.log('✅ Resposta do servidor:', parsedData);
-
-      if (parsedData.success) {
+      const data = await response.json();
+      console.log('✅ Resposta do servidor:', data);
+      
+      if (data.success) {
         toast({
           title: "Sucesso",
           description: "Oficiais de serviço atualizados com sucesso!",
         });
-
+        
         // Recarregar os dados para sincronizar
         await loadDutyOfficers();
       } else {
-        throw new Error(responseErrorMessage || 'Erro ao salvar oficiais');
+        throw new Error(data.error || 'Erro ao salvar oficiais');
       }
     } catch (error) {
       console.error('❌ Erro ao salvar oficiais:', error);
