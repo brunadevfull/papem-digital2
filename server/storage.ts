@@ -1,37 +1,68 @@
 import { users, notices, documents, militaryPersonnel, type User, type InsertUser, type Notice, type InsertNotice, type PDFDocument, type InsertDocument, type DutyOfficers, type InsertDutyOfficers, type MilitaryPersonnel, type InsertMilitaryPersonnel } from "@shared/schema";
 import { DatabaseStorage } from "./db-storage";
 
-const RANK_PREFIX_PATTERN = /^([A-Z0-9]+)\s*(?:\([A-Z0-9-]+\))?\s+(.+)$/;
+const DUTY_PERSON_PATTERN = /^([A-Z0-9]+(?:\s*\([A-Z0-9-]+\))?)\s+(.+)$/;
 
-const sanitizeDutyName = (value: string | null | undefined): string => {
-  if (!value) {
-    return "";
-  }
-
-  const trimmed = value.trim().toUpperCase();
-  if (!trimmed) {
-    return "";
-  }
-
-  const match = trimmed.match(RANK_PREFIX_PATTERN);
-  if (match) {
-    return match[2].trim();
-  }
-
-  return trimmed;
+type ParsedDutyPerson = {
+  name: string;
+  rank?: string;
 };
 
-const normalizeDutyRank = (value: string | null | undefined): string | undefined => {
+const normalizeRankSpacing = (value: string): string => {
+  return value
+    .replace(/\s+/g, " ")
+    .replace(/\(\s+/g, "(")
+    .replace(/\s+\)/g, ")")
+    .trim();
+};
+
+const parseDutyPerson = (value: string | null | undefined): ParsedDutyPerson => {
   if (!value) {
-    return undefined;
+    return { name: "" };
   }
 
   const trimmed = value.trim();
   if (!trimmed) {
-    return undefined;
+    return { name: "" };
   }
 
-  return trimmed.toUpperCase();
+  const upperValue = trimmed.toUpperCase();
+  const match = upperValue.match(DUTY_PERSON_PATTERN);
+
+  if (match) {
+    return {
+      rank: normalizeRankSpacing(match[1]),
+      name: normalizeRankSpacing(match[2])
+    };
+  }
+
+  return { name: normalizeRankSpacing(upperValue) };
+};
+
+const sanitizeDutyName = (value: string | null | undefined): string => {
+  return parseDutyPerson(value).name;
+};
+
+const normalizeDutyRank = (
+  value: string | null | undefined,
+  fallback?: string | null | undefined
+): string | undefined => {
+  const candidates = [value, fallback];
+
+  for (const candidate of candidates) {
+    if (typeof candidate !== "string") {
+      continue;
+    }
+
+    const trimmed = candidate.trim();
+    if (!trimmed) {
+      continue;
+    }
+
+    return normalizeRankSpacing(trimmed.toUpperCase());
+  }
+
+  return undefined;
 };
 
 export interface IStorage {
@@ -460,10 +491,18 @@ export class MemStorage implements IStorage {
   async updateDutyOfficers(officers: InsertDutyOfficers): Promise<DutyOfficers> {
     const now = new Date();
     const validFromDate = officers.validFrom ?? now;
-    const sanitizedOfficerName = sanitizeDutyName(officers.officerName ?? "");
-    const sanitizedMasterName = sanitizeDutyName(officers.masterName ?? "");
-    const normalizedOfficerRank = normalizeDutyRank(officers.officerRank);
-    const normalizedMasterRank = normalizeDutyRank(officers.masterRank);
+    const parsedOfficer = parseDutyPerson(officers.officerName);
+    const parsedMaster = parseDutyPerson(officers.masterName);
+    const sanitizedOfficerName = parsedOfficer.name;
+    const sanitizedMasterName = parsedMaster.name;
+    const normalizedOfficerRank = normalizeDutyRank(
+      officers.officerRank,
+      parsedOfficer.rank
+    );
+    const normalizedMasterRank = normalizeDutyRank(
+      officers.masterRank,
+      parsedMaster.rank
+    );
     const updatedOfficers: DutyOfficers = {
       id: (this.dutyOfficers?.id ?? 0) + 1,
       officerName: sanitizedOfficerName,
