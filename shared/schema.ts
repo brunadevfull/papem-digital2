@@ -124,9 +124,25 @@ export const dutyOfficersPayloadSchema = z.object({
     .transform(value => {
       if (!value) return undefined;
 
-      const date = value instanceof Date ? value : new Date(value);
+      if (value instanceof Date) {
+        return Number.isNaN(value.getTime()) ? undefined : value;
+      }
+
+      const trimmed = typeof value === "string" ? value.trim() : "";
+      if (!trimmed) return undefined;
+
+      const normalized =
+        trimmed.includes("T") || !trimmed.includes(" ")
+          ? trimmed
+          : trimmed.replace(/\s+/, "T");
+
+      const date = new Date(normalized);
       if (Number.isNaN(date.getTime())) {
-        throw new Error("Invalid validFrom date");
+        console.warn?.("[dutyOfficersPayloadSchema] Invalid validFrom date sanitized", {
+          original: value,
+          normalized,
+        });
+        return undefined;
       }
 
       return date;
