@@ -77,6 +77,36 @@ const Index = () => {
     return () => clearInterval(interval);
   }, []);
 
+  useEffect(() => {
+    const url = resolveBackendUrl('/api/duty-officers/stream');
+    const eventSource = new EventSource(url);
+
+    eventSource.onmessage = (event) => {
+      try {
+        const payload = JSON.parse(event.data) as {
+          type?: 'snapshot' | 'update';
+          officers?: DutyOfficers | null;
+          timestamp?: string;
+        };
+
+        if ('officers' in payload) {
+          setOfficers(payload.officers ?? null);
+          console.log('📡 Index recebeu atualização SSE de oficiais:', payload);
+        }
+      } catch (error) {
+        console.error('❌ Index - erro ao processar SSE de oficiais:', error);
+      }
+    };
+
+    eventSource.onerror = (event) => {
+      console.error('⚠️ Index - erro no stream SSE de oficiais:', event);
+    };
+
+    return () => {
+      eventSource.close();
+    };
+  }, []);
+
   // Buscar dados da temperatura
   useEffect(() => {
     const fetchTemperature = async () => {
