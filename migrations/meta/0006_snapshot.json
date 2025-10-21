@@ -1,0 +1,134 @@
+{
+  "id": "0f3c88ab-1f2d-4fdd-9b2c-41a0c8b617e3",
+  "prevId": "5b69a7d2-9a7d-4d07-a839-8f0af7e8a5ce",
+  "version": "7",
+  "dialect": "postgresql",
+  "tables": {
+    "public.documents": {
+      "name": "documents",
+      "schema": "",
+      "columns": {
+        "id": { "name": "id", "type": "serial", "primaryKey": true, "notNull": true },
+        "title": { "name": "title", "type": "text", "primaryKey": false, "notNull": true },
+        "url": { "name": "url", "type": "text", "primaryKey": false, "notNull": true },
+        "type": { "name": "type", "type": "text", "primaryKey": false, "notNull": true },
+        "category": { "name": "category", "type": "text", "primaryKey": false, "notNull": false },
+        "active": { "name": "active", "type": "boolean", "primaryKey": false, "notNull": true, "default": true },
+        "upload_date": { "name": "upload_date", "type": "timestamp", "primaryKey": false, "notNull": false, "default": "now()" },
+        "tags": { "name": "tags", "type": "text[]", "primaryKey": false, "notNull": true, "default": "ARRAY[]::text[]" },
+        "unit": { "name": "unit", "type": "text", "primaryKey": false, "notNull": false }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {
+        "documents_unit_check": {
+          "name": "documents_unit_check",
+          "expression": "unit IN ('EAGM', '1DN')"
+        }
+      },
+      "isRLSEnabled": false
+    },
+    "public.duty_assignments": {
+      "name": "duty_assignments",
+      "schema": "",
+      "columns": {
+        "id": { "name": "id", "type": "serial", "primaryKey": true, "notNull": true },
+        "officer_name": { "name": "officer_name", "type": "text", "primaryKey": false, "notNull": true },
+        "officer_rank": { "name": "officer_rank", "type": "text", "primaryKey": false, "notNull": false },
+        "master_name": { "name": "master_name", "type": "text", "primaryKey": false, "notNull": true },
+        "master_rank": { "name": "master_rank", "type": "text", "primaryKey": false, "notNull": false },
+        "valid_from": { "name": "valid_from", "type": "timestamp", "primaryKey": false, "notNull": true, "default": "now()" },
+        "updated_at": { "name": "updated_at", "type": "timestamp", "primaryKey": false, "notNull": true, "default": "now()" }
+      },
+      "indexes": {
+        "duty_assignments_valid_from_idx": {
+          "name": "duty_assignments_valid_from_idx",
+          "columns": ["valid_from", "updated_at"],
+          "isUnique": false,
+          "predicate": null
+        }
+      },
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.military_personnel": {
+      "name": "military_personnel",
+      "schema": "",
+      "columns": {
+        "id": { "name": "id", "type": "serial", "primaryKey": true, "notNull": true },
+        "name": { "name": "name", "type": "text", "primaryKey": false, "notNull": true },
+        "rank": { "name": "rank", "type": "text", "primaryKey": false, "notNull": true },
+        "type": { "name": "type", "type": "text", "primaryKey": false, "notNull": true },
+        "specialty": { "name": "specialty", "type": "text", "primaryKey": false, "notNull": false },
+        "full_rank_name": { "name": "full_rank_name", "type": "text", "primaryKey": false, "notNull": true },
+        "active": { "name": "active", "type": "boolean", "primaryKey": false, "notNull": true, "default": true },
+        "created_at": { "name": "created_at", "type": "timestamp", "primaryKey": false, "notNull": false, "default": "now()" },
+        "updated_at": { "name": "updated_at", "type": "timestamp", "primaryKey": false, "notNull": false, "default": "now()" }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.notices": {
+      "name": "notices",
+      "schema": "",
+      "columns": {
+        "id": { "name": "id", "type": "serial", "primaryKey": true, "notNull": true },
+        "title": { "name": "title", "type": "text", "primaryKey": false, "notNull": true },
+        "content": { "name": "content", "type": "text", "primaryKey": false, "notNull": true },
+        "priority": { "name": "priority", "type": "text", "primaryKey": false, "notNull": true },
+        "start_date": { "name": "start_date", "type": "timestamp", "primaryKey": false, "notNull": true },
+        "end_date": { "name": "end_date", "type": "timestamp", "primaryKey": false, "notNull": true },
+        "active": { "name": "active", "type": "boolean", "primaryKey": false, "notNull": true, "default": true },
+        "created_at": { "name": "created_at", "type": "timestamp", "primaryKey": false, "notNull": false, "default": "now()" },
+        "updated_at": { "name": "updated_at", "type": "timestamp", "primaryKey": false, "notNull": false, "default": "now()" }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {
+        "notices_priority_check": {
+          "name": "notices_priority_check",
+          "expression": "priority IN ('high', 'medium', 'low')"
+        }
+      },
+      "isRLSEnabled": false
+    },
+    "public.session": {
+      "name": "session",
+      "schema": "",
+      "columns": {
+        "sid": { "name": "sid", "type": "varchar", "primaryKey": true, "notNull": true },
+        "sess": { "name": "sess", "type": "json", "primaryKey": false, "notNull": true },
+        "expire": { "name": "expire", "type": "timestamp", "primaryKey": false, "notNull": true }
+      },
+      "indexes": {
+        "IDX_session_expire": {
+          "name": "IDX_session_expire",
+          "columns": ["expire"],
+          "isUnique": false,
+          "predicate": null
+        }
+      },
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    }
+  }
+}
