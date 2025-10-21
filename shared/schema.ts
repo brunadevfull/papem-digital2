@@ -48,9 +48,9 @@ export const militaryPersonnel = pgTable("military_personnel", {
 export const dutyAssignments = pgTable("duty_assignments", {
   id: serial("id").primaryKey(),
   officerName: text("officer_name").notNull(),
-  officerRank: text("officer_rank").$type<"1t" | "2t" | "ct" | null>(),
+  officerRank: text("officer_rank").$type<string | null>(),
   masterName: text("master_name").notNull(),
-  masterRank: text("master_rank").$type<"3sg" | "2sg" | "1sg" | null>(),
+  masterRank: text("master_rank").$type<string | null>(),
   validFrom: timestamp("valid_from").notNull().defaultNow(),
   updatedAt: timestamp("updated_at").notNull().defaultNow(),
 });
@@ -82,14 +82,12 @@ export const insertMilitaryPersonnelSchema = createInsertSchema(militaryPersonne
   updatedAt: true,
 });
 
-const dutyOfficerRankValues = ["1t", "2t", "ct"] as const;
-const dutyMasterRankValues = ["3sg", "2sg", "1sg"] as const;
-
 const dutyOfficerNameSchema = z
   .union([z.string(), z.null(), z.undefined()])
   .transform(value => {
     if (typeof value === "string") {
-      return value.trim();
+      const trimmed = value.trim();
+      return trimmed ? trimmed.toUpperCase() : "";
     }
 
     return "";
@@ -97,11 +95,23 @@ const dutyOfficerNameSchema = z
   .optional()
   .default("");
 
+const dutyRankSchema = z
+  .union([z.string(), z.null(), z.undefined()])
+  .transform(value => {
+    if (typeof value === "string") {
+      const trimmed = value.trim();
+      return trimmed ? trimmed.toUpperCase() : undefined;
+    }
+
+    return undefined;
+  })
+  .optional();
+
 export const dutyOfficersPayloadSchema = z.object({
   officerName: dutyOfficerNameSchema,
   masterName: dutyOfficerNameSchema,
-  officerRank: z.enum(dutyOfficerRankValues).optional(),
-  masterRank: z.enum(dutyMasterRankValues).optional(),
+  officerRank: dutyRankSchema,
+  masterRank: dutyRankSchema,
   validFrom: z
     .union([z.string(), z.date()])
     .optional()
@@ -131,8 +141,8 @@ export type InsertDocument = Omit<z.infer<typeof insertDocumentSchema>, "tags" |
   tags?: string[];
   unit?: "EAGM" | "1DN";
 };
-export type DutyOfficerRank = (typeof dutyOfficerRankValues)[number];
-export type DutyMasterRank = (typeof dutyMasterRankValues)[number];
+export type DutyOfficerRank = string;
+export type DutyMasterRank = string;
 export type DutyOfficersPayload = z.infer<typeof dutyOfficersPayloadSchema>;
 export type InsertDutyOfficers = DutyOfficersPayload;
 export type DutyOfficers = {
