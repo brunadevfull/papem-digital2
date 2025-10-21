@@ -9,37 +9,68 @@ import {
   type MilitaryPersonnel, type InsertMilitaryPersonnel
 } from "@shared/schema";
 
-const RANK_PREFIX_PATTERN = /^([A-Z0-9]+)\s*(?:\([A-Z0-9-]+\))?\s+(.+)$/;
+const DUTY_PERSON_PATTERN = /^([A-Z0-9]+(?:\s*\([A-Z0-9-]+\))?)\s+(.+)$/;
 
-const sanitizeDutyName = (value: string | null | undefined): string => {
-  if (!value) {
-    return "";
-  }
-
-  const trimmed = value.trim().toUpperCase();
-  if (!trimmed) {
-    return "";
-  }
-
-  const match = trimmed.match(RANK_PREFIX_PATTERN);
-  if (match) {
-    return match[2].trim();
-  }
-
-  return trimmed;
+type ParsedDutyPerson = {
+  name: string;
+  rank?: string;
 };
 
-const normalizeDutyRank = (value: string | null | undefined): string | undefined => {
+const normalizeRankSpacing = (value: string): string => {
+  return value
+    .replace(/\s+/g, " ")
+    .replace(/\(\s+/g, "(")
+    .replace(/\s+\)/g, ")")
+    .trim();
+};
+
+const parseDutyPerson = (value: string | null | undefined): ParsedDutyPerson => {
   if (!value) {
-    return undefined;
+    return { name: "" };
   }
 
   const trimmed = value.trim();
   if (!trimmed) {
-    return undefined;
+    return { name: "" };
   }
 
-  return trimmed.toUpperCase();
+  const upperValue = trimmed.toUpperCase();
+  const match = upperValue.match(DUTY_PERSON_PATTERN);
+
+  if (match) {
+    return {
+      rank: normalizeRankSpacing(match[1]),
+      name: normalizeRankSpacing(match[2])
+    };
+  }
+
+  return { name: normalizeRankSpacing(upperValue) };
+};
+
+const sanitizeDutyName = (value: string | null | undefined): string => {
+  return parseDutyPerson(value).name;
+};
+
+const normalizeDutyRank = (
+  value: string | null | undefined,
+  fallback?: string | null | undefined
+): string | undefined => {
+  const candidates = [value, fallback];
+
+  for (const candidate of candidates) {
+    if (typeof candidate !== "string") {
+      continue;
+    }
+
+    const trimmed = candidate.trim();
+    if (!trimmed) {
+      continue;
+    }
+
+    return normalizeRankSpacing(trimmed.toUpperCase());
+  }
+
+  return undefined;
 };
 
 export class DatabaseStorage implements IStorage {
@@ -421,10 +452,18 @@ export class DatabaseStorage implements IStorage {
 
     try {
       const validFromDate = officers.validFrom ?? new Date();
-      const sanitizedOfficerName = sanitizeDutyName(officers.officerName ?? "");
-      const sanitizedMasterName = sanitizeDutyName(officers.masterName ?? "");
-      const normalizedOfficerRank = normalizeDutyRank(officers.officerRank) ?? null;
-      const normalizedMasterRank = normalizeDutyRank(officers.masterRank) ?? null;
+      const parsedOfficer = parseDutyPerson(officers.officerName);
+      const parsedMaster = parseDutyPerson(officers.masterName);
+      const sanitizedOfficerName = parsedOfficer.name;
+      const sanitizedMasterName = parsedMaster.name;
+      const normalizedOfficerRank = normalizeDutyRank(
+        officers.officerRank,
+        parsedOfficer.rank
+      ) ?? null;
+      const normalizedMasterRank = normalizeDutyRank(
+        officers.masterRank,
+        parsedMaster.rank
+      ) ?? null;
 
       const result = await this.pool.query(
         `INSERT INTO duty_assignments (officer_name, officer_rank, master_name, master_rank, valid_from, updated_at)
