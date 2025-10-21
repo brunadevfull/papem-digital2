@@ -8,6 +8,7 @@ import {
   insertMilitaryPersonnelSchema,
   type User,
   type DutyOfficersPayload,
+  type DutyOfficers,
 } from "@shared/schema";
 import { z } from "zod";
 import multer from "multer";
@@ -312,6 +313,32 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.use(session(sessionOptions));
 
   await ensureDefaultAdminUser();
+
+  const dutyOfficerSubscribers = new Set<Response>();
+
+  type DutyOfficersSseEvent = {
+    type: 'snapshot' | 'update';
+    officers: DutyOfficers | null;
+    timestamp: string;
+  };
+
+  const broadcastDutyOfficers = (event: DutyOfficersSseEvent) => {
+    const payload = `data: ${JSON.stringify(event)}\n\n`;
+
+    for (const subscriber of dutyOfficerSubscribers) {
+      try {
+        subscriber.write(payload);
+      } catch (error) {
+        console.error('❌ Erro ao enviar atualização de oficiais via SSE:', error);
+        dutyOfficerSubscribers.delete(subscriber);
+        try {
+          subscriber.end();
+        } catch (endError) {
+          console.error('❌ Erro ao encerrar conexão SSE com problema:', endError);
+        }
+      }
+    }
+  };
 
   app.get('/api/admin/session', (req: Request, res: Response) => {
     res.json({
@@ -1639,6 +1666,40 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // 🔥 NOVO: System info com informações de cache
   // Duty Officers API
+  app.get('/api/duty-officers/stream', async (req, res) => {
+    try {
+      res.setHeader('Content-Type', 'text/event-stream');
+      res.setHeader('Cache-Control', 'no-cache');
+      res.setHeader('Connection', 'keep-alive');
+
+      const heartbeat = setInterval(() => {
+        res.write(': heartbeat\n\n');
+      }, 30_000);
+
+      dutyOfficerSubscribers.add(res);
+
+      const snapshot = await storage.getDutyOfficers();
+      res.write(`data: ${JSON.stringify({
+        type: 'snapshot' as const,
+        officers: snapshot,
+        timestamp: new Date().toISOString(),
+      })}\n\n`);
+
+      req.on('close', () => {
+        clearInterval(heartbeat);
+        dutyOfficerSubscribers.delete(res);
+      });
+    } catch (error) {
+      console.error('❌ Erro ao iniciar stream de oficiais de serviço:', error);
+      dutyOfficerSubscribers.delete(res);
+      try {
+        res.status(500).end();
+      } catch {
+        // Ignore secondary errors ao encerrar stream
+      }
+    }
+  });
+
   app.get('/api/duty-officers', async (req, res) => {
     try {
       console.log('👮 GET /api/duty-officers - Buscando oficiais de serviço...');
@@ -1680,10 +1741,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
         message: 'Oficiais de serviço atualizados com sucesso',
         timestamp: new Date().toISOString()
       };
-      
+
       console.log('✅ Oficiais de serviço atualizados:', updatedOfficers);
       res.json(result);
-      
+
+      broadcastDutyOfficers({
+        type: 'update',
+        officers: updatedOfficers,
+        timestamp: result.timestamp,
+      });
+
     } catch (error) {
       console.error('❌ Erro ao atualizar oficiais de serviço:', error);
       
