@@ -1,12 +1,12 @@
 import React, { useState, useEffect } from "react";
 import PDFViewer from "@/components/PDFViewer";
 import { WeatherAlertsActive } from "@/components/WeatherAlertsActive";
-import { DutyOfficersDisplay } from "@/components/DutyOfficersDisplay";
 import { useDisplay } from "@/context/DisplayContext";
 import { getSunsetWithLabel } from "@/utils/sunsetUtils";
 import { getCurrentTemperature } from "@/utils/temperatureUtils";
 import { resolveBackendUrl } from "@/utils/backend";
 import logoPAPEM from "@assets/logoPAPEM_1751352314977.png";
+import type { DutyOfficers } from "@shared/schema";
 
 const Index = () => {
   const {
@@ -26,8 +26,16 @@ const Index = () => {
   });
 
   // Estados para dados inline
-  const [officers, setOfficers] = useState<{officerName?: string, masterName?: string} | null>(null);
+  const [officers, setOfficers] = useState<DutyOfficers | null>(null);
   const [temperature, setTemperature] = useState<{temp?: number, humidity?: number, description?: string, rainChance?: number} | null>(null);
+
+  const formatDutyPerson = (rank?: string | null, name?: string | null) => {
+    const parts = [rank, name]
+      .map((value) => value?.trim())
+      .filter((value): value is string => Boolean(value));
+
+    return parts.join(" ");
+  };
 
   // Buscar horário do pôr do sol
   useEffect(() => {
@@ -131,6 +139,9 @@ const Index = () => {
     autoRestartDelay
   });
 
+  const formattedOfficer = officers ? formatDutyPerson(officers.officerRank, officers.officerName) : '';
+  const formattedMaster = officers ? formatDutyPerson(officers.masterRank, officers.masterName) : '';
+
   return (
     <div className="h-screen w-screen bg-gradient-to-br from-blue-950 via-slate-900 to-blue-950 flex flex-col overflow-hidden">
       {/* Header Principal - Painel com contorno restaurado */}
@@ -164,22 +175,22 @@ const Index = () => {
         <div className="hidden lg:flex items-center justify-center space-x-6 text-sm overflow-hidden">
           
           {/* Oficial - Dinâmico e Estilizado */}
-          {officers?.officerName && (
+          {formattedOfficer && (
             <>
               <div className="flex items-center space-x-2 bg-blue-600/20 px-3 py-1 rounded-lg border border-blue-400/30">
                 <span className="text-blue-300 font-medium text-xs">👮‍♂️ Oficial:</span>
-                <span className="text-white font-bold text-sm">{officers.officerName}</span>
+                <span className="text-white font-bold text-sm">{formattedOfficer}</span>
               </div>
               <div className="w-px h-4 bg-blue-400/30"></div>
             </>
           )}
           
           {/* Contramestre - Dinâmico e Estilizado */}
-          {officers?.masterName && (
+          {formattedMaster && (
             <>
               <div className="flex items-center space-x-2 bg-blue-600/20 px-3 py-1 rounded-lg border border-blue-400/30">
                 <span className="text-blue-300 font-medium text-xs">⚓ Contramestre:</span>
-                <span className="text-white font-bold text-sm">{officers.masterName}</span>
+                <span className="text-white font-bold text-sm">{formattedMaster}</span>
               </div>
               <div className="w-px h-4 bg-blue-400/30"></div>
             </>
@@ -266,16 +277,16 @@ const Index = () => {
           {/* Primeira Linha Mobile */}
           <div className="col-span-1 sm:col-span-2 flex flex-wrap items-center justify-center gap-2">
             {/* Oficiais */}
-            {officers?.officerName && (
+            {formattedOfficer && (
               <div className="flex items-center space-x-1 bg-blue-600/20 px-2 py-1 rounded border border-blue-400/30">
                 <span className="text-blue-300 font-medium text-xs">👮‍♂️</span>
-                <span className="text-white font-bold text-xs">{officers.officerName}</span>
+                <span className="text-white font-bold text-xs">{formattedOfficer}</span>
               </div>
             )}
-            {officers?.masterName && (
+            {formattedMaster && (
               <div className="flex items-center space-x-1 bg-blue-600/20 px-2 py-1 rounded border border-blue-400/30">
                 <span className="text-blue-300 font-medium text-xs">⚓</span>
-                <span className="text-white font-bold text-xs">{officers.masterName}</span>
+                <span className="text-white font-bold text-xs">{formattedMaster}</span>
               </div>
             )}
           </div>
