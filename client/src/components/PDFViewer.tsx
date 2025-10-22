@@ -5,6 +5,7 @@ import { resolveBackendUrl } from "@/utils/backend";
 
 const IS_DEV_MODE = process.env.NODE_ENV === 'development';
 const MAX_RENDER_DIMENSION = 8192;
+const MIN_RENDER_DIMENSION = 2560;
 const IMAGE_EXPORT_FORMAT = 'image/png';
 
 const BASE_PDF_SCALE = 2.4;
@@ -51,6 +52,25 @@ const getDevicePixelRatio = () => {
 
   const ratio = window.devicePixelRatio || 1;
   return Number.isFinite(ratio) && ratio > 0 ? ratio : 1;
+};
+
+const ensureImageHasMinimumResolution = (url: string, minDimension: number): Promise<boolean> => {
+  if (typeof window === 'undefined' || typeof Image === 'undefined') {
+    return Promise.resolve(true);
+  }
+
+  return new Promise((resolve) => {
+    const img = new Image();
+    img.decoding = 'async';
+    img.onload = () => {
+      const width = img.naturalWidth || img.width || 0;
+      const height = img.naturalHeight || img.height || 0;
+      const largestSide = Math.max(width, height);
+      resolve(largestSide >= minDimension);
+    };
+    img.onerror = () => resolve(false);
+    img.src = url;
+  });
 };
 
 // Configurar PDF.js
@@ -197,9 +217,19 @@ const PDFViewer: React.FC<PDFViewerProps> = ({
   const RESTART_DELAY = autoRestartDelay * 1000;
   const devicePixelRatio = getDevicePixelRatio();
   const calculateRenderScale = useCallback((maxDimension: number) => {
-    const limitScale = MAX_RENDER_DIMENSION / maxDimension;
+    if (maxDimension <= 0) {
+      return getBasePdfScale() * devicePixelRatio;
+    }
+
+    const safeMaxDimension = Math.max(maxDimension, 1);
+    const effectiveMinDimension = Math.min(MIN_RENDER_DIMENSION, MAX_RENDER_DIMENSION);
+    const limitScale = MAX_RENDER_DIMENSION / safeMaxDimension;
+    const minScale = effectiveMinDimension / safeMaxDimension;
     const baseScale = getBasePdfScale() * devicePixelRatio;
-    return limitScale > 0 ? Math.min(baseScale, limitScale) : baseScale;
+    const targetScale = Math.max(baseScale, minScale);
+
+    const clampedScale = limitScale > 0 ? Math.min(targetScale, limitScale) : targetScale;
+    return Math.max(clampedScale, 1);
   }, [devicePixelRatio]);
 
   // Função para obter a URL completa do servidor backend - DETECTAR AMBIENTE
@@ -878,9 +908,15 @@ useEffect(() => {
           if (cacheResult.success && cacheResult.exists) {
             console.log(`💾 ESCALA: Cache encontrado: ${cacheResult.url}`);
             const cachedUrl = getBackendUrl(cacheResult.url);
-            setImageUrl(cachedUrl);
-            setLoading(false);
-            return;
+            const hasMinimumResolution = await ensureImageHasMinimumResolution(cachedUrl, MIN_RENDER_DIMENSION);
+
+            if (hasMinimumResolution) {
+              setImageUrl(cachedUrl);
+              setLoading(false);
+              return;
+            }
+
+            console.log('⚠️ ESCALA: Cache com resolução baixa detectado. Reprocessando documento.');
           }
         } catch (cacheError) {
           console.warn("⚠️ ESCALA: Erro ao verificar cache:", cacheError);
