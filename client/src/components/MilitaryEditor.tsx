@@ -4,7 +4,6 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Badge } from '@/components/ui/badge';
 import type { MilitaryPersonnel } from '../../../shared/schema';
 
 interface MilitaryEditorProps {
@@ -193,13 +192,14 @@ export function MilitaryEditor({ isOpen, onClose, military, onSave }: MilitaryEd
           {formData.name && formData.rank && (
             <div className="p-3 bg-gray-50 dark:bg-gray-800 rounded">
               <Label className="text-sm font-medium">Preview:</Label>
-              <div className="flex items-center gap-2 mt-1">
-                <Badge variant="outline">
-                  {formData.rank.toUpperCase()}
-                  {formData.specialty && ` (${formData.specialty.toUpperCase()})`}
-                  {' '}
+              <div className="mt-1 space-y-1">
+                <div className="text-sm font-semibold text-muted-foreground">
+                  {currentRankData?.label ?? formData.rank.toUpperCase()}
+                  {formData.specialty !== 'none' && formData.specialty ? ` (${formData.specialty.toUpperCase()})` : ''}
+                </div>
+                <div className="text-base font-bold">
                   {formData.name.toUpperCase()}
-                </Badge>
+                </div>
               </div>
             </div>
           )}
