@@ -4,9 +4,45 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { resolveBackendUrl } from "@/utils/backend";
 
 const IS_DEV_MODE = process.env.NODE_ENV === 'development';
-const PDF_SCALE = 2.0;
-const MAX_RENDER_DIMENSION = 4096;
+const MAX_RENDER_DIMENSION = 8192;
 const IMAGE_EXPORT_FORMAT = 'image/png';
+
+const BASE_PDF_SCALE = 2.4;
+const DESKTOP_PDF_SCALE = 3.0;
+const LARGE_SCREEN_PDF_SCALE = 3.6;
+const ULTRA_HD_PDF_SCALE = 4.2;
+
+const getViewportWidth = () => {
+  if (typeof window === "undefined") {
+    return 1920;
+  }
+
+  const { innerWidth, screen } = window;
+  return Math.max(
+    innerWidth || 0,
+    screen?.width || 0,
+    screen?.availWidth || 0,
+    1920
+  );
+};
+
+const getBasePdfScale = () => {
+  const viewportWidth = getViewportWidth();
+
+  if (viewportWidth >= 3800) {
+    return ULTRA_HD_PDF_SCALE;
+  }
+
+  if (viewportWidth >= 2560) {
+    return LARGE_SCREEN_PDF_SCALE;
+  }
+
+  if (viewportWidth >= 1920) {
+    return DESKTOP_PDF_SCALE;
+  }
+
+  return BASE_PDF_SCALE;
+};
 
 const getDevicePixelRatio = () => {
   if (typeof window === 'undefined') {
@@ -160,6 +196,11 @@ const PDFViewer: React.FC<PDFViewerProps> = ({
   const SCROLL_SPEED = getScrollSpeed();
   const RESTART_DELAY = autoRestartDelay * 1000;
   const devicePixelRatio = getDevicePixelRatio();
+  const calculateRenderScale = useCallback((maxDimension: number) => {
+    const limitScale = MAX_RENDER_DIMENSION / maxDimension;
+    const baseScale = getBasePdfScale() * devicePixelRatio;
+    return limitScale > 0 ? Math.min(baseScale, limitScale) : baseScale;
+  }, [devicePixelRatio]);
 
   // Função para obter a URL completa do servidor backend - DETECTAR AMBIENTE
   const getBackendUrl = (path: string): string => resolveBackendUrl(path);
@@ -466,18 +507,19 @@ const getCurrentCardapioDoc = () => {
 
           const originalViewport = page.getViewport({ scale: 1.0 });
           const maxDimension = Math.max(originalViewport.width, originalViewport.height) || 1;
-          const limitScale = MAX_RENDER_DIMENSION / maxDimension;
-          const baseScale = PDF_SCALE * devicePixelRatio;
-          const appliedScale = limitScale > 0 ? Math.min(baseScale, limitScale) : baseScale;
+          const appliedScale = calculateRenderScale(maxDimension);
           const viewport = page.getViewport({ scale: appliedScale });
 
           console.log(`📐 Página ${pageNum} - Original: ${originalViewport.width}x${originalViewport.height}, Escala: ${appliedScale}, Final: ${viewport.width}x${viewport.height}`);
 
           const canvas = document.createElement('canvas');
-          const context = canvas.getContext('2d', { 
+          const context = canvas.getContext('2d', {
             alpha: false,
             willReadFrequently: false
           })!;
+
+          context.imageSmoothingEnabled = true;
+          context.imageSmoothingQuality = 'high';
           
           canvas.height = Math.floor(viewport.height);
           canvas.width = Math.floor(viewport.width);
@@ -890,9 +932,7 @@ useEffect(() => {
 
       const originalViewport = page.getViewport({ scale: 1.0 });
       const maxDimension = Math.max(originalViewport.width, originalViewport.height) || 1;
-      const limitScale = MAX_RENDER_DIMENSION / maxDimension;
-      const baseScale = PDF_SCALE * devicePixelRatio;
-      const appliedScale = limitScale > 0 ? Math.min(baseScale, limitScale) : baseScale;
+      const appliedScale = calculateRenderScale(maxDimension);
       const viewport = page.getViewport({ scale: appliedScale });
 
       console.log(`📐 ${target.toUpperCase()}: Dimensões - ${viewport.width}x${viewport.height} (escala: ${appliedScale})`);
@@ -906,6 +946,9 @@ useEffect(() => {
       if (!context) {
         throw new Error('Falha ao criar contexto do canvas');
       }
+
+      context.imageSmoothingEnabled = true;
+      context.imageSmoothingQuality = 'high';
 
       canvas.height = Math.floor(viewport.height);
       canvas.width = Math.floor(viewport.width);
