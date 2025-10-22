@@ -1,6 +1,7 @@
 import express, { type Express, type Request, type Response } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
+import { startDutyAssignmentsListener } from "./dutyAssignmentsListener";
 import {
   insertNoticeSchema,
   insertDocumentSchema,
@@ -339,6 +340,23 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
     }
   };
+
+  await startDutyAssignmentsListener(async (payload) => {
+    console.log('📡 NOTIFY duty_assignments_changed recebido:', payload);
+
+    try {
+      const officers = await storage.getDutyOfficers();
+      const timestamp = new Date().toISOString();
+
+      broadcastDutyOfficers({
+        type: 'update',
+        officers,
+        timestamp,
+      });
+    } catch (error) {
+      console.error('❌ Falha ao atualizar oficiais após NOTIFY duty_assignments_changed:', error);
+    }
+  });
 
   app.get('/api/admin/session', (req: Request, res: Response) => {
     res.json({
