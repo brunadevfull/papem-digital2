@@ -202,27 +202,25 @@ const Index = () => {
       <div className="flex-shrink-0 mb-2 px-2 sm:px-4 py-2 bg-gradient-to-r from-slate-700/50 to-blue-800/50 backdrop-blur-lg rounded-lg shadow-lg border border-blue-400/20 mx-2">
         
         {/* Layout Desktop - Uma linha */}
-        <div className="hidden lg:flex items-center justify-center space-x-6 text-sm overflow-hidden">
+        <div className="hidden lg:flex flex-wrap items-center justify-center gap-x-6 gap-y-2 text-sm">
           
           {/* Oficial - Dinâmico e Estilizado */}
           {formattedOfficer && (
-            <>
-              <div className="flex items-center space-x-2 bg-blue-600/20 px-3 py-1 rounded-lg border border-blue-400/30">
+            <> 
+              <div className="flex items-center space-x-2 bg-blue-600/20 px-3 py-1 rounded-lg border border-blue-400/30 whitespace-normal">
                 <span className="text-blue-300 font-medium text-xs">👮‍♂️ Oficial:</span>
                 <span className="text-white font-bold text-sm">{formattedOfficer}</span>
               </div>
-              <div className="w-px h-4 bg-blue-400/30"></div>
             </>
           )}
-          
+
           {/* Contramestre - Dinâmico e Estilizado */}
           {formattedMaster && (
             <>
-              <div className="flex items-center space-x-2 bg-blue-600/20 px-3 py-1 rounded-lg border border-blue-400/30">
+              <div className="flex items-center space-x-2 bg-blue-600/20 px-3 py-1 rounded-lg border border-blue-400/30 whitespace-normal">
                 <span className="text-blue-300 font-medium text-xs">⚓ Contramestre:</span>
                 <span className="text-white font-bold text-sm">{formattedMaster}</span>
               </div>
-              <div className="w-px h-4 bg-blue-400/30"></div>
             </>
           )}
 
