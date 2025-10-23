@@ -295,28 +295,42 @@ const PDFViewer: React.FC<PDFViewerProps> = ({
  const getDocumentUrl = () => {
   if (documentType === "plasa") {
     if (activePlasaDoc?.url) {
+      console.log("📄 PLASA: Usando documento do admin:", activePlasaDoc.url);
       return getBackendUrl(activePlasaDoc.url);
     }
+    console.log("📄 PLASA: Nenhum documento ativo");
     return null;
   } else if (documentType === "escala") {
     const activeEscalas = escalaDocuments.filter(doc => doc.active && doc.type === "escala");
 
     if (activeEscalas.length === 0) {
+      console.log("📋 ESCALA: Nenhuma escala ativa");
       return null;
     }
 
     const currentEscala = activeEscalas[currentEscalaIndex % activeEscalas.length];
 
     if (currentEscala?.url) {
+      console.log(`📋 ESCALA: Usando escala ${currentEscalaIndex + 1}/${activeEscalas.length}:`, {
+        title: currentEscala.title,
+        category: currentEscala.category,
+        url: currentEscala.url
+      });
       return getBackendUrl(currentEscala.url);
     }
 
+    console.log("📋 ESCALA: Escala atual sem URL válida");
     return null;
   } else if (documentType === "cardapio") {
     if (!activeCardapioDoc) {
+      console.log("🍽️ CARDÁPIO: Nenhum cardápio ativo");
       return null;
     }
 
+    console.log("🍽️ CARDÁPIO: Usando cardápio ativo:", {
+      title: activeCardapioDoc.title,
+      url: activeCardapioDoc.url
+    });
     return getBackendUrl(activeCardapioDoc.url);
   }
 
@@ -381,7 +395,7 @@ const getCurrentCardapioDoc = () => {
         const response = await fetch(url);
         if (!response.ok) throw new Error(`Erro blob: ${response.status}`);
         const arrayBuffer = await response.arrayBuffer();
-        // Blob converted
+        console.log(`✅ Blob convertido: ${arrayBuffer.byteLength} bytes`);
         return arrayBuffer;
       }
       
@@ -419,7 +433,7 @@ const getCurrentCardapioDoc = () => {
       }
       
     } catch (error) {
-      console.error("Erro ao obter PDF:", error);
+      console.error("❌ Erro ao obter PDF:", error);
       throw error;
     }
   };
@@ -429,7 +443,7 @@ const getCurrentCardapioDoc = () => {
     return new Promise((resolve) => {
       canvas.toBlob(async (blob) => {
         if (!blob) {
-          console.error(`Erro ao converter página ${pageNum} para blob`);
+          console.error(`❌ Erro ao converter página ${pageNum} para blob`);
           resolve(canvas.toDataURL(IMAGE_EXPORT_FORMAT));
           return;
         }
@@ -459,7 +473,7 @@ const getCurrentCardapioDoc = () => {
           }
 
         } catch (error) {
-          console.warn(`Falha ao salvar página ${pageNum}, usando data URL`);
+          console.warn(`⚠️ Falha ao salvar página ${pageNum} no servidor, usando data URL:`, error);
           resolve(canvas.toDataURL(IMAGE_EXPORT_FORMAT));
         }
       }, IMAGE_EXPORT_FORMAT);
@@ -496,7 +510,7 @@ const getCurrentCardapioDoc = () => {
       if (response.ok) {
         const result = await response.json();
         if (result.allPagesExist) {
-          console.log(`Usando ${totalPages} páginas em cache`);
+          console.log(`💾 Usando ${totalPages} páginas já salvas no servidor`);
           return result.pageUrls.map((url: string) => getBackendUrl(url));
         }
       }
@@ -505,7 +519,7 @@ const getCurrentCardapioDoc = () => {
       return [];
       
     } catch (error) {
-      console.warn("Erro ao verificar cache:", error);
+      console.log(`⚠️ Erro ao verificar páginas existentes:`, error);
       return [];
     }
   };
@@ -513,7 +527,7 @@ const getCurrentCardapioDoc = () => {
   // FUNÇÃO PRINCIPAL: Converter PDF para imagens
   const convertPDFToImages = async (pdfUrl: string) => {
     try {
-      console.log(`Iniciando conversão PDF: ${pdfUrl}`);
+      console.log(`🎯 INICIANDO CONVERSÃO PDF: ${pdfUrl}`);
       setLoading(true);
       setLoadingProgress(0);
       setDebugInfo({});
@@ -565,14 +579,14 @@ const getCurrentCardapioDoc = () => {
         return;
       }
 
-      console.log("Convertendo páginas para imagens...");
+      console.log("🖼️ Convertendo páginas para imagens...");
       const imageUrls: string[] = [];
 
       for (let pageNum = 1; pageNum <= pdf.numPages; pageNum++) {
         try {
-          // Log progress every 10 pages
+          // Log progress every 10 pages to avoid console spam
           if (pageNum % 10 === 0 || pageNum === pdf.numPages) {
-            console.log(`Processando: ${pageNum}/${pdf.numPages} páginas`);
+            console.log(`📄 Processando página ${pageNum}/${pdf.numPages}`);
           }
 
           const page = await pdf.getPage(pageNum);
