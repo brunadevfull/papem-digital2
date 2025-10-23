@@ -111,7 +111,7 @@ testar_api() {
     fi
     
     # Executa requisição e captura código de resposta
-    local codigo_resposta=$(eval "$curl_cmd http://localhost:5000/api$endpoint")
+    local codigo_resposta=$(eval "$curl_cmd http://localhost:5001/api$endpoint")
     
     # Verifica se o código de resposta corresponde ao esperado
     if [ "$codigo_resposta" = "$status_esperado" ]; then
@@ -129,7 +129,7 @@ aguardar_servidor() {
     local tentativa=0
     
     while [ $tentativa -lt $max_tentativas ]; do
-        if curl -s http://localhost:5000/api/health >/dev/null 2>&1; then
+        if curl -s http://localhost:5001/api/health >/dev/null 2>&1; then
             log $GREEN "Servidor está pronto!"
             return 0
         fi
@@ -234,8 +234,8 @@ executar_todos_testes() {
     
     # Testes do frontend
     log $YELLOW "Testando páginas do frontend..."
-    executar_teste "Página principal" "curl -s http://localhost:5000 | grep -q 'Marinha do Brasil'"
-    executar_teste "Página admin" "curl -s http://localhost:5000/admin | grep -q 'html'"
+    executar_teste "Página principal" "curl -s http://localhost:5001 | grep -q 'Marinha do Brasil'"
+    executar_teste "Página admin" "curl -s http://localhost:5001/admin | grep -q 'html'"
     
     # Testes de tratamento de erro
     log $YELLOW "Testando tratamento de erros..."

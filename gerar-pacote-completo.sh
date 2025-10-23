@@ -212,8 +212,8 @@ sleep 10
 if systemctl is-active --quiet display-marinha; then
     echo "✅ Instalação concluída com sucesso!"
     echo ""
-    echo "🌐 Acesso: http://localhost:5000"
-    echo "🔧 Admin: http://localhost:5000/admin"
+    echo "🌐 Acesso: http://localhost:5001"
+    echo "🔧 Admin: http://localhost:5001/admin"
     echo ""
     echo "📋 Comandos úteis:"
     echo "   Status: systemctl status display-marinha"
@@ -247,7 +247,7 @@ fi
 # Testar conectividade
 echo "🌐 Testando conectividade..."
 for i in {1..15}; do
-    if curl -s http://localhost:5000/health >/dev/null 2>&1; then
+    if curl -s http://localhost:5001/health >/dev/null 2>&1; then
         echo "✅ Sistema respondendo"
         break
     fi
@@ -269,7 +269,7 @@ else
 fi
 
 echo "✅ Teste concluído"
-echo "🌐 Acesse: http://localhost:5000"
+echo "🌐 Acesse: http://localhost:5001"
 EOF
 
 chmod +x "$PACOTE_DIR/scripts/testar.sh"
@@ -303,8 +303,8 @@ INSTALAÇÃO SIMPLES:
    ./scripts/testar.sh
 
 ACESSO:
-- Interface: http://localhost:5000
-- Painel Admin: http://localhost:5000/admin
+- Interface: http://localhost:5001
+- Painel Admin: http://localhost:5001/admin
 
 GERENCIAMENTO:
 - Status: systemctl status display-marinha
@@ -373,6 +373,6 @@ echo "   2. Extrair: tar -xzf $PACOTE_FINAL"
 echo "   3. Instalar: cd marinha-display-offline && sudo ./scripts/instalar.sh"
 echo "   4. Testar: ./scripts/testar.sh"
 echo ""
-echo "🌐 Após instalação: http://localhost:5000"
+echo "🌐 Após instalação: http://localhost:5001"
 echo ""
 echo "✅ SISTEMA PRONTO PARA ORACLE LINUX OFFLINE!"

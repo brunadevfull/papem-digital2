@@ -103,8 +103,8 @@ systemctl start display-marinha
 sleep 8
 if systemctl is-active --quiet display-marinha; then
     echo "✅ Instalação concluída!"
-    echo "🌐 Interface: http://localhost:5000"
-    echo "🔧 Admin: http://localhost:5000/admin"
+    echo "🌐 Interface: http://localhost:5001"
+    echo "🔧 Admin: http://localhost:5001/admin"
 else
     echo "❌ Falha na inicialização"
     echo "Logs: journalctl -u display-marinha -f"
@@ -124,8 +124,8 @@ INSTALAÇÃO:
 3. sudo ./install/install.sh
 
 ACESSO:
-- Interface: http://localhost:5000
-- Admin: http://localhost:5000/admin
+- Interface: http://localhost:5001
+- Admin: http://localhost:5001/admin
 
 COMANDOS:
 - Status: systemctl status display-marinha

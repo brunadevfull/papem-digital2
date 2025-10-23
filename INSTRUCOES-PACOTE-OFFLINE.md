@@ -144,8 +144,8 @@ systemctl start display-marinha
 sleep 10
 if systemctl is-active --quiet display-marinha; then
     echo "✅ Instalação concluída!"
-    echo "🌐 Interface: http://localhost:5000"
-    echo "🔧 Admin: http://localhost:5000/admin"
+    echo "🌐 Interface: http://localhost:5001"
+    echo "🔧 Admin: http://localhost:5001/admin"
 else
     echo "❌ Falha na inicialização"
     echo "Logs: journalctl -u display-marinha -f"
@@ -170,8 +170,8 @@ INSTALAÇÃO NO ORACLE LINUX (SEM INTERNET):
 3. sudo ./install/instalar.sh
 
 ACESSO:
-- Interface: http://localhost:5000
-- Admin: http://localhost:5000/admin
+- Interface: http://localhost:5001
+- Admin: http://localhost:5001/admin
 
 COMANDOS:
 - Status: systemctl status display-marinha
@@ -276,7 +276,7 @@ Após criar o pacote, teste em uma VM Oracle Linux limpa:
 1. Transferir o arquivo `.tar.gz`
 2. Extrair e executar instalação
 3. Verificar se o serviço inicia
-4. Testar acesso via http://localhost:5000
+4. Testar acesso via http://localhost:5001
 5. Verificar funcionalidades (PLASA, Escalas, Admin)
 
 ## Suporte

@@ -112,13 +112,13 @@ sudo firewall-cmd --reload
 ### Passo 9: Acessar via browser
 ```
 # No navegador do servidor ou rede local
-http://IP_DO_SERVIDOR:5000
+http://IP_DO_SERVIDOR:5001
 
 # Página principal (display)
-http://IP_DO_SERVIDOR:5000
+http://IP_DO_SERVIDOR:5001
 
 # Painel administrativo
-http://IP_DO_SERVIDOR:5000/admin
+http://IP_DO_SERVIDOR:5001/admin
 ```
 
 ---

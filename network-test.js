@@ -44,18 +44,18 @@ console.log(`   Arch: ${os.arch()}`);
 // 4. Comandos úteis
 console.log('\n🛠️  Comandos Úteis:');
 console.log('   Linux:');
-console.log('   - Verificar porta: netstat -an | grep :5000');
+console.log('   - Verificar porta: netstat -an | grep :5001');
 console.log('   - Liberar firewall: sudo ufw allow 5000');
 console.log('   - Ver IP: ifconfig ou ip addr show');
 console.log('   - Verificar processo: ps aux | grep node');
 console.log('\n   Windows:');
-console.log('   - Verificar porta: netstat -an | findstr :5000');
+console.log('   - Verificar porta: netstat -an | findstr :5001');
 console.log('   - Liberar firewall: New-NetFirewallRule -DisplayName "Node 5000" -Direction Inbound -Protocol TCP -LocalPort 5000 -Action Allow');
 console.log('   - Ver IP: ipconfig');
 
 console.log('\n📝 Próximos Passos:');
 console.log('   1. Execute: npm run dev');
-console.log('   2. Teste local: http://localhost:5000');
+console.log('   2. Teste local: http://localhost:5001');
 console.log('   3. Teste rede: use um dos IPs de rede listados acima');
 console.log('   4. Se não funcionar, verifique firewall');
 
@@ -68,20 +68,20 @@ if (platform === 'linux') {
   console.log('   sudo ufw allow 5000');
   console.log('   sudo ufw status');
   console.log('\n   # Verificar se porta está em uso:');
-  console.log('   netstat -tulpn | grep :5000');
+  console.log('   netstat -tulpn | grep :5001');
   console.log('\n   # Ver IPs da máquina:');
   console.log('   ip addr show');
 } else if (platform === 'win32') {
   console.log('   # Liberar porta no firewall (PowerShell como Admin):');
   console.log('   New-NetFirewallRule -DisplayName "Node.js 5000" -Direction Inbound -Protocol TCP -LocalPort 5000 -Action Allow');
   console.log('\n   # Verificar se porta está em uso:');
-  console.log('   netstat -an | findstr :5000');
+  console.log('   netstat -an | findstr :5001');
   console.log('\n   # Ver IPs da máquina:');
   console.log('   ipconfig');
 } else if (platform === 'darwin') {
   console.log('   # Verificar se porta está em uso:');
-  console.log('   netstat -an | grep :5000');
-  console.log('   lsof -i :5000');
+  console.log('   netstat -an | grep :5001');
+  console.log('   lsof -i :5001');
   console.log('\n   # Ver IPs da máquina:');
   console.log('   ifconfig');
 }

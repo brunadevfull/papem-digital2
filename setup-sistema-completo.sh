@@ -135,7 +135,7 @@ setup_env() {
 check_ports() {
     print_status "Verificando portas..."
     
-    if lsof -Pi :5000 -sTCP:LISTEN -t >/dev/null ; then
+    if lsof -Pi :5001 -sTCP:LISTEN -t >/dev/null ; then
         print_warning "Porta 5000 em uso - pare o serviço antes de continuar"
     else
         print_success "Porta 5000 disponível"
@@ -170,8 +170,8 @@ main() {
     print_status "  npm run dev"
     echo ""
     print_status "URLs de acesso:"
-    print_status "  - Interface principal: http://localhost:5000"
-    print_status "  - Painel admin: http://localhost:5000/admin"
+    print_status "  - Interface principal: http://localhost:5001"
+    print_status "  - Painel admin: http://localhost:5001/admin"
     echo ""
     print_status "Usuário padrão: admin / admin123"
     echo ""
