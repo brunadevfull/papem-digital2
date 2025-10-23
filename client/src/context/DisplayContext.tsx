@@ -90,6 +90,9 @@ export const DisplayProvider: React.FC<DisplayProviderProps> = ({ children }) =>
   const escalaTimerRef = useRef<NodeJS.Timeout | null>(null);
   const mainDocTimerRef = useRef<NodeJS.Timeout | null>(null);
   const isInitializingRef = useRef(true);
+
+  // Ref para o timer de polling de documentos
+  const documentPollingTimerRef = useRef<NodeJS.Timeout | null>(null);
   
   // Callback para após completar scroll (apenas PLASA agora)
   const handleScrollComplete = () => {
@@ -1228,6 +1231,31 @@ useEffect(() => {
     
     initializeContext();
   }, []);
+
+  // Effect para polling de documentos (atualização automática a cada 60 segundos)
+  useEffect(() => {
+    // Aguardar 3 segundos para garantir que a inicialização terminou
+    const initTimeout = setTimeout(() => {
+      console.log('🔄 Iniciando polling de documentos a cada 60 segundos');
+
+      documentPollingTimerRef.current = setInterval(() => {
+        console.log('🔄 Polling: Verificando novos documentos...');
+        loadDocumentsFromServer().catch((error) => {
+          console.warn('⚠️ Erro no polling de documentos:', error);
+        });
+      }, 60000); // 60 segundos
+    }, 3000); // Aguardar 3 segundos após montagem
+
+    // Cleanup: limpar timers ao desmontar
+    return () => {
+      clearTimeout(initTimeout);
+      if (documentPollingTimerRef.current) {
+        console.log('🛑 Parando polling de documentos');
+        clearInterval(documentPollingTimerRef.current);
+        documentPollingTimerRef.current = null;
+      }
+    };
+  }, []); // Rodar apenas uma vez no mount
 
   // Effect para resetar índice quando não há escalas ativas
   useEffect(() => {
