@@ -43,6 +43,7 @@ interface DisplayContextType {
   scrollSpeed: "slow" | "normal" | "fast";
   autoRestartDelay: number;
   isLoading: boolean;
+  documentRefreshInterval: number; // ⏱️ Intervalo de atualização de documentos (em ms)
   addNotice: (notice: Omit<Notice, "id" | "createdAt" | "updatedAt">) => Promise<boolean>;
   updateNotice: (notice: Notice) => Promise<boolean>;
   deleteNotice: (id: string) => Promise<boolean>;
@@ -53,7 +54,9 @@ interface DisplayContextType {
   setCardapioAlternateInterval: (interval: number) => void;
   setScrollSpeed: (speed: "slow" | "normal" | "fast") => void;
   setAutoRestartDelay: (delay: number) => void;
+  setDocumentRefreshInterval: (interval: number) => void; // ⏱️ Configurar intervalo de refresh
   refreshNotices: () => Promise<void>;
+  refreshDocuments: () => Promise<void>; // 🔄 Atualizar documentos manualmente
   handleScrollComplete: () => void;
 }
 
@@ -85,11 +88,13 @@ export const DisplayProvider: React.FC<DisplayProviderProps> = ({ children }) =>
   const [scrollSpeed, setScrollSpeed] = useState<"slow" | "normal" | "fast">("normal");
   const [autoRestartDelay, setAutoRestartDelay] = useState(3);
   const [isLoading, setIsLoading] = useState(false);
+  const [documentRefreshInterval, setDocumentRefreshInterval] = useState(60000); // ⏱️ 60 segundos (1 minuto) padrão
 
   // Ref para o timer de alternância
   const escalaTimerRef = useRef<NodeJS.Timeout | null>(null);
   const mainDocTimerRef = useRef<NodeJS.Timeout | null>(null);
   const isInitializingRef = useRef(true);
+  const documentRefreshTimerRef = useRef<NodeJS.Timeout | null>(null); // ⏱️ Timer para refresh de documentos
   
   // Callback para após completar scroll (apenas PLASA agora)
   const handleScrollComplete = () => {
@@ -335,6 +340,12 @@ const convertLocalNoticeToServer = (localNotice: Omit<Notice, "id" | "createdAt"
   // Refresh avisos (função pública)
   const refreshNotices = async (): Promise<void> => {
     await loadNoticesFromServer();
+  };
+
+  // 🔄 Refresh documentos (função pública)
+  const refreshDocuments = async (): Promise<void> => {
+    console.log('🔄 Atualizando documentos do servidor...');
+    await loadDocumentsFromServer();
   };
 
   // CORREÇÃO: Criar aviso no servidor com melhor tratamento de erro
@@ -806,14 +817,15 @@ useEffect(() => {
         escalaAlternateInterval,
         cardapioAlternateInterval,
         documentAlternateInterval: escalaAlternateInterval, // 🔙 Compatibilidade com versões anteriores
+        documentRefreshInterval, // ⏱️ Intervalo de polling
         scrollSpeed,
         autoRestartDelay,
         lastUpdate: new Date().toISOString(),
-        version: '3.1' // Avisos agora no servidor
+        version: '3.2' // Adicionado polling de documentos
       };
-      
+
       localStorage.setItem('display-context', JSON.stringify(contextData, null, 2));
-      
+
 
       
     } catch (error) {
@@ -827,6 +839,7 @@ useEffect(() => {
     currentCardapioIndex,
     escalaAlternateInterval,
     cardapioAlternateInterval,
+    documentRefreshInterval,
     scrollSpeed,
     autoRestartDelay
   ]);
@@ -1187,6 +1200,9 @@ useEffect(() => {
               setEscalaAlternateInterval(data.documentAlternateInterval);
               setCardapioAlternateInterval(data.documentAlternateInterval);
             }
+            if (typeof data.documentRefreshInterval === 'number') {
+              setDocumentRefreshInterval(data.documentRefreshInterval);
+            }
             if (data.scrollSpeed) setScrollSpeed(data.scrollSpeed);
             if (data.autoRestartDelay) setAutoRestartDelay(data.autoRestartDelay);
           } catch (parseError) {
@@ -1238,6 +1254,108 @@ useEffect(() => {
     }
   }, [activeEscalaDocuments.length, currentEscalaIndex]);
 
+  // ⏱️ Effect para polling periódico de documentos
+  useEffect(() => {
+    // Limpar timer existente
+    if (documentRefreshTimerRef.current) {
+      clearInterval(documentRefreshTimerRef.current);
+      documentRefreshTimerRef.current = null;
+    }
+
+    // Se o intervalo for 0, não iniciar polling (desabilitado)
+    if (documentRefreshInterval === 0) {
+      console.log('⏸️ Polling de documentos desabilitado');
+      return;
+    }
+
+    // Iniciar polling periódico
+    console.log(`⏱️ Iniciando polling de documentos a cada ${documentRefreshInterval / 1000}s`);
+    documentRefreshTimerRef.current = setInterval(() => {
+      refreshDocuments().catch(err => {
+        console.warn('⚠️ Erro ao atualizar documentos:', err);
+      });
+    }, documentRefreshInterval);
+
+    // Cleanup
+    return () => {
+      if (documentRefreshTimerRef.current) {
+        clearInterval(documentRefreshTimerRef.current);
+        documentRefreshTimerRef.current = null;
+      }
+    };
+  }, [documentRefreshInterval]);
+
+  // 📡 Effect para SSE (Server-Sent Events) de documentos em tempo real
+  useEffect(() => {
+    if (isInitializingRef.current) {
+      return;
+    }
+
+    let eventSource: EventSource | null = null;
+    let reconnectTimer: NodeJS.Timeout | null = null;
+    const RECONNECT_DELAY = 5000; // 5 segundos
+
+    const connectSSE = () => {
+      try {
+        const sseUrl = getBackendUrl('/api/documents/stream');
+        console.log('📡 Conectando ao SSE de documentos:', sseUrl);
+
+        eventSource = new EventSource(sseUrl);
+
+        eventSource.onopen = () => {
+          console.log('✅ Conexão SSE de documentos estabelecida');
+        };
+
+        eventSource.onmessage = (event) => {
+          try {
+            const data = JSON.parse(event.data);
+            console.log('📡 Evento SSE de documentos recebido:', data.type);
+
+            if (data.type === 'snapshot' || data.type === 'update') {
+              // Atualizar documentos com os dados recebidos
+              refreshDocuments().catch(err => {
+                console.warn('⚠️ Erro ao atualizar documentos via SSE:', err);
+              });
+            }
+          } catch (error) {
+            console.error('❌ Erro ao processar evento SSE de documentos:', error);
+          }
+        };
+
+        eventSource.onerror = (error) => {
+          console.warn('⚠️ Erro na conexão SSE de documentos, tentando reconectar...', error);
+          eventSource?.close();
+          eventSource = null;
+
+          // Agendar reconexão
+          if (!reconnectTimer) {
+            reconnectTimer = setTimeout(() => {
+              reconnectTimer = null;
+              connectSSE();
+            }, RECONNECT_DELAY);
+          }
+        };
+      } catch (error) {
+        console.error('❌ Erro ao conectar SSE de documentos:', error);
+      }
+    };
+
+    // Iniciar conexão SSE
+    connectSSE();
+
+    // Cleanup
+    return () => {
+      if (reconnectTimer) {
+        clearTimeout(reconnectTimer);
+        reconnectTimer = null;
+      }
+      if (eventSource) {
+        eventSource.close();
+        eventSource = null;
+      }
+    };
+  }, []);
+
 
 const value: DisplayContextType = {
   notices,
@@ -1254,6 +1372,7 @@ const value: DisplayContextType = {
   scrollSpeed,
   autoRestartDelay,
   isLoading,
+  documentRefreshInterval, // ⏱️ Intervalo de polling
   addNotice,
   updateNotice,
   deleteNotice,
@@ -1264,7 +1383,9 @@ const value: DisplayContextType = {
   setCardapioAlternateInterval,
   setScrollSpeed,
   setAutoRestartDelay,
+  setDocumentRefreshInterval, // ⏱️ Configurar intervalo de refresh
   refreshNotices,
+  refreshDocuments, // 🔄 Atualizar documentos manualmente
   handleScrollComplete,
 };
 
