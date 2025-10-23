@@ -2,6 +2,7 @@ import express, { type Express, type Request, type Response } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { startDutyAssignmentsListener } from "./dutyAssignmentsListener";
+import { startDocumentsListener } from "./documentsListener";
 import {
   insertNoticeSchema,
   insertDocumentSchema,
@@ -323,6 +324,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
     timestamp: string;
   };
 
+  // 📄 SSE para documentos
+  const documentSubscribers = new Set<Response>();
+
+  type DocumentsSseEvent = {
+    type: 'snapshot' | 'update';
+    documents: any[] | null;
+    timestamp: string;
+  };
+
   const broadcastDutyOfficers = (event: DutyOfficersSseEvent) => {
     const payload = `data: ${JSON.stringify(event)}\n\n`;
 
@@ -332,6 +342,25 @@ export async function registerRoutes(app: Express): Promise<Server> {
       } catch (error) {
         console.error('❌ Erro ao enviar atualização de oficiais via SSE:', error);
         dutyOfficerSubscribers.delete(subscriber);
+        try {
+          subscriber.end();
+        } catch (endError) {
+          console.error('❌ Erro ao encerrar conexão SSE com problema:', endError);
+        }
+      }
+    }
+  };
+
+  // 📄 Broadcast de atualizações de documentos via SSE
+  const broadcastDocuments = (event: DocumentsSseEvent) => {
+    const payload = `data: ${JSON.stringify(event)}\n\n`;
+
+    for (const subscriber of documentSubscribers) {
+      try {
+        subscriber.write(payload);
+      } catch (error) {
+        console.error('❌ Erro ao enviar atualização de documentos via SSE:', error);
+        documentSubscribers.delete(subscriber);
         try {
           subscriber.end();
         } catch (endError) {
@@ -355,6 +384,24 @@ export async function registerRoutes(app: Express): Promise<Server> {
       });
     } catch (error) {
       console.error('❌ Falha ao atualizar oficiais após NOTIFY duty_assignments_changed:', error);
+    }
+  });
+
+  // 📄 Listener PostgreSQL para mudanças em documentos
+  await startDocumentsListener(async (payload) => {
+    console.log('📡 NOTIFY documents_changed recebido:', payload);
+
+    try {
+      const documents = await storage.getDocuments();
+      const timestamp = new Date().toISOString();
+
+      broadcastDocuments({
+        type: 'update',
+        documents,
+        timestamp,
+      });
+    } catch (error) {
+      console.error('❌ Falha ao atualizar documentos após NOTIFY documents_changed:', error);
     }
   });
 
@@ -1710,6 +1757,41 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error('❌ Erro ao iniciar stream de oficiais de serviço:', error);
       dutyOfficerSubscribers.delete(res);
+      try {
+        res.status(500).end();
+      } catch {
+        // Ignore secondary errors ao encerrar stream
+      }
+    }
+  });
+
+  // 📄 SSE para atualizações de documentos em tempo real
+  app.get('/api/documents/stream', async (req, res) => {
+    try {
+      res.setHeader('Content-Type', 'text/event-stream');
+      res.setHeader('Cache-Control', 'no-cache');
+      res.setHeader('Connection', 'keep-alive');
+
+      const heartbeat = setInterval(() => {
+        res.write(': heartbeat\n\n');
+      }, 30_000);
+
+      documentSubscribers.add(res);
+
+      const snapshot = await storage.getDocuments();
+      res.write(`data: ${JSON.stringify({
+        type: 'snapshot' as const,
+        documents: snapshot,
+        timestamp: new Date().toISOString(),
+      })}\n\n`);
+
+      req.on('close', () => {
+        clearInterval(heartbeat);
+        documentSubscribers.delete(res);
+      });
+    } catch (error) {
+      console.error('❌ Erro ao iniciar stream de documentos:', error);
+      documentSubscribers.delete(res);
       try {
         res.status(500).end();
       } catch {
