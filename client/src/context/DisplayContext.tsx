@@ -88,7 +88,7 @@ export const DisplayProvider: React.FC<DisplayProviderProps> = ({ children }) =>
   const [scrollSpeed, setScrollSpeed] = useState<"slow" | "normal" | "fast">("normal");
   const [autoRestartDelay, setAutoRestartDelay] = useState(3);
   const [isLoading, setIsLoading] = useState(false);
-  const [documentRefreshInterval, setDocumentRefreshInterval] = useState(60000); // ⏱️ 60 segundos (1 minuto) padrão
+  const [documentRefreshInterval, setDocumentRefreshInterval] = useState(300000); // ⏱️ 300 segundos (5 minutos) padrão - Fallback apenas
 
   // Ref para o timer de alternância
   const escalaTimerRef = useRef<NodeJS.Timeout | null>(null);
