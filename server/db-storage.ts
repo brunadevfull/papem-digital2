@@ -9,38 +9,8 @@ import {
   type MilitaryPersonnel, type InsertMilitaryPersonnel
 } from "@shared/schema";
 
-const RANK_PREFIX_PATTERN = /^([A-Z0-9]+)\s*(?:\([A-Z0-9-]+\))?\s+(.+)$/;
-
-const sanitizeDutyName = (value: string | null | undefined): string => {
-  if (!value) {
-    return "";
-  }
-
-  const trimmed = value.trim().toUpperCase();
-  if (!trimmed) {
-    return "";
-  }
-
-  const match = trimmed.match(RANK_PREFIX_PATTERN);
-  if (match) {
-    return match[2].trim();
-  }
-
-  return trimmed;
-};
-
-const normalizeDutyRank = (value: string | null | undefined): string | undefined => {
-  if (!value) {
-    return undefined;
-  }
-
-  const trimmed = value.trim();
-  if (!trimmed) {
-    return undefined;
-  }
-
-  return trimmed.toUpperCase();
-};
+// Funções removidas - não são mais necessárias pois os dados agora são salvos
+// no formato completo "POSTO (ESPECIALIDADE) NOME" diretamente
 
 export class DatabaseStorage implements IStorage {
   private pool: Pool;
@@ -400,10 +370,10 @@ export class DatabaseStorage implements IStorage {
       const row = result.rows[0];
       const officers: DutyOfficers = {
         id: row.id,
-        officerName: sanitizeDutyName(row.officer_name),
-        masterName: sanitizeDutyName(row.master_name),
-        officerRank: normalizeDutyRank(row.officer_rank),
-        masterRank: normalizeDutyRank(row.master_rank),
+        officerName: row.officer_name || "",
+        masterName: row.master_name || "",
+        officerRank: row.officer_rank || undefined,
+        masterRank: row.master_rank || undefined,
         validFrom: new Date(row.valid_from),
         updatedAt: new Date(row.updated_at),
       };
@@ -421,20 +391,25 @@ export class DatabaseStorage implements IStorage {
 
     try {
       const validFromDate = officers.validFrom ?? new Date();
-      const sanitizedOfficerName = sanitizeDutyName(officers.officerName ?? "");
-      const sanitizedMasterName = sanitizeDutyName(officers.masterName ?? "");
-      const normalizedOfficerRank = normalizeDutyRank(officers.officerRank) ?? null;
-      const normalizedMasterRank = normalizeDutyRank(officers.masterRank) ?? null;
+
+      // Construir nomes completos com posto/graduação se disponíveis
+      const officerFullName = officers.officerRank && officers.officerName
+        ? `${officers.officerRank} ${officers.officerName}`.trim().toUpperCase()
+        : (officers.officerName || "").trim().toUpperCase();
+
+      const masterFullName = officers.masterRank && officers.masterName
+        ? `${officers.masterRank} ${officers.masterName}`.trim().toUpperCase()
+        : (officers.masterName || "").trim().toUpperCase();
 
       const result = await this.pool.query(
         `INSERT INTO duty_assignments (officer_name, officer_rank, master_name, master_rank, valid_from, updated_at)
          VALUES ($1, $2, $3, $4, $5, NOW())
          RETURNING id, officer_name, officer_rank, master_name, master_rank, valid_from, updated_at`,
         [
-          sanitizedOfficerName,
-          normalizedOfficerRank,
-          sanitizedMasterName,
-          normalizedMasterRank,
+          officerFullName,
+          officers.officerRank || null,
+          masterFullName,
+          officers.masterRank || null,
           validFromDate,
         ]
       );
@@ -442,10 +417,10 @@ export class DatabaseStorage implements IStorage {
       const row = result.rows[0];
       const updatedOfficers: DutyOfficers = {
         id: row.id,
-        officerName: sanitizeDutyName(row.officer_name),
-        masterName: sanitizeDutyName(row.master_name),
-        officerRank: normalizeDutyRank(row.officer_rank),
-        masterRank: normalizeDutyRank(row.master_rank),
+        officerName: row.officer_name || "",
+        masterName: row.master_name || "",
+        officerRank: row.officer_rank || undefined,
+        masterRank: row.master_rank || undefined,
         validFrom: new Date(row.valid_from),
         updatedAt: new Date(row.updated_at),
       };
