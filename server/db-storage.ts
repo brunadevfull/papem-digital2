@@ -9,7 +9,10 @@ import {
   type MilitaryPersonnel, type InsertMilitaryPersonnel
 } from "@shared/schema";
 
-const DUTY_PERSON_PATTERN = /^([A-Z0-9]+(?:\s*\([A-Z0-9-]+\))?)\s+(.+)$/;
+// Padrão que aceita APENAS patentes militares válidas seguidas de especialidade opcional
+// Patentes: 1T, 2T, CT, CC, CF, CMG, CA (oficiais) | 1SG, 2SG, 3SG, CB, SO, MN, SD (praças)
+// Formato: "1T (IM) NOME" ou "1T NOME"
+const DUTY_PERSON_PATTERN = /^((?:1T|2T|CT|CC|CF|CMG|CA|1SG|2SG|3SG|CB|SO|MN|SD)(?:\s*\([A-Z0-9-]+\))?)\s+(.+)$/;
 
 type ParsedDutyPerson = {
   name: string;
