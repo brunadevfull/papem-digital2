@@ -76,7 +76,7 @@ systemctl daemon-reload
 systemctl enable display-marinha
 systemctl start display-marinha
 
-echo "✅ Instalado! Acesse: http://localhost:5000"
+echo "✅ Instalado! Acesse: http://localhost:5001"
 EOF
 
 chmod +x sistema-marinha-offline/instalar.sh
@@ -94,6 +94,6 @@ echo "INSTALAÇÃO NO ORACLE LINUX:"
 echo "1. tar -xzf sistema-marinha-offline.tar.gz"  
 echo "2. cd sistema-marinha-offline"
 echo "3. sudo ./instalar.sh"
-echo "4. Acesse: http://localhost:5000"
+echo "4. Acesse: http://localhost:5001"
 echo ""
 echo "FIM - Só isso!"

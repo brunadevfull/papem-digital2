@@ -31,7 +31,7 @@ cd sistema-marinha-offline
 sudo ./instalar.sh
 ```
 
-**Pronto!** Sistema rodando em `http://localhost:5000`
+**Pronto!** Sistema rodando em `http://localhost:5001`
 
 ## O que o script faz:
 

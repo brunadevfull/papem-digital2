@@ -28,12 +28,12 @@ O Sistema de Visualização Naval foi desenvolvido para exibir documentos navais
 ## 🔐 Acesso ao Sistema
 
 ### Tela Principal (Visualização)
-- **URL**: `http://seu-servidor:5000/`
+- **URL**: `http://seu-servidor:5001/`
 - **Descrição**: Interface pública para visualização dos documentos
 - **Acesso**: Aberto para todos os usuários
 
 ### Painel Administrativo
-- **URL**: `http://seu-servidor:5000/admin`
+- **URL**: `http://seu-servidor:5001/admin`
 - **Descrição**: Interface para gerenciamento do sistema
 - **Acesso**: Restrito aos administradores
 

@@ -9,7 +9,7 @@
 import { spawn } from 'child_process';
 import { setTimeout } from 'timers/promises';
 
-const BASE_URL = 'http://localhost:5000';
+const BASE_URL = 'http://localhost:5001';
 const API_BASE = `${BASE_URL}/api`;
 
 // ANSI color codes for terminal output

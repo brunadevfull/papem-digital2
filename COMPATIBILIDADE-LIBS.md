@@ -131,7 +131,7 @@ npm run dev
 systemctl status sistema-marinha
 
 # Testar acesso
-curl http://localhost:5000
+curl http://localhost:5001
 
 # Executar testes
 ./teste.sh

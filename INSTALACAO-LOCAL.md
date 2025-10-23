@@ -141,8 +141,8 @@ sudo semanage port -a -t http_port_t -p tcp 5000
 ## Acessar o Sistema
 
 ### URLs de Acesso
-- **Interface Principal**: http://localhost:5000
-- **Painel Admin**: http://localhost:5000/admin
+- **Interface Principal**: http://localhost:5001
+- **Painel Admin**: http://localhost:5001/admin
 
 ### Acesso Remoto
 Para acesso de outras máquinas na rede:
@@ -150,7 +150,7 @@ Para acesso de outras máquinas na rede:
 # Descobrir IP da máquina
 ip addr show | grep inet
 
-# Acessar via: http://IP_DA_MAQUINA:5000
+# Acessar via: http://IP_DA_MAQUINA:5001
 ```
 
 ## Solução de Problemas
@@ -172,7 +172,7 @@ npm install
 ### Porta em uso
 ```bash
 # Verificar processo usando a porta 5000
-sudo netstat -tulpn | grep :5000
+sudo netstat -tulpn | grep :5001
 sudo kill -9 <PID>
 
 # Ou usar porta alternativa
@@ -275,7 +275,7 @@ TimeoutStopSec=20
 
 # Variáveis de ambiente
 Environment=NODE_ENV=production
-Environment=PORT=5000
+Environment=PORT: 5001
 
 # Limites de recursos
 LimitNOFILE=65536
@@ -320,7 +320,7 @@ server {
     server_name display.marinha.local;
     
     location / {
-        proxy_pass http://localhost:5000;
+        proxy_pass http://localhost:5001;
         proxy_http_version 1.1;
         proxy_set_header Upgrade $http_upgrade;
         proxy_set_header Connection 'upgrade';
@@ -341,7 +341,7 @@ nano monitor-display.sh
 
 ```bash
 #!/bin/bash
-if ! curl -f http://localhost:5000 > /dev/null 2>&1; then
+if ! curl -f http://localhost:5001 > /dev/null 2>&1; then
     echo "$(date): Sistema fora do ar, reiniciando..." >> /var/log/display-monitor.log
     sudo systemctl restart display-marinha
 fi
@@ -364,7 +364,7 @@ crontab -e
 node -e "console.log('Node.js:', process.version); console.log('Plataforma:', process.platform);"
 
 # Testar conectividade
-curl -I http://localhost:5000
+curl -I http://localhost:5001
 
 # Verificar logs detalhados
 tail -f logs/sistema.log
