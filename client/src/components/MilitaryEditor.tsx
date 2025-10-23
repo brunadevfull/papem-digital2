@@ -196,7 +196,7 @@ export function MilitaryEditor({ isOpen, onClose, military, onSave }: MilitaryEd
               <div className="flex items-center gap-2 mt-1">
                 <Badge variant="outline">
                   {formData.rank.toUpperCase()}
-                  {formData.specialty && ` (${formData.specialty.toUpperCase()})`}
+                  {formData.specialty && formData.specialty !== 'none' ? ` (${formData.specialty.toUpperCase()})` : null}
                   {' '}
                   {formData.name.toUpperCase()}
                 </Badge>
