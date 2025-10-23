@@ -4,7 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { resolveBackendUrl } from "@/utils/backend";
 
 const IS_DEV_MODE = process.env.NODE_ENV === 'development';
-const PDF_SCALE = 2.0;
+const PDF_SCALE = 3.0; // Aumentado de 2.0 para 3.0 para melhor qualidade
 const MAX_RENDER_DIMENSION = 4096;
 const IMAGE_EXPORT_FORMAT = 'image/png';
 
@@ -1098,6 +1098,9 @@ useEffect(() => {
               src={escalaImageUrl}
               alt="Escala de Serviço"
               className="max-w-full max-h-full object-contain shadow-lg"
+              style={{
+                imageRendering: 'crisp-edges' as const,
+              }}
               onError={(e) => {
                 console.error("❌ ESCALA: Erro ao carregar imagem:", escalaImageUrl);
                 setEscalaError("Falha ao exibir a imagem da escala");
@@ -1112,6 +1115,9 @@ useEffect(() => {
               src={docUrl}
               alt="Escala de Serviço (Original)"
               className="max-w-full max-h-full object-contain shadow-lg"
+              style={{
+                imageRendering: 'crisp-edges' as const,
+              }}
               onError={(e) => {
                 console.error("❌ ESCALA: Erro ao carregar arquivo original:", docUrl);
                 setEscalaError("Falha ao carregar o arquivo da escala");
@@ -1148,6 +1154,9 @@ useEffect(() => {
               src={cardapioImageUrl}
               alt="Cardápio Semanal"
               className="max-w-full max-h-full object-contain shadow-lg"
+              style={{
+                imageRendering: 'crisp-edges' as const,
+              }}
               onError={(e) => {
                 console.error("❌ CARDÁPIO: Erro ao carregar imagem:", cardapioImageUrl);
                 (e.target as HTMLImageElement).style.display = 'none';
@@ -1161,6 +1170,9 @@ useEffect(() => {
               src={docUrl}
               alt="Cardápio Semanal (Original)"
               className="max-w-full max-h-full object-contain shadow-lg"
+              style={{
+                imageRendering: 'crisp-edges' as const,
+              }}
               onError={(e) => {
                 console.error("❌ CARDÁPIO: Erro ao carregar arquivo original:", docUrl);
                 (e.target as HTMLImageElement).style.display = 'none';
