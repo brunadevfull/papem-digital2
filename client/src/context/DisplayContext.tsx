@@ -308,15 +308,11 @@ const convertLocalNoticeToServer = (localNotice: Omit<Notice, "id" | "createdAt"
         }
       });
       
-      console.log("📢 Resposta do servidor:", response.status, response.statusText);
-      
       if (response.ok) {
         const result = await response.json();
-        console.log("📢 Dados recebidos:", result);
-        
+
         if (result.success && Array.isArray(result.notices)) {
           const serverNotices = result.notices.map(convertServerNoticeToLocal);
-          
           console.log(`📢 ${serverNotices.length} avisos carregados do servidor`);
           setNotices(serverNotices);
         } else {
@@ -329,8 +325,7 @@ const convertLocalNoticeToServer = (localNotice: Omit<Notice, "id" | "createdAt"
         // Manter avisos locais se servidor falhar
       }
     } catch (error) {
-      // Silenciar erro de conexão - sistema funciona normalmente
-      console.log("🔄 Sistema funcionando em modo offline para avisos");
+      console.warn("⚠️ Falha ao conectar ao servidor de avisos, usando dados locais:", error);
       // Manter avisos locais se servidor falhar
     } finally {
       setIsLoading(false);
@@ -351,35 +346,11 @@ const convertLocalNoticeToServer = (localNotice: Omit<Notice, "id" | "createdAt"
   // CORREÇÃO: Criar aviso no servidor com melhor tratamento de erro
   const addNotice = async (noticeData: Omit<Notice, "id" | "createdAt" | "updatedAt">): Promise<boolean> => {
     try {
-      console.log("📢 Criando aviso no servidor:", noticeData.title);
       setIsLoading(true);
-      
-      const serverData = convertLocalNoticeToServer(noticeData);
-      console.log("📢 Dados para enviar:", serverData);
-  // ✅ ADICIONAR ESTE DEBUG TEMPORÁRIO:
-    console.log("🔍 DEBUG - Dados originais:", {
-      title: noticeData.title,
-      content: noticeData.content,
-      priority: noticeData.priority,
-      startDate: noticeData.startDate,
-      startDateType: typeof noticeData.startDate,
-      startDateValid: noticeData.startDate instanceof Date,
-      endDate: noticeData.endDate,
-      endDateType: typeof noticeData.endDate,
-      endDateValid: noticeData.endDate instanceof Date,
-      active: noticeData.active
-    });
-    
-    console.log("🔍 DEBUG - Dados convertidos:", {
-      ...serverData,
-      startDateLength: serverData.startDate?.length,
-      endDateLength: serverData.endDate?.length
-    });
-    
-      const backendUrl = getBackendUrl('/api/notices');
-      console.log("📢 Enviando para:", backendUrl);
 
-      
+      const serverData = convertLocalNoticeToServer(noticeData);
+      const backendUrl = getBackendUrl('/api/notices');
+
       const response = await fetch(backendUrl, {
         method: 'POST',
         headers: {
@@ -388,37 +359,22 @@ const convertLocalNoticeToServer = (localNotice: Omit<Notice, "id" | "createdAt"
         },
         body: JSON.stringify(serverData)
       });
-      
-      console.log("📢 Resposta:", response.status, response.statusText);
 
-      // ✅ ADICIONAR ESTE DEBUG PARA VER O ERRO:
-    if (!response.ok) {
-      const errorData = await response.json().catch(() => ({ error: 'Erro desconhecido' }));
-      console.error("❌ Erro HTTP detalhado:", {
-        status: response.status,
-        statusText: response.statusText,
-        errorData: errorData
-      });
-      throw new Error(errorData.error || `Erro HTTP: ${response.status}`);
-    }
-      
-      if (response.ok) {
-        const result = await response.json();
-        console.log("📢 Resultado:", result);
-        
-        if (result.success && result.notice) {
-          const newNotice = convertServerNoticeToLocal(result.notice);
-          setNotices(prev => [...prev, newNotice]);
-          
-          console.log(`✅ Aviso criado no servidor: ${newNotice.id}`);
-          return true;
-        } else {
-          throw new Error(result.error || 'Resposta inválida do servidor');
-        }
-      } else {
+      if (!response.ok) {
         const errorData = await response.json().catch(() => ({ error: 'Erro desconhecido' }));
-        console.error("❌ Erro HTTP:", response.status, errorData);
+        console.error("❌ Erro HTTP ao criar aviso:", response.status, errorData);
         throw new Error(errorData.error || `Erro HTTP: ${response.status}`);
+      }
+
+      const result = await response.json();
+
+      if (result.success && result.notice) {
+        const newNotice = convertServerNoticeToLocal(result.notice);
+        setNotices(prev => [...prev, newNotice]);
+        console.log(`✅ Aviso criado no servidor: ${newNotice.id}`);
+        return true;
+      } else {
+        throw new Error(result.error || 'Resposta inválida do servidor');
       }
     } catch (error) {
       console.error("❌ Erro ao criar aviso:", error);
@@ -1104,8 +1060,8 @@ useEffect(() => {
           setCardapioDocuments([]);
         }
       }
-    } catch {
-      // Silenciar erros de documentos - sistema funciona em modo offline
+    } catch (error) {
+      console.warn("⚠️ Falha ao carregar documentos do servidor, usando dados locais:", error);
     }
   };
 
@@ -1220,8 +1176,8 @@ useEffect(() => {
         
         // Carregar documentos do servidor (não bloqueante)
         setTimeout(() => {
-          loadDocumentsFromServer().catch(() => {
-            // Silenciar erro - sistema funciona normalmente
+          loadDocumentsFromServer().catch((error) => {
+            console.warn("⚠️ Falha ao carregar documentos:", error);
           });
         }, 1000);
         

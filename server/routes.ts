@@ -2039,12 +2039,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
       try {
         const plasaFiles = await readdir(plasaPagesDir);
         plasaCacheCount = plasaFiles.filter(f => f.endsWith('.jpg') || f.endsWith('.png')).length;
-      } catch {}
+      } catch (error) {
+        console.warn("⚠️ Erro ao contar arquivos PLASA:", error);
+      }
 
       try {
         const escalaFiles = await readdir(escalaCacheDir);
         escalaCacheCount = escalaFiles.filter(f => f.endsWith('.jpg') || f.endsWith('.png')).length;
-      } catch {}
+      } catch (error) {
+        console.warn("⚠️ Erro ao contar arquivos ESCALA:", error);
+      }
 
       const systemInfo = {
         server: {
