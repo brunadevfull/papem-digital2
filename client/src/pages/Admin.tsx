@@ -290,7 +290,9 @@ const Admin: React.FC = () => {
     return `${rankText}${specialtyText}`.trim();
   };
 
-  const DUTY_NAME_PATTERN = /^([A-Z0-9]+)\s*(?:\([A-Z0-9-]+\))?\s+(.+)$/;
+  // Padrão que aceita APENAS patentes militares válidas (não qualquer palavra)
+  // Patentes: 1T, 2T, CT, CC, CF, CMG, CA (oficiais) | 1SG, 2SG, 3SG, CB, SO, MN, SD (praças)
+  const DUTY_NAME_PATTERN = /^(1T|2T|CT|CC|CF|CMG|CA|1SG|2SG|3SG|CB|SO|MN|SD)\s*(?:\([A-Z0-9-]+\))?\s+(.+)$/;
 
   const normalizeDutyNameValue = (value?: string | null): string => {
     if (!value) {
@@ -305,9 +307,12 @@ const Admin: React.FC = () => {
     const upper = trimmed.toUpperCase();
     const match = upper.match(DUTY_NAME_PATTERN);
     if (match) {
+      // Match[1] é a patente, match[2] é o nome completo
       return match[2].trim();
     }
 
+    // Se não há match com o padrão de patente, retorna o valor completo
+    // Isso preserva nomes compostos como "LARISSA CASTRO"
     return upper;
   };
 
