@@ -1,1 +1,0 @@
-// Backup do DisplayContext para recuperação em caso de erro

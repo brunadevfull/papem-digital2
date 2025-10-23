@@ -295,47 +295,31 @@ const PDFViewer: React.FC<PDFViewerProps> = ({
  const getDocumentUrl = () => {
   if (documentType === "plasa") {
     if (activePlasaDoc?.url) {
-      console.log("📄 PLASA: Usando documento do admin:", activePlasaDoc.url);
       return getBackendUrl(activePlasaDoc.url);
     }
-    console.log("📄 PLASA: Nenhum documento ativo");
     return null;
   } else if (documentType === "escala") {
-    // CORREÇÃO: Usar a escala atual baseada no índice
     const activeEscalas = escalaDocuments.filter(doc => doc.active && doc.type === "escala");
-    
+
     if (activeEscalas.length === 0) {
-      console.log("📋 ESCALA: Nenhuma escala ativa");
       return null;
     }
-    
+
     const currentEscala = activeEscalas[currentEscalaIndex % activeEscalas.length];
-    
+
     if (currentEscala?.url) {
-      console.log(`📋 ESCALA: Usando escala ${currentEscalaIndex + 1}/${activeEscalas.length}:`, {
-        title: currentEscala.title,
-        category: currentEscala.category,
-        url: currentEscala.url
-      });
       return getBackendUrl(currentEscala.url);
     }
-    
-    console.log("📋 ESCALA: Escala atual sem URL válida");
+
     return null;
   } else if (documentType === "cardapio") {
-    // CORREÇÃO: Usar activeCardapioDoc diretamente do contexto
     if (!activeCardapioDoc) {
-      console.log("🍽️ CARDÁPIO: Nenhum cardápio ativo");
       return null;
     }
-    
-    console.log("🍽️ CARDÁPIO: Usando cardápio ativo:", {
-      title: activeCardapioDoc.title,
-      url: activeCardapioDoc.url
-    });
+
     return getBackendUrl(activeCardapioDoc.url);
   }
-  
+
   return null;
 };
 
@@ -397,7 +381,7 @@ const getCurrentCardapioDoc = () => {
         const response = await fetch(url);
         if (!response.ok) throw new Error(`Erro blob: ${response.status}`);
         const arrayBuffer = await response.arrayBuffer();
-        console.log(`✅ Blob convertido: ${arrayBuffer.byteLength} bytes`);
+        // Blob converted
         return arrayBuffer;
       }
       
@@ -435,7 +419,7 @@ const getCurrentCardapioDoc = () => {
       }
       
     } catch (error) {
-      console.error("❌ Erro ao obter PDF:", error);
+      console.error("Erro ao obter PDF:", error);
       throw error;
     }
   };
@@ -445,7 +429,7 @@ const getCurrentCardapioDoc = () => {
     return new Promise((resolve) => {
       canvas.toBlob(async (blob) => {
         if (!blob) {
-          console.error(`❌ Erro ao converter página ${pageNum} para blob`);
+          console.error(`Erro ao converter página ${pageNum} para blob`);
           resolve(canvas.toDataURL(IMAGE_EXPORT_FORMAT));
           return;
         }
@@ -469,14 +453,13 @@ const getCurrentCardapioDoc = () => {
             const fallbackFilename = `${documentId}-page-${pageNum}.${extension}`;
             const savedUrl = result.data?.url || result.url || `/plasa-pages/${fallbackFilename}`;
             const fullSavedUrl = getBackendUrl(savedUrl);
-            console.log(`💾 Página ${pageNum} salva no servidor: ${fullSavedUrl}`);
             resolve(fullSavedUrl);
           } else {
             throw new Error(`Erro no servidor: ${response.status}`);
           }
 
         } catch (error) {
-          console.warn(`⚠️ Falha ao salvar página ${pageNum} no servidor, usando data URL:`, error);
+          console.warn(`Falha ao salvar página ${pageNum}, usando data URL`);
           resolve(canvas.toDataURL(IMAGE_EXPORT_FORMAT));
         }
       }, IMAGE_EXPORT_FORMAT);
@@ -513,7 +496,7 @@ const getCurrentCardapioDoc = () => {
       if (response.ok) {
         const result = await response.json();
         if (result.allPagesExist) {
-          console.log(`💾 Usando ${totalPages} páginas já salvas no servidor`);
+          console.log(`Usando ${totalPages} páginas em cache`);
           return result.pageUrls.map((url: string) => getBackendUrl(url));
         }
       }
@@ -522,7 +505,7 @@ const getCurrentCardapioDoc = () => {
       return [];
       
     } catch (error) {
-      console.log(`⚠️ Erro ao verificar páginas existentes:`, error);
+      console.warn("Erro ao verificar cache:", error);
       return [];
     }
   };
@@ -530,7 +513,7 @@ const getCurrentCardapioDoc = () => {
   // FUNÇÃO PRINCIPAL: Converter PDF para imagens
   const convertPDFToImages = async (pdfUrl: string) => {
     try {
-      console.log(`🎯 INICIANDO CONVERSÃO PDF: ${pdfUrl}`);
+      console.log(`Iniciando conversão PDF: ${pdfUrl}`);
       setLoading(true);
       setLoadingProgress(0);
       setDebugInfo({});
@@ -582,21 +565,22 @@ const getCurrentCardapioDoc = () => {
         return;
       }
 
-      console.log("🖼️ Convertendo páginas para imagens...");
+      console.log("Convertendo páginas para imagens...");
       const imageUrls: string[] = [];
 
       for (let pageNum = 1; pageNum <= pdf.numPages; pageNum++) {
         try {
-          console.log(`📄 Processando página ${pageNum}/${pdf.numPages}`);
-          
+          // Log progress every 10 pages
+          if (pageNum % 10 === 0 || pageNum === pdf.numPages) {
+            console.log(`Processando: ${pageNum}/${pdf.numPages} páginas`);
+          }
+
           const page = await pdf.getPage(pageNum);
 
           const originalViewport = page.getViewport({ scale: 1.0 });
           const maxDimension = Math.max(originalViewport.width, originalViewport.height) || 1;
           const appliedScale = calculateRenderScale(maxDimension);
           const viewport = page.getViewport({ scale: appliedScale });
-
-          console.log(`📐 Página ${pageNum} - Original: ${originalViewport.width}x${originalViewport.height}, Escala: ${appliedScale}, Final: ${viewport.width}x${viewport.height}`);
 
           const canvas = document.createElement('canvas');
           const context = canvas.getContext('2d', {
@@ -606,10 +590,10 @@ const getCurrentCardapioDoc = () => {
 
           context.imageSmoothingEnabled = true;
           context.imageSmoothingQuality = 'high';
-          
+
           canvas.height = Math.floor(viewport.height);
           canvas.width = Math.floor(viewport.width);
-          
+
           context.fillStyle = '#FFFFFF';
           context.fillRect(0, 0, canvas.width, canvas.height);
 
@@ -620,22 +604,16 @@ const getCurrentCardapioDoc = () => {
             intent: 'display'
           };
 
-          console.log(`🎨 Renderizando página ${pageNum}...`);
-          
           const renderPromise = page.render(renderContext).promise;
-          const timeoutPromise = new Promise((_, reject) => 
+          const timeoutPromise = new Promise((_, reject) =>
             setTimeout(() => reject(new Error('Timeout na renderização')), 120000)
           );
-          
+
           await Promise.race([renderPromise, timeoutPromise]);
-          
-          console.log(`✅ Página ${pageNum} renderizada com sucesso`);
-          
+
           const imageUrl = await savePageAsImage(canvas, pageNum, docId);
           imageUrls.push(imageUrl);
-          
-          console.log(`💾 Página ${pageNum} salva: ${imageUrl}`);
-          
+
           setLoadingProgress(Math.round((pageNum / pdf.numPages) * 100));
           
           page.cleanup();
@@ -925,7 +903,8 @@ useEffect(() => {
       const response = await fetch(url, { method: 'HEAD' });
       const contentType = response.headers.get('content-type');
       return contentType?.startsWith('image/') || false;
-    } catch {
+    } catch (error) {
+      console.warn("⚠️ Erro ao verificar tipo de arquivo:", url, error);
       return false;
     }
   };

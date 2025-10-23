@@ -99,7 +99,7 @@ export const DisplayProvider: React.FC<DisplayProviderProps> = ({ children }) =>
   // Callback para após completar scroll (apenas PLASA agora)
   const handleScrollComplete = () => {
     // Função simplificada - apenas PLASA
-    console.log("✅ Scroll completo");
+    console.log("Scroll completo");
   };
 
   // CORREÇÃO: Função para obter URL completa do backend - DETECTAR AMBIENTE
@@ -168,7 +168,7 @@ export const DisplayProvider: React.FC<DisplayProviderProps> = ({ children }) =>
             ? `${parsed.pathname}${parsed.search}`
             : null;
         } catch (error) {
-          console.warn('⚠️ URL inválida ao persistir documento:', error);
+          console.warn('URL inválida ao persistir documento:', error);
           return null;
         }
       }
@@ -203,10 +203,10 @@ export const DisplayProvider: React.FC<DisplayProviderProps> = ({ children }) =>
       });
 
       if (!response.ok) {
-        console.warn('⚠️ Falha ao persistir metadados do documento:', await response.text().catch(() => response.statusText));
+        console.warn('Falha ao persistir metadados do documento:', await response.text().catch(() => response.statusText));
       }
     } catch (error) {
-      console.warn('⚠️ Não foi possível persistir documento no servidor:', error);
+      console.warn('Não foi possível persistir documento no servidor:', error);
     }
   };
 
@@ -308,29 +308,23 @@ const convertLocalNoticeToServer = (localNotice: Omit<Notice, "id" | "createdAt"
         }
       });
       
-      console.log("📢 Resposta do servidor:", response.status, response.statusText);
-      
       if (response.ok) {
         const result = await response.json();
-        console.log("📢 Dados recebidos:", result);
-        
+
         if (result.success && Array.isArray(result.notices)) {
           const serverNotices = result.notices.map(convertServerNoticeToLocal);
-          
-          console.log(`📢 ${serverNotices.length} avisos carregados do servidor`);
           setNotices(serverNotices);
         } else {
-          console.warn("⚠️ Resposta inválida do servidor:", result);
+          console.warn("Resposta inválida do servidor");
           setNotices([]);
         }
       } else {
         const errorText = await response.text();
-        console.error(`❌ Erro ao carregar avisos: ${response.status} - ${errorText}`);
+        console.error(`Erro ao carregar avisos: ${response.status}`);
         // Manter avisos locais se servidor falhar
       }
     } catch (error) {
-      // Silenciar erro de conexão - sistema funciona normalmente
-      console.log("🔄 Sistema funcionando em modo offline para avisos");
+      console.warn("Falha ao conectar ao servidor de avisos, usando dados locais:", error);
       // Manter avisos locais se servidor falhar
     } finally {
       setIsLoading(false);
@@ -344,42 +338,18 @@ const convertLocalNoticeToServer = (localNotice: Omit<Notice, "id" | "createdAt"
 
   // 🔄 Refresh documentos (função pública)
   const refreshDocuments = async (): Promise<void> => {
-    console.log('🔄 Atualizando documentos do servidor...');
+    // Refreshing documents
     await loadDocumentsFromServer();
   };
 
   // CORREÇÃO: Criar aviso no servidor com melhor tratamento de erro
   const addNotice = async (noticeData: Omit<Notice, "id" | "createdAt" | "updatedAt">): Promise<boolean> => {
     try {
-      console.log("📢 Criando aviso no servidor:", noticeData.title);
       setIsLoading(true);
-      
-      const serverData = convertLocalNoticeToServer(noticeData);
-      console.log("📢 Dados para enviar:", serverData);
-  // ✅ ADICIONAR ESTE DEBUG TEMPORÁRIO:
-    console.log("🔍 DEBUG - Dados originais:", {
-      title: noticeData.title,
-      content: noticeData.content,
-      priority: noticeData.priority,
-      startDate: noticeData.startDate,
-      startDateType: typeof noticeData.startDate,
-      startDateValid: noticeData.startDate instanceof Date,
-      endDate: noticeData.endDate,
-      endDateType: typeof noticeData.endDate,
-      endDateValid: noticeData.endDate instanceof Date,
-      active: noticeData.active
-    });
-    
-    console.log("🔍 DEBUG - Dados convertidos:", {
-      ...serverData,
-      startDateLength: serverData.startDate?.length,
-      endDateLength: serverData.endDate?.length
-    });
-    
-      const backendUrl = getBackendUrl('/api/notices');
-      console.log("📢 Enviando para:", backendUrl);
 
-      
+      const serverData = convertLocalNoticeToServer(noticeData);
+      const backendUrl = getBackendUrl('/api/notices');
+
       const response = await fetch(backendUrl, {
         method: 'POST',
         headers: {
@@ -388,40 +358,24 @@ const convertLocalNoticeToServer = (localNotice: Omit<Notice, "id" | "createdAt"
         },
         body: JSON.stringify(serverData)
       });
-      
-      console.log("📢 Resposta:", response.status, response.statusText);
 
-      // ✅ ADICIONAR ESTE DEBUG PARA VER O ERRO:
-    if (!response.ok) {
-      const errorData = await response.json().catch(() => ({ error: 'Erro desconhecido' }));
-      console.error("❌ Erro HTTP detalhado:", {
-        status: response.status,
-        statusText: response.statusText,
-        errorData: errorData
-      });
-      throw new Error(errorData.error || `Erro HTTP: ${response.status}`);
-    }
-      
-      if (response.ok) {
-        const result = await response.json();
-        console.log("📢 Resultado:", result);
-        
-        if (result.success && result.notice) {
-          const newNotice = convertServerNoticeToLocal(result.notice);
-          setNotices(prev => [...prev, newNotice]);
-          
-          console.log(`✅ Aviso criado no servidor: ${newNotice.id}`);
-          return true;
-        } else {
-          throw new Error(result.error || 'Resposta inválida do servidor');
-        }
-      } else {
+      if (!response.ok) {
         const errorData = await response.json().catch(() => ({ error: 'Erro desconhecido' }));
-        console.error("❌ Erro HTTP:", response.status, errorData);
+        console.error("Erro HTTP ao criar aviso:", response.status, errorData);
         throw new Error(errorData.error || `Erro HTTP: ${response.status}`);
       }
+
+      const result = await response.json();
+
+      if (result.success && result.notice) {
+        const newNotice = convertServerNoticeToLocal(result.notice);
+        setNotices(prev => [...prev, newNotice]);
+        return true;
+      } else {
+        throw new Error(result.error || 'Resposta inválida do servidor');
+      }
     } catch (error) {
-      console.error("❌ Erro ao criar aviso:", error);
+      console.error("Erro ao criar aviso:", error);
       
       // Fallback: adicionar localmente se servidor falhar
       const localNotice: Notice = {
@@ -432,7 +386,7 @@ const convertLocalNoticeToServer = (localNotice: Omit<Notice, "id" | "createdAt"
       };
       
       setNotices(prev => [...prev, localNotice]);
-      console.log("⚠️ Aviso adicionado apenas localmente devido a erro no servidor");
+      console.log("Aviso adicionado apenas localmente");
       
       return false;
     } finally {
@@ -479,7 +433,7 @@ const updateNotice = async (updatedNotice: Notice): Promise<boolean> => {
           notice.id === updated.id ? updated : notice
         ));
         
-        console.log(`✅ Aviso atualizado no servidor: ${updated.id}`);
+        console.log(`Aviso atualizado: ${updated.id}`);
         return true;
       } else {
         throw new Error(result.error || 'Resposta inválida do servidor');
@@ -489,13 +443,13 @@ const updateNotice = async (updatedNotice: Notice): Promise<boolean> => {
       throw new Error(errorData.error || `Erro HTTP: ${response.status}`);
     }
   } catch (error) {
-    console.error("❌ Erro ao atualizar aviso:", error);
+    console.error("Erro ao atualizar aviso:", error);
     
     // Fallback: atualizar localmente se servidor falhar
     setNotices(prev => prev.map(notice => 
       notice.id === updatedNotice.id ? updatedNotice : notice
     ));
-    console.log("⚠️ Aviso atualizado apenas localmente devido a erro no servidor");
+    console.log("Aviso atualizado apenas localmente");
     
     return false;
   } finally {
@@ -530,7 +484,7 @@ const deleteNotice = async (id: string): Promise<boolean> => {
       if (result.success) {
         setNotices(prev => prev.filter(notice => String(notice.id) !== stringId));
         
-        console.log(`✅ Aviso deletado do servidor: ${id}`);
+        console.log(`Aviso deletado: ${id}`);
         return true;
       } else {
         throw new Error(result.error || 'Resposta inválida do servidor');
@@ -540,12 +494,12 @@ const deleteNotice = async (id: string): Promise<boolean> => {
       throw new Error(errorData.error || `Erro HTTP: ${response.status}`);
     }
   } catch (error) {
-    console.error("❌ Erro ao deletar aviso:", error);
+    console.error("Erro ao deletar aviso:", error);
     
     // Fallback: remover localmente se servidor falhar
     const stringId = String(id);
     setNotices(prev => prev.filter(notice => String(notice.id) !== stringId));
-    console.log("⚠️ Aviso removido apenas localmente devido a erro no servidor");
+    console.log("Aviso removido apenas localmente");
     
     return false;
   } finally {
@@ -671,12 +625,12 @@ const deleteDocument = async (id: string) => {
         const result = await response.json();
         
         if (result.success) {
-          console.log("✅ Arquivo deletado do servidor com sucesso");
+          console.log("Arquivo deletado do servidor");
         } else {
-          console.warn("⚠️ Falha ao deletar arquivo do servidor:", result.error);
+          console.warn("Falha ao deletar arquivo do servidor:", result.error);
         }
       } catch (error) {
-        console.error("❌ Erro ao deletar arquivo do servidor:", error);
+        console.error("Erro ao deletar arquivo do servidor:", error);
       }
     }
     
@@ -763,7 +717,7 @@ useEffect(() => {
     console.log(`🍽️ Apenas 1 cardápio ativo, mantendo fixo`);
     setCurrentCardapioIndex(0);
   } else {
-    console.log(`⚠️ Nenhum cardápio ativo`);
+    // No active menu
   }
 
   return () => {
@@ -829,7 +783,7 @@ useEffect(() => {
 
       
     } catch (error) {
-      console.error("❌ Erro ao salvar contexto:", error);
+      console.error("Erro ao salvar contexto:", error);
     }
   }, [
     plasaDocuments,
@@ -1081,7 +1035,7 @@ useEffect(() => {
         }
       }
     } catch (error) {
-      console.warn('⚠️ Falha ao carregar documentos do banco:', error);
+      console.warn('Falha ao carregar documentos do banco:', error);
     }
 
     try {
@@ -1104,8 +1058,8 @@ useEffect(() => {
           setCardapioDocuments([]);
         }
       }
-    } catch {
-      // Silenciar erros de documentos - sistema funciona em modo offline
+    } catch (error) {
+      console.warn("Falha ao carregar documentos do servidor:", error);
     }
   };
 
@@ -1206,7 +1160,7 @@ useEffect(() => {
             if (data.scrollSpeed) setScrollSpeed(data.scrollSpeed);
             if (data.autoRestartDelay) setAutoRestartDelay(data.autoRestartDelay);
           } catch (parseError) {
-            console.warn("⚠️ Erro ao processar localStorage:", parseError);
+            console.warn("Erro ao processar localStorage:", parseError);
             localStorage.removeItem('display-context');
           }
         }
@@ -1215,24 +1169,24 @@ useEffect(() => {
         try {
           await loadNoticesFromServer();
         } catch (noticeError) {
-          console.warn("⚠️ Falha ao carregar avisos do servidor:", noticeError);
+          console.warn("Falha ao carregar avisos do servidor:", noticeError);
         }
         
         // Carregar documentos do servidor (não bloqueante)
         setTimeout(() => {
-          loadDocumentsFromServer().catch(() => {
-            // Silenciar erro - sistema funciona normalmente
+          loadDocumentsFromServer().catch((error) => {
+            console.warn("Falha ao carregar documentos:", error);
           });
         }, 1000);
         
       } catch (error) {
-        console.error("❌ Erro na inicialização:", error);
+        console.error("Erro na inicialização:", error);
         
         // Fallback: tentar carregar apenas avisos
         try {
           await loadNoticesFromServer();
         } catch (fallbackError) {
-          console.error("❌ Falha total na inicialização:", fallbackError);
+          console.error("Falha total na inicialização:", fallbackError);
         }
       } finally {
         setTimeout(() => {
@@ -1272,7 +1226,7 @@ useEffect(() => {
     console.log(`⏱️ Iniciando polling de documentos a cada ${documentRefreshInterval / 1000}s`);
     documentRefreshTimerRef.current = setInterval(() => {
       refreshDocuments().catch(err => {
-        console.warn('⚠️ Erro ao atualizar documentos:', err);
+        console.warn('Erro ao atualizar documentos:', err);
       });
     }, documentRefreshInterval);
 
@@ -1303,7 +1257,7 @@ useEffect(() => {
         eventSource = new EventSource(sseUrl);
 
         eventSource.onopen = () => {
-          console.log('✅ Conexão SSE de documentos estabelecida');
+          console.log('Conexão SSE estabelecida');
         };
 
         eventSource.onmessage = (event) => {
@@ -1314,16 +1268,16 @@ useEffect(() => {
             if (data.type === 'snapshot' || data.type === 'update') {
               // Atualizar documentos com os dados recebidos
               refreshDocuments().catch(err => {
-                console.warn('⚠️ Erro ao atualizar documentos via SSE:', err);
+                console.warn('Erro ao atualizar documentos via SSE:', err);
               });
             }
           } catch (error) {
-            console.error('❌ Erro ao processar evento SSE de documentos:', error);
+            console.error('Erro ao processar evento SSE:', error);
           }
         };
 
         eventSource.onerror = (error) => {
-          console.warn('⚠️ Erro na conexão SSE de documentos, tentando reconectar...', error);
+          console.warn('Erro na conexão SSE, reconectando...', error);
           eventSource?.close();
           eventSource = null;
 
@@ -1336,7 +1290,7 @@ useEffect(() => {
           }
         };
       } catch (error) {
-        console.error('❌ Erro ao conectar SSE de documentos:', error);
+        console.error('Erro ao conectar SSE:', error);
       }
     };
 
