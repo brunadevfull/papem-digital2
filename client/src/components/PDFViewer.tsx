@@ -97,6 +97,62 @@ interface PDFViewerProps {
   onScrollComplete?: () => void;
 }
 
+const normalizeCategoryText = (value?: string | null) => {
+  if (!value) {
+    return "";
+  }
+
+  return value
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase();
+};
+
+type EscalaClassificationLike = {
+  category?: "oficial" | "praca";
+  tags?: string[];
+  title?: string;
+  url?: string;
+};
+
+const detectEscalaCategory = (
+  doc?: EscalaClassificationLike | null
+): "oficial" | "praca" | null => {
+  if (!doc) {
+    return null;
+  }
+
+  if (doc.category === "oficial" || doc.category === "praca") {
+    return doc.category;
+  }
+
+  const normalizedTags = Array.isArray(doc.tags)
+    ? doc.tags
+        .map(tag => normalizeCategoryText(tag))
+        .filter(Boolean)
+    : [];
+
+  if (normalizedTags.some(tag => tag.includes("oficia"))) {
+    return "oficial";
+  }
+
+  if (normalizedTags.some(tag => tag.includes("praca"))) {
+    return "praca";
+  }
+
+  const combinedText = `${normalizeCategoryText(doc.title)} ${normalizeCategoryText(doc.url)}`.trim();
+
+  if (combinedText.includes("oficial") || combinedText.includes("oficiais") || combinedText.includes("oficia")) {
+    return "oficial";
+  }
+
+  if (combinedText.includes("praca") || combinedText.includes("pracas") || combinedText.includes("prac")) {
+    return "praca";
+  }
+
+  return null;
+};
+
 // Classe para controlar o scroll automático contínuo
 class ContinuousAutoScroller {
   private isScrolling: boolean = false;
@@ -1440,39 +1496,52 @@ useEffect(() => {
   <div className="flex items-center space-x-3">
     {/* Indicador OFICIAIS | PRAÇAS fixo com ícones para ESCALA */}
     {documentType === "escala" && (() => {
-      const currentEscala = getCurrentEscalaDoc();
-      const isOficial = currentEscala?.category === "oficial";
-      
+      const currentEscala = getCurrentEscalaDoc() ?? activeEscalaDoc;
+      const escalaCategory = detectEscalaCategory(currentEscala);
+      const isOficial = escalaCategory === "oficial";
+      const isPraca = escalaCategory === "praca";
+      const isUnclassified = escalaCategory === null;
+      const inactiveOpacityClass = isUnclassified ? "opacity-60" : "opacity-40";
+      const inactiveTextClass = isUnclassified ? "text-slate-300" : "text-slate-400";
+
       return (
         <div className="bg-slate-600/50 backdrop-blur-sm rounded-lg px-3 py-1 border border-slate-400/30 flex items-center">
           <div className="flex items-center gap-2">
             {/* OFICIAIS */}
             <div className="flex items-center gap-1">
-              <span className={`text-sm transition-all duration-300 ${
-                isOficial ? "opacity-100" : "opacity-40"
-              }`}>⭐</span>
-              <span className={`text-xs font-bold transition-all duration-300 ${
-                isOficial 
-                  ? "text-yellow-200 drop-shadow-sm" 
-                  : "text-slate-400"
-              }`}>
+              <span
+                className={`text-sm transition-all duration-300 ${
+                  isOficial ? "opacity-100" : inactiveOpacityClass
+                }`}
+              >
+                ⭐
+              </span>
+              <span
+                className={`text-xs font-bold transition-all duration-300 ${
+                  isOficial ? "text-yellow-200 drop-shadow-sm" : inactiveTextClass
+                }`}
+              >
                 OFICIAIS
               </span>
             </div>
-            
+
             {/* Separador */}
             <span className="text-slate-300 text-xs mx-1">|</span>
-            
+
             {/* PRAÇAS */}
             <div className="flex items-center gap-1">
-              <span className={`text-sm transition-all duration-300 ${
-                !isOficial ? "opacity-100" : "opacity-40"
-              }`}>🛡️</span>
-              <span className={`text-xs font-bold transition-all duration-300 ${
-                !isOficial 
-                  ? "text-green-200 drop-shadow-sm" 
-                  : "text-slate-400"
-              }`}>
+              <span
+                className={`text-sm transition-all duration-300 ${
+                  isPraca ? "opacity-100" : inactiveOpacityClass
+                }`}
+              >
+                🛡️
+              </span>
+              <span
+                className={`text-xs font-bold transition-all duration-300 ${
+                  isPraca ? "text-green-200 drop-shadow-sm" : inactiveTextClass
+                }`}
+              >
                 PRAÇAS
               </span>
             </div>
