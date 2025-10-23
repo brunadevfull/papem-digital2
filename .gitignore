@@ -4,3 +4,6 @@ dist
 server/public
 vite.config.ts.*
 *.tar.gz
+
+# Arquivos de upload gerados pelo sistema
+uploads/
