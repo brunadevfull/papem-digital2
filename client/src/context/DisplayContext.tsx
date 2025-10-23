@@ -1,12 +1,4 @@
-import React, {
-  createContext,
-  useContext,
-  useState,
-  ReactNode,
-  useEffect,
-  useRef,
-  useCallback
-} from "react";
+import React, { createContext, useContext, useState, ReactNode, useEffect, useRef } from "react";
 import { resolveBackendUrl } from "@/utils/backend";
 
 export interface Notice {
@@ -106,62 +98,56 @@ export const DisplayProvider: React.FC<DisplayProviderProps> = ({ children }) =>
   };
 
   // CORREÇÃO: Função para obter URL completa do backend - DETECTAR AMBIENTE
-  const getBackendUrl = useCallback(
-    (path: string): string => resolveBackendUrl(path),
-    []
-  );
+  const getBackendUrl = (path: string): string => resolveBackendUrl(path);
 
   // Função utilitária para tratar tags dos documentos
-  const normalizeDocumentTags = useCallback(
-    (input: {
-      tags?: string[];
-      type: PDFDocument["type"];
-      category?: PDFDocument["category"];
-      unit?: PDFDocument["unit"];
-    }): string[] => {
-      const baseTags = Array.isArray(input.tags)
-        ? input.tags
-            .map(tag => (typeof tag === "string" ? tag.trim() : ""))
-            .filter(tag => tag.length > 0)
-        : [];
+  const normalizeDocumentTags = (input: {
+    tags?: string[];
+    type: PDFDocument["type"];
+    category?: PDFDocument["category"];
+    unit?: PDFDocument["unit"];
+  }): string[] => {
+    const baseTags = Array.isArray(input.tags)
+      ? input.tags
+          .map(tag => (typeof tag === "string" ? tag.trim() : ""))
+          .filter(tag => tag.length > 0)
+      : [];
 
-      const ensureTag = (tag: string) => {
-        const normalized = tag.trim();
-        if (!normalized) return;
-        const alreadyExists = baseTags.some(
-          existing => existing.toUpperCase() === normalized.toUpperCase()
-        );
-        if (!alreadyExists) {
-          baseTags.push(normalized);
-        }
-      };
-
-      if (input.type === "plasa") {
-        ensureTag("PLASA");
+    const ensureTag = (tag: string) => {
+      const normalized = tag.trim();
+      if (!normalized) return;
+      const alreadyExists = baseTags.some(
+        existing => existing.toUpperCase() === normalized.toUpperCase()
+      );
+      if (!alreadyExists) {
+        baseTags.push(normalized);
       }
+    };
 
-      if (input.type === "escala") {
-        ensureTag("ESCALA");
-        if (input.category === "oficial") {
-          ensureTag("OFICIAIS");
-        } else if (input.category === "praca") {
-          ensureTag("PRAÇAS");
-        }
+    if (input.type === "plasa") {
+      ensureTag("PLASA");
+    }
+
+    if (input.type === "escala") {
+      ensureTag("ESCALA");
+      if (input.category === "oficial") {
+        ensureTag("OFICIAIS");
+      } else if (input.category === "praca") {
+        ensureTag("PRAÇAS");
       }
+    }
 
-      if (input.type === "cardapio") {
-        ensureTag("CARDÁPIO");
-        if (input.unit === "EAGM") {
-          ensureTag("EAGM");
-        } else if (input.unit === "1DN") {
-          ensureTag("1DN");
-        }
+    if (input.type === "cardapio") {
+      ensureTag("CARDÁPIO");
+      if (input.unit === "EAGM") {
+        ensureTag("EAGM");
+      } else if (input.unit === "1DN") {
+        ensureTag("1DN");
       }
+    }
 
-      return baseTags;
-    },
-    []
-  );
+    return baseTags;
+  };
 
   const persistDocumentMetadata = async (
     document: Omit<PDFDocument, "id" | "uploadDate"> & { url: string }
@@ -219,7 +205,7 @@ export const DisplayProvider: React.FC<DisplayProviderProps> = ({ children }) =>
     }
   };
 
-  const getComparableUrl = useCallback((url: string): string => {
+  const getComparableUrl = (url: string): string => {
     if (!url) return "";
 
     try {
@@ -234,33 +220,30 @@ export const DisplayProvider: React.FC<DisplayProviderProps> = ({ children }) =>
 
     const normalized = url.startsWith("/") ? url : `/${url}`;
     return normalized.replace(/\\+/g, "/");
-  }, []);
+  };
 
-  const generateDocumentIdFromUrl = useCallback(
-    (url: string): string => {
-      const comparable = getComparableUrl(url).toLowerCase();
-      if (!comparable) {
-        return `${Date.now()}-${Math.random().toString(36).slice(2, 11)}`;
-      }
+  const generateDocumentIdFromUrl = (url: string): string => {
+    const comparable = getComparableUrl(url).toLowerCase();
+    if (!comparable) {
+      return `${Date.now()}-${Math.random().toString(36).slice(2, 11)}`;
+    }
 
-      let hash = 0;
-      for (let i = 0; i < comparable.length; i++) {
-        hash = (hash * 31 + comparable.charCodeAt(i)) >>> 0;
-      }
+    let hash = 0;
+    for (let i = 0; i < comparable.length; i++) {
+      hash = (hash * 31 + comparable.charCodeAt(i)) >>> 0;
+    }
 
-      return `doc-${hash.toString(16)}`;
-    },
-    [getComparableUrl]
-  );
+    return `doc-${hash.toString(16)}`;
+  };
 
   const generateUniqueId = (): string => {
     return `${Date.now()}-${Math.random().toString(36).slice(2, 11)}`;
   };
 
   // Função para normalizar URLs existentes para o ambiente atual
-  const normalizeDocumentUrl = useCallback((url: string): string => {
+  const normalizeDocumentUrl = (url: string): string => {
     if (!url) return url;
-
+    
     // Se é uma URL local incorreta (localhost), corrigir para o ambiente atual
     if (url.includes('localhost:')) {
       const pathMatch = url.match(/\/uploads\/.*$/);
@@ -268,9 +251,9 @@ export const DisplayProvider: React.FC<DisplayProviderProps> = ({ children }) =>
         return getBackendUrl(pathMatch[0]);
       }
     }
-
+    
     return url;
-  }, [getBackendUrl]);
+  };
 
   // CORREÇÃO: Conversão de aviso do servidor para local
   const convertServerNoticeToLocal = (serverNotice: any): Notice => {
@@ -849,7 +832,7 @@ useEffect(() => {
   ]);
 
   // Função auxiliar para determinar categoria
-  const determineCategory = useCallback((filename: string): "oficial" | "praca" | undefined => {
+  const determineCategory = (filename: string): "oficial" | "praca" | undefined => {
     const lowerFilename = filename.toLowerCase();
     const normalizedFilename = lowerFilename
       .normalize("NFD")
@@ -858,9 +841,9 @@ useEffect(() => {
     if (normalizedFilename.includes('oficial')) return 'oficial';
     if (normalizedFilename.includes('praca')) return 'praca';
     return undefined;
-  }, []);
+  };
 
-  const normalizeUnitValue = useCallback((value: unknown): PDFDocument["unit"] | undefined => {
+  const normalizeUnitValue = (value: unknown): PDFDocument["unit"] | undefined => {
     if (typeof value !== "string") {
       return undefined;
     }
@@ -888,9 +871,9 @@ useEffect(() => {
     }
 
     return undefined;
-  }, []);
+  };
 
-  const detectUnitFromText = useCallback((text?: string | null): PDFDocument["unit"] | undefined => {
+  const detectUnitFromText = (text?: string | null): PDFDocument["unit"] | undefined => {
     if (!text) {
       return undefined;
     }
@@ -911,9 +894,9 @@ useEffect(() => {
     }
 
     return undefined;
-  }, []);
+  };
 
-  const deriveUnitFromTags = useCallback((tags: unknown): PDFDocument["unit"] | undefined => {
+  const deriveUnitFromTags = (tags: unknown): PDFDocument["unit"] | undefined => {
     if (!Array.isArray(tags)) {
       return undefined;
     }
@@ -926,10 +909,10 @@ useEffect(() => {
     }
 
     return undefined;
-  }, [normalizeUnitValue]);
+  };
 
   // Função para carregar documentos do servidor
-  const loadDocumentsFromServer = useCallback(async () => {
+  const loadDocumentsFromServer = async () => {
     const existingDocsMap = new Map<string, PDFDocument>();
     [...plasaDocuments, ...escalaDocuments, ...cardapioDocuments].forEach(doc => {
       existingDocsMap.set(getComparableUrl(doc.url), doc);
@@ -1111,22 +1094,7 @@ useEffect(() => {
     } catch {
       // Silenciar erros de documentos - sistema funciona em modo offline
     }
-  }, [
-    cardapioDocuments,
-    detectUnitFromText,
-    deriveUnitFromTags,
-    determineCategory,
-    escalaDocuments,
-    generateDocumentIdFromUrl,
-    getBackendUrl,
-    getComparableUrl,
-    normalizeDocumentTags,
-    normalizeUnitValue,
-    plasaDocuments,
-    setCardapioDocuments,
-    setEscalaDocuments,
-    setPlasaDocuments
-  ]);
+  };
 
   // CORREÇÃO: Inicialização robusta com fallback para erros de documento
   useEffect(() => {
@@ -1234,9 +1202,16 @@ useEffect(() => {
           console.warn("⚠️ Falha ao carregar avisos do servidor:", noticeError);
         }
         
+        // Carregar documentos do servidor (não bloqueante)
+        setTimeout(() => {
+          loadDocumentsFromServer().catch(() => {
+            // Silenciar erro - sistema funciona normalmente
+          });
+        }, 1000);
+        
       } catch (error) {
         console.error("❌ Erro na inicialização:", error);
-
+        
         // Fallback: tentar carregar apenas avisos
         try {
           await loadNoticesFromServer();
@@ -1253,48 +1228,6 @@ useEffect(() => {
     
     initializeContext();
   }, []);
-
-  useEffect(() => {
-    let documentsInterval: NodeJS.Timeout | null = null;
-    let initializationWatcher: NodeJS.Timeout | null = null;
-
-    const scheduleDocumentsRefresh = () => {
-      const refreshDocuments = () => {
-        loadDocumentsFromServer().catch(error => {
-          console.warn("⚠️ Falha ao atualizar documentos do servidor:", error);
-        });
-      };
-
-      refreshDocuments();
-
-      documentsInterval = setInterval(() => {
-        refreshDocuments();
-      }, 60000);
-    };
-
-    if (!isInitializingRef.current) {
-      scheduleDocumentsRefresh();
-    } else {
-      initializationWatcher = setInterval(() => {
-        if (!isInitializingRef.current) {
-          if (initializationWatcher) {
-            clearInterval(initializationWatcher);
-            initializationWatcher = null;
-          }
-          scheduleDocumentsRefresh();
-        }
-      }, 500);
-    }
-
-    return () => {
-      if (initializationWatcher) {
-        clearInterval(initializationWatcher);
-      }
-      if (documentsInterval) {
-        clearInterval(documentsInterval);
-      }
-    };
-  }, [loadDocumentsFromServer]);
 
   // Effect para resetar índice quando não há escalas ativas
   useEffect(() => {
