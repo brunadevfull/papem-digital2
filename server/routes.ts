@@ -1394,7 +1394,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
           const subFiles = fs.readdirSync(subfolderPath);
           
           subFiles
-            .filter(file => file.endsWith('.pdf') || file.endsWith('.jpg') || file.endsWith('.png'))
+            .filter(file => {
+              const normalized = file.toLowerCase();
+              return ['.pdf', '.jpg', '.jpeg', '.png', '.gif', '.webp'].some(extension =>
+                normalized.endsWith(extension)
+              );
+            })
             .forEach(file => {
               const filePath = path.join(subfolderPath, file);
               const stats = fs.statSync(filePath);
