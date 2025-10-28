@@ -5,13 +5,7 @@ import { resolveBackendUrl } from "@/utils/backend";
 
 const IS_DEV_MODE = process.env.NODE_ENV === 'development';
 const MAX_RENDER_DIMENSION = 8192;
-const MIN_RENDER_DIMENSION = 2560;
 const IMAGE_EXPORT_FORMAT = 'image/png';
-
-const BASE_PDF_SCALE = 2.4;
-const DESKTOP_PDF_SCALE = 3.0;
-const LARGE_SCREEN_PDF_SCALE = 3.6;
-const ULTRA_HD_PDF_SCALE = 4.2;
 
 const getViewportWidth = () => {
   if (typeof window === "undefined") {
@@ -25,24 +19,6 @@ const getViewportWidth = () => {
     screen?.availWidth || 0,
     1920
   );
-};
-
-const getBasePdfScale = () => {
-  const viewportWidth = getViewportWidth();
-
-  if (viewportWidth >= 3800) {
-    return ULTRA_HD_PDF_SCALE;
-  }
-
-  if (viewportWidth >= 2560) {
-    return LARGE_SCREEN_PDF_SCALE;
-  }
-
-  if (viewportWidth >= 1920) {
-    return DESKTOP_PDF_SCALE;
-  }
-
-  return BASE_PDF_SCALE;
 };
 
 const getDevicePixelRatio = () => {
@@ -272,21 +248,36 @@ const PDFViewer: React.FC<PDFViewerProps> = ({
   const SCROLL_SPEED = getScrollSpeed();
   const RESTART_DELAY = autoRestartDelay * 1000;
   const devicePixelRatio = getDevicePixelRatio();
-  const calculateRenderScale = useCallback((maxDimension: number) => {
-    if (maxDimension <= 0) {
-      return getBasePdfScale() * devicePixelRatio;
+  const getTargetRenderWidth = useCallback(() => {
+    const containerWidth = containerRef.current?.clientWidth ?? 0;
+    const fallbackWidth = getViewportWidth();
+    const baseWidth = containerWidth > 0 ? containerWidth : fallbackWidth;
+    const targetWidth = baseWidth * devicePixelRatio;
+    const safeTargetWidth = Number.isFinite(targetWidth) && targetWidth > 0
+      ? targetWidth
+      : fallbackWidth;
+
+    return Math.min(Math.max(safeTargetWidth, baseWidth), MAX_RENDER_DIMENSION);
+  }, [devicePixelRatio]);
+
+  const calculateRenderScale = useCallback((viewportDimensions: { width: number; height: number }) => {
+    const { width, height } = viewportDimensions;
+    const originalWidth = Math.max(width, 1);
+    const originalHeight = Math.max(height, 1);
+    const targetRenderWidth = getTargetRenderWidth();
+
+    let desiredScale = targetRenderWidth / originalWidth;
+    if (!Number.isFinite(desiredScale) || desiredScale <= 0) {
+      desiredScale = 1;
     }
 
-    const safeMaxDimension = Math.max(maxDimension, 1);
-    const effectiveMinDimension = Math.min(MIN_RENDER_DIMENSION, MAX_RENDER_DIMENSION);
-    const limitScale = MAX_RENDER_DIMENSION / safeMaxDimension;
-    const minScale = effectiveMinDimension / safeMaxDimension;
-    const baseScale = getBasePdfScale() * devicePixelRatio;
-    const targetScale = Math.max(baseScale, minScale);
+    const maxScale = MAX_RENDER_DIMENSION / Math.max(originalWidth, originalHeight);
+    if (Number.isFinite(maxScale) && maxScale > 0) {
+      desiredScale = Math.min(desiredScale, maxScale);
+    }
 
-    const clampedScale = limitScale > 0 ? Math.min(targetScale, limitScale) : targetScale;
-    return Math.max(clampedScale, 1);
-  }, [devicePixelRatio]);
+    return Math.max(desiredScale, 1);
+  }, [getTargetRenderWidth]);
 
   // Função para obter a URL completa do servidor backend - DETECTAR AMBIENTE
   const getBackendUrl = (path: string): string => resolveBackendUrl(path);
@@ -592,8 +583,10 @@ const getCurrentCardapioDoc = () => {
           const page = await pdf.getPage(pageNum);
 
           const originalViewport = page.getViewport({ scale: 1.0 });
-          const maxDimension = Math.max(originalViewport.width, originalViewport.height) || 1;
-          const appliedScale = calculateRenderScale(maxDimension);
+          const appliedScale = calculateRenderScale({
+            width: originalViewport.width,
+            height: originalViewport.height,
+          });
           const viewport = page.getViewport({ scale: appliedScale });
 
           const canvas = document.createElement('canvas');
@@ -605,8 +598,11 @@ const getCurrentCardapioDoc = () => {
           context.imageSmoothingEnabled = true;
           context.imageSmoothingQuality = 'high';
 
-          canvas.height = Math.floor(viewport.height);
-          canvas.width = Math.floor(viewport.width);
+          const renderWidth = Math.min(MAX_RENDER_DIMENSION, Math.ceil(viewport.width));
+          const renderHeight = Math.min(MAX_RENDER_DIMENSION, Math.ceil(viewport.height));
+
+          canvas.height = renderHeight;
+          canvas.width = renderWidth;
 
           context.fillStyle = '#FFFFFF';
           context.fillRect(0, 0, canvas.width, canvas.height);
@@ -957,7 +953,8 @@ useEffect(() => {
           if (cacheResult.success && cacheResult.exists) {
             console.log(`💾 ESCALA: Cache encontrado: ${cacheResult.url}`);
             const cachedUrl = getBackendUrl(cacheResult.url);
-            const hasMinimumResolution = await ensureImageHasMinimumResolution(cachedUrl, MIN_RENDER_DIMENSION);
+            const minimumRenderWidth = Math.max(1, Math.floor(getTargetRenderWidth()));
+            const hasMinimumResolution = await ensureImageHasMinimumResolution(cachedUrl, minimumRenderWidth);
 
             if (hasMinimumResolution) {
               setImageUrl(cachedUrl);
@@ -1016,8 +1013,10 @@ useEffect(() => {
       const page = await pdf.getPage(1);
 
       const originalViewport = page.getViewport({ scale: 1.0 });
-      const maxDimension = Math.max(originalViewport.width, originalViewport.height) || 1;
-      const appliedScale = calculateRenderScale(maxDimension);
+      const appliedScale = calculateRenderScale({
+        width: originalViewport.width,
+        height: originalViewport.height,
+      });
       const viewport = page.getViewport({ scale: appliedScale });
 
       console.log(`📐 ${target.toUpperCase()}: Dimensões - ${viewport.width}x${viewport.height} (escala: ${appliedScale})`);
@@ -1035,8 +1034,11 @@ useEffect(() => {
       context.imageSmoothingEnabled = true;
       context.imageSmoothingQuality = 'high';
 
-      canvas.height = Math.floor(viewport.height);
-      canvas.width = Math.floor(viewport.width);
+      const renderWidth = Math.min(MAX_RENDER_DIMENSION, Math.ceil(viewport.width));
+      const renderHeight = Math.min(MAX_RENDER_DIMENSION, Math.ceil(viewport.height));
+
+      canvas.height = renderHeight;
+      canvas.width = renderWidth;
 
       context.fillStyle = '#FFFFFF';
       context.fillRect(0, 0, canvas.width, canvas.height);
