@@ -356,7 +356,7 @@ const Index = () => {
       <div className="flex-1 flex flex-col lg:flex-row gap-2 p-2 overflow-hidden">
         
         {/* PLASA - Ocupa espaço disponível */}
-        <div className="w-full lg:w-3/5 flex-1 lg:flex-none lg:h-full">
+        <div className="w-full lg:w-1/2 flex-1 lg:flex-none lg:h-full">
           <div className="h-full bg-gradient-to-br from-white/5 via-blue-900/20 to-white/5 backdrop-blur-sm rounded-lg border border-blue-400/25 shadow-xl hover:border-blue-400/40 transition-all duration-500 overflow-hidden">
             <PDFViewer
               documentType="plasa"
@@ -369,7 +369,7 @@ const Index = () => {
         </div>
 
         {/* Lado direito - Escala e Avisos */}
-<div className="w-full lg:w-2/5 flex flex-col gap-1 flex-1 lg:flex-none lg:h-full">          
+        <div className="w-full lg:w-1/2 flex flex-col gap-1 flex-1 lg:flex-none lg:h-full">
           {/* Escala de Serviço - 65% da altura disponível */}
           
     <div className="h-[55%] flex-shrink-0">
