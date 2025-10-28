@@ -230,6 +230,7 @@ const PDFViewer: React.FC<PDFViewerProps> = ({
   const [debugInfo, setDebugInfo] = useState<DebugInfo>({});
   const [escalaImageUrl, setEscalaImageUrl] = useState<string | null>(null);
   const [cardapioImageUrl, setCardapioImageUrl] = useState<string | null>(null);
+  const [cardapioPdfUrl, setCardapioPdfUrl] = useState<string | null>(null);
   const [escalaError, setEscalaError] = useState<string | null>(null);
 
   const scrollerRef = useRef<ContinuousAutoScroller | null>(null);
@@ -886,6 +887,7 @@ useEffect(() => {
     });
 
     setCardapioImageUrl(null);
+    setCardapioPdfUrl(null);
     setLoading(false);
     setTotalPages(1);
 
@@ -893,12 +895,13 @@ useEffect(() => {
       const docUrl = getBackendUrl(currentCardapio.url);
       console.log("🖼️ CARDÁPIO: Processando URL:", docUrl);
 
-      const isPDF = docUrl.toLowerCase().includes('.pdf') || 
+      const isPDF = docUrl.toLowerCase().includes('.pdf') ||
                     currentCardapio.title.toLowerCase().includes('.pdf');
 
       if (isPDF) {
-        console.log("📄 CARDÁPIO: É um PDF, convertendo...");
-        convertEscalaPDFToImage(docUrl, { target: "cardapio" });
+        console.log("📄 CARDÁPIO: É um PDF, exibindo diretamente");
+        setCardapioPdfUrl(docUrl);
+        setLoading(false);
       } else {
         console.log("🖼️ CARDÁPIO: É uma imagem");
         setCardapioImageUrl(docUrl);
@@ -1273,7 +1276,13 @@ useEffect(() => {
 
       return (
         <div className="w-full h-full flex items-center justify-center p-4">
-          {cardapioImageUrl ? (
+          {cardapioPdfUrl ? (
+            <iframe
+              src={`${cardapioPdfUrl}#toolbar=0&navpanes=0`}
+              title="Visualizador de Cardápio"
+              className="w-full h-full rounded-lg shadow-lg border border-gray-200"
+            />
+          ) : cardapioImageUrl ? (
             <img
               src={cardapioImageUrl}
               alt="Cardápio Semanal"
