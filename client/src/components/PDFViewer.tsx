@@ -252,18 +252,64 @@ const PDFViewer: React.FC<PDFViewerProps> = ({
   // Estados para controle de zoom
   const [zoomLevel, setZoomLevel] = useState(1);
   const [showZoomControls, setShowZoomControls] = useState(false);
+  const [zoomInputValue, setZoomInputValue] = useState("100");
 
   // Funções de controle de zoom
   const handleZoomIn = () => {
-    setZoomLevel(prev => Math.min(prev + 0.1, 3)); // Máximo 3x
+    const newZoom = Math.min(zoomLevel + 0.1, 3); // Máximo 3x
+    setZoomLevel(newZoom);
+    setZoomInputValue(Math.round(newZoom * 100).toString());
   };
 
   const handleZoomOut = () => {
-    setZoomLevel(prev => Math.max(prev - 0.1, 0.5)); // Mínimo 0.5x
+    const newZoom = Math.max(zoomLevel - 0.1, 0.5); // Mínimo 0.5x
+    setZoomLevel(newZoom);
+    setZoomInputValue(Math.round(newZoom * 100).toString());
   };
 
   const handleResetZoom = () => {
     setZoomLevel(1);
+    setZoomInputValue("100");
+  };
+
+  const handleZoomInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    // Permitir apenas números
+    if (value === '' || /^\d+$/.test(value)) {
+      setZoomInputValue(value);
+    }
+  };
+
+  const handleZoomInputKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter') {
+      applyZoomFromInput();
+      (e.target as HTMLInputElement).blur();
+    } else if (e.key === 'Escape') {
+      // Cancelar e restaurar valor atual
+      setZoomInputValue(Math.round(zoomLevel * 100).toString());
+      (e.target as HTMLInputElement).blur();
+    }
+  };
+
+  const applyZoomFromInput = () => {
+    let numericValue = parseInt(zoomInputValue);
+
+    // Validação: se vazio ou inválido, restaurar valor atual
+    if (isNaN(numericValue) || zoomInputValue === '') {
+      setZoomInputValue(Math.round(zoomLevel * 100).toString());
+      return;
+    }
+
+    // Limitar entre 50% e 300%
+    numericValue = Math.max(50, Math.min(300, numericValue));
+
+    const newZoom = numericValue / 100;
+    setZoomLevel(newZoom);
+    setZoomInputValue(numericValue.toString());
+  };
+
+  const handleZoomInputBlur = () => {
+    applyZoomFromInput();
   };
 
   // Configurações
@@ -1608,17 +1654,24 @@ useEffect(() => {
           <span className="text-white text-sm font-bold">−</span>
         </button>
 
-        <button
-          onClick={handleResetZoom}
-          className={`px-2 py-0.5 rounded text-[10px] font-bold transition-colors ${
-            documentType === "cardapio"
-              ? "hover:bg-orange-500/80 text-orange-100"
-              : "hover:bg-slate-500/80 text-slate-100"
-          }`}
-          title="Resetar zoom"
-        >
-          {Math.round(zoomLevel * 100)}%
-        </button>
+        <div className="flex items-center gap-0.5">
+          <input
+            type="text"
+            value={zoomInputValue}
+            onChange={handleZoomInputChange}
+            onKeyDown={handleZoomInputKeyDown}
+            onBlur={handleZoomInputBlur}
+            className={`w-10 px-1 py-0.5 rounded text-[10px] font-bold text-center transition-colors ${
+              documentType === "cardapio"
+                ? "bg-orange-600/90 hover:bg-orange-500/80 text-orange-100 focus:bg-orange-500/90"
+                : "bg-slate-600/90 hover:bg-slate-500/80 text-slate-100 focus:bg-slate-500/90"
+            } border-none outline-none focus:ring-1 focus:ring-white/30`}
+            title="Digite o zoom e pressione Enter (50-300%)"
+          />
+          <span className={`text-[10px] font-bold ${
+            documentType === "cardapio" ? "text-orange-100" : "text-slate-100"
+          }`}>%</span>
+        </div>
 
         <button
           onClick={handleZoomIn}
