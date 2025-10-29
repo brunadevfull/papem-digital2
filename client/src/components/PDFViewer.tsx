@@ -305,6 +305,33 @@ const PDFViewer: React.FC<PDFViewerProps> = ({
     return 1; // Valor padrão
   }, []);
 
+  // Função para salvar posição do scroll no localStorage (apenas escala e cardápio)
+  const saveScrollToLocalStorage = useCallback((docId: string, scrollTop: number, scrollLeft: number) => {
+    try {
+      localStorage.setItem(`document-scroll-${docId}`, JSON.stringify({ scrollTop, scrollLeft }));
+      console.log(`💾 Scroll salvo para documento ${docId}: top=${scrollTop}, left=${scrollLeft}`);
+    } catch (error) {
+      console.warn("⚠️ Erro ao salvar scroll no localStorage:", error);
+    }
+  }, []);
+
+  // Função para carregar posição do scroll do localStorage (apenas escala e cardápio)
+  const loadScrollFromLocalStorage = useCallback((docId: string): { scrollTop: number; scrollLeft: number } => {
+    try {
+      const saved = localStorage.getItem(`document-scroll-${docId}`);
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (typeof parsed.scrollTop === 'number' && typeof parsed.scrollLeft === 'number') {
+          console.log(`📖 Scroll carregado para documento ${docId}: top=${parsed.scrollTop}, left=${parsed.scrollLeft}`);
+          return { scrollTop: parsed.scrollTop, scrollLeft: parsed.scrollLeft };
+        }
+      }
+    } catch (error) {
+      console.warn("⚠️ Erro ao carregar scroll do localStorage:", error);
+    }
+    return { scrollTop: 0, scrollLeft: 0 }; // Valor padrão
+  }, []);
+
   // Funções de controle de zoom
   const handleZoomIn = () => {
     const newZoom = Math.min(zoomLevel + 0.1, 3); // Máximo 3x
@@ -363,6 +390,17 @@ const PDFViewer: React.FC<PDFViewerProps> = ({
     applyZoomFromInput();
   };
 
+  // Handler para salvar posição do scroll quando o usuário rolar (apenas escala e cardápio)
+  const handleScroll = useCallback((e: React.UIEvent<HTMLDivElement>) => {
+    if (documentType === "plasa") return; // Não salvar scroll para PLASA (tem scroll automático)
+
+    const docId = getCurrentDocumentId();
+    if (docId) {
+      const target = e.currentTarget;
+      saveScrollToLocalStorage(docId, target.scrollTop, target.scrollLeft);
+    }
+  }, [documentType, getCurrentDocumentId, saveScrollToLocalStorage]);
+
   // useEffect para restaurar o zoom ao mudar de documento (apenas escala e cardápio)
   useEffect(() => {
     const docId = getCurrentDocumentId();
@@ -384,6 +422,26 @@ const PDFViewer: React.FC<PDFViewerProps> = ({
       saveZoomToLocalStorage(docId, zoomLevel);
     }
   }, [zoomLevel, getCurrentDocumentId, saveZoomToLocalStorage]);
+
+  // useEffect para restaurar a posição do scroll quando mudar de documento (apenas escala e cardápio)
+  useEffect(() => {
+    if (documentType === "plasa") return; // Não restaurar scroll para PLASA
+
+    const docId = getCurrentDocumentId();
+    if (docId && containerRef.current) {
+      // Esperar a imagem carregar antes de restaurar o scroll
+      const timer = setTimeout(() => {
+        if (containerRef.current) {
+          const savedScroll = loadScrollFromLocalStorage(docId);
+          containerRef.current.scrollTop = savedScroll.scrollTop;
+          containerRef.current.scrollLeft = savedScroll.scrollLeft;
+          console.log(`🔄 Scroll restaurado para documento ${docId}`);
+        }
+      }, 100); // Pequeno delay para garantir que a imagem foi renderizada
+
+      return () => clearTimeout(timer);
+    }
+  }, [documentType, getCurrentDocumentId, loadScrollFromLocalStorage, escalaImageUrl, cardapioImageUrl]);
 
   // Configurações
   const getScrollSpeed = () => {
@@ -1911,6 +1969,7 @@ useEffect(() => {
             className="relative w-full h-full overflow-y-auto"
             ref={containerRef}
             style={{ scrollBehavior: "auto" }}
+            onScroll={handleScroll}
           >
             {renderContent()}
           </div>
