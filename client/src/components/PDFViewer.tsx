@@ -225,15 +225,23 @@ class ContinuousAutoScroller {
   }
 }
 
-const PDFViewer: React.FC<PDFViewerProps> = ({ 
-  documentType, 
-  title, 
+const PDFViewer: React.FC<PDFViewerProps> = ({
+  documentType,
+  title,
   scrollSpeed = "normal",
   autoRestartDelay = 3,
   onScrollComplete
 }) => {
-  // CORREÇÃO: Usar currentEscalaIndex do contexto
-  const { activeEscalaDoc, activePlasaDoc, activeCardapioDoc, currentEscalaIndex, escalaDocuments } = useDisplay();
+  // CORREÇÃO: Usar currentEscalaIndex do contexto + ✏️ Estados de modo editor
+  const {
+    activeEscalaDoc,
+    activePlasaDoc,
+    activeCardapioDoc,
+    currentEscalaIndex,
+    escalaDocuments,
+    setIsEscalaEditMode,
+    setIsCardapioEditMode
+  } = useDisplay();
   const [totalPages, setTotalPages] = useState(0);
   const [loading, setLoading] = useState(false);
   const [isScrolling, setIsScrolling] = useState(false);
@@ -392,6 +400,47 @@ const PDFViewer: React.FC<PDFViewerProps> = ({
 
   // Estado para feedback visual ao salvar posição
   const [scrollSavedFeedback, setScrollSavedFeedback] = useState(false);
+
+  // ✏️ Estado para controlar modo editor local
+  const [isEditMode, setIsEditMode] = useState(false);
+
+  // ✏️ Função para alternar modo editor (pausa/retoma troca automática + salva)
+  const handleToggleEditMode = useCallback(() => {
+    if (!isEditMode) {
+      // ENTRANDO em modo editor
+      if (documentType === "escala") {
+        setIsEscalaEditMode(true); // Pausar alternância de escalas
+        console.log("✏️ Modo editor de escala ativado");
+      } else if (documentType === "cardapio") {
+        setIsCardapioEditMode(true); // Pausar alternância de cardápios
+        console.log("✏️ Modo editor de cardápio ativado");
+      }
+      setIsEditMode(true);
+    } else {
+      // SAINDO do modo editor
+      // 1. Salvar posição automaticamente
+      const docId = getCurrentDocumentId();
+      if (docId && containerRef.current) {
+        saveScrollToLocalStorage(docId, containerRef.current.scrollTop, containerRef.current.scrollLeft);
+        console.log("💾 Posição salva automaticamente ao sair do modo editor");
+      }
+
+      // 2. Retomar alternância automática
+      if (documentType === "escala") {
+        setIsEscalaEditMode(false);
+        console.log("▶️ Alternância de escala retomada");
+      } else if (documentType === "cardapio") {
+        setIsCardapioEditMode(false);
+        console.log("▶️ Alternância de cardápio retomada");
+      }
+
+      setIsEditMode(false);
+
+      // 3. Mostrar feedback visual de salvamento
+      setScrollSavedFeedback(true);
+      setTimeout(() => setScrollSavedFeedback(false), 2000);
+    }
+  }, [isEditMode, documentType, getCurrentDocumentId, saveScrollToLocalStorage, setIsEscalaEditMode, setIsCardapioEditMode]);
 
   // Função para salvar manualmente a posição atual do scroll
   const handleSaveScrollPosition = useCallback(() => {
@@ -1860,26 +1909,37 @@ useEffect(() => {
           documentType === "cardapio" ? "bg-orange-400/40" : "bg-slate-400/40"
         }`}></div>
 
-        {/* Botão de salvar posição */}
+        {/* ✏️ Botão de modo editor (toggle pausar/salvar) */}
         <button
-          onClick={handleSaveScrollPosition}
-          className={`p-1 rounded transition-colors relative ${
-            documentType === "cardapio"
-              ? "hover:bg-orange-500/80"
-              : "hover:bg-slate-500/80"
+          onClick={handleToggleEditMode}
+          className={`p-1 rounded transition-all relative ${
+            isEditMode
+              ? "bg-blue-500 animate-pulse shadow-lg" // Visual diferente em modo editor
+              : documentType === "cardapio"
+                ? "hover:bg-orange-500/80"
+                : "hover:bg-slate-500/80"
           }`}
-          title="Salvar posição atual da tela"
+          title={isEditMode ? "Clique para salvar e retomar alternância" : "Clique para pausar alternância e editar"}
         >
-          <span className="text-white text-sm">📍</span>
+          <span className="text-white text-sm">
+            {isEditMode ? "✏️" : "📍"}
+          </span>
 
           {/* Feedback visual de salvamento */}
           {scrollSavedFeedback && (
             <span className={`absolute -top-8 left-1/2 transform -translate-x-1/2 text-[10px] font-bold whitespace-nowrap px-2 py-1 rounded shadow-lg ${
               documentType === "cardapio"
-                ? "bg-orange-500 text-white"
-                : "bg-slate-700 text-white"
+                ? "bg-green-500 text-white"
+                : "bg-green-600 text-white"
             }`}>
-              ✓ Salvo!
+              ✅ Salvo!
+            </span>
+          )}
+
+          {/* ✏️ Indicador de modo editor */}
+          {isEditMode && (
+            <span className="absolute -bottom-8 left-1/2 transform -translate-x-1/2 text-[10px] font-bold whitespace-nowrap px-2 py-1 rounded shadow-lg bg-blue-500 text-white animate-pulse">
+              🔒 Modo Editor
             </span>
           )}
         </button>
