@@ -254,6 +254,59 @@ const PDFViewer: React.FC<PDFViewerProps> = ({
   const [showZoomControls, setShowZoomControls] = useState(false);
   const [zoomInputValue, setZoomInputValue] = useState("100");
 
+  // CORREÇÃO: Obter documento da escala atual
+  const getCurrentEscalaDoc = useCallback(() => {
+    const activeEscalas = escalaDocuments.filter(doc => doc.active && doc.type === "escala");
+    if (activeEscalas.length === 0) return null;
+    return activeEscalas[currentEscalaIndex % activeEscalas.length] || null;
+  }, [escalaDocuments, currentEscalaIndex]);
+
+  // CORREÇÃO: Obter documento do cardápio atual do contexto
+  const getCurrentCardapioDoc = useCallback(() => {
+    return activeCardapioDoc;
+  }, [activeCardapioDoc]);
+
+  // Função para obter ID único do documento atual
+  const getCurrentDocumentId = useCallback((): string | null => {
+    if (documentType === "plasa") {
+      return activePlasaDoc?.id ? `plasa-${activePlasaDoc.id}` : null;
+    } else if (documentType === "escala") {
+      const currentEscala = getCurrentEscalaDoc();
+      return currentEscala?.id ? `escala-${currentEscala.id}` : null;
+    } else if (documentType === "cardapio") {
+      const currentCardapio = getCurrentCardapioDoc();
+      return currentCardapio?.id ? `cardapio-${currentCardapio.id}` : null;
+    }
+    return null;
+  }, [documentType, activePlasaDoc?.id, getCurrentEscalaDoc, getCurrentCardapioDoc]);
+
+  // Função para salvar zoom no localStorage
+  const saveZoomToLocalStorage = useCallback((docId: string, zoom: number) => {
+    try {
+      localStorage.setItem(`document-zoom-${docId}`, zoom.toString());
+      console.log(`💾 Zoom salvo para documento ${docId}: ${zoom}`);
+    } catch (error) {
+      console.warn("⚠️ Erro ao salvar zoom no localStorage:", error);
+    }
+  }, []);
+
+  // Função para carregar zoom do localStorage
+  const loadZoomFromLocalStorage = useCallback((docId: string): number => {
+    try {
+      const saved = localStorage.getItem(`document-zoom-${docId}`);
+      if (saved) {
+        const zoom = parseFloat(saved);
+        if (!isNaN(zoom) && zoom >= 0.5 && zoom <= 3) {
+          console.log(`📖 Zoom carregado para documento ${docId}: ${zoom}`);
+          return zoom;
+        }
+      }
+    } catch (error) {
+      console.warn("⚠️ Erro ao carregar zoom do localStorage:", error);
+    }
+    return 1; // Valor padrão
+  }, []);
+
   // Funções de controle de zoom
   const handleZoomIn = () => {
     const newZoom = Math.min(zoomLevel + 0.1, 3); // Máximo 3x
@@ -311,6 +364,24 @@ const PDFViewer: React.FC<PDFViewerProps> = ({
   const handleZoomInputBlur = () => {
     applyZoomFromInput();
   };
+
+  // useEffect para restaurar o zoom ao mudar de documento
+  useEffect(() => {
+    const docId = getCurrentDocumentId();
+    if (docId) {
+      const savedZoom = loadZoomFromLocalStorage(docId);
+      setZoomLevel(savedZoom);
+      setZoomInputValue(Math.round(savedZoom * 100).toString());
+    }
+  }, [getCurrentDocumentId, loadZoomFromLocalStorage]);
+
+  // useEffect para salvar o zoom sempre que ele mudar
+  useEffect(() => {
+    const docId = getCurrentDocumentId();
+    if (docId && zoomLevel !== 1) {
+      saveZoomToLocalStorage(docId, zoomLevel);
+    }
+  }, [zoomLevel, getCurrentDocumentId, saveZoomToLocalStorage]);
 
   // Configurações
   const getScrollSpeed = () => {
@@ -404,22 +475,6 @@ const PDFViewer: React.FC<PDFViewerProps> = ({
   return null;
 };
 
-    
-  
-
-  // CORREÇÃO: Obter documento da escala atual
-  const getCurrentEscalaDoc = () => {
-  const activeEscalas = escalaDocuments.filter(doc => doc.active && doc.type === "escala");
-    if (activeEscalas.length === 0) return null;
-    return activeEscalas[currentEscalaIndex % activeEscalas.length] || null;
-  };
-
-
-
-// CORREÇÃO: Obter documento do cardápio atual do contexto
-const getCurrentCardapioDoc = () => {
-  return activeCardapioDoc;
-};
 
   // Verificar se arquivo é imagem
   const isImageFile = (url: string) => {
