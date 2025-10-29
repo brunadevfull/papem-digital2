@@ -44,16 +44,16 @@ console.log(`   Arch: ${os.arch()}`);
 // 4. Comandos úteis
 console.log('\n🛠️  Comandos Úteis:');
 console.log('   Windows:');
-console.log('   - Verificar porta: netstat -an | findstr :5000');
+console.log('   - Verificar porta: netstat -an | findstr :5001');
 console.log('   - Liberar firewall: New-NetFirewallRule -DisplayName "Node 5000" -Direction Inbound -Protocol TCP -LocalPort 5000 -Action Allow');
 console.log('   - Ver IP: ipconfig');
 console.log('\n   Linux/Mac:');
-console.log('   - Verificar porta: netstat -an | grep :5000');
+console.log('   - Verificar porta: netstat -an | grep :5001');
 console.log('   - Liberar firewall: sudo ufw allow 5000');
 console.log('   - Ver IP: ifconfig ou ip addr show');
 
 console.log('\n📝 Próximos Passos:');
 console.log('   1. Execute: npm run dev');
-console.log('   2. Teste local: http://localhost:5000');
+console.log('   2. Teste local: http://localhost:5001');
 console.log('   3. Teste rede: use um dos IPs de rede listados acima');
 console.log('   4. Se não funcionar, verifique firewall');

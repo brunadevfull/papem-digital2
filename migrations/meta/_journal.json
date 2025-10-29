@@ -43,13 +43,6 @@
       "when": 1761903228444,
       "tag": "0005_create_duty_assignments",
       "breakpoints": false
-    },
-    {
-      "idx": 6,
-      "version": "7",
-      "when": 1762903228444,
-      "tag": "0006_create_session_table",
-      "breakpoints": false
     }
   ]
 }

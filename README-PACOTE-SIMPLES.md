@@ -2,7 +2,7 @@
 
 ## Situação
 
-✅ **Sistema funcionando perfeitamente no Replit**
+✅ **Sistema funcionando perfeitamente em ambiente de desenvolvimento**
 - Horário pôr do sol: 17:18 (Rio de Janeiro)
 - Layout responsivo completo
 - PLASA com scroll automático
@@ -15,7 +15,7 @@
 
 ### Como usar:
 
-1. **Copie este código do Replit para sua máquina local**
+1. **Copie este código do repositório para sua máquina local**
 2. **Execute o script:**
    ```bash
    chmod +x pacote-offline-final.sh
@@ -31,7 +31,7 @@ cd sistema-marinha-offline
 sudo ./instalar.sh
 ```
 
-**Pronto!** Sistema rodando em `http://localhost:5000`
+**Pronto!** Sistema rodando em `http://localhost:5001`
 
 ## O que o script faz:
 

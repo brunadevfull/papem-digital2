@@ -65,7 +65,7 @@ test_api() {
         curl_cmd="$curl_cmd -X DELETE"
     fi
     
-    local response_code=$(eval "$curl_cmd http://localhost:5000/api$endpoint")
+    local response_code=$(eval "$curl_cmd http://localhost:5001/api$endpoint")
     
     if [ "$response_code" = "$expected_status" ]; then
         return 0
@@ -82,7 +82,7 @@ wait_for_server() {
     local attempt=0
     
     while [ $attempt -lt $max_attempts ]; do
-        if curl -s http://localhost:5000/api/health >/dev/null 2>&1; then
+        if curl -s http://localhost:5001/api/health >/dev/null 2>&1; then
             log $GREEN "Server is ready!"
             return 0
         fi
@@ -187,8 +187,8 @@ run_all_tests() {
     
     # Frontend tests
     log $YELLOW "Testing frontend pages..."
-    run_test "Main page" "curl -s http://localhost:5000 | grep -q 'Marinha do Brasil'"
-    run_test "Admin page" "curl -s http://localhost:5000/admin | grep -q 'html'"
+    run_test "Main page" "curl -s http://localhost:5001 | grep -q 'Marinha do Brasil'"
+    run_test "Admin page" "curl -s http://localhost:5001/admin | grep -q 'html'"
     
     # Error handling tests
     log $YELLOW "Testing error handling..."

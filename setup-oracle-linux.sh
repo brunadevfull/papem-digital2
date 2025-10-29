@@ -183,7 +183,7 @@ server {
     client_max_body_size 100M;
     
     location / {
-        proxy_pass http://localhost:5000;
+        proxy_pass http://localhost:5001;
         proxy_http_version 1.1;
         proxy_set_header Upgrade $http_upgrade;
         proxy_set_header Connection 'upgrade';
@@ -198,7 +198,7 @@ server {
     
     # Static files caching
     location ~* \.(js|css|png|jpg|jpeg|gif|ico|svg)$ {
-        proxy_pass http://localhost:5000;
+        proxy_pass http://localhost:5001;
         expires 1y;
         add_header Cache-Control "public, immutable";
     }
@@ -229,7 +229,7 @@ Type=simple
 User=$APP_USER
 WorkingDirectory=$APP_DIR
 Environment=NODE_ENV=production
-Environment=PORT=5000
+Environment=PORT: 5001
 ExecStart=/usr/bin/npm run start
 Restart=on-failure
 RestartSec=5
@@ -382,7 +382,7 @@ create_monitoring_script() {
 # Navy Display System Monitoring Script
 
 SERVICE_NAME="navy-display"
-APP_URL="http://localhost:5000"
+APP_URL="http://localhost:5001"
 LOG_FILE="/var/log/navy-display/monitor.log"
 
 log() {

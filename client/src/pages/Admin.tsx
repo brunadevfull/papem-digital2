@@ -290,9 +290,8 @@ const Admin: React.FC = () => {
     return `${rankText}${specialtyText}`.trim();
   };
 
-  // Padrão que aceita APENAS patentes militares válidas (não qualquer palavra)
-  // Patentes: 1T, 2T, CT, CC, CF, CMG, CA (oficiais) | 1SG, 2SG, 3SG, CB, SO, MN, SD (praças)
-  const DUTY_NAME_PATTERN = /^(1T|2T|CT|CC|CF|CMG|CA|1SG|2SG|3SG|CB|SO|MN|SD)\s*(?:\([A-Z0-9-]+\))?\s+(.+)$/;
+  // Regex para capturar apenas postos válidos (1T, 2T, CT, CC, CF, CMG, 1SG, 2SG, 3SG)
+  const DUTY_NAME_PATTERN = /^(1T|2T|CT|CC|CF|CMG|1SG|2SG|3SG)\s*(?:\([A-Z0-9-]+\))?\s+(.+)$/;
 
   const normalizeDutyNameValue = (value?: string | null): string => {
     if (!value) {
@@ -307,12 +306,9 @@ const Admin: React.FC = () => {
     const upper = trimmed.toUpperCase();
     const match = upper.match(DUTY_NAME_PATTERN);
     if (match) {
-      // Match[1] é a patente, match[2] é o nome completo
       return match[2].trim();
     }
 
-    // Se não há match com o padrão de patente, retorna o valor completo
-    // Isso preserva nomes compostos como "LARISSA CASTRO"
     return upper;
   };
 
@@ -900,11 +896,13 @@ const saveEditOfficer = async () => {
           ? new Date(data.officers.updatedAt)
           : undefined;
 
+        // Agora o nome vem completo do backend (ex: "1T (RM2-T) LARISSA CASTRO")
+        // Não normalizar mais
         setDutyOfficers({
-          officerName: normalizeDutyNameValue(data.officers.officerName),
-          officerRank: normalizeDutyRankValue(data.officers.officerRank),
-          masterName: normalizeDutyNameValue(data.officers.masterName),
-          masterRank: normalizeDutyRankValue(data.officers.masterRank),
+          officerName: data.officers.officerName || "",
+          officerRank: data.officers.officerRank || undefined,
+          masterName: data.officers.masterName || "",
+          masterRank: data.officers.masterRank || undefined,
           validFrom: validFromDate && !Number.isNaN(validFromDate.getTime())
             ? validFromDate.toISOString()
             : undefined,
@@ -935,11 +933,7 @@ const saveEditOfficer = async () => {
     try {
       console.log('💾 Salvando oficiais:', dutyOfficers);
 
-      const sanitizedOfficerName = normalizeDutyNameValue(dutyOfficers.officerName);
-      const sanitizedMasterName = normalizeDutyNameValue(dutyOfficers.masterName);
-      const normalizedOfficerRank = normalizeDutyRankValue(dutyOfficers.officerRank);
-      const normalizedMasterRank = normalizeDutyRankValue(dutyOfficers.masterRank);
-
+      // Não normalizar mais - o backend vai construir o nome completo corretamente
       const validFromDate = (() => {
         if (dutyOfficers.validFrom) {
           const parsed = new Date(dutyOfficers.validFrom);
@@ -951,10 +945,10 @@ const saveEditOfficer = async () => {
       })();
 
       const officersData = {
-        officerName: sanitizedOfficerName,
-        masterName: sanitizedMasterName,
-        officerRank: normalizedOfficerRank,
-        masterRank: normalizedMasterRank,
+        officerName: (dutyOfficers.officerName || "").trim(),
+        masterName: (dutyOfficers.masterName || "").trim(),
+        officerRank: (dutyOfficers.officerRank || "").trim() || undefined,
+        masterRank: (dutyOfficers.masterRank || "").trim() || undefined,
         validFrom: validFromDate
       };
 

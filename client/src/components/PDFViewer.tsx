@@ -1,39 +1,13 @@
-import React, { useState, useEffect, useRef, useCallback, useMemo } from "react";
+import React, { useState, useEffect, useRef, useCallback } from "react";
 import { useDisplay } from "@/context/DisplayContext";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { resolveBackendUrl } from "@/utils/backend";
 import imageCache from "@/utils/imageCache";
 
 const IS_DEV_MODE = process.env.NODE_ENV === 'development';
-const MAX_RENDER_DIMENSION = 8192;
+const PDF_SCALE = 3.0; // Aumentado de 2.0 para 3.0 para melhor qualidade
+const MAX_RENDER_DIMENSION = 4096;
 const IMAGE_EXPORT_FORMAT = 'image/png';
-
-// Configurações de timeout e qualidade para renderização
-const RENDER_TIMEOUTS = {
-  HIGH_QUALITY: 300000,    // 5 minutos para alta qualidade
-  MEDIUM_QUALITY: 180000,  // 3 minutos para qualidade média
-  LOW_QUALITY: 120000      // 2 minutos para qualidade baixa
-};
-
-const QUALITY_SCALES = {
-  HIGH: 1.0,      // 100% da escala calculada
-  MEDIUM: 0.6,    // 60% da escala calculada
-  LOW: 0.35       // 35% da escala calculada
-};
-
-const getViewportWidth = () => {
-  if (typeof window === "undefined") {
-    return 1920;
-  }
-
-  const { innerWidth, screen } = window;
-  return Math.max(
-    innerWidth || 0,
-    screen?.width || 0,
-    screen?.availWidth || 0,
-    1920
-  );
-};
 
 const getDevicePixelRatio = () => {
   if (typeof window === 'undefined') {
@@ -42,25 +16,6 @@ const getDevicePixelRatio = () => {
 
   const ratio = window.devicePixelRatio || 1;
   return Number.isFinite(ratio) && ratio > 0 ? ratio : 1;
-};
-
-const ensureImageHasMinimumResolution = (url: string, minDimension: number): Promise<boolean> => {
-  if (typeof window === 'undefined' || typeof Image === 'undefined') {
-    return Promise.resolve(true);
-  }
-
-  return new Promise((resolve) => {
-    const img = new Image();
-    img.decoding = 'async';
-    img.onload = () => {
-      const width = img.naturalWidth || img.width || 0;
-      const height = img.naturalHeight || img.height || 0;
-      const largestSide = Math.max(width, height);
-      resolve(largestSide >= minDimension);
-    };
-    img.onerror = () => resolve(false);
-    img.src = url;
-  });
 };
 
 // Configurar PDF.js
@@ -86,62 +41,6 @@ interface PDFViewerProps {
   autoRestartDelay?: number;
   onScrollComplete?: () => void;
 }
-
-const normalizeCategoryText = (value?: string | null) => {
-  if (!value) {
-    return "";
-  }
-
-  return value
-    .normalize("NFD")
-    .replace(/[\u0300-\u036f]/g, "")
-    .toLowerCase();
-};
-
-type EscalaClassificationLike = {
-  category?: "oficial" | "praca";
-  tags?: string[];
-  title?: string;
-  url?: string;
-};
-
-const detectEscalaCategory = (
-  doc?: EscalaClassificationLike | null
-): "oficial" | "praca" | null => {
-  if (!doc) {
-    return null;
-  }
-
-  if (doc.category === "oficial" || doc.category === "praca") {
-    return doc.category;
-  }
-
-  const normalizedTags = Array.isArray(doc.tags)
-    ? doc.tags
-        .map(tag => normalizeCategoryText(tag))
-        .filter(Boolean)
-    : [];
-
-  if (normalizedTags.some(tag => tag.includes("oficia"))) {
-    return "oficial";
-  }
-
-  if (normalizedTags.some(tag => tag.includes("praca"))) {
-    return "praca";
-  }
-
-  const combinedText = `${normalizeCategoryText(doc.title)} ${normalizeCategoryText(doc.url)}`.trim();
-
-  if (combinedText.includes("oficial") || combinedText.includes("oficiais") || combinedText.includes("oficia")) {
-    return "oficial";
-  }
-
-  if (combinedText.includes("praca") || combinedText.includes("pracas") || combinedText.includes("prac")) {
-    return "praca";
-  }
-
-  return null;
-};
 
 // Classe para controlar o scroll automático contínuo
 class ContinuousAutoScroller {
@@ -250,69 +149,6 @@ const PDFViewer: React.FC<PDFViewerProps> = ({
   const containerRef = useRef<HTMLDivElement>(null);
   const restartTimerRef = useRef<NodeJS.Timeout | null>(null);
 
-  // Estados para controle de zoom
-  const [zoomLevel, setZoomLevel] = useState(1);
-  const [showZoomControls, setShowZoomControls] = useState(false);
-  const [zoomInputValue, setZoomInputValue] = useState("100");
-
-  // Funções de controle de zoom
-  const handleZoomIn = () => {
-    const newZoom = Math.min(zoomLevel + 0.1, 3); // Máximo 3x
-    setZoomLevel(newZoom);
-    setZoomInputValue(Math.round(newZoom * 100).toString());
-  };
-
-  const handleZoomOut = () => {
-    const newZoom = Math.max(zoomLevel - 0.1, 0.5); // Mínimo 0.5x
-    setZoomLevel(newZoom);
-    setZoomInputValue(Math.round(newZoom * 100).toString());
-  };
-
-  const handleResetZoom = () => {
-    setZoomLevel(1);
-    setZoomInputValue("100");
-  };
-
-  const handleZoomInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value;
-    // Permitir apenas números
-    if (value === '' || /^\d+$/.test(value)) {
-      setZoomInputValue(value);
-    }
-  };
-
-  const handleZoomInputKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === 'Enter') {
-      applyZoomFromInput();
-      (e.target as HTMLInputElement).blur();
-    } else if (e.key === 'Escape') {
-      // Cancelar e restaurar valor atual
-      setZoomInputValue(Math.round(zoomLevel * 100).toString());
-      (e.target as HTMLInputElement).blur();
-    }
-  };
-
-  const applyZoomFromInput = () => {
-    let numericValue = parseInt(zoomInputValue);
-
-    // Validação: se vazio ou inválido, restaurar valor atual
-    if (isNaN(numericValue) || zoomInputValue === '') {
-      setZoomInputValue(Math.round(zoomLevel * 100).toString());
-      return;
-    }
-
-    // Limitar entre 50% e 300%
-    numericValue = Math.max(50, Math.min(300, numericValue));
-
-    const newZoom = numericValue / 100;
-    setZoomLevel(newZoom);
-    setZoomInputValue(numericValue.toString());
-  };
-
-  const handleZoomInputBlur = () => {
-    applyZoomFromInput();
-  };
-
   // Configurações
   const getScrollSpeed = () => {
     switch (scrollSpeed) {
@@ -325,36 +161,6 @@ const PDFViewer: React.FC<PDFViewerProps> = ({
   const SCROLL_SPEED = getScrollSpeed();
   const RESTART_DELAY = autoRestartDelay * 1000;
   const devicePixelRatio = getDevicePixelRatio();
-  const getTargetRenderWidth = useCallback(() => {
-    const containerWidth = containerRef.current?.clientWidth ?? 0;
-    const fallbackWidth = getViewportWidth();
-    const baseWidth = containerWidth > 0 ? containerWidth : fallbackWidth;
-    const targetWidth = baseWidth * devicePixelRatio;
-    const safeTargetWidth = Number.isFinite(targetWidth) && targetWidth > 0
-      ? targetWidth
-      : fallbackWidth;
-
-    return Math.min(Math.max(safeTargetWidth, baseWidth), MAX_RENDER_DIMENSION);
-  }, [devicePixelRatio]);
-
-  const calculateRenderScale = useCallback((viewportDimensions: { width: number; height: number }) => {
-    const { width, height } = viewportDimensions;
-    const originalWidth = Math.max(width, 1);
-    const originalHeight = Math.max(height, 1);
-    const targetRenderWidth = getTargetRenderWidth();
-
-    let desiredScale = targetRenderWidth / originalWidth;
-    if (!Number.isFinite(desiredScale) || desiredScale <= 0) {
-      desiredScale = 1;
-    }
-
-    const maxScale = MAX_RENDER_DIMENSION / Math.max(originalWidth, originalHeight);
-    if (Number.isFinite(maxScale) && maxScale > 0) {
-      desiredScale = Math.min(desiredScale, maxScale);
-    }
-
-    return Math.max(desiredScale, 1);
-  }, [getTargetRenderWidth]);
 
   // Função para obter a URL completa do servidor backend - DETECTAR AMBIENTE
   const getBackendUrl = (path: string): string => resolveBackendUrl(path);
@@ -369,15 +175,16 @@ const PDFViewer: React.FC<PDFViewerProps> = ({
     console.log("📄 PLASA: Nenhum documento ativo");
     return null;
   } else if (documentType === "escala") {
+    // CORREÇÃO: Usar a escala atual baseada no índice
     const activeEscalas = escalaDocuments.filter(doc => doc.active && doc.type === "escala");
-
+    
     if (activeEscalas.length === 0) {
       console.log("📋 ESCALA: Nenhuma escala ativa");
       return null;
     }
-
+    
     const currentEscala = activeEscalas[currentEscalaIndex % activeEscalas.length];
-
+    
     if (currentEscala?.url) {
       console.log(`📋 ESCALA: Usando escala ${currentEscalaIndex + 1}/${activeEscalas.length}:`, {
         title: currentEscala.title,
@@ -386,22 +193,23 @@ const PDFViewer: React.FC<PDFViewerProps> = ({
       });
       return getBackendUrl(currentEscala.url);
     }
-
+    
     console.log("📋 ESCALA: Escala atual sem URL válida");
     return null;
   } else if (documentType === "cardapio") {
+    // CORREÇÃO: Usar activeCardapioDoc diretamente do contexto
     if (!activeCardapioDoc) {
       console.log("🍽️ CARDÁPIO: Nenhum cardápio ativo");
       return null;
     }
-
+    
     console.log("🍽️ CARDÁPIO: Usando cardápio ativo:", {
       title: activeCardapioDoc.title,
       url: activeCardapioDoc.url
     });
     return getBackendUrl(activeCardapioDoc.url);
   }
-
+  
   return null;
 };
 
@@ -535,6 +343,7 @@ const getCurrentCardapioDoc = () => {
             const fallbackFilename = `${documentId}-page-${pageNum}.${extension}`;
             const savedUrl = result.data?.url || result.url || `/plasa-pages/${fallbackFilename}`;
             const fullSavedUrl = getBackendUrl(savedUrl);
+            console.log(`💾 Página ${pageNum} salva no servidor: ${fullSavedUrl}`);
             resolve(fullSavedUrl);
           } else {
             throw new Error(`Erro no servidor: ${response.status}`);
@@ -566,7 +375,7 @@ const getCurrentCardapioDoc = () => {
   const checkExistingPages = async (totalPages: number, documentId: string): Promise<string[]> => {
     try {
       const checkUrl = getBackendUrl('/api/check-plasa-pages');
-
+      
       const response = await fetch(checkUrl, {
         method: 'POST',
         headers: {
@@ -582,10 +391,10 @@ const getCurrentCardapioDoc = () => {
           return result.pageUrls.map((url: string) => getBackendUrl(url));
         }
       }
-
+      
       console.log("🆕 Páginas não encontradas, gerando novas...");
       return [];
-
+      
     } catch (error) {
       console.log(`⚠️ Erro ao verificar páginas existentes:`, error);
       return [];
@@ -652,35 +461,28 @@ const getCurrentCardapioDoc = () => {
 
       for (let pageNum = 1; pageNum <= pdf.numPages; pageNum++) {
         try {
-          // Log progress every 10 pages to avoid console spam
-          if (pageNum % 10 === 0 || pageNum === pdf.numPages) {
-            console.log(`📄 Processando página ${pageNum}/${pdf.numPages}`);
-          }
-
+          console.log(`📄 Processando página ${pageNum}/${pdf.numPages}`);
+          
           const page = await pdf.getPage(pageNum);
 
           const originalViewport = page.getViewport({ scale: 1.0 });
-          const appliedScale = calculateRenderScale({
-            width: originalViewport.width,
-            height: originalViewport.height,
-          });
+          const maxDimension = Math.max(originalViewport.width, originalViewport.height) || 1;
+          const limitScale = MAX_RENDER_DIMENSION / maxDimension;
+          const baseScale = PDF_SCALE * devicePixelRatio;
+          const appliedScale = limitScale > 0 ? Math.min(baseScale, limitScale) : baseScale;
           const viewport = page.getViewport({ scale: appliedScale });
 
+          console.log(`📐 Página ${pageNum} - Original: ${originalViewport.width}x${originalViewport.height}, Escala: ${appliedScale}, Final: ${viewport.width}x${viewport.height}`);
+
           const canvas = document.createElement('canvas');
-          const context = canvas.getContext('2d', {
+          const context = canvas.getContext('2d', { 
             alpha: false,
             willReadFrequently: false
           })!;
-
-          context.imageSmoothingEnabled = true;
-          context.imageSmoothingQuality = 'high';
-
-          const renderWidth = Math.min(MAX_RENDER_DIMENSION, Math.ceil(viewport.width));
-          const renderHeight = Math.min(MAX_RENDER_DIMENSION, Math.ceil(viewport.height));
-
-          canvas.height = renderHeight;
-          canvas.width = renderWidth;
-
+          
+          canvas.height = Math.floor(viewport.height);
+          canvas.width = Math.floor(viewport.width);
+          
           context.fillStyle = '#FFFFFF';
           context.fillRect(0, 0, canvas.width, canvas.height);
 
@@ -691,16 +493,22 @@ const getCurrentCardapioDoc = () => {
             intent: 'display'
           };
 
+          console.log(`🎨 Renderizando página ${pageNum}...`);
+          
           const renderPromise = page.render(renderContext).promise;
-          const timeoutPromise = new Promise((_, reject) =>
-            setTimeout(() => reject(new Error('Timeout na renderização')), RENDER_TIMEOUTS.HIGH_QUALITY)
+          const timeoutPromise = new Promise((_, reject) => 
+            setTimeout(() => reject(new Error('Timeout na renderização')), 120000)
           );
-
+          
           await Promise.race([renderPromise, timeoutPromise]);
-
+          
+          console.log(`✅ Página ${pageNum} renderizada com sucesso`);
+          
           const imageUrl = await savePageAsImage(canvas, pageNum, docId);
           imageUrls.push(imageUrl);
-
+          
+          console.log(`💾 Página ${pageNum} salva: ${imageUrl}`);
+          
           setLoadingProgress(Math.round((pageNum / pdf.numPages) * 100));
           
           page.cleanup();
@@ -917,16 +725,16 @@ const getCurrentCardapioDoc = () => {
   useEffect(() => {
     if (documentType === "escala") {
       const currentEscala = getCurrentEscalaDoc();
-
+      
       console.log("🔄 ESCALA Effect triggered:", {
         currentEscalaIndex,
         totalActiveEscalas: escalaDocuments.filter(d => d.active && d.type === "escala").length,
         currentEscala: currentEscala?.title,
         category: currentEscala?.category,
         url: currentEscala?.url,
-        id: currentEscala?.id
+        id: currentEscala?.id 
       });
-
+      
       setEscalaImageUrl(null);
       setLoading(false);
       setTotalPages(1);
@@ -1041,83 +849,9 @@ useEffect(() => {
       const response = await fetch(url, { method: 'HEAD' });
       const contentType = response.headers.get('content-type');
       return contentType?.startsWith('image/') || false;
-    } catch (error) {
-      console.warn("⚠️ Erro ao verificar tipo de arquivo:", url, error);
+    } catch {
       return false;
     }
-  };
-
-  // NOVA FUNÇÃO: Tentar renderizar PDF com fallback de qualidade
-  const tryRenderWithFallback = async (
-    page: any,
-    canvas: HTMLCanvasElement,
-    baseScale: number,
-    target: string
-  ): Promise<boolean> => {
-    const qualities = [
-      { name: 'ALTA', scale: QUALITY_SCALES.HIGH, timeout: RENDER_TIMEOUTS.HIGH_QUALITY },
-      { name: 'MÉDIA', scale: QUALITY_SCALES.MEDIUM, timeout: RENDER_TIMEOUTS.MEDIUM_QUALITY },
-      { name: 'BAIXA', scale: QUALITY_SCALES.LOW, timeout: RENDER_TIMEOUTS.LOW_QUALITY }
-    ];
-
-    for (const quality of qualities) {
-      try {
-        console.log(`🎨 ${target.toUpperCase()}: Tentando renderização em qualidade ${quality.name} (escala: ${(baseScale * quality.scale).toFixed(2)}, timeout: ${quality.timeout / 1000}s)...`);
-
-        const viewport = page.getViewport({ scale: baseScale * quality.scale });
-        const context = canvas.getContext('2d', {
-          alpha: false,
-          willReadFrequently: false
-        });
-
-        if (!context) {
-          throw new Error('Falha ao criar contexto do canvas');
-        }
-
-        context.imageSmoothingEnabled = true;
-        context.imageSmoothingQuality = 'high';
-
-        const renderWidth = Math.min(MAX_RENDER_DIMENSION, Math.ceil(viewport.width));
-        const renderHeight = Math.min(MAX_RENDER_DIMENSION, Math.ceil(viewport.height));
-
-        canvas.width = renderWidth;
-        canvas.height = renderHeight;
-
-        context.fillStyle = '#FFFFFF';
-        context.fillRect(0, 0, canvas.width, canvas.height);
-
-        const renderContext = {
-          canvasContext: context,
-          viewport: viewport,
-          background: '#FFFFFF',
-          intent: 'display'
-        };
-
-        const renderPromise = page.render(renderContext).promise;
-        const timeoutPromise = new Promise((_, reject) =>
-          setTimeout(() => reject(new Error(`Timeout na renderização (${quality.name})`)), quality.timeout)
-        );
-
-        await Promise.race([renderPromise, timeoutPromise]);
-
-        console.log(`✅ ${target.toUpperCase()}: Renderização em qualidade ${quality.name} bem-sucedida! (${renderWidth}x${renderHeight})`);
-        return true;
-
-      } catch (error) {
-        console.warn(`⚠️ ${target.toUpperCase()}: Falha na qualidade ${quality.name}:`, error);
-
-        // Se não for a última tentativa, continue para a próxima qualidade
-        if (quality !== qualities[qualities.length - 1]) {
-          console.log(`🔄 ${target.toUpperCase()}: Tentando próxima qualidade...`);
-          continue;
-        }
-
-        // Se foi a última tentativa, retorne false
-        return false;
-      }
-    }
-
-    return false;
   };
   
   // NOVA FUNÇÃO: Converter PDF da escala para imagem
@@ -1146,7 +880,7 @@ useEffect(() => {
       setLoading(true);
       setLoadingProgress(0);
 
-      // Verificar cache local primeiro
+      // Verificar cache local primeiro (IndexedDB)
       const localCached = await imageCache.get(documentId);
       if (localCached) {
         console.log(`💾 ${target.toUpperCase()}: Usando cache local`);
@@ -1155,7 +889,7 @@ useEffect(() => {
         return;
       }
 
-      // Verificar cache no servidor (apenas para ESCALA)
+      // Verificar cache no servidor (apenas ESCALA)
       if (target === "escala") {
         try {
           const cacheResponse = await fetch(getBackendUrl(`/api/check-escala-cache/${documentId}`));
@@ -1164,16 +898,9 @@ useEffect(() => {
           if (cacheResult.success && cacheResult.exists) {
             console.log(`💾 ESCALA: Cache do servidor encontrado: ${cacheResult.url}`);
             const cachedUrl = getBackendUrl(cacheResult.url);
-            const minimumRenderWidth = Math.max(1, Math.floor(getTargetRenderWidth()));
-            const hasMinimumResolution = await ensureImageHasMinimumResolution(cachedUrl, minimumRenderWidth);
-
-            if (hasMinimumResolution) {
-              setImageUrl(cachedUrl);
-              setLoading(false);
-              return;
-            }
-
-            console.log('⚠️ ESCALA: Cache com resolução baixa detectado. Reprocessando documento.');
+            setImageUrl(cachedUrl);
+            setLoading(false);
+            return;
           }
         } catch (cacheError) {
           console.warn("⚠️ ESCALA: Erro ao verificar cache do servidor:", cacheError);
@@ -1224,28 +951,52 @@ useEffect(() => {
       const page = await pdf.getPage(1);
 
       const originalViewport = page.getViewport({ scale: 1.0 });
-      const baseScale = calculateRenderScale({
-        width: originalViewport.width,
-        height: originalViewport.height,
-      });
+      const maxDimension = Math.max(originalViewport.width, originalViewport.height) || 1;
+      const limitScale = MAX_RENDER_DIMENSION / maxDimension;
+      const baseScale = PDF_SCALE * devicePixelRatio;
+      const appliedScale = limitScale > 0 ? Math.min(baseScale, limitScale) : baseScale;
+      const viewport = page.getViewport({ scale: appliedScale });
 
-      console.log(`📐 ${target.toUpperCase()}: Escala base calculada: ${baseScale.toFixed(2)}`);
+      console.log(`📐 ${target.toUpperCase()}: Dimensões - ${viewport.width}x${viewport.height} (escala: ${appliedScale})`);
 
       const canvas = document.createElement('canvas');
+      const context = canvas.getContext('2d', {
+        alpha: false,
+        willReadFrequently: false
+      });
 
-      // Tentar renderizar com fallback de qualidade
-      const renderSuccess = await tryRenderWithFallback(page, canvas, baseScale, target);
-
-      if (!renderSuccess) {
-        throw new Error('Falha em todas as tentativas de renderização');
+      if (!context) {
+        throw new Error('Falha ao criar contexto do canvas');
       }
+
+      canvas.height = Math.floor(viewport.height);
+      canvas.width = Math.floor(viewport.width);
+
+      context.fillStyle = '#FFFFFF';
+      context.fillRect(0, 0, canvas.width, canvas.height);
+
+      const renderContext = {
+        canvasContext: context,
+        viewport: viewport,
+        background: '#FFFFFF',
+        intent: 'display'
+      };
+
+      console.log(`🎨 ${target.toUpperCase()}: Renderizando página...`);
+
+      const renderPromise = page.render(renderContext).promise;
+      const timeoutPromise = new Promise((_, reject) =>
+        setTimeout(() => reject(new Error('Timeout na renderização')), 60000)
+      );
+
+      await Promise.race([renderPromise, timeoutPromise]);
 
       console.log(`✅ ${target.toUpperCase()}: Página renderizada com sucesso`);
 
       // Gerar data URL da imagem processada
       const imageDataUrl = canvas.toDataURL(IMAGE_EXPORT_FORMAT);
 
-      // Salvar no cache local imediatamente
+      // Salvar no cache local imediatamente (IndexedDB)
       await imageCache.set(documentId, imageDataUrl).catch(err => {
         console.warn(`⚠️ ${target.toUpperCase()}: Falha ao salvar no cache local:`, err);
       });
@@ -1326,21 +1077,18 @@ useEffect(() => {
     }
   }, [loading, savedPageUrls.length, isAutomationPaused, isScrolling, startContinuousScroll]);
 
-  // CORREÇÃO: Renderizar conteúdo com melhor tratamento de erros (memoizado)
-  const renderContent = useMemo(() => {
-    const render = () => {
+  // CORREÇÃO: Renderizar conteúdo com melhor tratamento de erros
+  const renderContent = () => {
     if (documentType === "plasa" && savedPageUrls.length > 0) {
       return (
         <div className="w-full">
           {savedPageUrls.map((pageUrl, index) => (
-            <div key={pageUrl} className="w-full mb-4">
+            <div key={index} className="w-full mb-4">
               <img
                 src={pageUrl}
                 alt={`PLASA - Página ${index + 1}`}
                 className="w-full h-auto block shadow-sm"
                 style={{ maxWidth: '100%' }}
-                loading={index < 2 ? "eager" : "lazy"}
-                decoding="async"
                 onError={(e) => {
                   console.error(`❌ Erro ao carregar página ${index + 1}:`, pageUrl);
                   (e.target as HTMLImageElement).src = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iODAwIiBoZWlnaHQ9IjYwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iODAwIiBoZWlnaHQ9IjYwMCIgZmlsbD0iI2Y4ZjhmOCIvPjx0ZXh0IHg9IjQwMCIgeT0iMzAwIiBmb250LWZhbWlseT0iQXJpYWwiIGZvbnQtc2l6ZT0iMjQiIGZpbGw9IiM5OTkiIHRleHQtYW5jaG9yPSJtaWRkbGUiPkVycm8gYW8gY2FycmVnYXIgcMOhZ2luYSAke2luZGV4ICsgMX08L3RleHQ+PC9zdmc+';
@@ -1410,19 +1158,15 @@ useEffect(() => {
       }
 
       return (
-        <div className="w-full h-full flex items-center justify-center p-4 overflow-auto">
+        <div className="w-full h-full flex items-center justify-center p-4">
           {escalaImageUrl ? (
             <img
               src={escalaImageUrl}
               alt="Escala de Serviço"
-              className="object-contain shadow-lg transition-transform duration-200"
+              className="max-w-full max-h-full object-contain shadow-lg"
               style={{
-                transform: `scale(${zoomLevel})`,
-                maxWidth: zoomLevel > 1 ? 'none' : '100%',
-                maxHeight: zoomLevel > 1 ? 'none' : '100%'
+                imageRendering: 'crisp-edges' as const,
               }}
-              loading="eager"
-              decoding="async"
               onError={(e) => {
                 console.error("❌ ESCALA: Erro ao carregar imagem:", escalaImageUrl);
                 setEscalaError("Falha ao exibir a imagem da escala");
@@ -1436,14 +1180,10 @@ useEffect(() => {
             <img
               src={docUrl}
               alt="Escala de Serviço (Original)"
-              className="object-contain shadow-lg transition-transform duration-200"
+              className="max-w-full max-h-full object-contain shadow-lg"
               style={{
-                transform: `scale(${zoomLevel})`,
-                maxWidth: zoomLevel > 1 ? 'none' : '100%',
-                maxHeight: zoomLevel > 1 ? 'none' : '100%'
+                imageRendering: 'crisp-edges' as const,
               }}
-              loading="eager"
-              decoding="async"
               onError={(e) => {
                 console.error("❌ ESCALA: Erro ao carregar arquivo original:", docUrl);
                 setEscalaError("Falha ao carregar o arquivo da escala");
@@ -1474,19 +1214,15 @@ useEffect(() => {
       });
 
       return (
-        <div className="w-full h-full flex items-center justify-center p-4 overflow-auto">
+        <div className="w-full h-full flex items-center justify-center p-4">
           {cardapioImageUrl ? (
             <img
               src={cardapioImageUrl}
               alt="Cardápio Semanal"
-              className="object-contain shadow-lg transition-transform duration-200"
+              className="max-w-full max-h-full object-contain shadow-lg"
               style={{
-                transform: `scale(${zoomLevel})`,
-                maxWidth: zoomLevel > 1 ? 'none' : '100%',
-                maxHeight: zoomLevel > 1 ? 'none' : '100%'
+                imageRendering: 'crisp-edges' as const,
               }}
-              loading="eager"
-              decoding="async"
               onError={(e) => {
                 console.error("❌ CARDÁPIO: Erro ao carregar imagem:", cardapioImageUrl);
                 (e.target as HTMLImageElement).style.display = 'none';
@@ -1499,14 +1235,10 @@ useEffect(() => {
             <img
               src={docUrl}
               alt="Cardápio Semanal (Original)"
-              className="object-contain shadow-lg transition-transform duration-200"
+              className="max-w-full max-h-full object-contain shadow-lg"
               style={{
-                transform: `scale(${zoomLevel})`,
-                maxWidth: zoomLevel > 1 ? 'none' : '100%',
-                maxHeight: zoomLevel > 1 ? 'none' : '100%'
+                imageRendering: 'crisp-edges' as const,
               }}
-              loading="eager"
-              decoding="async"
               onError={(e) => {
                 console.error("❌ CARDÁPIO: Erro ao carregar arquivo original:", docUrl);
                 (e.target as HTMLImageElement).style.display = 'none';
@@ -1610,19 +1342,7 @@ useEffect(() => {
         </div>
       </div>
     );
-    };
-    return render();
-  }, [
-    documentType,
-    savedPageUrls,
-    escalaImageUrl,
-    cardapioImageUrl,
-    escalaError,
-    loading,
-    debugInfo,
-    activePlasaDoc,
-    zoomLevel,
-  ]);
+  };
 
  const getCurrentTitle = () => {
   if (documentType === "escala") {
@@ -1644,15 +1364,11 @@ useEffect(() => {
 
 
 
-<CardHeader
-  className={`relative text-white border-b space-y-0 py-1.5 px-3 ${
-    documentType === "cardapio"
-      ? "bg-gradient-to-r from-orange-700 via-amber-600 to-orange-700 border-orange-400/40 shadow-lg"
-      : "bg-gradient-to-r from-slate-700 via-blue-800 to-slate-700 border-blue-400/30"
-  }`}
-  onMouseEnter={() => (documentType === "escala" || documentType === "cardapio") && setShowZoomControls(true)}
-  onMouseLeave={() => setShowZoomControls(false)}
->
+<CardHeader className={`relative text-white border-b py-2 px-4 ${
+  documentType === "cardapio" 
+    ? "bg-gradient-to-r from-orange-700 via-amber-600 to-orange-700 border-orange-400/40 shadow-lg" 
+    : "bg-gradient-to-r from-slate-700 via-blue-800 to-slate-700 border-blue-400/30"
+}`}>
   {/* Efeito de brilho melhorado baseado no tipo */}
   <div className={`absolute inset-0 ${
     documentType === "cardapio" 
@@ -1674,22 +1390,24 @@ useEffect(() => {
   )}
 
 <CardTitle className="relative z-10 flex items-center justify-between">
-  <div className="flex items-center space-x-2">
+  <div className="flex items-center space-x-3">
     {/* Ícone estilizado baseado no tipo */}
-    <div className="relative w-6 h-6">
+    <div className={`relative ${
+      documentType === "cardapio" ? "w-8 h-8" : "w-6 h-6"
+    }`}>
       <div className={`w-full h-full rounded-lg flex items-center justify-center shadow-lg ${
         documentType === "cardapio" 
           ? "bg-gradient-to-br from-orange-500 to-amber-600" 
           : "bg-gradient-to-br from-blue-500 to-blue-600"
       }`}>
         {documentType === "plasa" ? (
-          <span className="text-white text-base leading-none">📋</span>
+          <span className="text-white text-lg leading-none">📋</span>
         )  : documentType === "escala" ? (
-          <span className="text-white text-base leading-none">📅</span>
+          <span className="text-white text-lg leading-none">📅</span>
         ) : documentType === "cardapio" ? (
-          <span className="text-white text-base leading-none">🍽️</span>
+          <span className="text-white text-lg leading-none">🍽️</span>
         ) : (
-          <span className="text-white text-base leading-none">📄</span>
+          <span className="text-white text-lg leading-none">📄</span>
         )}
       </div>
       
@@ -1700,7 +1418,7 @@ useEffect(() => {
     </div>
     
     <div className="flex flex-col">
-      <span className={`font-bold text-xs sm:text-sm bg-clip-text text-transparent uppercase tracking-wide ${
+      <span className={`font-bold text-sm bg-clip-text text-transparent uppercase tracking-wide ${
         documentType === "cardapio"
           ? "bg-gradient-to-r from-orange-50 via-white to-amber-50 drop-shadow-sm"
           : "bg-gradient-to-r from-white to-blue-100"
@@ -1718,113 +1436,42 @@ useEffect(() => {
     </div>
   </div>
   
-  <div className="flex items-center space-x-2">
-    {/* Controles de zoom que aparecem no hover */}
-    {(documentType === "escala" || documentType === "cardapio") && (
-      <div
-        className={`flex items-center gap-1 transition-all duration-300 ${
-          showZoomControls ? 'opacity-100 scale-100' : 'opacity-0 scale-90 pointer-events-none'
-        } ${
-          documentType === "cardapio"
-            ? "bg-orange-600/70 backdrop-blur-sm border-orange-400/40"
-            : "bg-slate-600/70 backdrop-blur-sm border-slate-400/40"
-        } rounded-lg px-2 py-1 border shadow-lg`}
-      >
-        <button
-          onClick={handleZoomOut}
-          disabled={zoomLevel <= 0.5}
-          className={`p-1 rounded transition-colors ${
-            documentType === "cardapio"
-              ? "hover:bg-orange-500/80 disabled:opacity-40"
-              : "hover:bg-slate-500/80 disabled:opacity-40"
-          } disabled:cursor-not-allowed`}
-          title="Diminuir zoom"
-        >
-          <span className="text-white text-sm font-bold">−</span>
-        </button>
-
-        <div className="flex items-center gap-0.5">
-          <input
-            type="text"
-            value={zoomInputValue}
-            onChange={handleZoomInputChange}
-            onKeyDown={handleZoomInputKeyDown}
-            onBlur={handleZoomInputBlur}
-            className={`w-10 px-1 py-0.5 rounded text-[10px] font-bold text-center transition-colors ${
-              documentType === "cardapio"
-                ? "bg-orange-600/90 hover:bg-orange-500/80 text-orange-100 focus:bg-orange-500/90"
-                : "bg-slate-600/90 hover:bg-slate-500/80 text-slate-100 focus:bg-slate-500/90"
-            } border-none outline-none focus:ring-1 focus:ring-white/30`}
-            title="Digite o zoom e pressione Enter (50-300%)"
-          />
-          <span className={`text-[10px] font-bold ${
-            documentType === "cardapio" ? "text-orange-100" : "text-slate-100"
-          }`}>%</span>
-        </div>
-
-        <button
-          onClick={handleZoomIn}
-          disabled={zoomLevel >= 3}
-          className={`p-1 rounded transition-colors ${
-            documentType === "cardapio"
-              ? "hover:bg-orange-500/80 disabled:opacity-40"
-              : "hover:bg-slate-500/80 disabled:opacity-40"
-          } disabled:cursor-not-allowed`}
-          title="Aumentar zoom"
-        >
-          <span className="text-white text-sm font-bold">+</span>
-        </button>
-      </div>
-    )}
-
+  <div className="flex items-center space-x-3">
     {/* Indicador OFICIAIS | PRAÇAS fixo com ícones para ESCALA */}
     {documentType === "escala" && (() => {
-      const currentEscala = getCurrentEscalaDoc() ?? activeEscalaDoc;
-      const escalaCategory = detectEscalaCategory(currentEscala);
-      const isOficial = escalaCategory === "oficial";
-      const isPraca = escalaCategory === "praca";
-      const isUnclassified = escalaCategory === null;
-      const inactiveOpacityClass = isUnclassified ? "opacity-60" : "opacity-40";
-      const inactiveTextClass = isUnclassified ? "text-slate-300" : "text-slate-400";
-
+      const currentEscala = getCurrentEscalaDoc();
+      const isOficial = currentEscala?.category === "oficial";
+      
       return (
-        <div className="bg-slate-600/50 backdrop-blur-sm rounded-lg px-2 py-0.5 border border-slate-400/30 flex items-center">
-          <div className="flex items-center gap-1.5">
+        <div className="bg-slate-600/50 backdrop-blur-sm rounded-lg px-3 py-1 border border-slate-400/30 flex items-center">
+          <div className="flex items-center gap-2">
             {/* OFICIAIS */}
             <div className="flex items-center gap-1">
-              <span
-                className={`text-xs transition-all duration-300 ${
-                  isOficial ? "opacity-100" : inactiveOpacityClass
-                }`}
-              >
-                ⭐
-              </span>
-              <span
-                className={`text-[10px] sm:text-xs font-bold transition-all duration-300 ${
-                  isOficial ? "text-yellow-200 drop-shadow-sm" : inactiveTextClass
-                }`}
-              >
+              <span className={`text-sm transition-all duration-300 ${
+                isOficial ? "opacity-100" : "opacity-40"
+              }`}>⭐</span>
+              <span className={`text-xs font-bold transition-all duration-300 ${
+                isOficial 
+                  ? "text-yellow-200 drop-shadow-sm" 
+                  : "text-slate-400"
+              }`}>
                 OFICIAIS
               </span>
             </div>
-
+            
             {/* Separador */}
-            <span className="text-slate-300 text-[10px] sm:text-xs mx-1">|</span>
-
+            <span className="text-slate-300 text-xs mx-1">|</span>
+            
             {/* PRAÇAS */}
             <div className="flex items-center gap-1">
-              <span
-                className={`text-xs transition-all duration-300 ${
-                  isPraca ? "opacity-100" : inactiveOpacityClass
-                }`}
-              >
-                🛡️
-              </span>
-              <span
-                className={`text-[10px] sm:text-xs font-bold transition-all duration-300 ${
-                  isPraca ? "text-green-200 drop-shadow-sm" : inactiveTextClass
-                }`}
-              >
+              <span className={`text-sm transition-all duration-300 ${
+                !isOficial ? "opacity-100" : "opacity-40"
+              }`}>🛡️</span>
+              <span className={`text-xs font-bold transition-all duration-300 ${
+                !isOficial 
+                  ? "text-green-200 drop-shadow-sm" 
+                  : "text-slate-400"
+              }`}>
                 PRAÇAS
               </span>
             </div>
@@ -1840,14 +1487,14 @@ useEffect(() => {
       const isEAGM = currentCardapio?.unit === "EAGM";
       
       return (
-        <div className="bg-orange-600/50 backdrop-blur-sm rounded-lg px-2 py-0.5 border border-orange-400/30 flex items-center">
-          <div className="flex items-center gap-1.5">
+        <div className="bg-orange-600/50 backdrop-blur-sm rounded-lg px-3 py-1 border border-orange-400/30 flex items-center">
+          <div className="flex items-center gap-2">
             {/* EAGM */}
             <div className="flex items-center gap-1">
-              <span className={`text-xs transition-all duration-300 ${
+              <span className={`text-sm transition-all duration-300 ${
                 isEAGM ? "opacity-100" : "opacity-40"
               }`}>🏢</span>
-              <span className={`text-[10px] sm:text-xs font-bold transition-all duration-300 ${
+              <span className={`text-xs font-bold transition-all duration-300 ${
                 isEAGM 
                   ? "text-orange-200 drop-shadow-sm" 
                   : "text-orange-400/60"
@@ -1857,14 +1504,14 @@ useEffect(() => {
             </div>
             
             {/* Separador */}
-            <span className="text-orange-300 text-[10px] sm:text-xs mx-1">|</span>
+            <span className="text-orange-300 text-xs mx-1">|</span>
             
             {/* 1DN */}
             <div className="flex items-center gap-1">
-              <span className={`text-xs transition-all duration-300 ${
+              <span className={`text-sm transition-all duration-300 ${
                 !isEAGM ? "opacity-100" : "opacity-40"
               }`}>⚓</span>
-              <span className={`text-[10px] sm:text-xs font-bold transition-all duration-300 ${
+              <span className={`text-xs font-bold transition-all duration-300 ${
                 !isEAGM 
                   ? "text-orange-200 drop-shadow-sm" 
                   : "text-orange-400/60"
@@ -1904,13 +1551,4 @@ useEffect(() => {
   );
 };
 
-// Otimização: Memoizar componente para evitar re-renders desnecessários
-export default React.memo(PDFViewer, (prevProps, nextProps) => {
-  // Re-renderizar apenas se props realmente mudarem
-  return (
-    prevProps.documentType === nextProps.documentType &&
-    prevProps.title === nextProps.title &&
-    prevProps.scrollSpeed === nextProps.scrollSpeed &&
-    prevProps.autoRestartDelay === nextProps.autoRestartDelay
-  );
-});
+export default PDFViewer;

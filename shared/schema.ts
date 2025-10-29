@@ -1,5 +1,5 @@
 import { sql } from "drizzle-orm";
-import { pgTable, text, serial, boolean, timestamp, json, varchar } from "drizzle-orm/pg-core";
+import { pgTable, text, serial, boolean, timestamp } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 
@@ -53,12 +53,6 @@ export const dutyAssignments = pgTable("duty_assignments", {
   masterRank: text("master_rank").$type<string | null>(),
   validFrom: timestamp("valid_from").notNull().defaultNow(),
   updatedAt: timestamp("updated_at").notNull().defaultNow(),
-});
-
-export const sessions = pgTable("session", {
-  sid: varchar("sid").primaryKey(),
-  sess: json("sess").notNull(),
-  expire: timestamp("expire").notNull(),
 });
 
 export const insertUserSchema = createInsertSchema(users).pick({
@@ -124,25 +118,9 @@ export const dutyOfficersPayloadSchema = z.object({
     .transform(value => {
       if (!value) return undefined;
 
-      if (value instanceof Date) {
-        return Number.isNaN(value.getTime()) ? undefined : value;
-      }
-
-      const trimmed = typeof value === "string" ? value.trim() : "";
-      if (!trimmed) return undefined;
-
-      const normalized =
-        trimmed.includes("T") || !trimmed.includes(" ")
-          ? trimmed
-          : trimmed.replace(/\s+/, "T");
-
-      const date = new Date(normalized);
+      const date = value instanceof Date ? value : new Date(value);
       if (Number.isNaN(date.getTime())) {
-        console.warn?.("[dutyOfficersPayloadSchema] Invalid validFrom date sanitized", {
-          original: value,
-          normalized,
-        });
-        return undefined;
+        throw new Error("Invalid validFrom date");
       }
 
       return date;
