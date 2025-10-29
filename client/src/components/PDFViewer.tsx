@@ -1,7 +1,8 @@
-import React, { useState, useEffect, useRef, useCallback } from "react";
+import React, { useState, useEffect, useRef, useCallback, useMemo } from "react";
 import { useDisplay } from "@/context/DisplayContext";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { resolveBackendUrl } from "@/utils/backend";
+import imageCache from "@/utils/imageCache";
 
 const IS_DEV_MODE = process.env.NODE_ENV === 'development';
 const MAX_RENDER_DIMENSION = 8192;
@@ -505,7 +506,7 @@ const getCurrentCardapioDoc = () => {
     }
   };
 
-  // Função para salvar página como imagem no servidor
+  // Função para salvar página como imagem no servidor e cache local
   const savePageAsImage = async (canvas: HTMLCanvasElement, pageNum: number, documentId: string): Promise<string> => {
     return new Promise((resolve) => {
       canvas.toBlob(async (blob) => {
@@ -514,6 +515,9 @@ const getCurrentCardapioDoc = () => {
           resolve(canvas.toDataURL(IMAGE_EXPORT_FORMAT));
           return;
         }
+
+        // Gerar data URL para cache local
+        const dataUrl = canvas.toDataURL(IMAGE_EXPORT_FORMAT);
 
         try {
           const formData = new FormData();
@@ -534,6 +538,12 @@ const getCurrentCardapioDoc = () => {
             const fallbackFilename = `${documentId}-page-${pageNum}.${extension}`;
             const savedUrl = result.data?.url || result.url || `/plasa-pages/${fallbackFilename}`;
             const fullSavedUrl = getBackendUrl(savedUrl);
+
+            // Salvar no cache local do navegador
+            imageCache.set(`${documentId}-page-${pageNum}`, dataUrl).catch(err => {
+              console.warn('⚠️ Falha ao salvar no cache local:', err);
+            });
+
             resolve(fullSavedUrl);
           } else {
             throw new Error(`Erro no servidor: ${response.status}`);
@@ -541,7 +551,13 @@ const getCurrentCardapioDoc = () => {
 
         } catch (error) {
           console.warn(`⚠️ Falha ao salvar página ${pageNum} no servidor, usando data URL:`, error);
-          resolve(canvas.toDataURL(IMAGE_EXPORT_FORMAT));
+
+          // Mesmo em caso de erro, salvar no cache local
+          imageCache.set(`${documentId}-page-${pageNum}`, dataUrl).catch(err => {
+            console.warn('⚠️ Falha ao salvar no cache local:', err);
+          });
+
+          resolve(dataUrl);
         }
       }, IMAGE_EXPORT_FORMAT);
     });
@@ -561,11 +577,28 @@ const getCurrentCardapioDoc = () => {
     return `${timestamp}-${cleanName}-${random}`;
   };
 
-  // Verificar se páginas já existem no servidor
+  // Verificar se páginas já existem no cache local ou servidor
   const checkExistingPages = async (totalPages: number, documentId: string): Promise<string[]> => {
     try {
+      // Primeiro, verificar cache local
+      const cachedPages: string[] = [];
+      for (let i = 1; i <= totalPages; i++) {
+        const cached = await imageCache.get(`${documentId}-page-${i}`);
+        if (cached) {
+          cachedPages.push(cached);
+        } else {
+          break; // Se uma página não está em cache, parar
+        }
+      }
+
+      if (cachedPages.length === totalPages) {
+        console.log(`💾 Usando ${totalPages} páginas do cache local`);
+        return cachedPages;
+      }
+
+      // Se não estiver completo no cache local, verificar servidor
       const checkUrl = getBackendUrl('/api/check-plasa-pages');
-      
+
       const response = await fetch(checkUrl, {
         method: 'POST',
         headers: {
@@ -581,10 +614,10 @@ const getCurrentCardapioDoc = () => {
           return result.pageUrls.map((url: string) => getBackendUrl(url));
         }
       }
-      
+
       console.log("🆕 Páginas não encontradas, gerando novas...");
       return [];
-      
+
     } catch (error) {
       console.log(`⚠️ Erro ao verificar páginas existentes:`, error);
       return [];
@@ -916,16 +949,16 @@ const getCurrentCardapioDoc = () => {
   useEffect(() => {
     if (documentType === "escala") {
       const currentEscala = getCurrentEscalaDoc();
-      
+
       console.log("🔄 ESCALA Effect triggered:", {
         currentEscalaIndex,
         totalActiveEscalas: escalaDocuments.filter(d => d.active && d.type === "escala").length,
         currentEscala: currentEscala?.title,
         category: currentEscala?.category,
         url: currentEscala?.url,
-        id: currentEscala?.id 
+        id: currentEscala?.id
       });
-      
+
       setEscalaImageUrl(null);
       setLoading(false);
       setTotalPages(1);
@@ -947,6 +980,57 @@ const getCurrentCardapioDoc = () => {
       } else {
         setLoading(false);
       }
+    }
+  }, [documentType, currentEscalaIndex, escalaDocuments]);
+
+  // Pré-carregamento da próxima imagem rotativa (ESCALA)
+  useEffect(() => {
+    if (documentType === "escala") {
+      const activeEscalas = escalaDocuments.filter(d => d.active && d.type === "escala");
+
+      if (activeEscalas.length <= 1) return; // Não há próxima imagem
+
+      const nextIndex = (currentEscalaIndex + 1) % activeEscalas.length;
+      const nextEscala = activeEscalas[nextIndex];
+
+      if (!nextEscala?.url || !nextEscala?.id) return;
+
+      // Pré-carregar em background após um pequeno delay
+      const preloadTimer = setTimeout(async () => {
+        console.log(`🔮 Pré-carregando próxima ESCALA (${nextIndex + 1}/${activeEscalas.length}):`, nextEscala.title);
+
+        // Verificar se já está no cache local
+        const cached = await imageCache.get(nextEscala.id);
+        if (cached) {
+          console.log(`✅ Próxima ESCALA já está no cache local`);
+          return;
+        }
+
+        // Pré-carregar do servidor se necessário
+        try {
+          const cacheResponse = await fetch(getBackendUrl(`/api/check-escala-cache/${nextEscala.id}`));
+          const cacheResult = await cacheResponse.json();
+
+          if (cacheResult.success && cacheResult.exists) {
+            const cachedUrl = getBackendUrl(cacheResult.url);
+
+            // Carregar imagem em background para popular o cache do navegador
+            const img = new Image();
+            img.decoding = 'async';
+            img.onload = () => {
+              console.log(`✅ Próxima ESCALA pré-carregada do servidor`);
+            };
+            img.onerror = () => {
+              console.warn(`⚠️ Falha ao pré-carregar próxima ESCALA`);
+            };
+            img.src = cachedUrl;
+          }
+        } catch (error) {
+          console.warn(`⚠️ Erro ao pré-carregar próxima ESCALA:`, error);
+        }
+      }, 3000); // Esperar 3 segundos após carregar a imagem atual
+
+      return () => clearTimeout(preloadTimer);
     }
   }, [documentType, currentEscalaIndex, escalaDocuments]);
 
@@ -1094,13 +1178,23 @@ useEffect(() => {
       setLoading(true);
       setLoadingProgress(0);
 
+      // Verificar cache local primeiro
+      const localCached = await imageCache.get(documentId);
+      if (localCached) {
+        console.log(`💾 ${target.toUpperCase()}: Usando cache local`);
+        setImageUrl(localCached);
+        setLoading(false);
+        return;
+      }
+
+      // Verificar cache no servidor (apenas para ESCALA)
       if (target === "escala") {
         try {
           const cacheResponse = await fetch(getBackendUrl(`/api/check-escala-cache/${documentId}`));
           const cacheResult = await cacheResponse.json();
 
           if (cacheResult.success && cacheResult.exists) {
-            console.log(`💾 ESCALA: Cache encontrado: ${cacheResult.url}`);
+            console.log(`💾 ESCALA: Cache do servidor encontrado: ${cacheResult.url}`);
             const cachedUrl = getBackendUrl(cacheResult.url);
             const minimumRenderWidth = Math.max(1, Math.floor(getTargetRenderWidth()));
             const hasMinimumResolution = await ensureImageHasMinimumResolution(cachedUrl, minimumRenderWidth);
@@ -1114,7 +1208,7 @@ useEffect(() => {
             console.log('⚠️ ESCALA: Cache com resolução baixa detectado. Reprocessando documento.');
           }
         } catch (cacheError) {
-          console.warn("⚠️ ESCALA: Erro ao verificar cache:", cacheError);
+          console.warn("⚠️ ESCALA: Erro ao verificar cache do servidor:", cacheError);
         }
       }
 
@@ -1180,10 +1274,16 @@ useEffect(() => {
 
       console.log(`✅ ${target.toUpperCase()}: Página renderizada com sucesso`);
 
+      // Gerar data URL da imagem processada
+      const imageDataUrl = canvas.toDataURL(IMAGE_EXPORT_FORMAT);
+
+      // Salvar no cache local imediatamente
+      await imageCache.set(documentId, imageDataUrl).catch(err => {
+        console.warn(`⚠️ ${target.toUpperCase()}: Falha ao salvar no cache local:`, err);
+      });
+
       if (target === "escala") {
         try {
-          const imageDataUrl = canvas.toDataURL(IMAGE_EXPORT_FORMAT);
-
           const saveResponse = await fetch(getBackendUrl('/api/save-escala-cache'), {
             method: 'POST',
             headers: {
@@ -1211,12 +1311,10 @@ useEffect(() => {
             throw new Error(`Servidor retornou ${saveResponse.status}`);
           }
         } catch (saveError) {
-          console.warn(`⚠️ ESCALA: Falha ao salvar cache, usando dataURL:`, saveError);
-          const imageDataUrl = canvas.toDataURL(IMAGE_EXPORT_FORMAT);
+          console.warn(`⚠️ ESCALA: Falha ao salvar cache no servidor, usando dataURL:`, saveError);
           setImageUrl(imageDataUrl);
         }
       } else {
-        const imageDataUrl = canvas.toDataURL(IMAGE_EXPORT_FORMAT);
         setImageUrl(imageDataUrl);
       }
 
@@ -1260,18 +1358,21 @@ useEffect(() => {
     }
   }, [loading, savedPageUrls.length, isAutomationPaused, isScrolling, startContinuousScroll]);
 
-  // CORREÇÃO: Renderizar conteúdo com melhor tratamento de erros
-  const renderContent = () => {
+  // CORREÇÃO: Renderizar conteúdo com melhor tratamento de erros (memoizado)
+  const renderContent = useMemo(() => {
+    const render = () => {
     if (documentType === "plasa" && savedPageUrls.length > 0) {
       return (
         <div className="w-full">
           {savedPageUrls.map((pageUrl, index) => (
-            <div key={index} className="w-full mb-4">
+            <div key={pageUrl} className="w-full mb-4">
               <img
                 src={pageUrl}
                 alt={`PLASA - Página ${index + 1}`}
                 className="w-full h-auto block shadow-sm"
                 style={{ maxWidth: '100%' }}
+                loading={index < 2 ? "eager" : "lazy"}
+                decoding="async"
                 onError={(e) => {
                   console.error(`❌ Erro ao carregar página ${index + 1}:`, pageUrl);
                   (e.target as HTMLImageElement).src = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iODAwIiBoZWlnaHQ9IjYwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iODAwIiBoZWlnaHQ9IjYwMCIgZmlsbD0iI2Y4ZjhmOCIvPjx0ZXh0IHg9IjQwMCIgeT0iMzAwIiBmb250LWZhbWlseT0iQXJpYWwiIGZvbnQtc2l6ZT0iMjQiIGZpbGw9IiM5OTkiIHRleHQtYW5jaG9yPSJtaWRkbGUiPkVycm8gYW8gY2FycmVnYXIgcMOhZ2luYSAke2luZGV4ICsgMX08L3RleHQ+PC9zdmc+';
@@ -1352,6 +1453,8 @@ useEffect(() => {
                 maxWidth: zoomLevel > 1 ? 'none' : '100%',
                 maxHeight: zoomLevel > 1 ? 'none' : '100%'
               }}
+              loading="eager"
+              decoding="async"
               onError={(e) => {
                 console.error("❌ ESCALA: Erro ao carregar imagem:", escalaImageUrl);
                 setEscalaError("Falha ao exibir a imagem da escala");
@@ -1371,6 +1474,8 @@ useEffect(() => {
                 maxWidth: zoomLevel > 1 ? 'none' : '100%',
                 maxHeight: zoomLevel > 1 ? 'none' : '100%'
               }}
+              loading="eager"
+              decoding="async"
               onError={(e) => {
                 console.error("❌ ESCALA: Erro ao carregar arquivo original:", docUrl);
                 setEscalaError("Falha ao carregar o arquivo da escala");
@@ -1412,6 +1517,8 @@ useEffect(() => {
                 maxWidth: zoomLevel > 1 ? 'none' : '100%',
                 maxHeight: zoomLevel > 1 ? 'none' : '100%'
               }}
+              loading="eager"
+              decoding="async"
               onError={(e) => {
                 console.error("❌ CARDÁPIO: Erro ao carregar imagem:", cardapioImageUrl);
                 (e.target as HTMLImageElement).style.display = 'none';
@@ -1430,6 +1537,8 @@ useEffect(() => {
                 maxWidth: zoomLevel > 1 ? 'none' : '100%',
                 maxHeight: zoomLevel > 1 ? 'none' : '100%'
               }}
+              loading="eager"
+              decoding="async"
               onError={(e) => {
                 console.error("❌ CARDÁPIO: Erro ao carregar arquivo original:", docUrl);
                 (e.target as HTMLImageElement).style.display = 'none';
@@ -1533,7 +1642,19 @@ useEffect(() => {
         </div>
       </div>
     );
-  };
+    };
+    return render();
+  }, [
+    documentType,
+    savedPageUrls,
+    escalaImageUrl,
+    cardapioImageUrl,
+    escalaError,
+    loading,
+    debugInfo,
+    activePlasaDoc,
+    zoomLevel,
+  ]);
 
  const getCurrentTitle = () => {
   if (documentType === "escala") {
@@ -1815,4 +1936,13 @@ useEffect(() => {
   );
 };
 
-export default PDFViewer;
+// Otimização: Memoizar componente para evitar re-renders desnecessários
+export default React.memo(PDFViewer, (prevProps, nextProps) => {
+  // Re-renderizar apenas se props realmente mudarem
+  return (
+    prevProps.documentType === nextProps.documentType &&
+    prevProps.title === nextProps.title &&
+    prevProps.scrollSpeed === nextProps.scrollSpeed &&
+    prevProps.autoRestartDelay === nextProps.autoRestartDelay
+  );
+});
