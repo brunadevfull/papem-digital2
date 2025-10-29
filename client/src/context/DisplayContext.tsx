@@ -88,7 +88,7 @@ export const DisplayProvider: React.FC<DisplayProviderProps> = ({ children }) =>
   const [scrollSpeed, setScrollSpeed] = useState<"slow" | "normal" | "fast">("normal");
   const [autoRestartDelay, setAutoRestartDelay] = useState(3);
   const [isLoading, setIsLoading] = useState(false);
-  const [documentRefreshInterval, setDocumentRefreshInterval] = useState(60000); // ⏱️ 60 segundos (1 minuto) padrão
+  const [documentRefreshInterval, setDocumentRefreshInterval] = useState(300000); // ⏱️ 300 segundos (5 minutos) padrão
 
   // Ref para o timer de alternância
   const escalaTimerRef = useRef<NodeJS.Timeout | null>(null);
@@ -696,7 +696,7 @@ const activeCardapioDoc = activeCardapioDocuments.length > 0
         escalaTimerRef.current = null;
       }
     };
-  }, [activeEscalaDocuments.length, escalaAlternateInterval, escalaDocuments]);
+  }, [activeEscalaDocuments.length, escalaAlternateInterval]);
 // ✅ ADICIONAR: Effect para alternar cardápios automaticamente
 useEffect(() => {
   if (cardapioTimerRef.current) {
@@ -728,7 +728,7 @@ useEffect(() => {
       cardapioTimerRef.current = null;
     }
   };
-}, [activeCardapioDocuments.length, cardapioAlternateInterval, cardapioDocuments]);
+}, [activeCardapioDocuments.length, cardapioAlternateInterval]);
 
 // ✅ ADICIONAR: Effect para resetar índice de cardápios
 useEffect(() => {
