@@ -305,6 +305,33 @@ const PDFViewer: React.FC<PDFViewerProps> = ({
     return 1; // Valor padrão
   }, []);
 
+  // Função para salvar posição do scroll no localStorage (apenas escala e cardápio)
+  const saveScrollToLocalStorage = useCallback((docId: string, scrollTop: number, scrollLeft: number) => {
+    try {
+      localStorage.setItem(`document-scroll-${docId}`, JSON.stringify({ scrollTop, scrollLeft }));
+      console.log(`💾 Scroll salvo para documento ${docId}: top=${scrollTop}, left=${scrollLeft}`);
+    } catch (error) {
+      console.warn("⚠️ Erro ao salvar scroll no localStorage:", error);
+    }
+  }, []);
+
+  // Função para carregar posição do scroll do localStorage (apenas escala e cardápio)
+  const loadScrollFromLocalStorage = useCallback((docId: string): { scrollTop: number; scrollLeft: number } => {
+    try {
+      const saved = localStorage.getItem(`document-scroll-${docId}`);
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (typeof parsed.scrollTop === 'number' && typeof parsed.scrollLeft === 'number') {
+          console.log(`📖 Scroll carregado para documento ${docId}: top=${parsed.scrollTop}, left=${parsed.scrollLeft}`);
+          return { scrollTop: parsed.scrollTop, scrollLeft: parsed.scrollLeft };
+        }
+      }
+    } catch (error) {
+      console.warn("⚠️ Erro ao carregar scroll do localStorage:", error);
+    }
+    return { scrollTop: 0, scrollLeft: 0 }; // Valor padrão
+  }, []);
+
   // Funções de controle de zoom
   const handleZoomIn = () => {
     const newZoom = Math.min(zoomLevel + 0.1, 3); // Máximo 3x
@@ -363,6 +390,23 @@ const PDFViewer: React.FC<PDFViewerProps> = ({
     applyZoomFromInput();
   };
 
+  // Estado para feedback visual ao salvar posição
+  const [scrollSavedFeedback, setScrollSavedFeedback] = useState(false);
+
+  // Função para salvar manualmente a posição atual do scroll
+  const handleSaveScrollPosition = useCallback(() => {
+    if (documentType === "plasa") return; // Não salvar scroll para PLASA
+
+    const docId = getCurrentDocumentId();
+    if (docId && containerRef.current) {
+      saveScrollToLocalStorage(docId, containerRef.current.scrollTop, containerRef.current.scrollLeft);
+
+      // Mostrar feedback visual
+      setScrollSavedFeedback(true);
+      setTimeout(() => setScrollSavedFeedback(false), 2000);
+    }
+  }, [documentType, getCurrentDocumentId, saveScrollToLocalStorage]);
+
   // useEffect para restaurar o zoom ao mudar de documento (apenas escala e cardápio)
   useEffect(() => {
     const docId = getCurrentDocumentId();
@@ -384,6 +428,26 @@ const PDFViewer: React.FC<PDFViewerProps> = ({
       saveZoomToLocalStorage(docId, zoomLevel);
     }
   }, [zoomLevel, getCurrentDocumentId, saveZoomToLocalStorage]);
+
+  // useEffect para restaurar a posição do scroll quando mudar de documento (apenas escala e cardápio)
+  useEffect(() => {
+    if (documentType === "plasa") return; // Não restaurar scroll para PLASA
+
+    const docId = getCurrentDocumentId();
+    if (docId && containerRef.current) {
+      // Esperar a imagem carregar antes de restaurar o scroll
+      const timer = setTimeout(() => {
+        if (containerRef.current) {
+          const savedScroll = loadScrollFromLocalStorage(docId);
+          containerRef.current.scrollTop = savedScroll.scrollTop;
+          containerRef.current.scrollLeft = savedScroll.scrollLeft;
+          console.log(`🔄 Scroll restaurado para documento ${docId}`);
+        }
+      }, 100); // Pequeno delay para garantir que a imagem foi renderizada
+
+      return () => clearTimeout(timer);
+    }
+  }, [documentType, getCurrentDocumentId, loadScrollFromLocalStorage, escalaImageUrl, cardapioImageUrl]);
 
   // Configurações
   const getScrollSpeed = () => {
@@ -1789,6 +1853,35 @@ useEffect(() => {
           title="Aumentar zoom"
         >
           <span className="text-white text-sm font-bold">+</span>
+        </button>
+
+        {/* Separador */}
+        <div className={`w-px h-5 ${
+          documentType === "cardapio" ? "bg-orange-400/40" : "bg-slate-400/40"
+        }`}></div>
+
+        {/* Botão de salvar posição */}
+        <button
+          onClick={handleSaveScrollPosition}
+          className={`p-1 rounded transition-colors relative ${
+            documentType === "cardapio"
+              ? "hover:bg-orange-500/80"
+              : "hover:bg-slate-500/80"
+          }`}
+          title="Salvar posição atual da tela"
+        >
+          <span className="text-white text-sm">📍</span>
+
+          {/* Feedback visual de salvamento */}
+          {scrollSavedFeedback && (
+            <span className={`absolute -top-8 left-1/2 transform -translate-x-1/2 text-[10px] font-bold whitespace-nowrap px-2 py-1 rounded shadow-lg ${
+              documentType === "cardapio"
+                ? "bg-orange-500 text-white"
+                : "bg-slate-700 text-white"
+            }`}>
+              ✓ Salvo!
+            </span>
+          )}
         </button>
       </div>
     )}
