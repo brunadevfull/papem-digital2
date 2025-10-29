@@ -1416,7 +1416,7 @@ useEffect(() => {
 
 
 
-<CardHeader className={`relative text-white border-b py-2 px-4 ${
+<CardHeader className={`relative text-white border-b space-y-0 py-1.5 px-3 ${
   documentType === "cardapio" 
     ? "bg-gradient-to-r from-orange-700 via-amber-600 to-orange-700 border-orange-400/40 shadow-lg" 
     : "bg-gradient-to-r from-slate-700 via-blue-800 to-slate-700 border-blue-400/30"
@@ -1442,24 +1442,22 @@ useEffect(() => {
   )}
 
 <CardTitle className="relative z-10 flex items-center justify-between">
-  <div className="flex items-center space-x-3">
+  <div className="flex items-center space-x-2">
     {/* Ícone estilizado baseado no tipo */}
-    <div className={`relative ${
-      documentType === "cardapio" ? "w-8 h-8" : "w-6 h-6"
-    }`}>
+    <div className="relative w-6 h-6">
       <div className={`w-full h-full rounded-lg flex items-center justify-center shadow-lg ${
         documentType === "cardapio" 
           ? "bg-gradient-to-br from-orange-500 to-amber-600" 
           : "bg-gradient-to-br from-blue-500 to-blue-600"
       }`}>
         {documentType === "plasa" ? (
-          <span className="text-white text-lg leading-none">📋</span>
+          <span className="text-white text-base leading-none">📋</span>
         )  : documentType === "escala" ? (
-          <span className="text-white text-lg leading-none">📅</span>
+          <span className="text-white text-base leading-none">📅</span>
         ) : documentType === "cardapio" ? (
-          <span className="text-white text-lg leading-none">🍽️</span>
+          <span className="text-white text-base leading-none">🍽️</span>
         ) : (
-          <span className="text-white text-lg leading-none">📄</span>
+          <span className="text-white text-base leading-none">📄</span>
         )}
       </div>
       
@@ -1470,7 +1468,7 @@ useEffect(() => {
     </div>
     
     <div className="flex flex-col">
-      <span className={`font-bold text-sm bg-clip-text text-transparent uppercase tracking-wide ${
+      <span className={`font-bold text-xs sm:text-sm bg-clip-text text-transparent uppercase tracking-wide ${
         documentType === "cardapio"
           ? "bg-gradient-to-r from-orange-50 via-white to-amber-50 drop-shadow-sm"
           : "bg-gradient-to-r from-white to-blue-100"
@@ -1488,7 +1486,7 @@ useEffect(() => {
     </div>
   </div>
   
-  <div className="flex items-center space-x-3">
+  <div className="flex items-center space-x-2">
     {/* Indicador OFICIAIS | PRAÇAS fixo com ícones para ESCALA */}
     {documentType === "escala" && (() => {
       const currentEscala = getCurrentEscalaDoc() ?? activeEscalaDoc;
@@ -1500,19 +1498,19 @@ useEffect(() => {
       const inactiveTextClass = isUnclassified ? "text-slate-300" : "text-slate-400";
 
       return (
-        <div className="bg-slate-600/50 backdrop-blur-sm rounded-lg px-3 py-1 border border-slate-400/30 flex items-center">
-          <div className="flex items-center gap-2">
+        <div className="bg-slate-600/50 backdrop-blur-sm rounded-lg px-2 py-0.5 border border-slate-400/30 flex items-center">
+          <div className="flex items-center gap-1.5">
             {/* OFICIAIS */}
             <div className="flex items-center gap-1">
               <span
-                className={`text-sm transition-all duration-300 ${
+                className={`text-xs transition-all duration-300 ${
                   isOficial ? "opacity-100" : inactiveOpacityClass
                 }`}
               >
                 ⭐
               </span>
               <span
-                className={`text-xs font-bold transition-all duration-300 ${
+                className={`text-[10px] sm:text-xs font-bold transition-all duration-300 ${
                   isOficial ? "text-yellow-200 drop-shadow-sm" : inactiveTextClass
                 }`}
               >
@@ -1521,19 +1519,19 @@ useEffect(() => {
             </div>
 
             {/* Separador */}
-            <span className="text-slate-300 text-xs mx-1">|</span>
+            <span className="text-slate-300 text-[10px] sm:text-xs mx-1">|</span>
 
             {/* PRAÇAS */}
             <div className="flex items-center gap-1">
               <span
-                className={`text-sm transition-all duration-300 ${
+                className={`text-xs transition-all duration-300 ${
                   isPraca ? "opacity-100" : inactiveOpacityClass
                 }`}
               >
                 🛡️
               </span>
               <span
-                className={`text-xs font-bold transition-all duration-300 ${
+                className={`text-[10px] sm:text-xs font-bold transition-all duration-300 ${
                   isPraca ? "text-green-200 drop-shadow-sm" : inactiveTextClass
                 }`}
               >
@@ -1552,14 +1550,14 @@ useEffect(() => {
       const isEAGM = currentCardapio?.unit === "EAGM";
       
       return (
-        <div className="bg-orange-600/50 backdrop-blur-sm rounded-lg px-3 py-1 border border-orange-400/30 flex items-center">
-          <div className="flex items-center gap-2">
+        <div className="bg-orange-600/50 backdrop-blur-sm rounded-lg px-2 py-0.5 border border-orange-400/30 flex items-center">
+          <div className="flex items-center gap-1.5">
             {/* EAGM */}
             <div className="flex items-center gap-1">
-              <span className={`text-sm transition-all duration-300 ${
+              <span className={`text-xs transition-all duration-300 ${
                 isEAGM ? "opacity-100" : "opacity-40"
               }`}>🏢</span>
-              <span className={`text-xs font-bold transition-all duration-300 ${
+              <span className={`text-[10px] sm:text-xs font-bold transition-all duration-300 ${
                 isEAGM 
                   ? "text-orange-200 drop-shadow-sm" 
                   : "text-orange-400/60"
@@ -1569,14 +1567,14 @@ useEffect(() => {
             </div>
             
             {/* Separador */}
-            <span className="text-orange-300 text-xs mx-1">|</span>
+            <span className="text-orange-300 text-[10px] sm:text-xs mx-1">|</span>
             
             {/* 1DN */}
             <div className="flex items-center gap-1">
-              <span className={`text-sm transition-all duration-300 ${
+              <span className={`text-xs transition-all duration-300 ${
                 !isEAGM ? "opacity-100" : "opacity-40"
               }`}>⚓</span>
-              <span className={`text-xs font-bold transition-all duration-300 ${
+              <span className={`text-[10px] sm:text-xs font-bold transition-all duration-300 ${
                 !isEAGM 
                   ? "text-orange-200 drop-shadow-sm" 
                   : "text-orange-400/60"
