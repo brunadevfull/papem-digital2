@@ -506,7 +506,7 @@ const getCurrentCardapioDoc = () => {
     }
   };
 
-  // Função para salvar página como imagem no servidor e cache local
+  // Função para salvar página como imagem no servidor
   const savePageAsImage = async (canvas: HTMLCanvasElement, pageNum: number, documentId: string): Promise<string> => {
     return new Promise((resolve) => {
       canvas.toBlob(async (blob) => {
@@ -515,9 +515,6 @@ const getCurrentCardapioDoc = () => {
           resolve(canvas.toDataURL(IMAGE_EXPORT_FORMAT));
           return;
         }
-
-        // Gerar data URL para cache local
-        const dataUrl = canvas.toDataURL(IMAGE_EXPORT_FORMAT);
 
         try {
           const formData = new FormData();
@@ -538,12 +535,6 @@ const getCurrentCardapioDoc = () => {
             const fallbackFilename = `${documentId}-page-${pageNum}.${extension}`;
             const savedUrl = result.data?.url || result.url || `/plasa-pages/${fallbackFilename}`;
             const fullSavedUrl = getBackendUrl(savedUrl);
-
-            // Salvar no cache local do navegador
-            imageCache.set(`${documentId}-page-${pageNum}`, dataUrl).catch(err => {
-              console.warn('⚠️ Falha ao salvar no cache local:', err);
-            });
-
             resolve(fullSavedUrl);
           } else {
             throw new Error(`Erro no servidor: ${response.status}`);
@@ -551,13 +542,7 @@ const getCurrentCardapioDoc = () => {
 
         } catch (error) {
           console.warn(`⚠️ Falha ao salvar página ${pageNum} no servidor, usando data URL:`, error);
-
-          // Mesmo em caso de erro, salvar no cache local
-          imageCache.set(`${documentId}-page-${pageNum}`, dataUrl).catch(err => {
-            console.warn('⚠️ Falha ao salvar no cache local:', err);
-          });
-
-          resolve(dataUrl);
+          resolve(canvas.toDataURL(IMAGE_EXPORT_FORMAT));
         }
       }, IMAGE_EXPORT_FORMAT);
     });
@@ -577,26 +562,9 @@ const getCurrentCardapioDoc = () => {
     return `${timestamp}-${cleanName}-${random}`;
   };
 
-  // Verificar se páginas já existem no cache local ou servidor
+  // Verificar se páginas já existem no servidor
   const checkExistingPages = async (totalPages: number, documentId: string): Promise<string[]> => {
     try {
-      // Primeiro, verificar cache local
-      const cachedPages: string[] = [];
-      for (let i = 1; i <= totalPages; i++) {
-        const cached = await imageCache.get(`${documentId}-page-${i}`);
-        if (cached) {
-          cachedPages.push(cached);
-        } else {
-          break; // Se uma página não está em cache, parar
-        }
-      }
-
-      if (cachedPages.length === totalPages) {
-        console.log(`💾 Usando ${totalPages} páginas do cache local`);
-        return cachedPages;
-      }
-
-      // Se não estiver completo no cache local, verificar servidor
       const checkUrl = getBackendUrl('/api/check-plasa-pages');
 
       const response = await fetch(checkUrl, {
