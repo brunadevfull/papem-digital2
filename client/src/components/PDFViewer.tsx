@@ -225,15 +225,23 @@ class ContinuousAutoScroller {
   }
 }
 
-const PDFViewer: React.FC<PDFViewerProps> = ({ 
-  documentType, 
-  title, 
+const PDFViewer: React.FC<PDFViewerProps> = ({
+  documentType,
+  title,
   scrollSpeed = "normal",
   autoRestartDelay = 3,
   onScrollComplete
 }) => {
-  // CORREÇÃO: Usar currentEscalaIndex do contexto
-  const { activeEscalaDoc, activePlasaDoc, activeCardapioDoc, currentEscalaIndex, escalaDocuments } = useDisplay();
+  // CORREÇÃO: Usar currentEscalaIndex do contexto + ✏️ Estados de modo editor
+  const {
+    activeEscalaDoc,
+    activePlasaDoc,
+    activeCardapioDoc,
+    currentEscalaIndex,
+    escalaDocuments,
+    setIsEscalaEditMode,
+    setIsCardapioEditMode
+  } = useDisplay();
   const [totalPages, setTotalPages] = useState(0);
   const [loading, setLoading] = useState(false);
   const [isScrolling, setIsScrolling] = useState(false);
@@ -393,6 +401,57 @@ const PDFViewer: React.FC<PDFViewerProps> = ({
   // Estado para feedback visual ao salvar posição
   const [scrollSavedFeedback, setScrollSavedFeedback] = useState(false);
 
+  // ✏️ Estado para controlar modo editor local
+  const [isEditMode, setIsEditMode] = useState(false);
+
+  // ✏️ Função para alternar modo editor (pausa/retoma troca automática + salva)
+  const handleToggleEditMode = useCallback(() => {
+    const docId = getCurrentDocumentId();
+    console.log(`\n🔧 [MODO EDITOR] Estado atual: ${isEditMode ? 'ATIVO' : 'INATIVO'}, Documento: ${docId}`);
+
+    if (!isEditMode) {
+      // ENTRANDO em modo editor
+      if (documentType === "escala") {
+        setIsEscalaEditMode(true); // Pausar alternância de escalas
+        console.log("✏️ [MODO EDITOR] ESCALA: Pausando alternância automática");
+      } else if (documentType === "cardapio") {
+        setIsCardapioEditMode(true); // Pausar alternância de cardápios
+        console.log("✏️ [MODO EDITOR] CARDÁPIO: Pausando alternância automática");
+      }
+      setIsEditMode(true);
+    } else {
+      // SAINDO do modo editor
+      // 1. Salvar posição automaticamente
+      if (docId && containerRef.current) {
+        const scrollTop = containerRef.current.scrollTop;
+        const scrollLeft = containerRef.current.scrollLeft;
+        console.log(`💾 [MODO EDITOR] Salvando posição: docId=${docId}, top=${scrollTop}, left=${scrollLeft}`);
+        saveScrollToLocalStorage(docId, scrollTop, scrollLeft);
+
+        // Verificar se salvou
+        const saved = localStorage.getItem(`document-scroll-${docId}`);
+        console.log(`✅ [MODO EDITOR] Verificação: localStorage['document-scroll-${docId}'] =`, saved);
+      } else {
+        console.warn(`⚠️ [MODO EDITOR] Não foi possível salvar: docId=${docId}, containerRef=${!!containerRef.current}`);
+      }
+
+      // 2. Retomar alternância automática
+      if (documentType === "escala") {
+        setIsEscalaEditMode(false);
+        console.log("▶️ [MODO EDITOR] ESCALA: Retomando alternância automática");
+      } else if (documentType === "cardapio") {
+        setIsCardapioEditMode(false);
+        console.log("▶️ [MODO EDITOR] CARDÁPIO: Retomando alternância automática");
+      }
+
+      setIsEditMode(false);
+
+      // 3. Mostrar feedback visual de salvamento
+      setScrollSavedFeedback(true);
+      setTimeout(() => setScrollSavedFeedback(false), 2000);
+    }
+  }, [isEditMode, documentType, getCurrentDocumentId, saveScrollToLocalStorage, setIsEscalaEditMode, setIsCardapioEditMode]);
+
   // Função para salvar manualmente a posição atual do scroll
   const handleSaveScrollPosition = useCallback(() => {
     if (documentType === "plasa") return; // Não salvar scroll para PLASA
@@ -429,25 +488,18 @@ const PDFViewer: React.FC<PDFViewerProps> = ({
     }
   }, [zoomLevel, getCurrentDocumentId, saveZoomToLocalStorage]);
 
-  // useEffect para restaurar a posição do scroll quando mudar de documento (apenas escala e cardápio)
-  useEffect(() => {
+  // Função para restaurar scroll após imagem carregar
+  const restoreScrollPosition = useCallback(() => {
     if (documentType === "plasa") return; // Não restaurar scroll para PLASA
 
     const docId = getCurrentDocumentId();
     if (docId && containerRef.current) {
-      // Esperar a imagem carregar antes de restaurar o scroll
-      const timer = setTimeout(() => {
-        if (containerRef.current) {
-          const savedScroll = loadScrollFromLocalStorage(docId);
-          containerRef.current.scrollTop = savedScroll.scrollTop;
-          containerRef.current.scrollLeft = savedScroll.scrollLeft;
-          console.log(`🔄 Scroll restaurado para documento ${docId}`);
-        }
-      }, 100); // Pequeno delay para garantir que a imagem foi renderizada
-
-      return () => clearTimeout(timer);
+      const savedScroll = loadScrollFromLocalStorage(docId);
+      containerRef.current.scrollTop = savedScroll.scrollTop;
+      containerRef.current.scrollLeft = savedScroll.scrollLeft;
+      console.log(`🔄 Scroll restaurado para documento ${docId}: top=${savedScroll.scrollTop}, left=${savedScroll.scrollLeft}`);
     }
-  }, [documentType, getCurrentDocumentId, loadScrollFromLocalStorage, escalaImageUrl, cardapioImageUrl]);
+  }, [documentType, getCurrentDocumentId, loadScrollFromLocalStorage]);
 
   // Configurações
   const getScrollSpeed = () => {
@@ -1490,6 +1542,8 @@ useEffect(() => {
                   }}
                   onLoad={() => {
                     console.log(`✅ ESCALA: Imagem carregada com sucesso`);
+                    // Restaurar scroll DEPOIS que a imagem carregou
+                    restoreScrollPosition();
                   }}
                 />
               </div>
@@ -1521,6 +1575,8 @@ useEffect(() => {
                   }}
                   onLoad={() => {
                     console.log(`✅ ESCALA: Arquivo original carregado`);
+                    // Restaurar scroll DEPOIS que a imagem carregou
+                    restoreScrollPosition();
                   }}
                 />
               </div>
@@ -1573,6 +1629,8 @@ useEffect(() => {
                   }}
                   onLoad={() => {
                     console.log(`✅ CARDÁPIO: Imagem carregada com sucesso`);
+                    // Restaurar scroll DEPOIS que a imagem carregou
+                    restoreScrollPosition();
                   }}
                 />
               </div>
@@ -1603,6 +1661,8 @@ useEffect(() => {
                   }}
                   onLoad={() => {
                     console.log(`✅ CARDÁPIO: Arquivo original carregado`);
+                    // Restaurar scroll DEPOIS que a imagem carregou
+                    restoreScrollPosition();
                   }}
                 />
               </div>
@@ -1860,26 +1920,37 @@ useEffect(() => {
           documentType === "cardapio" ? "bg-orange-400/40" : "bg-slate-400/40"
         }`}></div>
 
-        {/* Botão de salvar posição */}
+        {/* ✏️ Botão de modo editor (toggle pausar/salvar) */}
         <button
-          onClick={handleSaveScrollPosition}
-          className={`p-1 rounded transition-colors relative ${
-            documentType === "cardapio"
-              ? "hover:bg-orange-500/80"
-              : "hover:bg-slate-500/80"
+          onClick={handleToggleEditMode}
+          className={`p-1 rounded transition-all relative ${
+            isEditMode
+              ? "bg-blue-500 animate-pulse shadow-lg" // Visual diferente em modo editor
+              : documentType === "cardapio"
+                ? "hover:bg-orange-500/80"
+                : "hover:bg-slate-500/80"
           }`}
-          title="Salvar posição atual da tela"
+          title={isEditMode ? "Clique para salvar e retomar alternância" : "Clique para pausar alternância e editar"}
         >
-          <span className="text-white text-sm">📍</span>
+          <span className="text-white text-sm">
+            {isEditMode ? "✏️" : "📍"}
+          </span>
 
           {/* Feedback visual de salvamento */}
           {scrollSavedFeedback && (
             <span className={`absolute -top-8 left-1/2 transform -translate-x-1/2 text-[10px] font-bold whitespace-nowrap px-2 py-1 rounded shadow-lg ${
               documentType === "cardapio"
-                ? "bg-orange-500 text-white"
-                : "bg-slate-700 text-white"
+                ? "bg-green-500 text-white"
+                : "bg-green-600 text-white"
             }`}>
-              ✓ Salvo!
+              ✅ Salvo!
+            </span>
+          )}
+
+          {/* ✏️ Indicador de modo editor */}
+          {isEditMode && (
+            <span className="absolute -bottom-8 left-1/2 transform -translate-x-1/2 text-[10px] font-bold whitespace-nowrap px-2 py-1 rounded shadow-lg bg-blue-500 text-white animate-pulse">
+              🔒 Modo Editor
             </span>
           )}
         </button>

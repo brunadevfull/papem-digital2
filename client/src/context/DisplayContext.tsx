@@ -44,6 +44,8 @@ interface DisplayContextType {
   autoRestartDelay: number;
   isLoading: boolean;
   documentRefreshInterval: number; // ⏱️ Intervalo de atualização de documentos (em ms)
+  isEscalaEditMode: boolean; // ✏️ Modo editor de escala
+  isCardapioEditMode: boolean; // ✏️ Modo editor de cardápio
   addNotice: (notice: Omit<Notice, "id" | "createdAt" | "updatedAt">) => Promise<boolean>;
   updateNotice: (notice: Notice) => Promise<boolean>;
   deleteNotice: (id: string) => Promise<boolean>;
@@ -55,6 +57,8 @@ interface DisplayContextType {
   setScrollSpeed: (speed: "slow" | "normal" | "fast") => void;
   setAutoRestartDelay: (delay: number) => void;
   setDocumentRefreshInterval: (interval: number) => void; // ⏱️ Configurar intervalo de refresh
+  setIsEscalaEditMode: (isEditMode: boolean) => void; // ✏️ Alternar modo editor de escala
+  setIsCardapioEditMode: (isEditMode: boolean) => void; // ✏️ Alternar modo editor de cardápio
   refreshNotices: () => Promise<void>;
   refreshDocuments: () => Promise<void>; // 🔄 Atualizar documentos manualmente
   handleScrollComplete: () => void;
@@ -89,6 +93,8 @@ export const DisplayProvider: React.FC<DisplayProviderProps> = ({ children }) =>
   const [autoRestartDelay, setAutoRestartDelay] = useState(3);
   const [isLoading, setIsLoading] = useState(false);
   const [documentRefreshInterval, setDocumentRefreshInterval] = useState(300000); // ⏱️ 300 segundos (5 minutos) padrão
+  const [isEscalaEditMode, setIsEscalaEditMode] = useState(false); // ✏️ Modo editor de escala
+  const [isCardapioEditMode, setIsCardapioEditMode] = useState(false); // ✏️ Modo editor de cardápio
 
   // Ref para o timer de alternância
   const escalaTimerRef = useRef<NodeJS.Timeout | null>(null);
@@ -673,9 +679,10 @@ const activeCardapioDoc = activeCardapioDocuments.length > 0
       escalaTimerRef.current = null;
     }
 
-    if (activeEscalaDocuments.length > 1) {
+    // ✏️ NOVO: Não iniciar timer se estiver em modo editor
+    if (activeEscalaDocuments.length > 1 && !isEscalaEditMode) {
 
-      
+
       escalaTimerRef.current = setInterval(() => {
         setCurrentEscalaIndex(prevIndex => {
           const nextIndex = (prevIndex + 1) % activeEscalaDocuments.length;
@@ -696,7 +703,7 @@ const activeCardapioDoc = activeCardapioDocuments.length > 0
         escalaTimerRef.current = null;
       }
     };
-  }, [activeEscalaDocuments.length, escalaAlternateInterval]);
+  }, [activeEscalaDocuments.length, escalaAlternateInterval, isEscalaEditMode]);
 // ✅ ADICIONAR: Effect para alternar cardápios automaticamente
 useEffect(() => {
   if (cardapioTimerRef.current) {
@@ -704,9 +711,10 @@ useEffect(() => {
     cardapioTimerRef.current = null;
   }
 
-  if (activeCardapioDocuments.length > 1) {
+  // ✏️ NOVO: Não iniciar timer se estiver em modo editor
+  if (activeCardapioDocuments.length > 1 && !isCardapioEditMode) {
     console.log(`🍽️ Iniciando alternância de ${activeCardapioDocuments.length} cardápios`);
-    
+
     cardapioTimerRef.current = setInterval(() => {
       setCurrentCardapioIndex(prevIndex => {
         const nextIndex = (prevIndex + 1) % activeCardapioDocuments.length;
@@ -728,7 +736,7 @@ useEffect(() => {
       cardapioTimerRef.current = null;
     }
   };
-}, [activeCardapioDocuments.length, cardapioAlternateInterval]);
+}, [activeCardapioDocuments.length, cardapioAlternateInterval, isCardapioEditMode]);
 
 // ✅ ADICIONAR: Effect para resetar índice de cardápios
 useEffect(() => {
@@ -1329,6 +1337,8 @@ const value: DisplayContextType = {
   autoRestartDelay,
   isLoading,
   documentRefreshInterval, // ⏱️ Intervalo de polling
+  isEscalaEditMode, // ✏️ Modo editor de escala
+  isCardapioEditMode, // ✏️ Modo editor de cardápio
   addNotice,
   updateNotice,
   deleteNotice,
@@ -1340,6 +1350,8 @@ const value: DisplayContextType = {
   setScrollSpeed,
   setAutoRestartDelay,
   setDocumentRefreshInterval, // ⏱️ Configurar intervalo de refresh
+  setIsEscalaEditMode, // ✏️ Alternar modo editor de escala
+  setIsCardapioEditMode, // ✏️ Alternar modo editor de cardápio
   refreshNotices,
   refreshDocuments, // 🔄 Atualizar documentos manualmente
   handleScrollComplete,
