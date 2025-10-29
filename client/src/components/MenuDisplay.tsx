@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useMemo } from "react";
 import { useDisplay } from "@/context/DisplayContext";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { resolveBackendUrl } from "@/utils/backend";
@@ -7,29 +7,27 @@ const MenuDisplay: React.FC = () => {
   const { escalaDocuments } = useDisplay();
   const [currentMenuIndex, setCurrentMenuIndex] = useState(0);
 
-  // Função para filtrar apenas documentos de cardápio
-  const getActiveMenus = () => {
+  // Memoizar a lista de cardápios ativos para evitar recalcular a cada render
+  const activeMenus = useMemo(() => {
     return escalaDocuments.filter(doc => {
       if (!doc.active) return false;
-      
+
       // Detectar se é cardápio baseado no título ou URL
-      const isMenu = doc.title.toLowerCase().includes('cardápio') || 
+      const isMenu = doc.title.toLowerCase().includes('cardápio') ||
                     doc.title.toLowerCase().includes('cardapio') ||
                     doc.url.toLowerCase().includes('cardápio') ||
                     doc.url.toLowerCase().includes('cardapio') ||
                     doc.title.toLowerCase().includes('menu');
-      
+
       console.log(`📋 MenuDisplay: Verificando documento "${doc.title}":`, {
         active: doc.active,
         isMenu: isMenu,
         category: doc.category
       });
-      
+
       return isMenu;
     });
-  };
-
-  const activeMenus = getActiveMenus();
+  }, [escalaDocuments]);
 
   // Log para debug
   useEffect(() => {
@@ -91,12 +89,16 @@ const MenuDisplay: React.FC = () => {
   }
 
   const currentMenu = activeMenus[currentMenuIndex];
-  
-  if (!currentMenu) {
-    console.warn("🍽️ Cardápio atual não encontrado, resetando índice");
-    if (currentMenuIndex !== 0) {
+
+  // Resetar índice se o cardápio atual não existe (movido para fora do render)
+  useEffect(() => {
+    if (!currentMenu && currentMenuIndex !== 0 && activeMenus.length > 0) {
+      console.warn("🍽️ Cardápio atual não encontrado, resetando índice");
       setCurrentMenuIndex(0);
     }
+  }, [currentMenu, currentMenuIndex, activeMenus.length]);
+
+  if (!currentMenu) {
     return (
       <Card className="h-full border-orange-400">
         <CardHeader className="bg-gradient-to-r from-orange-600 to-amber-600 text-white py-1.5">
