@@ -406,32 +406,42 @@ const PDFViewer: React.FC<PDFViewerProps> = ({
 
   // ✏️ Função para alternar modo editor (pausa/retoma troca automática + salva)
   const handleToggleEditMode = useCallback(() => {
+    const docId = getCurrentDocumentId();
+    console.log(`\n🔧 [MODO EDITOR] Estado atual: ${isEditMode ? 'ATIVO' : 'INATIVO'}, Documento: ${docId}`);
+
     if (!isEditMode) {
       // ENTRANDO em modo editor
       if (documentType === "escala") {
         setIsEscalaEditMode(true); // Pausar alternância de escalas
-        console.log("✏️ Modo editor de escala ativado");
+        console.log("✏️ [MODO EDITOR] ESCALA: Pausando alternância automática");
       } else if (documentType === "cardapio") {
         setIsCardapioEditMode(true); // Pausar alternância de cardápios
-        console.log("✏️ Modo editor de cardápio ativado");
+        console.log("✏️ [MODO EDITOR] CARDÁPIO: Pausando alternância automática");
       }
       setIsEditMode(true);
     } else {
       // SAINDO do modo editor
       // 1. Salvar posição automaticamente
-      const docId = getCurrentDocumentId();
       if (docId && containerRef.current) {
-        saveScrollToLocalStorage(docId, containerRef.current.scrollTop, containerRef.current.scrollLeft);
-        console.log("💾 Posição salva automaticamente ao sair do modo editor");
+        const scrollTop = containerRef.current.scrollTop;
+        const scrollLeft = containerRef.current.scrollLeft;
+        console.log(`💾 [MODO EDITOR] Salvando posição: docId=${docId}, top=${scrollTop}, left=${scrollLeft}`);
+        saveScrollToLocalStorage(docId, scrollTop, scrollLeft);
+
+        // Verificar se salvou
+        const saved = localStorage.getItem(`document-scroll-${docId}`);
+        console.log(`✅ [MODO EDITOR] Verificação: localStorage['document-scroll-${docId}'] =`, saved);
+      } else {
+        console.warn(`⚠️ [MODO EDITOR] Não foi possível salvar: docId=${docId}, containerRef=${!!containerRef.current}`);
       }
 
       // 2. Retomar alternância automática
       if (documentType === "escala") {
         setIsEscalaEditMode(false);
-        console.log("▶️ Alternância de escala retomada");
+        console.log("▶️ [MODO EDITOR] ESCALA: Retomando alternância automática");
       } else if (documentType === "cardapio") {
         setIsCardapioEditMode(false);
-        console.log("▶️ Alternância de cardápio retomada");
+        console.log("▶️ [MODO EDITOR] CARDÁPIO: Retomando alternância automática");
       }
 
       setIsEditMode(false);
@@ -478,25 +488,18 @@ const PDFViewer: React.FC<PDFViewerProps> = ({
     }
   }, [zoomLevel, getCurrentDocumentId, saveZoomToLocalStorage]);
 
-  // useEffect para restaurar a posição do scroll quando mudar de documento (apenas escala e cardápio)
-  useEffect(() => {
+  // Função para restaurar scroll após imagem carregar
+  const restoreScrollPosition = useCallback(() => {
     if (documentType === "plasa") return; // Não restaurar scroll para PLASA
 
     const docId = getCurrentDocumentId();
     if (docId && containerRef.current) {
-      // Esperar a imagem carregar antes de restaurar o scroll
-      const timer = setTimeout(() => {
-        if (containerRef.current) {
-          const savedScroll = loadScrollFromLocalStorage(docId);
-          containerRef.current.scrollTop = savedScroll.scrollTop;
-          containerRef.current.scrollLeft = savedScroll.scrollLeft;
-          console.log(`🔄 Scroll restaurado para documento ${docId}`);
-        }
-      }, 100); // Pequeno delay para garantir que a imagem foi renderizada
-
-      return () => clearTimeout(timer);
+      const savedScroll = loadScrollFromLocalStorage(docId);
+      containerRef.current.scrollTop = savedScroll.scrollTop;
+      containerRef.current.scrollLeft = savedScroll.scrollLeft;
+      console.log(`🔄 Scroll restaurado para documento ${docId}: top=${savedScroll.scrollTop}, left=${savedScroll.scrollLeft}`);
     }
-  }, [documentType, getCurrentDocumentId, loadScrollFromLocalStorage, escalaImageUrl, cardapioImageUrl]);
+  }, [documentType, getCurrentDocumentId, loadScrollFromLocalStorage]);
 
   // Configurações
   const getScrollSpeed = () => {
@@ -1539,6 +1542,8 @@ useEffect(() => {
                   }}
                   onLoad={() => {
                     console.log(`✅ ESCALA: Imagem carregada com sucesso`);
+                    // Restaurar scroll DEPOIS que a imagem carregou
+                    restoreScrollPosition();
                   }}
                 />
               </div>
@@ -1570,6 +1575,8 @@ useEffect(() => {
                   }}
                   onLoad={() => {
                     console.log(`✅ ESCALA: Arquivo original carregado`);
+                    // Restaurar scroll DEPOIS que a imagem carregou
+                    restoreScrollPosition();
                   }}
                 />
               </div>
@@ -1622,6 +1629,8 @@ useEffect(() => {
                   }}
                   onLoad={() => {
                     console.log(`✅ CARDÁPIO: Imagem carregada com sucesso`);
+                    // Restaurar scroll DEPOIS que a imagem carregou
+                    restoreScrollPosition();
                   }}
                 />
               </div>
@@ -1652,6 +1661,8 @@ useEffect(() => {
                   }}
                   onLoad={() => {
                     console.log(`✅ CARDÁPIO: Arquivo original carregado`);
+                    // Restaurar scroll DEPOIS que a imagem carregou
+                    restoreScrollPosition();
                   }}
                 />
               </div>
