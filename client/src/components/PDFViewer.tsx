@@ -1523,9 +1523,9 @@ useEffect(() => {
 
 
 
-<CardHeader className={`relative text-white border-b space-y-0 py-1.5 px-3 ${
-  documentType === "cardapio" 
-    ? "bg-gradient-to-r from-orange-700 via-amber-600 to-orange-700 border-orange-400/40 shadow-lg" 
+<CardHeader className={`relative text-white border-b space-y-0 py-0.5 px-3 ${
+  documentType === "cardapio"
+    ? "bg-gradient-to-r from-orange-700 via-amber-600 to-orange-700 border-orange-400/40 shadow-lg"
     : "bg-gradient-to-r from-slate-700 via-blue-800 to-slate-700 border-blue-400/30"
 }`}>
   {/* Efeito de brilho melhorado baseado no tipo */}

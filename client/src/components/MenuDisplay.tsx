@@ -72,7 +72,7 @@ const MenuDisplay: React.FC = () => {
   if (activeMenus.length === 0) {
     return (
       <Card className="h-full border-orange-400">
-        <CardHeader className="bg-gradient-to-r from-orange-600 to-amber-600 text-white py-1.5">
+        <CardHeader className="bg-gradient-to-r from-orange-600 to-amber-600 text-white py-0.5">
           <CardTitle className="text-center text-sm font-medium flex items-center justify-center gap-2">
             🍽️ Cardápio Semanal
           </CardTitle>
@@ -99,7 +99,7 @@ const MenuDisplay: React.FC = () => {
     }
     return (
       <Card className="h-full border-orange-400">
-        <CardHeader className="bg-gradient-to-r from-orange-600 to-amber-600 text-white py-1.5">
+        <CardHeader className="bg-gradient-to-r from-orange-600 to-amber-600 text-white py-0.5">
           <CardTitle className="text-center text-sm font-medium">
             🍽️ Cardápio Semanal
           </CardTitle>
@@ -118,7 +118,7 @@ const MenuDisplay: React.FC = () => {
 
   return (
     <Card className="h-full border-orange-400 overflow-hidden">
-      <CardHeader className="bg-gradient-to-r from-orange-600 to-amber-600 text-white py-1.5">
+      <CardHeader className="bg-gradient-to-r from-orange-600 to-amber-600 text-white py-0.5">
         <CardTitle className="text-center flex items-center justify-between text-sm">
           <span className="font-medium flex items-center gap-2">
             🍽️ Cardápio Semanal
@@ -133,11 +133,11 @@ const MenuDisplay: React.FC = () => {
           </div>
         </CardTitle>
       </CardHeader>
-      
-      <CardContent className="p-0 h-[calc(100%-2.5rem)]">
+
+      <CardContent className="p-0 h-[calc(100%-1.75rem)]">
         <div className="h-full flex flex-col">
           {/* Barra de título do cardápio */}
-          <div className="bg-gradient-to-r from-orange-50 to-amber-50 px-3 py-2 border-b border-orange-200">
+          <div className="bg-gradient-to-r from-orange-50 to-amber-50 px-3 py-1 border-b border-orange-200">
             <div className="text-sm font-semibold text-orange-800 truncate">
               {currentMenu.title}
             </div>
@@ -179,7 +179,7 @@ const MenuDisplay: React.FC = () => {
           
           {/* Indicador de múltiplos cardápios */}
           {activeMenus.length > 1 && (
-            <div className="bg-gradient-to-r from-orange-50 to-amber-50 px-3 py-2 border-t border-orange-200">
+            <div className="bg-gradient-to-r from-orange-50 to-amber-50 px-3 py-1 border-t border-orange-200">
               <div className="flex justify-center space-x-1">
                 {activeMenus.map((_, index) => (
                   <div
