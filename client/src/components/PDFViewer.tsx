@@ -390,14 +390,20 @@ const PDFViewer: React.FC<PDFViewerProps> = ({
     applyZoomFromInput();
   };
 
-  // Handler para salvar posição do scroll quando o usuário rolar (apenas escala e cardápio)
-  const handleScroll = useCallback((e: React.UIEvent<HTMLDivElement>) => {
-    if (documentType === "plasa") return; // Não salvar scroll para PLASA (tem scroll automático)
+  // Estado para feedback visual ao salvar posição
+  const [scrollSavedFeedback, setScrollSavedFeedback] = useState(false);
+
+  // Função para salvar manualmente a posição atual do scroll
+  const handleSaveScrollPosition = useCallback(() => {
+    if (documentType === "plasa") return; // Não salvar scroll para PLASA
 
     const docId = getCurrentDocumentId();
-    if (docId) {
-      const target = e.currentTarget;
-      saveScrollToLocalStorage(docId, target.scrollTop, target.scrollLeft);
+    if (docId && containerRef.current) {
+      saveScrollToLocalStorage(docId, containerRef.current.scrollTop, containerRef.current.scrollLeft);
+
+      // Mostrar feedback visual
+      setScrollSavedFeedback(true);
+      setTimeout(() => setScrollSavedFeedback(false), 2000);
     }
   }, [documentType, getCurrentDocumentId, saveScrollToLocalStorage]);
 
@@ -1848,6 +1854,35 @@ useEffect(() => {
         >
           <span className="text-white text-sm font-bold">+</span>
         </button>
+
+        {/* Separador */}
+        <div className={`w-px h-5 ${
+          documentType === "cardapio" ? "bg-orange-400/40" : "bg-slate-400/40"
+        }`}></div>
+
+        {/* Botão de salvar posição */}
+        <button
+          onClick={handleSaveScrollPosition}
+          className={`p-1 rounded transition-colors relative ${
+            documentType === "cardapio"
+              ? "hover:bg-orange-500/80"
+              : "hover:bg-slate-500/80"
+          }`}
+          title="Salvar posição atual da tela"
+        >
+          <span className="text-white text-sm">📍</span>
+
+          {/* Feedback visual de salvamento */}
+          {scrollSavedFeedback && (
+            <span className={`absolute -top-8 left-1/2 transform -translate-x-1/2 text-[10px] font-bold whitespace-nowrap px-2 py-1 rounded shadow-lg ${
+              documentType === "cardapio"
+                ? "bg-orange-500 text-white"
+                : "bg-slate-700 text-white"
+            }`}>
+              ✓ Salvo!
+            </span>
+          )}
+        </button>
       </div>
     )}
 
@@ -1969,7 +2004,6 @@ useEffect(() => {
             className="relative w-full h-full overflow-y-auto"
             ref={containerRef}
             style={{ scrollBehavior: "auto" }}
-            onScroll={handleScroll}
           >
             {renderContent()}
           </div>
