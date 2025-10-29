@@ -7,6 +7,19 @@ const IS_DEV_MODE = process.env.NODE_ENV === 'development';
 const MAX_RENDER_DIMENSION = 8192;
 const IMAGE_EXPORT_FORMAT = 'image/png';
 
+// Configurações de timeout e qualidade para renderização
+const RENDER_TIMEOUTS = {
+  HIGH_QUALITY: 300000,    // 5 minutos para alta qualidade
+  MEDIUM_QUALITY: 180000,  // 3 minutos para qualidade média
+  LOW_QUALITY: 120000      // 2 minutos para qualidade baixa
+};
+
+const QUALITY_SCALES = {
+  HIGH: 1.0,      // 100% da escala calculada
+  MEDIUM: 0.6,    // 60% da escala calculada
+  LOW: 0.35       // 35% da escala calculada
+};
+
 const getViewportWidth = () => {
   if (typeof window === "undefined") {
     return 1920;
@@ -616,7 +629,7 @@ const getCurrentCardapioDoc = () => {
 
           const renderPromise = page.render(renderContext).promise;
           const timeoutPromise = new Promise((_, reject) =>
-            setTimeout(() => reject(new Error('Timeout na renderização')), 120000)
+            setTimeout(() => reject(new Error('Timeout na renderização')), RENDER_TIMEOUTS.HIGH_QUALITY)
           );
 
           await Promise.race([renderPromise, timeoutPromise]);
@@ -918,6 +931,79 @@ useEffect(() => {
       return false;
     }
   };
+
+  // NOVA FUNÇÃO: Tentar renderizar PDF com fallback de qualidade
+  const tryRenderWithFallback = async (
+    page: any,
+    canvas: HTMLCanvasElement,
+    baseScale: number,
+    target: string
+  ): Promise<boolean> => {
+    const qualities = [
+      { name: 'ALTA', scale: QUALITY_SCALES.HIGH, timeout: RENDER_TIMEOUTS.HIGH_QUALITY },
+      { name: 'MÉDIA', scale: QUALITY_SCALES.MEDIUM, timeout: RENDER_TIMEOUTS.MEDIUM_QUALITY },
+      { name: 'BAIXA', scale: QUALITY_SCALES.LOW, timeout: RENDER_TIMEOUTS.LOW_QUALITY }
+    ];
+
+    for (const quality of qualities) {
+      try {
+        console.log(`🎨 ${target.toUpperCase()}: Tentando renderização em qualidade ${quality.name} (escala: ${(baseScale * quality.scale).toFixed(2)}, timeout: ${quality.timeout / 1000}s)...`);
+
+        const viewport = page.getViewport({ scale: baseScale * quality.scale });
+        const context = canvas.getContext('2d', {
+          alpha: false,
+          willReadFrequently: false
+        });
+
+        if (!context) {
+          throw new Error('Falha ao criar contexto do canvas');
+        }
+
+        context.imageSmoothingEnabled = true;
+        context.imageSmoothingQuality = 'high';
+
+        const renderWidth = Math.min(MAX_RENDER_DIMENSION, Math.ceil(viewport.width));
+        const renderHeight = Math.min(MAX_RENDER_DIMENSION, Math.ceil(viewport.height));
+
+        canvas.width = renderWidth;
+        canvas.height = renderHeight;
+
+        context.fillStyle = '#FFFFFF';
+        context.fillRect(0, 0, canvas.width, canvas.height);
+
+        const renderContext = {
+          canvasContext: context,
+          viewport: viewport,
+          background: '#FFFFFF',
+          intent: 'display'
+        };
+
+        const renderPromise = page.render(renderContext).promise;
+        const timeoutPromise = new Promise((_, reject) =>
+          setTimeout(() => reject(new Error(`Timeout na renderização (${quality.name})`)), quality.timeout)
+        );
+
+        await Promise.race([renderPromise, timeoutPromise]);
+
+        console.log(`✅ ${target.toUpperCase()}: Renderização em qualidade ${quality.name} bem-sucedida! (${renderWidth}x${renderHeight})`);
+        return true;
+
+      } catch (error) {
+        console.warn(`⚠️ ${target.toUpperCase()}: Falha na qualidade ${quality.name}:`, error);
+
+        // Se não for a última tentativa, continue para a próxima qualidade
+        if (quality !== qualities[qualities.length - 1]) {
+          console.log(`🔄 ${target.toUpperCase()}: Tentando próxima qualidade...`);
+          continue;
+        }
+
+        // Se foi a última tentativa, retorne false
+        return false;
+      }
+    }
+
+    return false;
+  };
   
   // NOVA FUNÇÃO: Converter PDF da escala para imagem
   const convertEscalaPDFToImage = async (pdfUrl: string, options?: { target?: "escala" | "cardapio" }) => {
@@ -1013,51 +1099,21 @@ useEffect(() => {
       const page = await pdf.getPage(1);
 
       const originalViewport = page.getViewport({ scale: 1.0 });
-      const appliedScale = calculateRenderScale({
+      const baseScale = calculateRenderScale({
         width: originalViewport.width,
         height: originalViewport.height,
       });
-      const viewport = page.getViewport({ scale: appliedScale });
 
-      console.log(`📐 ${target.toUpperCase()}: Dimensões - ${viewport.width}x${viewport.height} (escala: ${appliedScale})`);
+      console.log(`📐 ${target.toUpperCase()}: Escala base calculada: ${baseScale.toFixed(2)}`);
 
       const canvas = document.createElement('canvas');
-      const context = canvas.getContext('2d', {
-        alpha: false,
-        willReadFrequently: false
-      });
 
-      if (!context) {
-        throw new Error('Falha ao criar contexto do canvas');
+      // Tentar renderizar com fallback de qualidade
+      const renderSuccess = await tryRenderWithFallback(page, canvas, baseScale, target);
+
+      if (!renderSuccess) {
+        throw new Error('Falha em todas as tentativas de renderização');
       }
-
-      context.imageSmoothingEnabled = true;
-      context.imageSmoothingQuality = 'high';
-
-      const renderWidth = Math.min(MAX_RENDER_DIMENSION, Math.ceil(viewport.width));
-      const renderHeight = Math.min(MAX_RENDER_DIMENSION, Math.ceil(viewport.height));
-
-      canvas.height = renderHeight;
-      canvas.width = renderWidth;
-
-      context.fillStyle = '#FFFFFF';
-      context.fillRect(0, 0, canvas.width, canvas.height);
-
-      const renderContext = {
-        canvasContext: context,
-        viewport: viewport,
-        background: '#FFFFFF',
-        intent: 'display'
-      };
-
-      console.log(`🎨 ${target.toUpperCase()}: Renderizando página...`);
-
-      const renderPromise = page.render(renderContext).promise;
-      const timeoutPromise = new Promise((_, reject) =>
-        setTimeout(() => reject(new Error('Timeout na renderização')), 60000)
-      );
-
-      await Promise.race([renderPromise, timeoutPromise]);
 
       console.log(`✅ ${target.toUpperCase()}: Página renderizada com sucesso`);
 
