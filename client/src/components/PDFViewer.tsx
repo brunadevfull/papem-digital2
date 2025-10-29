@@ -266,11 +266,9 @@ const PDFViewer: React.FC<PDFViewerProps> = ({
     return activeCardapioDoc;
   }, [activeCardapioDoc]);
 
-  // Função para obter ID único do documento atual
+  // Função para obter ID único do documento atual (somente escala e cardápio)
   const getCurrentDocumentId = useCallback((): string | null => {
-    if (documentType === "plasa") {
-      return activePlasaDoc?.id ? `plasa-${activePlasaDoc.id}` : null;
-    } else if (documentType === "escala") {
+    if (documentType === "escala") {
       const currentEscala = getCurrentEscalaDoc();
       return currentEscala?.id ? `escala-${currentEscala.id}` : null;
     } else if (documentType === "cardapio") {
@@ -278,9 +276,9 @@ const PDFViewer: React.FC<PDFViewerProps> = ({
       return currentCardapio?.id ? `cardapio-${currentCardapio.id}` : null;
     }
     return null;
-  }, [documentType, activePlasaDoc?.id, getCurrentEscalaDoc, getCurrentCardapioDoc]);
+  }, [documentType, getCurrentEscalaDoc, getCurrentCardapioDoc]);
 
-  // Função para salvar zoom no localStorage
+  // Função para salvar zoom no localStorage (apenas escala e cardápio)
   const saveZoomToLocalStorage = useCallback((docId: string, zoom: number) => {
     try {
       localStorage.setItem(`document-zoom-${docId}`, zoom.toString());
@@ -290,7 +288,7 @@ const PDFViewer: React.FC<PDFViewerProps> = ({
     }
   }, []);
 
-  // Função para carregar zoom do localStorage
+  // Função para carregar zoom do localStorage (apenas escala e cardápio)
   const loadZoomFromLocalStorage = useCallback((docId: string): number => {
     try {
       const saved = localStorage.getItem(`document-zoom-${docId}`);
@@ -365,20 +363,24 @@ const PDFViewer: React.FC<PDFViewerProps> = ({
     applyZoomFromInput();
   };
 
-  // useEffect para restaurar o zoom ao mudar de documento
+  // useEffect para restaurar o zoom ao mudar de documento (apenas escala e cardápio)
   useEffect(() => {
     const docId = getCurrentDocumentId();
     if (docId) {
       const savedZoom = loadZoomFromLocalStorage(docId);
       setZoomLevel(savedZoom);
       setZoomInputValue(Math.round(savedZoom * 100).toString());
+    } else {
+      // Para PLASA, sempre resetar para 100%
+      setZoomLevel(1);
+      setZoomInputValue("100");
     }
   }, [getCurrentDocumentId, loadZoomFromLocalStorage]);
 
-  // useEffect para salvar o zoom sempre que ele mudar
+  // useEffect para salvar o zoom sempre que ele mudar (apenas escala e cardápio)
   useEffect(() => {
     const docId = getCurrentDocumentId();
-    if (docId && zoomLevel !== 1) {
+    if (docId) {
       saveZoomToLocalStorage(docId, zoomLevel);
     }
   }, [zoomLevel, getCurrentDocumentId, saveZoomToLocalStorage]);
