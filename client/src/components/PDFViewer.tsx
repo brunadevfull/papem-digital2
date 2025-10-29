@@ -1341,45 +1341,51 @@ useEffect(() => {
       }
 
       return (
-        <div className="w-full h-full flex items-center justify-center p-4 overflow-auto">
+        <div className="w-full h-full flex items-center justify-center p-4">
           {escalaImageUrl ? (
-            <img
-              src={escalaImageUrl}
-              alt="Escala de Serviço"
-              className="object-contain shadow-lg transition-transform duration-200"
-              style={{
-                transform: `scale(${zoomLevel})`,
-                maxWidth: zoomLevel > 1 ? 'none' : '100%',
-                maxHeight: zoomLevel > 1 ? 'none' : '100%'
-              }}
-              onError={(e) => {
-                console.error("❌ ESCALA: Erro ao carregar imagem:", escalaImageUrl);
-                setEscalaError("Falha ao exibir a imagem da escala");
-                (e.target as HTMLImageElement).style.display = 'none';
-              }}
-              onLoad={() => {
-                console.log(`✅ ESCALA: Imagem carregada com sucesso`);
-              }}
-            />
+            <div className="w-full h-full flex items-center justify-center overflow-auto">
+              <img
+                src={escalaImageUrl}
+                alt="Escala de Serviço"
+                className="object-contain shadow-lg transition-transform duration-200"
+                style={{
+                  transform: `scale(${zoomLevel})`,
+                  transformOrigin: 'center center',
+                  maxWidth: '100%',
+                  maxHeight: '100%'
+                }}
+                onError={(e) => {
+                  console.error("❌ ESCALA: Erro ao carregar imagem:", escalaImageUrl);
+                  setEscalaError("Falha ao exibir a imagem da escala");
+                  (e.target as HTMLImageElement).style.display = 'none';
+                }}
+                onLoad={() => {
+                  console.log(`✅ ESCALA: Imagem carregada com sucesso`);
+                }}
+              />
+            </div>
           ) : docUrl ? (
-            <img
-              src={docUrl}
-              alt="Escala de Serviço (Original)"
-              className="object-contain shadow-lg transition-transform duration-200"
-              style={{
-                transform: `scale(${zoomLevel})`,
-                maxWidth: zoomLevel > 1 ? 'none' : '100%',
-                maxHeight: zoomLevel > 1 ? 'none' : '100%'
-              }}
-              onError={(e) => {
-                console.error("❌ ESCALA: Erro ao carregar arquivo original:", docUrl);
-                setEscalaError("Falha ao carregar o arquivo da escala");
-                (e.target as HTMLImageElement).style.display = 'none';
-              }}
-              onLoad={() => {
-                console.log(`✅ ESCALA: Arquivo original carregado`);
-              }}
-            />
+            <div className="w-full h-full flex items-center justify-center overflow-auto">
+              <img
+                src={docUrl}
+                alt="Escala de Serviço (Original)"
+                className="object-contain shadow-lg transition-transform duration-200"
+                style={{
+                  transform: `scale(${zoomLevel})`,
+                  transformOrigin: 'center center',
+                  maxWidth: '100%',
+                  maxHeight: '100%'
+                }}
+                onError={(e) => {
+                  console.error("❌ ESCALA: Erro ao carregar arquivo original:", docUrl);
+                  setEscalaError("Falha ao carregar o arquivo da escala");
+                  (e.target as HTMLImageElement).style.display = 'none';
+                }}
+                onLoad={() => {
+                  console.log(`✅ ESCALA: Arquivo original carregado`);
+                }}
+              />
+            </div>
           ) : (
             <div className="text-center text-gray-500">
               <div className="text-4xl mb-4">📋</div>
@@ -1401,43 +1407,49 @@ useEffect(() => {
       });
 
       return (
-        <div className="w-full h-full flex items-center justify-center p-4 overflow-auto">
+        <div className="w-full h-full flex items-center justify-center p-4">
           {cardapioImageUrl ? (
-            <img
-              src={cardapioImageUrl}
-              alt="Cardápio Semanal"
-              className="object-contain shadow-lg transition-transform duration-200"
-              style={{
-                transform: `scale(${zoomLevel})`,
-                maxWidth: zoomLevel > 1 ? 'none' : '100%',
-                maxHeight: zoomLevel > 1 ? 'none' : '100%'
-              }}
-              onError={(e) => {
-                console.error("❌ CARDÁPIO: Erro ao carregar imagem:", cardapioImageUrl);
-                (e.target as HTMLImageElement).style.display = 'none';
-              }}
-              onLoad={() => {
-                console.log(`✅ CARDÁPIO: Imagem carregada com sucesso`);
-              }}
-            />
+            <div className="w-full h-full flex items-center justify-center overflow-auto">
+              <img
+                src={cardapioImageUrl}
+                alt="Cardápio Semanal"
+                className="object-contain shadow-lg transition-transform duration-200"
+                style={{
+                  transform: `scale(${zoomLevel})`,
+                  transformOrigin: 'center center',
+                  maxWidth: '100%',
+                  maxHeight: '100%'
+                }}
+                onError={(e) => {
+                  console.error("❌ CARDÁPIO: Erro ao carregar imagem:", cardapioImageUrl);
+                  (e.target as HTMLImageElement).style.display = 'none';
+                }}
+                onLoad={() => {
+                  console.log(`✅ CARDÁPIO: Imagem carregada com sucesso`);
+                }}
+              />
+            </div>
           ) : docUrl ? (
-            <img
-              src={docUrl}
-              alt="Cardápio Semanal (Original)"
-              className="object-contain shadow-lg transition-transform duration-200"
-              style={{
-                transform: `scale(${zoomLevel})`,
-                maxWidth: zoomLevel > 1 ? 'none' : '100%',
-                maxHeight: zoomLevel > 1 ? 'none' : '100%'
-              }}
-              onError={(e) => {
-                console.error("❌ CARDÁPIO: Erro ao carregar arquivo original:", docUrl);
-                (e.target as HTMLImageElement).style.display = 'none';
-              }}
-              onLoad={() => {
-                console.log(`✅ CARDÁPIO: Arquivo original carregado`);
-              }}
-            />
+            <div className="w-full h-full flex items-center justify-center overflow-auto">
+              <img
+                src={docUrl}
+                alt="Cardápio Semanal (Original)"
+                className="object-contain shadow-lg transition-transform duration-200"
+                style={{
+                  transform: `scale(${zoomLevel})`,
+                  transformOrigin: 'center center',
+                  maxWidth: '100%',
+                  maxHeight: '100%'
+                }}
+                onError={(e) => {
+                  console.error("❌ CARDÁPIO: Erro ao carregar arquivo original:", docUrl);
+                  (e.target as HTMLImageElement).style.display = 'none';
+                }}
+                onLoad={() => {
+                  console.log(`✅ CARDÁPIO: Arquivo original carregado`);
+                }}
+              />
+            </div>
           ) : (
             <div className="text-center text-gray-500">
               <div className="text-4xl mb-4">🍽️</div>
