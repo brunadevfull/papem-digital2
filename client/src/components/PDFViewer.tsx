@@ -249,6 +249,23 @@ const PDFViewer: React.FC<PDFViewerProps> = ({
   const containerRef = useRef<HTMLDivElement>(null);
   const restartTimerRef = useRef<NodeJS.Timeout | null>(null);
 
+  // Estados para controle de zoom
+  const [zoomLevel, setZoomLevel] = useState(1);
+  const [showZoomControls, setShowZoomControls] = useState(false);
+
+  // Funções de controle de zoom
+  const handleZoomIn = () => {
+    setZoomLevel(prev => Math.min(prev + 0.25, 3)); // Máximo 3x
+  };
+
+  const handleZoomOut = () => {
+    setZoomLevel(prev => Math.max(prev - 0.25, 0.5)); // Mínimo 0.5x
+  };
+
+  const handleResetZoom = () => {
+    setZoomLevel(1);
+  };
+
   // Configurações
   const getScrollSpeed = () => {
     switch (scrollSpeed) {
@@ -1278,12 +1295,17 @@ useEffect(() => {
       }
 
       return (
-        <div className="w-full h-full flex items-center justify-center p-4">
+        <div className="w-full h-full flex items-center justify-center p-4 overflow-auto">
           {escalaImageUrl ? (
             <img
               src={escalaImageUrl}
               alt="Escala de Serviço"
-              className="max-w-full max-h-full object-contain shadow-lg"
+              className="object-contain shadow-lg transition-transform duration-200"
+              style={{
+                transform: `scale(${zoomLevel})`,
+                maxWidth: zoomLevel > 1 ? 'none' : '100%',
+                maxHeight: zoomLevel > 1 ? 'none' : '100%'
+              }}
               onError={(e) => {
                 console.error("❌ ESCALA: Erro ao carregar imagem:", escalaImageUrl);
                 setEscalaError("Falha ao exibir a imagem da escala");
@@ -1297,7 +1319,12 @@ useEffect(() => {
             <img
               src={docUrl}
               alt="Escala de Serviço (Original)"
-              className="max-w-full max-h-full object-contain shadow-lg"
+              className="object-contain shadow-lg transition-transform duration-200"
+              style={{
+                transform: `scale(${zoomLevel})`,
+                maxWidth: zoomLevel > 1 ? 'none' : '100%',
+                maxHeight: zoomLevel > 1 ? 'none' : '100%'
+              }}
               onError={(e) => {
                 console.error("❌ ESCALA: Erro ao carregar arquivo original:", docUrl);
                 setEscalaError("Falha ao carregar o arquivo da escala");
@@ -1328,12 +1355,17 @@ useEffect(() => {
       });
 
       return (
-        <div className="w-full h-full flex items-center justify-center p-4">
+        <div className="w-full h-full flex items-center justify-center p-4 overflow-auto">
           {cardapioImageUrl ? (
             <img
               src={cardapioImageUrl}
               alt="Cardápio Semanal"
-              className="max-w-full max-h-full object-contain shadow-lg"
+              className="object-contain shadow-lg transition-transform duration-200"
+              style={{
+                transform: `scale(${zoomLevel})`,
+                maxWidth: zoomLevel > 1 ? 'none' : '100%',
+                maxHeight: zoomLevel > 1 ? 'none' : '100%'
+              }}
               onError={(e) => {
                 console.error("❌ CARDÁPIO: Erro ao carregar imagem:", cardapioImageUrl);
                 (e.target as HTMLImageElement).style.display = 'none';
@@ -1346,7 +1378,12 @@ useEffect(() => {
             <img
               src={docUrl}
               alt="Cardápio Semanal (Original)"
-              className="max-w-full max-h-full object-contain shadow-lg"
+              className="object-contain shadow-lg transition-transform duration-200"
+              style={{
+                transform: `scale(${zoomLevel})`,
+                maxWidth: zoomLevel > 1 ? 'none' : '100%',
+                maxHeight: zoomLevel > 1 ? 'none' : '100%'
+              }}
               onError={(e) => {
                 console.error("❌ CARDÁPIO: Erro ao carregar arquivo original:", docUrl);
                 (e.target as HTMLImageElement).style.display = 'none';
@@ -1472,11 +1509,15 @@ useEffect(() => {
 
 
 
-<CardHeader className={`relative text-white border-b space-y-0 py-1.5 px-3 ${
-  documentType === "cardapio" 
-    ? "bg-gradient-to-r from-orange-700 via-amber-600 to-orange-700 border-orange-400/40 shadow-lg" 
-    : "bg-gradient-to-r from-slate-700 via-blue-800 to-slate-700 border-blue-400/30"
-}`}>
+<CardHeader
+  className={`relative text-white border-b space-y-0 py-1.5 px-3 ${
+    documentType === "cardapio"
+      ? "bg-gradient-to-r from-orange-700 via-amber-600 to-orange-700 border-orange-400/40 shadow-lg"
+      : "bg-gradient-to-r from-slate-700 via-blue-800 to-slate-700 border-blue-400/30"
+  }`}
+  onMouseEnter={() => (documentType === "escala" || documentType === "cardapio") && setShowZoomControls(true)}
+  onMouseLeave={() => setShowZoomControls(false)}
+>
   {/* Efeito de brilho melhorado baseado no tipo */}
   <div className={`absolute inset-0 ${
     documentType === "cardapio" 
@@ -1543,6 +1584,57 @@ useEffect(() => {
   </div>
   
   <div className="flex items-center space-x-2">
+    {/* Controles de zoom que aparecem no hover */}
+    {(documentType === "escala" || documentType === "cardapio") && (
+      <div
+        className={`flex items-center gap-1 transition-all duration-300 ${
+          showZoomControls ? 'opacity-100 scale-100' : 'opacity-0 scale-90 pointer-events-none'
+        } ${
+          documentType === "cardapio"
+            ? "bg-orange-600/70 backdrop-blur-sm border-orange-400/40"
+            : "bg-slate-600/70 backdrop-blur-sm border-slate-400/40"
+        } rounded-lg px-2 py-1 border shadow-lg`}
+      >
+        <button
+          onClick={handleZoomOut}
+          disabled={zoomLevel <= 0.5}
+          className={`p-1 rounded transition-colors ${
+            documentType === "cardapio"
+              ? "hover:bg-orange-500/80 disabled:opacity-40"
+              : "hover:bg-slate-500/80 disabled:opacity-40"
+          } disabled:cursor-not-allowed`}
+          title="Diminuir zoom"
+        >
+          <span className="text-white text-sm font-bold">−</span>
+        </button>
+
+        <button
+          onClick={handleResetZoom}
+          className={`px-2 py-0.5 rounded text-[10px] font-bold transition-colors ${
+            documentType === "cardapio"
+              ? "hover:bg-orange-500/80 text-orange-100"
+              : "hover:bg-slate-500/80 text-slate-100"
+          }`}
+          title="Resetar zoom"
+        >
+          {Math.round(zoomLevel * 100)}%
+        </button>
+
+        <button
+          onClick={handleZoomIn}
+          disabled={zoomLevel >= 3}
+          className={`p-1 rounded transition-colors ${
+            documentType === "cardapio"
+              ? "hover:bg-orange-500/80 disabled:opacity-40"
+              : "hover:bg-slate-500/80 disabled:opacity-40"
+          } disabled:cursor-not-allowed`}
+          title="Aumentar zoom"
+        >
+          <span className="text-white text-sm font-bold">+</span>
+        </button>
+      </div>
+    )}
+
     {/* Indicador OFICIAIS | PRAÇAS fixo com ícones para ESCALA */}
     {documentType === "escala" && (() => {
       const currentEscala = getCurrentEscalaDoc() ?? activeEscalaDoc;
