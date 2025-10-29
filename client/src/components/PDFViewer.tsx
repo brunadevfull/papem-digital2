@@ -5,6 +5,7 @@ import { resolveBackendUrl } from "@/utils/backend";
 
 const IS_DEV_MODE = process.env.NODE_ENV === 'development';
 const MAX_RENDER_DIMENSION = 8192;
+const RENDER_DIMENSION_FALLBACKS = [8192, 7168, 6144, 5120, 4096];
 const IMAGE_EXPORT_FORMAT = 'image/png';
 
 const getViewportWidth = () => {
@@ -248,7 +249,13 @@ const PDFViewer: React.FC<PDFViewerProps> = ({
   const SCROLL_SPEED = getScrollSpeed();
   const RESTART_DELAY = autoRestartDelay * 1000;
   const devicePixelRatio = getDevicePixelRatio();
-  const getTargetRenderWidth = useCallback(() => {
+  const renderConstraintsRef = useRef<{ maxRenderDimension: number }>({ maxRenderDimension: MAX_RENDER_DIMENSION });
+  const getTargetRenderWidth = useCallback((overrideMaxDimension?: number) => {
+    const maxDimensionCandidate = overrideMaxDimension ?? renderConstraintsRef.current?.maxRenderDimension ?? MAX_RENDER_DIMENSION;
+    const maxDimension = Number.isFinite(maxDimensionCandidate) && maxDimensionCandidate > 0
+      ? Math.floor(maxDimensionCandidate)
+      : MAX_RENDER_DIMENSION;
+
     const containerWidth = containerRef.current?.clientWidth ?? 0;
     const fallbackWidth = getViewportWidth();
     const baseWidth = containerWidth > 0 ? containerWidth : fallbackWidth;
@@ -257,21 +264,25 @@ const PDFViewer: React.FC<PDFViewerProps> = ({
       ? targetWidth
       : fallbackWidth;
 
-    return Math.min(Math.max(safeTargetWidth, baseWidth), MAX_RENDER_DIMENSION);
+    return Math.min(Math.max(safeTargetWidth, baseWidth), maxDimension);
   }, [devicePixelRatio]);
 
-  const calculateRenderScale = useCallback((viewportDimensions: { width: number; height: number }) => {
+  const calculateRenderScale = useCallback((viewportDimensions: { width: number; height: number }, overrideMaxDimension?: number) => {
     const { width, height } = viewportDimensions;
     const originalWidth = Math.max(width, 1);
     const originalHeight = Math.max(height, 1);
-    const targetRenderWidth = getTargetRenderWidth();
+    const maxDimensionCandidate = overrideMaxDimension ?? renderConstraintsRef.current?.maxRenderDimension ?? MAX_RENDER_DIMENSION;
+    const maxDimension = Number.isFinite(maxDimensionCandidate) && maxDimensionCandidate > 0
+      ? maxDimensionCandidate
+      : MAX_RENDER_DIMENSION;
+    const targetRenderWidth = getTargetRenderWidth(maxDimension);
 
     let desiredScale = targetRenderWidth / originalWidth;
     if (!Number.isFinite(desiredScale) || desiredScale <= 0) {
       desiredScale = 1;
     }
 
-    const maxScale = MAX_RENDER_DIMENSION / Math.max(originalWidth, originalHeight);
+    const maxScale = maxDimension / Math.max(originalWidth, originalHeight);
     if (Number.isFinite(maxScale) && maxScale > 0) {
       desiredScale = Math.min(desiredScale, maxScale);
     }
@@ -942,6 +953,8 @@ useEffect(() => {
       const documentId = currentDoc.id;
       console.log(`🔄 ${target.toUpperCase()}: Iniciando conversão para ID: ${documentId}`);
 
+      renderConstraintsRef.current.maxRenderDimension = MAX_RENDER_DIMENSION;
+
       setLoading(true);
       setLoadingProgress(0);
 
@@ -1007,105 +1020,199 @@ useEffect(() => {
         useSystemFonts: true
       });
 
-      const pdf = await loadingTask.promise;
-      console.log(`📄 ${target.toUpperCase()}: PDF carregado - ${pdf.numPages} página(s)`);
+      let pdf: any | null = null;
+      let page: any | null = null;
+      let renderedCanvas: HTMLCanvasElement | null = null;
 
-      const page = await pdf.getPage(1);
+      const cleanupResources = () => {
+        if (renderedCanvas) {
+          renderedCanvas.width = 0;
+          renderedCanvas.height = 0;
+          renderedCanvas = null;
+        }
 
-      const originalViewport = page.getViewport({ scale: 1.0 });
-      const appliedScale = calculateRenderScale({
-        width: originalViewport.width,
-        height: originalViewport.height,
-      });
-      const viewport = page.getViewport({ scale: appliedScale });
+        try {
+          page?.cleanup();
+        } catch (cleanupError) {
+          console.warn(`⚠️ ${target.toUpperCase()}: Falha ao liberar página renderizada:`, cleanupError);
+        }
 
-      console.log(`📐 ${target.toUpperCase()}: Dimensões - ${viewport.width}x${viewport.height} (escala: ${appliedScale})`);
-
-      const canvas = document.createElement('canvas');
-      const context = canvas.getContext('2d', {
-        alpha: false,
-        willReadFrequently: false
-      });
-
-      if (!context) {
-        throw new Error('Falha ao criar contexto do canvas');
-      }
-
-      context.imageSmoothingEnabled = true;
-      context.imageSmoothingQuality = 'high';
-
-      const renderWidth = Math.min(MAX_RENDER_DIMENSION, Math.ceil(viewport.width));
-      const renderHeight = Math.min(MAX_RENDER_DIMENSION, Math.ceil(viewport.height));
-
-      canvas.height = renderHeight;
-      canvas.width = renderWidth;
-
-      context.fillStyle = '#FFFFFF';
-      context.fillRect(0, 0, canvas.width, canvas.height);
-
-      const renderContext = {
-        canvasContext: context,
-        viewport: viewport,
-        background: '#FFFFFF',
-        intent: 'display'
+        try {
+          pdf?.destroy();
+        } catch (destroyError) {
+          console.warn(`⚠️ ${target.toUpperCase()}: Falha ao destruir documento PDF:`, destroyError);
+        }
       };
 
-      console.log(`🎨 ${target.toUpperCase()}: Renderizando página...`);
+      const renderPageWithAdaptiveScale = async (
+        initialScale: number,
+        viewportDimensions: { width: number; height: number },
+        dimensionCandidates: number[],
+      ) => {
+        const MAX_ATTEMPTS_PER_DIMENSION = 3;
+        const SCALE_REDUCTION_FACTOR = 0.85;
+        const MIN_RENDER_SCALE = 0.6;
+        const RENDER_TIMEOUT_MS = 45000;
+        const TIMEOUT_ERROR_CODE = 'PDF_RENDER_TIMEOUT';
 
-      const renderPromise = page.render(renderContext).promise;
-      const timeoutPromise = new Promise((_, reject) =>
-        setTimeout(() => reject(new Error('Timeout na renderização')), 60000)
-      );
+        const sanitizedCandidates = dimensionCandidates
+          .filter(dim => Number.isFinite(dim) && dim > 0)
+          .map(dim => Math.floor(dim))
+          .filter((dim, index, arr) => arr.indexOf(dim) === index)
+          .sort((a, b) => b - a);
 
-      await Promise.race([renderPromise, timeoutPromise]);
+        for (const maxDimension of sanitizedCandidates) {
+          renderConstraintsRef.current.maxRenderDimension = maxDimension;
 
-      console.log(`✅ ${target.toUpperCase()}: Página renderizada com sucesso`);
+          let attemptScale = Math.min(
+            initialScale,
+            calculateRenderScale(viewportDimensions, maxDimension)
+          );
 
-      if (target === "escala") {
-        try {
-          const imageDataUrl = canvas.toDataURL(IMAGE_EXPORT_FORMAT);
+          for (let attempt = 1; attempt <= MAX_ATTEMPTS_PER_DIMENSION; attempt++) {
+            const viewport = page!.getViewport({ scale: attemptScale });
+            const renderWidth = Math.min(maxDimension, Math.ceil(viewport.width));
+            const renderHeight = Math.min(maxDimension, Math.ceil(viewport.height));
 
-          const saveResponse = await fetch(getBackendUrl('/api/save-escala-cache'), {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-              escalId: documentId,
-              imageData: imageDataUrl
-            })
-          });
+            const canvas = document.createElement('canvas');
+            const context = canvas.getContext('2d', {
+              alpha: false,
+              willReadFrequently: false
+            });
 
-          if (saveResponse.ok) {
-            const saveResult = await saveResponse.json();
-            const cachedPath = saveResult?.data?.url ?? saveResult?.url;
-
-            if (cachedPath) {
-              const resolvedCachedUrl = getBackendUrl(cachedPath);
-              console.log(`✅ ESCALA: Salvo no servidor. Caminho resolvido: ${resolvedCachedUrl}`);
-              setImageUrl(resolvedCachedUrl);
-            } else {
-              console.warn('⚠️ ESCALA: Resposta do servidor sem URL, usando dataURL.');
-              setImageUrl(imageDataUrl);
+            if (!context) {
+              throw new Error('Falha ao criar contexto do canvas');
             }
-          } else {
-            throw new Error(`Servidor retornou ${saveResponse.status}`);
+
+            context.imageSmoothingEnabled = true;
+            context.imageSmoothingQuality = 'high';
+
+            canvas.height = renderHeight;
+            canvas.width = renderWidth;
+
+            context.fillStyle = '#FFFFFF';
+            context.fillRect(0, 0, canvas.width, canvas.height);
+
+            const renderTask = page!.render({
+              canvasContext: context,
+              viewport,
+              background: '#FFFFFF',
+              intent: 'display'
+            });
+
+            console.log(`🎨 ${target.toUpperCase()}: Tentativa ${attempt} na dimensão ${maxDimension}px (escala ${attemptScale.toFixed(2)})...`);
+
+            try {
+              await new Promise<void>((resolve, reject) => {
+                const timeoutId: ReturnType<typeof setTimeout> = setTimeout(() => {
+                  renderTask.cancel();
+                  reject(new Error(TIMEOUT_ERROR_CODE));
+                }, RENDER_TIMEOUT_MS);
+
+                renderTask.promise
+                  .then(() => {
+                    clearTimeout(timeoutId);
+                    resolve();
+                  })
+                  .catch((renderError: unknown) => {
+                    clearTimeout(timeoutId);
+                    reject(renderError);
+                  });
+              });
+
+              console.log(`✅ ${target.toUpperCase()}: Página renderizada na dimensão ${maxDimension}px na tentativa ${attempt}`);
+              return { canvas, viewport, maxDimensionUsed: maxDimension };
+            } catch (renderError) {
+              canvas.width = 0;
+              canvas.height = 0;
+
+              if (renderError instanceof Error && renderError.message === TIMEOUT_ERROR_CODE) {
+                console.warn(`⚠️ ${target.toUpperCase()}: Renderização excedeu ${RENDER_TIMEOUT_MS / 1000}s na tentativa ${attempt} (limite ${maxDimension}px).`);
+
+                if (attempt === MAX_ATTEMPTS_PER_DIMENSION) {
+                  console.warn(`↘️ ${target.toUpperCase()}: Reduzindo limite máximo de renderização para próxima tentativa.`);
+                  break;
+                }
+
+                attemptScale = Math.max(attemptScale * SCALE_REDUCTION_FACTOR, MIN_RENDER_SCALE);
+                continue;
+              }
+
+              throw renderError;
+            }
           }
-        } catch (saveError) {
-          console.warn(`⚠️ ESCALA: Falha ao salvar cache, usando dataURL:`, saveError);
-          const imageDataUrl = canvas.toDataURL(IMAGE_EXPORT_FORMAT);
+        }
+
+        throw new Error('Timeout na renderização');
+      };
+
+      try {
+        pdf = await loadingTask.promise;
+        console.log(`📄 ${target.toUpperCase()}: PDF carregado - ${pdf.numPages} página(s)`);
+
+        page = await pdf.getPage(1);
+
+        const originalViewport = page.getViewport({ scale: 1.0 });
+        const appliedScale = calculateRenderScale({
+          width: originalViewport.width,
+          height: originalViewport.height,
+        });
+
+        const { canvas, viewport, maxDimensionUsed } = await renderPageWithAdaptiveScale(
+          appliedScale,
+          { width: originalViewport.width, height: originalViewport.height },
+          RENDER_DIMENSION_FALLBACKS,
+        );
+        renderedCanvas = canvas;
+
+        console.log(`📐 ${target.toUpperCase()}: Dimensões finais - ${viewport.width}x${viewport.height} (limite aplicado: ${maxDimensionUsed}px)`);
+
+        if (target === "escala") {
+          try {
+            const imageDataUrl = renderedCanvas.toDataURL(IMAGE_EXPORT_FORMAT);
+
+            const saveResponse = await fetch(getBackendUrl('/api/save-escala-cache'), {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+              },
+              body: JSON.stringify({
+                escalId: documentId,
+                imageData: imageDataUrl
+              })
+            });
+
+            if (saveResponse.ok) {
+              const saveResult = await saveResponse.json();
+              const cachedPath = saveResult?.data?.url ?? saveResult?.url;
+
+              if (cachedPath) {
+                const resolvedCachedUrl = getBackendUrl(cachedPath);
+                console.log(`✅ ESCALA: Salvo no servidor. Caminho resolvido: ${resolvedCachedUrl}`);
+                setImageUrl(resolvedCachedUrl);
+              } else {
+                console.warn('⚠️ ESCALA: Resposta do servidor sem URL, usando dataURL.');
+                setImageUrl(imageDataUrl);
+              }
+            } else {
+              throw new Error(`Servidor retornou ${saveResponse.status}`);
+            }
+          } catch (saveError) {
+            console.warn(`⚠️ ESCALA: Falha ao salvar cache, usando dataURL:`, saveError);
+            const imageDataUrl = renderedCanvas.toDataURL(IMAGE_EXPORT_FORMAT);
+            setImageUrl(imageDataUrl);
+          }
+        } else {
+          const imageDataUrl = renderedCanvas.toDataURL(IMAGE_EXPORT_FORMAT);
           setImageUrl(imageDataUrl);
         }
-      } else {
-        const imageDataUrl = canvas.toDataURL(IMAGE_EXPORT_FORMAT);
-        setImageUrl(imageDataUrl);
+
+        setLoading(false);
+        console.log(`🎉 ${target.toUpperCase()}: Conversão concluída com sucesso!`);
+      } finally {
+        cleanupResources();
+        renderConstraintsRef.current.maxRenderDimension = MAX_RENDER_DIMENSION;
       }
-
-      page.cleanup();
-      pdf.destroy();
-
-      setLoading(false);
-      console.log(`🎉 ${target.toUpperCase()}: Conversão concluída com sucesso!`);
 
     } catch (error) {
       console.error(`❌ ${target.toUpperCase()}: Erro crítico na conversão:`, error);
