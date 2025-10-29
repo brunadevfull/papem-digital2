@@ -1083,12 +1083,14 @@ useEffect(() => {
       return (
         <div className="w-full">
           {savedPageUrls.map((pageUrl, index) => (
-            <div key={index} className="w-full mb-4">
+            <div key={pageUrl} className="w-full mb-4">
               <img
                 src={pageUrl}
                 alt={`PLASA - Página ${index + 1}`}
                 className="w-full h-auto block shadow-sm"
                 style={{ maxWidth: '100%' }}
+                loading={index < 2 ? "eager" : "lazy"}
+                decoding="async"
                 onError={(e) => {
                   console.error(`❌ Erro ao carregar página ${index + 1}:`, pageUrl);
                   (e.target as HTMLImageElement).src = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iODAwIiBoZWlnaHQ9IjYwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iODAwIiBoZWlnaHQ9IjYwMCIgZmlsbD0iI2Y4ZjhmOCIvPjx0ZXh0IHg9IjQwMCIgeT0iMzAwIiBmb250LWZhbWlseT0iQXJpYWwiIGZvbnQtc2l6ZT0iMjQiIGZpbGw9IiM5OTkiIHRleHQtYW5jaG9yPSJtaWRkbGUiPkVycm8gYW8gY2FycmVnYXIgcMOhZ2luYSAke2luZGV4ICsgMX08L3RleHQ+PC9zdmc+';
@@ -1167,6 +1169,8 @@ useEffect(() => {
               style={{
                 imageRendering: 'crisp-edges' as const,
               }}
+              loading="eager"
+              decoding="async"
               onError={(e) => {
                 console.error("❌ ESCALA: Erro ao carregar imagem:", escalaImageUrl);
                 setEscalaError("Falha ao exibir a imagem da escala");
@@ -1184,6 +1188,8 @@ useEffect(() => {
               style={{
                 imageRendering: 'crisp-edges' as const,
               }}
+              loading="eager"
+              decoding="async"
               onError={(e) => {
                 console.error("❌ ESCALA: Erro ao carregar arquivo original:", docUrl);
                 setEscalaError("Falha ao carregar o arquivo da escala");
@@ -1223,6 +1229,8 @@ useEffect(() => {
               style={{
                 imageRendering: 'crisp-edges' as const,
               }}
+              loading="eager"
+              decoding="async"
               onError={(e) => {
                 console.error("❌ CARDÁPIO: Erro ao carregar imagem:", cardapioImageUrl);
                 (e.target as HTMLImageElement).style.display = 'none';
@@ -1239,6 +1247,8 @@ useEffect(() => {
               style={{
                 imageRendering: 'crisp-edges' as const,
               }}
+              loading="eager"
+              decoding="async"
               onError={(e) => {
                 console.error("❌ CARDÁPIO: Erro ao carregar arquivo original:", docUrl);
                 (e.target as HTMLImageElement).style.display = 'none';
