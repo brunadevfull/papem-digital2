@@ -1192,8 +1192,8 @@ useEffect(() => {
 
       if (escalaError && !loading) {
         return (
-          <div className="w-full h-full flex items-center justify-center p-4">
-            <div className="text-center max-w-md">
+          <div className="w-full h-full flex items-center justify-center p-0">
+            <div className="text-center max-w-md px-4">
               <div className="text-6xl mb-4">⚠️</div>
               <div className="text-red-600 font-bold text-lg mb-2">Erro ao carregar escala</div>
               <div className="text-gray-600 text-sm mb-4">{escalaError}</div>
@@ -1222,12 +1222,12 @@ useEffect(() => {
       }
 
       return (
-        <div className="w-full h-full flex items-center justify-center p-4">
+        <div className="w-full h-full flex items-center justify-center p-0">
           {escalaImageUrl ? (
             <img
               src={escalaImageUrl}
               alt="Escala de Serviço"
-              className="max-w-full max-h-full object-contain shadow-lg"
+              className="w-full h-full object-contain"
               onError={(e) => {
                 console.error("❌ ESCALA: Erro ao carregar imagem:", escalaImageUrl);
                 setEscalaError("Falha ao exibir a imagem da escala");
@@ -1241,7 +1241,7 @@ useEffect(() => {
             <img
               src={docUrl}
               alt="Escala de Serviço (Original)"
-              className="max-w-full max-h-full object-contain shadow-lg"
+              className="w-full h-full object-contain"
               onError={(e) => {
                 console.error("❌ ESCALA: Erro ao carregar arquivo original:", docUrl);
                 setEscalaError("Falha ao carregar o arquivo da escala");
@@ -1272,12 +1272,12 @@ useEffect(() => {
       });
 
       return (
-        <div className="w-full h-full flex items-center justify-center p-4">
+        <div className="w-full h-full flex items-center justify-center p-0">
           {cardapioImageUrl ? (
             <img
               src={cardapioImageUrl}
               alt="Cardápio Semanal"
-              className="max-w-full max-h-full object-contain shadow-lg"
+              className="w-full h-full object-contain"
               onError={(e) => {
                 console.error("❌ CARDÁPIO: Erro ao carregar imagem:", cardapioImageUrl);
                 (e.target as HTMLImageElement).style.display = 'none';
@@ -1290,7 +1290,7 @@ useEffect(() => {
             <img
               src={docUrl}
               alt="Cardápio Semanal (Original)"
-              className="max-w-full max-h-full object-contain shadow-lg"
+              className="w-full h-full object-contain"
               onError={(e) => {
                 console.error("❌ CARDÁPIO: Erro ao carregar arquivo original:", docUrl);
                 (e.target as HTMLImageElement).style.display = 'none';
@@ -1410,7 +1410,7 @@ useEffect(() => {
 
   return (
 
-    <Card className="h-full overflow-hidden border-0 shadow-none bg-transparent">
+    <Card className="h-full flex flex-col overflow-hidden border-0 shadow-none bg-transparent">
       {/* Header Estilizado com Gradiente */}
 
 
@@ -1592,7 +1592,7 @@ useEffect(() => {
 </CardTitle>
 </CardHeader>
       
-      <CardContent className="p-0 h-[calc(100%-2.5rem)] bg-white">
+      <CardContent className="flex-1 p-0 bg-white">
         {loading ? (
           <div className="flex flex-col items-center justify-center h-full">
             <div className="w-16 h-16 border-4 border-navy border-t-transparent rounded-full animate-spin"></div>
