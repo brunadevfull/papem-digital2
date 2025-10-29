@@ -372,7 +372,7 @@ const Index = () => {
         <div className="w-full lg:w-1/2 flex flex-col gap-1 flex-1 lg:flex-none lg:h-full">
           {/* Escala de Serviço - 65% da altura disponível */}
           
-    <div className="h-[55%] flex-shrink-0">
+    <div className="h-1/2 flex-shrink-0">
     <div className="h-full bg-gradient-to-br from-white/5 via-blue-900/20 to-white/5 backdrop-blur-sm rounded-lg border border-blue-400/25 shadow-xl hover:border-blue-400/40 transition-all duration-500 overflow-hidden">
       <PDFViewer
                 documentType="escala"
@@ -382,7 +382,7 @@ const Index = () => {
           </div>
 
 {/* Cardápio Semanal - 45% FIXO da altura disponível */}
-  <div className="h-[45%] flex-shrink-0 group">
+  <div className="h-1/2 flex-shrink-0 group">
     <div className="h-full relative bg-gradient-to-br from-orange-900/40 via-amber-900/30 to-yellow-900/40 backdrop-blur-md rounded-xl border border-orange-400/40 shadow-2xl hover:shadow-orange-500/20 hover:border-orange-400/60 transition-all duration-700 overflow-hidden">
       {/* Efeito de brilho animado */}
       <div className="absolute inset-0 bg-gradient-to-br from-orange-400/5 via-transparent to-yellow-400/5 opacity-0 group-hover:opacity-100 transition-opacity duration-700"></div>
