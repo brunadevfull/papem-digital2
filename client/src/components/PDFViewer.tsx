@@ -263,6 +263,9 @@ const PDFViewer: React.FC<PDFViewerProps> = ({
   const [showZoomControls, setShowZoomControls] = useState(false);
   const [zoomInputValue, setZoomInputValue] = useState("100");
 
+  // 🔒 REF para armazenar o ID do documento anterior
+  const previousDocIdRef = useRef<string | null>(null);
+
   // CORREÇÃO: Obter documento da escala atual
   const getCurrentEscalaDoc = useCallback(() => {
     const activeEscalas = escalaDocuments.filter(doc => doc.active && doc.type === "escala");
@@ -487,20 +490,8 @@ const PDFViewer: React.FC<PDFViewerProps> = ({
     }
   }, [documentType, getCurrentDocumentId, saveScrollToLocalStorage]);
 
-  // useEffect para restaurar o zoom ao mudar de documento (apenas escala e cardápio)
-  useEffect(() => {
-    const docId = getCurrentDocumentId();
-    if (docId) {
-      const savedZoom = loadZoomFromLocalStorage(docId);
-      setZoomLevel(savedZoom);
-      setZoomInputValue(Math.round(savedZoom * 100).toString());
-      console.log(`🔍 Zoom restaurado para documento ${docId}: ${savedZoom}`);
-    } else {
-      // Para PLASA, sempre resetar para 100%
-      setZoomLevel(1);
-      setZoomInputValue("100");
-    }
-  }, [documentType, currentEscalaIndex, activeCardapioDoc?.id, getCurrentDocumentId, loadZoomFromLocalStorage]);
+  // 🔄 REMOVIDO: Restauração de zoom agora acontece no onLoad das imagens
+  // para garantir que o zoom seja aplicado ANTES do scroll ser restaurado
 
   // useEffect para salvar o zoom sempre que ele mudar (apenas escala e cardápio)
   useEffect(() => {
@@ -510,35 +501,29 @@ const PDFViewer: React.FC<PDFViewerProps> = ({
     }
   }, [zoomLevel, getCurrentDocumentId, saveZoomToLocalStorage]);
 
-  // Função para restaurar scroll após imagem carregar
+  // Função para restaurar scroll após imagem carregar (APÓS zoom ser aplicado)
   const restoreScrollPosition = useCallback(() => {
     if (documentType === "plasa") return; // Não restaurar scroll para PLASA
 
     const docId = getCurrentDocumentId();
     const scrollContainer = scrollableContentRef.current || containerRef.current;
     if (docId && scrollContainer) {
-      const savedScroll = loadScrollFromLocalStorage(docId);
-      scrollContainer.scrollTop = savedScroll.scrollTop;
-      scrollContainer.scrollLeft = savedScroll.scrollLeft;
-      console.log(`🔄 Scroll restaurado para documento ${docId}: top=${savedScroll.scrollTop}, left=${savedScroll.scrollLeft}`);
+      // ⏰ ESPERAR um frame para garantir que o DOM foi atualizado com o zoom
+      requestAnimationFrame(() => {
+        const savedScroll = loadScrollFromLocalStorage(docId);
+        scrollContainer.scrollTop = savedScroll.scrollTop;
+        scrollContainer.scrollLeft = savedScroll.scrollLeft;
+        console.log(`🔄 Scroll restaurado para documento ${docId}: top=${savedScroll.scrollTop}, left=${savedScroll.scrollLeft} (zoom: ${zoomLevel})`);
+      });
     }
-  }, [documentType, currentEscalaIndex, activeCardapioDoc?.id, getCurrentDocumentId, loadScrollFromLocalStorage]);
+  }, [documentType, currentEscalaIndex, activeCardapioDoc?.id, getCurrentDocumentId, loadScrollFromLocalStorage, zoomLevel]);
 
   // 💾 REMOVIDO: Auto-save de scroll foi DESABILITADO
   // O scroll agora só é salvo quando o usuário SAI do modo editor
   // ou clica manualmente em "Salvar Posição"
 
-  // 🔄 useEffect para restaurar scroll quando o documento mudar
-  useEffect(() => {
-    if (documentType === "plasa") return; // Não restaurar scroll para PLASA
-
-    // Pequeno delay para garantir que o container está pronto
-    const timer = setTimeout(() => {
-      restoreScrollPosition();
-    }, 100);
-
-    return () => clearTimeout(timer);
-  }, [documentType, currentEscalaIndex, activeCardapioDoc?.id, restoreScrollPosition]);
+  // 🔄 REMOVIDO: Restauração de scroll agora acontece no onLoad das imagens
+  // após o zoom ser aplicado corretamente
 
   // Configurações
   const getScrollSpeed = () => {
@@ -1128,14 +1113,13 @@ const PDFViewer: React.FC<PDFViewerProps> = ({
   useEffect(() => {
     if (documentType === "escala") {
       const currentEscala = getCurrentEscalaDoc();
+      const currentDocId = currentEscala?.id ? `escala-${currentEscala.id}` : null;
 
       console.log("🔄 ESCALA Effect triggered:", {
         currentEscalaIndex,
-        totalActiveEscalas: escalaDocuments.filter(d => d.active && d.type === "escala").length,
         currentEscala: currentEscala?.title,
-        category: currentEscala?.category,
-        url: currentEscala?.url,
-        id: currentEscala?.id,
+        currentDocId,
+        previousDocId: previousDocIdRef.current,
         isEditMode
       });
 
@@ -1145,15 +1129,27 @@ const PDFViewer: React.FC<PDFViewerProps> = ({
         return;
       }
 
-      // 💾 SALVAR posição do documento anterior antes de trocar
-      const prevDocId = getCurrentDocumentId();
-      const scrollContainer = scrollableContentRef.current || containerRef.current;
-      if (prevDocId && scrollContainer && escalaImageUrl) {
-        const scrollTop = scrollContainer.scrollTop;
-        const scrollLeft = scrollContainer.scrollLeft;
-        console.log(`💾 ESCALA: Salvando posição do documento anterior: ${prevDocId}`);
-        saveScrollToLocalStorage(prevDocId, scrollTop, scrollLeft);
+      // 🔍 VERIFICAR se realmente mudou de documento
+      if (currentDocId === previousDocIdRef.current && escalaImageUrl) {
+        console.log("✅ ESCALA: Mesmo documento, não recarregar");
+        return;
       }
+
+      // 💾 SALVAR posição do documento anterior antes de trocar
+      if (previousDocIdRef.current && escalaImageUrl) {
+        const scrollContainer = scrollableContentRef.current || containerRef.current;
+        if (scrollContainer) {
+          const scrollTop = scrollContainer.scrollTop;
+          const scrollLeft = scrollContainer.scrollLeft;
+          console.log(`💾 ESCALA: Salvando posição do documento anterior: ${previousDocIdRef.current}`);
+          saveScrollToLocalStorage(previousDocIdRef.current, scrollTop, scrollLeft);
+          // Salvar zoom também
+          saveZoomToLocalStorage(previousDocIdRef.current, zoomLevel);
+        }
+      }
+
+      // Atualizar referência do documento anterior
+      previousDocIdRef.current = currentDocId;
 
       setEscalaImageUrl(null);
       setLoading(false);
@@ -1173,24 +1169,23 @@ const PDFViewer: React.FC<PDFViewerProps> = ({
           console.log("🖼️ ESCALA: É uma imagem, usando diretamente");
           setEscalaImageUrl(docUrl);
           setLoading(false);
-          // Restaurar scroll após um pequeno delay
-          setTimeout(() => restoreScrollPosition(), 100);
         }
       } else {
         setLoading(false);
       }
     }
-  }, [documentType, currentEscalaIndex, escalaDocuments, isEditMode]);
+  }, [documentType, currentEscalaIndex, isEditMode]);
 
   // NOVO: Inicializar CARDÁPIO
 useEffect(() => {
   if (documentType === "cardapio") {
     const currentCardapio = getCurrentCardapioDoc();
+    const currentDocId = currentCardapio?.id ? `cardapio-${currentCardapio.id}` : null;
 
     console.log("🔄 CARDÁPIO Effect triggered:", {
       currentCardapio: currentCardapio?.title,
-      url: currentCardapio?.url,
-      id: currentCardapio?.id,
+      currentDocId,
+      previousDocId: previousDocIdRef.current,
       isEditMode
     });
 
@@ -1200,15 +1195,27 @@ useEffect(() => {
       return;
     }
 
-    // 💾 SALVAR posição do documento anterior antes de trocar
-    const prevDocId = getCurrentDocumentId();
-    const scrollContainer = scrollableContentRef.current || containerRef.current;
-    if (prevDocId && scrollContainer && cardapioImageUrl) {
-      const scrollTop = scrollContainer.scrollTop;
-      const scrollLeft = scrollContainer.scrollLeft;
-      console.log(`💾 CARDÁPIO: Salvando posição do documento anterior: ${prevDocId}`);
-      saveScrollToLocalStorage(prevDocId, scrollTop, scrollLeft);
+    // 🔍 VERIFICAR se realmente mudou de documento
+    if (currentDocId === previousDocIdRef.current && cardapioImageUrl) {
+      console.log("✅ CARDÁPIO: Mesmo documento, não recarregar");
+      return;
     }
+
+    // 💾 SALVAR posição do documento anterior antes de trocar
+    if (previousDocIdRef.current && cardapioImageUrl) {
+      const scrollContainer = scrollableContentRef.current || containerRef.current;
+      if (scrollContainer) {
+        const scrollTop = scrollContainer.scrollTop;
+        const scrollLeft = scrollContainer.scrollLeft;
+        console.log(`💾 CARDÁPIO: Salvando posição do documento anterior: ${previousDocIdRef.current}`);
+        saveScrollToLocalStorage(previousDocIdRef.current, scrollTop, scrollLeft);
+        // Salvar zoom também
+        saveZoomToLocalStorage(previousDocIdRef.current, zoomLevel);
+      }
+    }
+
+    // Atualizar referência do documento anterior
+    previousDocIdRef.current = currentDocId;
 
     setCardapioImageUrl(null);
     setLoading(false);
@@ -1228,12 +1235,10 @@ useEffect(() => {
         console.log("🖼️ CARDÁPIO: É uma imagem");
         setCardapioImageUrl(docUrl);
         setLoading(false);
-        // Restaurar scroll após um pequeno delay
-        setTimeout(() => restoreScrollPosition(), 100);
       }
     }
   }
-}, [documentType, activeCardapioDoc, isEditMode]);
+}, [documentType, activeCardapioDoc?.id, isEditMode]);
   // ✅ FUNÇÃO: Verificar se URL é imagem
   const checkIfImageFile = async (url: string): Promise<boolean> => {
     try {
@@ -1350,19 +1355,15 @@ useEffect(() => {
           const cacheResponse = await fetch(getBackendUrl(`/api/check-escala-cache/${documentId}`));
           const cacheResult = await cacheResponse.json();
 
-          if (cacheResult.success && cacheResult.exists) {
+          if (cacheResult.success && cacheResult.cached) {
             console.log(`💾 ESCALA: Cache encontrado: ${cacheResult.url}`);
             const cachedUrl = getBackendUrl(cacheResult.url);
-            const minimumRenderWidth = Math.max(1, Math.floor(getTargetRenderWidth()));
-            const hasMinimumResolution = await ensureImageHasMinimumResolution(cachedUrl, minimumRenderWidth);
 
-            if (hasMinimumResolution) {
-              setImageUrl(cachedUrl);
-              setLoading(false);
-              return;
-            }
-
-            console.log('⚠️ ESCALA: Cache com resolução baixa detectado. Reprocessando documento.');
+            // ✅ USAR CACHE SEMPRE (não verificar resolução)
+            setImageUrl(cachedUrl);
+            setLoading(false);
+            console.log('✅ ESCALA: Usando cache existente (pulando reprocessamento)');
+            return;
           }
         } catch (cacheError) {
           console.warn("⚠️ ESCALA: Erro ao verificar cache:", cacheError);
@@ -1620,8 +1621,19 @@ useEffect(() => {
                   }}
                   onLoad={() => {
                     console.log(`✅ ESCALA: Imagem carregada com sucesso`);
-                    // Restaurar scroll DEPOIS que a imagem carregou
-                    restoreScrollPosition();
+                    // 🔄 Restaurar ZOOM primeiro, depois SCROLL
+                    const docId = getCurrentDocumentId();
+                    if (docId) {
+                      const savedZoom = loadZoomFromLocalStorage(docId);
+                      console.log(`🔍 ESCALA: Restaurando zoom ${savedZoom} antes do scroll`);
+                      setZoomLevel(savedZoom);
+                      setZoomInputValue(Math.round(savedZoom * 100).toString());
+
+                      // Esperar o zoom ser aplicado antes de restaurar o scroll
+                      setTimeout(() => {
+                        restoreScrollPosition();
+                      }, 150);
+                    }
                   }}
                 />
               </div>
@@ -1653,8 +1665,19 @@ useEffect(() => {
                   }}
                   onLoad={() => {
                     console.log(`✅ ESCALA: Arquivo original carregado`);
-                    // Restaurar scroll DEPOIS que a imagem carregou
-                    restoreScrollPosition();
+                    // 🔄 Restaurar ZOOM primeiro, depois SCROLL
+                    const docId = getCurrentDocumentId();
+                    if (docId) {
+                      const savedZoom = loadZoomFromLocalStorage(docId);
+                      console.log(`🔍 ESCALA: Restaurando zoom ${savedZoom} antes do scroll`);
+                      setZoomLevel(savedZoom);
+                      setZoomInputValue(Math.round(savedZoom * 100).toString());
+
+                      // Esperar o zoom ser aplicado antes de restaurar o scroll
+                      setTimeout(() => {
+                        restoreScrollPosition();
+                      }, 150);
+                    }
                   }}
                 />
               </div>
@@ -1707,8 +1730,19 @@ useEffect(() => {
                   }}
                   onLoad={() => {
                     console.log(`✅ CARDÁPIO: Imagem carregada com sucesso`);
-                    // Restaurar scroll DEPOIS que a imagem carregou
-                    restoreScrollPosition();
+                    // 🔄 Restaurar ZOOM primeiro, depois SCROLL
+                    const docId = getCurrentDocumentId();
+                    if (docId) {
+                      const savedZoom = loadZoomFromLocalStorage(docId);
+                      console.log(`🔍 CARDÁPIO: Restaurando zoom ${savedZoom} antes do scroll`);
+                      setZoomLevel(savedZoom);
+                      setZoomInputValue(Math.round(savedZoom * 100).toString());
+
+                      // Esperar o zoom ser aplicado antes de restaurar o scroll
+                      setTimeout(() => {
+                        restoreScrollPosition();
+                      }, 150);
+                    }
                   }}
                 />
               </div>
@@ -1739,8 +1773,19 @@ useEffect(() => {
                   }}
                   onLoad={() => {
                     console.log(`✅ CARDÁPIO: Arquivo original carregado`);
-                    // Restaurar scroll DEPOIS que a imagem carregou
-                    restoreScrollPosition();
+                    // 🔄 Restaurar ZOOM primeiro, depois SCROLL
+                    const docId = getCurrentDocumentId();
+                    if (docId) {
+                      const savedZoom = loadZoomFromLocalStorage(docId);
+                      console.log(`🔍 CARDÁPIO: Restaurando zoom ${savedZoom} antes do scroll`);
+                      setZoomLevel(savedZoom);
+                      setZoomInputValue(Math.round(savedZoom * 100).toString());
+
+                      // Esperar o zoom ser aplicado antes de restaurar o scroll
+                      setTimeout(() => {
+                        restoreScrollPosition();
+                      }, 150);
+                    }
                   }}
                 />
               </div>
