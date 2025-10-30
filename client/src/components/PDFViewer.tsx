@@ -255,6 +255,7 @@ const PDFViewer: React.FC<PDFViewerProps> = ({
 
   const scrollerRef = useRef<ContinuousAutoScroller | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
+  const scrollableContentRef = useRef<HTMLDivElement>(null); // ✅ Novo ref para container interno real
   const restartTimerRef = useRef<NodeJS.Timeout | null>(null);
 
   // Estados para controle de zoom
@@ -421,10 +422,11 @@ const PDFViewer: React.FC<PDFViewerProps> = ({
       setIsEditMode(true);
     } else {
       // SAINDO do modo editor
-      // 1. Salvar posição automaticamente
-      if (docId && containerRef.current) {
-        const scrollTop = containerRef.current.scrollTop;
-        const scrollLeft = containerRef.current.scrollLeft;
+      // 1. Salvar posição automaticamente do container INTERNO real
+      const scrollContainer = scrollableContentRef.current || containerRef.current;
+      if (docId && scrollContainer) {
+        const scrollTop = scrollContainer.scrollTop;
+        const scrollLeft = scrollContainer.scrollLeft;
         console.log(`💾 [MODO EDITOR] Salvando posição: docId=${docId}, top=${scrollTop}, left=${scrollLeft}`);
         saveScrollToLocalStorage(docId, scrollTop, scrollLeft);
 
@@ -432,7 +434,7 @@ const PDFViewer: React.FC<PDFViewerProps> = ({
         const saved = localStorage.getItem(`document-scroll-${docId}`);
         console.log(`✅ [MODO EDITOR] Verificação: localStorage['document-scroll-${docId}'] =`, saved);
       } else {
-        console.warn(`⚠️ [MODO EDITOR] Não foi possível salvar: docId=${docId}, containerRef=${!!containerRef.current}`);
+        console.warn(`⚠️ [MODO EDITOR] Não foi possível salvar: docId=${docId}, scrollContainer=${!!scrollContainer}`);
       }
 
       // 2. Retomar alternância automática
@@ -457,8 +459,9 @@ const PDFViewer: React.FC<PDFViewerProps> = ({
     if (documentType === "plasa") return; // Não salvar scroll para PLASA
 
     const docId = getCurrentDocumentId();
-    if (docId && containerRef.current) {
-      saveScrollToLocalStorage(docId, containerRef.current.scrollTop, containerRef.current.scrollLeft);
+    const scrollContainer = scrollableContentRef.current || containerRef.current;
+    if (docId && scrollContainer) {
+      saveScrollToLocalStorage(docId, scrollContainer.scrollTop, scrollContainer.scrollLeft);
 
       // Mostrar feedback visual
       setScrollSavedFeedback(true);
@@ -493,10 +496,11 @@ const PDFViewer: React.FC<PDFViewerProps> = ({
     if (documentType === "plasa") return; // Não restaurar scroll para PLASA
 
     const docId = getCurrentDocumentId();
-    if (docId && containerRef.current) {
+    const scrollContainer = scrollableContentRef.current || containerRef.current;
+    if (docId && scrollContainer) {
       const savedScroll = loadScrollFromLocalStorage(docId);
-      containerRef.current.scrollTop = savedScroll.scrollTop;
-      containerRef.current.scrollLeft = savedScroll.scrollLeft;
+      scrollContainer.scrollTop = savedScroll.scrollTop;
+      scrollContainer.scrollLeft = savedScroll.scrollLeft;
       console.log(`🔄 Scroll restaurado para documento ${docId}: top=${savedScroll.scrollTop}, left=${savedScroll.scrollLeft}`);
     }
   }, [documentType, getCurrentDocumentId, loadScrollFromLocalStorage]);
@@ -505,7 +509,7 @@ const PDFViewer: React.FC<PDFViewerProps> = ({
   useEffect(() => {
     if (documentType === "plasa") return; // Não salvar scroll para PLASA
 
-    const container = containerRef.current;
+    const container = scrollableContentRef.current || containerRef.current;
     if (!container) return;
 
     let scrollTimeout: NodeJS.Timeout;
@@ -1127,14 +1131,22 @@ const PDFViewer: React.FC<PDFViewerProps> = ({
         currentEscala: currentEscala?.title,
         category: currentEscala?.category,
         url: currentEscala?.url,
-        id: currentEscala?.id
+        id: currentEscala?.id,
+        isEditMode
       });
+
+      // 🔒 PROTEÇÃO: Não recarregar se estiver em modo editor
+      if (isEditMode) {
+        console.log("🔒 ESCALA: Modo editor ativo, ignorando recarregamento");
+        return;
+      }
 
       // 💾 SALVAR posição do documento anterior antes de trocar
       const prevDocId = getCurrentDocumentId();
-      if (prevDocId && containerRef.current && escalaImageUrl) {
-        const scrollTop = containerRef.current.scrollTop;
-        const scrollLeft = containerRef.current.scrollLeft;
+      const scrollContainer = scrollableContentRef.current || containerRef.current;
+      if (prevDocId && scrollContainer && escalaImageUrl) {
+        const scrollTop = scrollContainer.scrollTop;
+        const scrollLeft = scrollContainer.scrollLeft;
         console.log(`💾 ESCALA: Salvando posição do documento anterior: ${prevDocId}`);
         saveScrollToLocalStorage(prevDocId, scrollTop, scrollLeft);
       }
@@ -1164,7 +1176,7 @@ const PDFViewer: React.FC<PDFViewerProps> = ({
         setLoading(false);
       }
     }
-  }, [documentType, currentEscalaIndex, escalaDocuments]);
+  }, [documentType, currentEscalaIndex, escalaDocuments, isEditMode]);
 
   // NOVO: Inicializar CARDÁPIO
 useEffect(() => {
@@ -1174,14 +1186,22 @@ useEffect(() => {
     console.log("🔄 CARDÁPIO Effect triggered:", {
       currentCardapio: currentCardapio?.title,
       url: currentCardapio?.url,
-      id: currentCardapio?.id
+      id: currentCardapio?.id,
+      isEditMode
     });
+
+    // 🔒 PROTEÇÃO: Não recarregar se estiver em modo editor
+    if (isEditMode) {
+      console.log("🔒 CARDÁPIO: Modo editor ativo, ignorando recarregamento");
+      return;
+    }
 
     // 💾 SALVAR posição do documento anterior antes de trocar
     const prevDocId = getCurrentDocumentId();
-    if (prevDocId && containerRef.current && cardapioImageUrl) {
-      const scrollTop = containerRef.current.scrollTop;
-      const scrollLeft = containerRef.current.scrollLeft;
+    const scrollContainer = scrollableContentRef.current || containerRef.current;
+    if (prevDocId && scrollContainer && cardapioImageUrl) {
+      const scrollTop = scrollContainer.scrollTop;
+      const scrollLeft = scrollContainer.scrollLeft;
       console.log(`💾 CARDÁPIO: Salvando posição do documento anterior: ${prevDocId}`);
       saveScrollToLocalStorage(prevDocId, scrollTop, scrollLeft);
     }
@@ -1209,7 +1229,7 @@ useEffect(() => {
       }
     }
   }
-}, [documentType, activeCardapioDoc]);
+}, [documentType, activeCardapioDoc, isEditMode]);
   // ✅ FUNÇÃO: Verificar se URL é imagem
   const checkIfImageFile = async (url: string): Promise<boolean> => {
     try {
@@ -1570,7 +1590,7 @@ useEffect(() => {
       return (
         <div className="w-full h-full flex items-center justify-center p-4">
           {escalaImageUrl ? (
-            <div className="w-full h-full overflow-auto">
+            <div className="w-full h-full overflow-auto" ref={scrollableContentRef}>
               <div style={{
                 minHeight: `${100 * zoomLevel}%`,
                 minWidth: `${100 * zoomLevel}%`,
@@ -1603,7 +1623,7 @@ useEffect(() => {
               </div>
             </div>
           ) : docUrl ? (
-            <div className="w-full h-full overflow-auto">
+            <div className="w-full h-full overflow-auto" ref={scrollableContentRef}>
               <div style={{
                 minHeight: `${100 * zoomLevel}%`,
                 minWidth: `${100 * zoomLevel}%`,
@@ -1658,7 +1678,7 @@ useEffect(() => {
       return (
         <div className="w-full h-full flex items-center justify-center p-4">
           {cardapioImageUrl ? (
-            <div className="w-full h-full overflow-auto">
+            <div className="w-full h-full overflow-auto" ref={scrollableContentRef}>
               <div style={{
                 minHeight: `${100 * zoomLevel}%`,
                 minWidth: `${100 * zoomLevel}%`,
@@ -1690,7 +1710,7 @@ useEffect(() => {
               </div>
             </div>
           ) : docUrl ? (
-            <div className="w-full h-full overflow-auto">
+            <div className="w-full h-full overflow-auto" ref={scrollableContentRef}>
               <div style={{
                 minHeight: `${100 * zoomLevel}%`,
                 minWidth: `${100 * zoomLevel}%`,
