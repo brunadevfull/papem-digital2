@@ -255,13 +255,6 @@ const PDFViewer: React.FC<PDFViewerProps> = ({
 
   const scrollerRef = useRef<ContinuousAutoScroller | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
-  const scrollContainerRef = useRef<HTMLDivElement | null>(null);
-  const setScrollContainerRef = useCallback((node: HTMLDivElement | null) => {
-    scrollContainerRef.current = node;
-  }, []);
-  const getScrollContainer = useCallback(() => {
-    return scrollContainerRef.current ?? containerRef.current;
-  }, [containerRef, scrollContainerRef]);
   const restartTimerRef = useRef<NodeJS.Timeout | null>(null);
 
   // Estados para controle de zoom
@@ -429,11 +422,9 @@ const PDFViewer: React.FC<PDFViewerProps> = ({
     } else {
       // SAINDO do modo editor
       // 1. Salvar posição automaticamente
-      const scrollContainer = getScrollContainer();
-
-      if (docId && scrollContainer) {
-        const scrollTop = scrollContainer.scrollTop;
-        const scrollLeft = scrollContainer.scrollLeft;
+      if (docId && containerRef.current) {
+        const scrollTop = containerRef.current.scrollTop;
+        const scrollLeft = containerRef.current.scrollLeft;
         console.log(`💾 [MODO EDITOR] Salvando posição: docId=${docId}, top=${scrollTop}, left=${scrollLeft}`);
         saveScrollToLocalStorage(docId, scrollTop, scrollLeft);
 
@@ -441,7 +432,7 @@ const PDFViewer: React.FC<PDFViewerProps> = ({
         const saved = localStorage.getItem(`document-scroll-${docId}`);
         console.log(`✅ [MODO EDITOR] Verificação: localStorage['document-scroll-${docId}'] =`, saved);
       } else {
-        console.warn(`⚠️ [MODO EDITOR] Não foi possível salvar: docId=${docId}, scrollContainer=${!!scrollContainer}`);
+        console.warn(`⚠️ [MODO EDITOR] Não foi possível salvar: docId=${docId}, containerRef=${!!containerRef.current}`);
       }
 
       // 2. Retomar alternância automática
@@ -459,31 +450,21 @@ const PDFViewer: React.FC<PDFViewerProps> = ({
       setScrollSavedFeedback(true);
       setTimeout(() => setScrollSavedFeedback(false), 2000);
     }
-  }, [
-    isEditMode,
-    documentType,
-    getCurrentDocumentId,
-    getScrollContainer,
-    saveScrollToLocalStorage,
-    setIsEscalaEditMode,
-    setIsCardapioEditMode
-  ]);
+  }, [isEditMode, documentType, getCurrentDocumentId, saveScrollToLocalStorage, setIsEscalaEditMode, setIsCardapioEditMode]);
 
   // Função para salvar manualmente a posição atual do scroll
   const handleSaveScrollPosition = useCallback(() => {
     if (documentType === "plasa") return; // Não salvar scroll para PLASA
 
     const docId = getCurrentDocumentId();
-    const scrollContainer = getScrollContainer();
-
-    if (docId && scrollContainer) {
-      saveScrollToLocalStorage(docId, scrollContainer.scrollTop, scrollContainer.scrollLeft);
+    if (docId && containerRef.current) {
+      saveScrollToLocalStorage(docId, containerRef.current.scrollTop, containerRef.current.scrollLeft);
 
       // Mostrar feedback visual
       setScrollSavedFeedback(true);
       setTimeout(() => setScrollSavedFeedback(false), 2000);
     }
-  }, [documentType, getCurrentDocumentId, getScrollContainer, saveScrollToLocalStorage]);
+  }, [documentType, getCurrentDocumentId, saveScrollToLocalStorage]);
 
   // useEffect para restaurar o zoom ao mudar de documento (apenas escala e cardápio)
   useEffect(() => {
@@ -512,14 +493,13 @@ const PDFViewer: React.FC<PDFViewerProps> = ({
     if (documentType === "plasa") return; // Não restaurar scroll para PLASA
 
     const docId = getCurrentDocumentId();
-    const scrollContainer = getScrollContainer();
-    if (docId && scrollContainer) {
+    if (docId && containerRef.current) {
       const savedScroll = loadScrollFromLocalStorage(docId);
-      scrollContainer.scrollTop = savedScroll.scrollTop;
-      scrollContainer.scrollLeft = savedScroll.scrollLeft;
+      containerRef.current.scrollTop = savedScroll.scrollTop;
+      containerRef.current.scrollLeft = savedScroll.scrollLeft;
       console.log(`🔄 Scroll restaurado para documento ${docId}: top=${savedScroll.scrollTop}, left=${savedScroll.scrollLeft}`);
     }
-  }, [documentType, getCurrentDocumentId, getScrollContainer, loadScrollFromLocalStorage]);
+  }, [documentType, getCurrentDocumentId, loadScrollFromLocalStorage]);
 
   // Configurações
   const getScrollSpeed = () => {
@@ -1108,11 +1088,6 @@ const PDFViewer: React.FC<PDFViewerProps> = ({
   // CORREÇÃO: Inicializar ESCALA com monitoramento do índice de alternância
   useEffect(() => {
     if (documentType === "escala") {
-      if (isEscalaEditMode) {
-        console.log("⏸️ ESCALA: Modo editor ativo, mantendo conteúdo atual sem recarregar.");
-        return;
-      }
-
       const currentEscala = getCurrentEscalaDoc();
       
       console.log("🔄 ESCALA Effect triggered:", {
@@ -1146,46 +1121,41 @@ const PDFViewer: React.FC<PDFViewerProps> = ({
         setLoading(false);
       }
     }
-  }, [documentType, currentEscalaIndex, escalaDocuments, isEscalaEditMode]);
+  }, [documentType, currentEscalaIndex, escalaDocuments]);
 
   // NOVO: Inicializar CARDÁPIO
-  useEffect(() => {
-    if (documentType === "cardapio") {
-      if (isCardapioEditMode) {
-        console.log("⏸️ CARDÁPIO: Modo editor ativo, mantendo conteúdo atual sem recarregar.");
-        return;
-      }
+useEffect(() => {
+  if (documentType === "cardapio") {
+    const currentCardapio = getCurrentCardapioDoc();
 
-      const currentCardapio = getCurrentCardapioDoc();
+    console.log("🔄 CARDÁPIO Effect triggered:", {
+      currentCardapio: currentCardapio?.title,
+      url: currentCardapio?.url,
+      id: currentCardapio?.id 
+    });
 
-      console.log("🔄 CARDÁPIO Effect triggered:", {
-        currentCardapio: currentCardapio?.title,
-        url: currentCardapio?.url,
-        id: currentCardapio?.id
-      });
+    setCardapioImageUrl(null);
+    setLoading(false);
+    setTotalPages(1);
 
-      setCardapioImageUrl(null);
-      setLoading(false);
-      setTotalPages(1);
+    if (currentCardapio?.url) {
+      const docUrl = getBackendUrl(currentCardapio.url);
+      console.log("🖼️ CARDÁPIO: Processando URL:", docUrl);
 
-      if (currentCardapio?.url) {
-        const docUrl = getBackendUrl(currentCardapio.url);
-        console.log("🖼️ CARDÁPIO: Processando URL:", docUrl);
+      const isPDF = docUrl.toLowerCase().includes('.pdf') || 
+                    currentCardapio.title.toLowerCase().includes('.pdf');
 
-        const isPDF =
-          docUrl.toLowerCase().includes('.pdf') || currentCardapio.title.toLowerCase().includes('.pdf');
-
-        if (isPDF) {
-          console.log("📄 CARDÁPIO: É um PDF, convertendo...");
-          convertEscalaPDFToImage(docUrl, { target: "cardapio" });
-        } else {
-          console.log("🖼️ CARDÁPIO: É uma imagem");
-          setCardapioImageUrl(docUrl);
-          setLoading(false);
-        }
+      if (isPDF) {
+        console.log("📄 CARDÁPIO: É um PDF, convertendo...");
+        convertEscalaPDFToImage(docUrl, { target: "cardapio" });
+      } else {
+        console.log("🖼️ CARDÁPIO: É uma imagem");
+        setCardapioImageUrl(docUrl);
+        setLoading(false);
       }
     }
-  }, [documentType, activeCardapioDoc, isCardapioEditMode]);
+  }
+}, [documentType, activeCardapioDoc]);
   // ✅ FUNÇÃO: Verificar se URL é imagem
   const checkIfImageFile = async (url: string): Promise<boolean> => {
     try {
@@ -1546,7 +1516,7 @@ const PDFViewer: React.FC<PDFViewerProps> = ({
       return (
         <div className="w-full h-full flex items-center justify-center p-4">
           {escalaImageUrl ? (
-            <div className="w-full h-full overflow-auto" ref={setScrollContainerRef}>
+            <div className="w-full h-full overflow-auto">
               <div style={{
                 minHeight: `${100 * zoomLevel}%`,
                 minWidth: `${100 * zoomLevel}%`,
@@ -1579,7 +1549,7 @@ const PDFViewer: React.FC<PDFViewerProps> = ({
               </div>
             </div>
           ) : docUrl ? (
-            <div className="w-full h-full overflow-auto" ref={setScrollContainerRef}>
+            <div className="w-full h-full overflow-auto">
               <div style={{
                 minHeight: `${100 * zoomLevel}%`,
                 minWidth: `${100 * zoomLevel}%`,
@@ -1634,7 +1604,7 @@ const PDFViewer: React.FC<PDFViewerProps> = ({
       return (
         <div className="w-full h-full flex items-center justify-center p-4">
           {cardapioImageUrl ? (
-            <div className="w-full h-full overflow-auto" ref={setScrollContainerRef}>
+            <div className="w-full h-full overflow-auto">
               <div style={{
                 minHeight: `${100 * zoomLevel}%`,
                 minWidth: `${100 * zoomLevel}%`,
@@ -1666,7 +1636,7 @@ const PDFViewer: React.FC<PDFViewerProps> = ({
               </div>
             </div>
           ) : docUrl ? (
-            <div className="w-full h-full overflow-auto" ref={setScrollContainerRef}>
+            <div className="w-full h-full overflow-auto">
               <div style={{
                 minHeight: `${100 * zoomLevel}%`,
                 minWidth: `${100 * zoomLevel}%`,
