@@ -501,6 +501,37 @@ const PDFViewer: React.FC<PDFViewerProps> = ({
     }
   }, [documentType, getCurrentDocumentId, loadScrollFromLocalStorage]);
 
+  // 💾 useEffect para salvar scroll automaticamente enquanto o usuário navega
+  useEffect(() => {
+    if (documentType === "plasa") return; // Não salvar scroll para PLASA
+
+    const container = containerRef.current;
+    if (!container) return;
+
+    let scrollTimeout: NodeJS.Timeout;
+
+    const handleScroll = () => {
+      // Debounce: salvar apenas após 500ms sem scroll
+      clearTimeout(scrollTimeout);
+      scrollTimeout = setTimeout(() => {
+        const docId = getCurrentDocumentId();
+        if (docId) {
+          const scrollTop = container.scrollTop;
+          const scrollLeft = container.scrollLeft;
+          saveScrollToLocalStorage(docId, scrollTop, scrollLeft);
+          console.log(`💾 Auto-save scroll: docId=${docId}, top=${scrollTop}, left=${scrollLeft}`);
+        }
+      }, 500);
+    };
+
+    container.addEventListener('scroll', handleScroll);
+
+    return () => {
+      clearTimeout(scrollTimeout);
+      container.removeEventListener('scroll', handleScroll);
+    };
+  }, [documentType, getCurrentDocumentId, saveScrollToLocalStorage]);
+
   // Configurações
   const getScrollSpeed = () => {
     switch (scrollSpeed) {
@@ -1089,16 +1120,25 @@ const PDFViewer: React.FC<PDFViewerProps> = ({
   useEffect(() => {
     if (documentType === "escala") {
       const currentEscala = getCurrentEscalaDoc();
-      
+
       console.log("🔄 ESCALA Effect triggered:", {
         currentEscalaIndex,
         totalActiveEscalas: escalaDocuments.filter(d => d.active && d.type === "escala").length,
         currentEscala: currentEscala?.title,
         category: currentEscala?.category,
         url: currentEscala?.url,
-        id: currentEscala?.id 
+        id: currentEscala?.id
       });
-      
+
+      // 💾 SALVAR posição do documento anterior antes de trocar
+      const prevDocId = getCurrentDocumentId();
+      if (prevDocId && containerRef.current && escalaImageUrl) {
+        const scrollTop = containerRef.current.scrollTop;
+        const scrollLeft = containerRef.current.scrollLeft;
+        console.log(`💾 ESCALA: Salvando posição do documento anterior: ${prevDocId}`);
+        saveScrollToLocalStorage(prevDocId, scrollTop, scrollLeft);
+      }
+
       setEscalaImageUrl(null);
       setLoading(false);
       setTotalPages(1);
@@ -1115,7 +1155,10 @@ const PDFViewer: React.FC<PDFViewerProps> = ({
           convertEscalaPDFToImage(docUrl);
         } else {
           console.log("🖼️ ESCALA: É uma imagem, usando diretamente");
+          setEscalaImageUrl(docUrl);
           setLoading(false);
+          // Restaurar scroll após um pequeno delay
+          setTimeout(() => restoreScrollPosition(), 100);
         }
       } else {
         setLoading(false);
@@ -1131,8 +1174,17 @@ useEffect(() => {
     console.log("🔄 CARDÁPIO Effect triggered:", {
       currentCardapio: currentCardapio?.title,
       url: currentCardapio?.url,
-      id: currentCardapio?.id 
+      id: currentCardapio?.id
     });
+
+    // 💾 SALVAR posição do documento anterior antes de trocar
+    const prevDocId = getCurrentDocumentId();
+    if (prevDocId && containerRef.current && cardapioImageUrl) {
+      const scrollTop = containerRef.current.scrollTop;
+      const scrollLeft = containerRef.current.scrollLeft;
+      console.log(`💾 CARDÁPIO: Salvando posição do documento anterior: ${prevDocId}`);
+      saveScrollToLocalStorage(prevDocId, scrollTop, scrollLeft);
+    }
 
     setCardapioImageUrl(null);
     setLoading(false);
@@ -1142,7 +1194,7 @@ useEffect(() => {
       const docUrl = getBackendUrl(currentCardapio.url);
       console.log("🖼️ CARDÁPIO: Processando URL:", docUrl);
 
-      const isPDF = docUrl.toLowerCase().includes('.pdf') || 
+      const isPDF = docUrl.toLowerCase().includes('.pdf') ||
                     currentCardapio.title.toLowerCase().includes('.pdf');
 
       if (isPDF) {
@@ -1152,6 +1204,8 @@ useEffect(() => {
         console.log("🖼️ CARDÁPIO: É uma imagem");
         setCardapioImageUrl(docUrl);
         setLoading(false);
+        // Restaurar scroll após um pequeno delay
+        setTimeout(() => restoreScrollPosition(), 100);
       }
     }
   }
