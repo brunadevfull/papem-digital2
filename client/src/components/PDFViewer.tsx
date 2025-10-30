@@ -476,12 +476,13 @@ const PDFViewer: React.FC<PDFViewerProps> = ({
       const savedZoom = loadZoomFromLocalStorage(docId);
       setZoomLevel(savedZoom);
       setZoomInputValue(Math.round(savedZoom * 100).toString());
+      console.log(`🔍 Zoom restaurado para documento ${docId}: ${savedZoom}`);
     } else {
       // Para PLASA, sempre resetar para 100%
       setZoomLevel(1);
       setZoomInputValue("100");
     }
-  }, [getCurrentDocumentId, loadZoomFromLocalStorage]);
+  }, [documentType, currentEscalaIndex, activeCardapioDoc, getCurrentDocumentId, loadZoomFromLocalStorage]);
 
   // useEffect para salvar o zoom sempre que ele mudar (apenas escala e cardápio)
   useEffect(() => {
@@ -503,7 +504,7 @@ const PDFViewer: React.FC<PDFViewerProps> = ({
       scrollContainer.scrollLeft = savedScroll.scrollLeft;
       console.log(`🔄 Scroll restaurado para documento ${docId}: top=${savedScroll.scrollTop}, left=${savedScroll.scrollLeft}`);
     }
-  }, [documentType, getCurrentDocumentId, loadScrollFromLocalStorage]);
+  }, [documentType, currentEscalaIndex, activeCardapioDoc, getCurrentDocumentId, loadScrollFromLocalStorage]);
 
   // 💾 useEffect para salvar scroll automaticamente enquanto o usuário navega
   useEffect(() => {
@@ -534,7 +535,19 @@ const PDFViewer: React.FC<PDFViewerProps> = ({
       clearTimeout(scrollTimeout);
       container.removeEventListener('scroll', handleScroll);
     };
-  }, [documentType, getCurrentDocumentId, saveScrollToLocalStorage]);
+  }, [documentType, currentEscalaIndex, activeCardapioDoc, getCurrentDocumentId, saveScrollToLocalStorage]);
+
+  // 🔄 useEffect para restaurar scroll quando o documento mudar
+  useEffect(() => {
+    if (documentType === "plasa") return; // Não restaurar scroll para PLASA
+
+    // Pequeno delay para garantir que o container está pronto
+    const timer = setTimeout(() => {
+      restoreScrollPosition();
+    }, 100);
+
+    return () => clearTimeout(timer);
+  }, [documentType, currentEscalaIndex, activeCardapioDoc, restoreScrollPosition]);
 
   // Configurações
   const getScrollSpeed = () => {
