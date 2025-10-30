@@ -43,7 +43,6 @@ interface DisplayContextType {
   scrollSpeed: "slow" | "normal" | "fast";
   autoRestartDelay: number;
   isLoading: boolean;
-  documentRefreshInterval: number; // ⏱️ Intervalo de atualização de documentos (em ms)
   isEscalaEditMode: boolean; // ✏️ Modo editor de escala
   isCardapioEditMode: boolean; // ✏️ Modo editor de cardápio
   addNotice: (notice: Omit<Notice, "id" | "createdAt" | "updatedAt">) => Promise<boolean>;
@@ -56,7 +55,6 @@ interface DisplayContextType {
   setCardapioAlternateInterval: (interval: number) => void;
   setScrollSpeed: (speed: "slow" | "normal" | "fast") => void;
   setAutoRestartDelay: (delay: number) => void;
-  setDocumentRefreshInterval: (interval: number) => void; // ⏱️ Configurar intervalo de refresh
   setIsEscalaEditMode: (isEditMode: boolean) => void; // ✏️ Alternar modo editor de escala
   setIsCardapioEditMode: (isEditMode: boolean) => void; // ✏️ Alternar modo editor de cardápio
   refreshNotices: () => Promise<void>;
@@ -92,7 +90,6 @@ export const DisplayProvider: React.FC<DisplayProviderProps> = ({ children }) =>
   const [scrollSpeed, setScrollSpeed] = useState<"slow" | "normal" | "fast">("normal");
   const [autoRestartDelay, setAutoRestartDelay] = useState(3);
   const [isLoading, setIsLoading] = useState(false);
-  const [documentRefreshInterval, setDocumentRefreshInterval] = useState(300000); // ⏱️ 300 segundos (5 minutos) padrão
   const [isEscalaEditMode, setIsEscalaEditMode] = useState(false); // ✏️ Modo editor de escala
   const [isCardapioEditMode, setIsCardapioEditMode] = useState(false); // ✏️ Modo editor de cardápio
 
@@ -100,7 +97,6 @@ export const DisplayProvider: React.FC<DisplayProviderProps> = ({ children }) =>
   const escalaTimerRef = useRef<NodeJS.Timeout | null>(null);
   const mainDocTimerRef = useRef<NodeJS.Timeout | null>(null);
   const isInitializingRef = useRef(true);
-  const documentRefreshTimerRef = useRef<NodeJS.Timeout | null>(null); // ⏱️ Timer para refresh de documentos
   
   // Callback para após completar scroll (apenas PLASA agora)
   const handleScrollComplete = () => {
@@ -781,11 +777,10 @@ useEffect(() => {
         escalaAlternateInterval,
         cardapioAlternateInterval,
         documentAlternateInterval: escalaAlternateInterval, // 🔙 Compatibilidade com versões anteriores
-        documentRefreshInterval, // ⏱️ Intervalo de polling
         scrollSpeed,
         autoRestartDelay,
         lastUpdate: new Date().toISOString(),
-        version: '3.2' // Adicionado polling de documentos
+        version: '3.3' // Removido polling (usando apenas SSE)
       };
 
       localStorage.setItem('display-context', JSON.stringify(contextData, null, 2));
@@ -803,7 +798,6 @@ useEffect(() => {
     currentCardapioIndex,
     escalaAlternateInterval,
     cardapioAlternateInterval,
-    documentRefreshInterval,
     scrollSpeed,
     autoRestartDelay
   ]);
@@ -1164,9 +1158,6 @@ useEffect(() => {
               setEscalaAlternateInterval(data.documentAlternateInterval);
               setCardapioAlternateInterval(data.documentAlternateInterval);
             }
-            if (typeof data.documentRefreshInterval === 'number') {
-              setDocumentRefreshInterval(data.documentRefreshInterval);
-            }
             if (data.scrollSpeed) setScrollSpeed(data.scrollSpeed);
             if (data.autoRestartDelay) setAutoRestartDelay(data.autoRestartDelay);
           } catch (parseError) {
@@ -1218,38 +1209,8 @@ useEffect(() => {
     }
   }, [activeEscalaDocuments.length, currentEscalaIndex]);
 
-  // ⏱️ Effect para polling periódico de documentos
-  useEffect(() => {
-    // Limpar timer existente
-    if (documentRefreshTimerRef.current) {
-      clearInterval(documentRefreshTimerRef.current);
-      documentRefreshTimerRef.current = null;
-    }
-
-    // Se o intervalo for 0, não iniciar polling (desabilitado)
-    if (documentRefreshInterval === 0) {
-      console.log('⏸️ Polling de documentos desabilitado');
-      return;
-    }
-
-    // Iniciar polling periódico
-    console.log(`⏱️ Iniciando polling de documentos a cada ${documentRefreshInterval / 1000}s`);
-    documentRefreshTimerRef.current = setInterval(() => {
-      refreshDocuments().catch(err => {
-        console.warn('⚠️ Erro ao atualizar documentos:', err);
-      });
-    }, documentRefreshInterval);
-
-    // Cleanup
-    return () => {
-      if (documentRefreshTimerRef.current) {
-        clearInterval(documentRefreshTimerRef.current);
-        documentRefreshTimerRef.current = null;
-      }
-    };
-  }, [documentRefreshInterval]);
-
   // 📡 Effect para SSE (Server-Sent Events) de documentos em tempo real
+  // Substitui o polling periódico por atualizações em tempo real mais eficientes
   useEffect(() => {
     if (isInitializingRef.current) {
       return;
@@ -1336,7 +1297,6 @@ const value: DisplayContextType = {
   scrollSpeed,
   autoRestartDelay,
   isLoading,
-  documentRefreshInterval, // ⏱️ Intervalo de polling
   isEscalaEditMode, // ✏️ Modo editor de escala
   isCardapioEditMode, // ✏️ Modo editor de cardápio
   addNotice,
@@ -1349,7 +1309,6 @@ const value: DisplayContextType = {
   setCardapioAlternateInterval,
   setScrollSpeed,
   setAutoRestartDelay,
-  setDocumentRefreshInterval, // ⏱️ Configurar intervalo de refresh
   setIsEscalaEditMode, // ✏️ Alternar modo editor de escala
   setIsCardapioEditMode, // ✏️ Alternar modo editor de cardápio
   refreshNotices,
