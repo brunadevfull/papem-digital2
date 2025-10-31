@@ -1242,6 +1242,7 @@ useEffect(() => {
     }
   }
 }, [documentType, activeCardapioDoc?.id, isEditMode]);
+
   // ✅ FUNÇÃO: Verificar se URL é imagem
   const checkIfImageFile = async (url: string): Promise<boolean> => {
     try {
