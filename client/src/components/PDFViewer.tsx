@@ -1123,12 +1123,20 @@ const PDFViewer: React.FC<PDFViewerProps> = ({
         currentEscala: currentEscala?.title,
         currentDocId,
         previousDocId: previousDocIdRef.current,
-        isEditMode
+        isEditMode,
+        loading,
+        hasImage: !!escalaImageUrl
       });
 
       // 🔒 PROTEÇÃO: Não recarregar se estiver em modo editor
       if (isEditMode) {
         console.log("🔒 ESCALA: Modo editor ativo, ignorando recarregamento");
+        return;
+      }
+
+      // 🔒 PROTEÇÃO: Não reprocessar se já está carregando
+      if (loading) {
+        console.log("🔒 ESCALA: Já está carregando, ignorando recarregamento");
         return;
       }
 
@@ -1179,12 +1187,20 @@ useEffect(() => {
       currentCardapio: currentCardapio?.title,
       currentDocId,
       previousDocId: previousDocIdRef.current,
-      isEditMode
+      isEditMode,
+      loading,
+      hasImage: !!cardapioImageUrl
     });
 
     // 🔒 PROTEÇÃO: Não recarregar se estiver em modo editor
     if (isEditMode) {
       console.log("🔒 CARDÁPIO: Modo editor ativo, ignorando recarregamento");
+      return;
+    }
+
+    // 🔒 PROTEÇÃO: Não reprocessar se já está carregando
+    if (loading) {
+      console.log("🔒 CARDÁPIO: Já está carregando, ignorando recarregamento");
       return;
     }
 
