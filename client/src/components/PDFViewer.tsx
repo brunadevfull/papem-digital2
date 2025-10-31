@@ -1138,18 +1138,8 @@ const PDFViewer: React.FC<PDFViewerProps> = ({
         return;
       }
 
-      // 💾 SALVAR posição do documento anterior antes de trocar
-      if (previousDocIdRef.current && escalaImageUrl) {
-        const scrollContainer = scrollableContentRef.current || containerRef.current;
-        if (scrollContainer) {
-          const scrollTop = scrollContainer.scrollTop;
-          const scrollLeft = scrollContainer.scrollLeft;
-          console.log(`💾 ESCALA: Salvando posição do documento anterior: ${previousDocIdRef.current}`);
-          saveScrollToLocalStorage(previousDocIdRef.current, scrollTop, scrollLeft);
-          // Salvar zoom também
-          saveZoomToLocalStorage(previousDocIdRef.current, zoomLevel);
-        }
-      }
+      // ⚠️ NÃO salvar scroll/zoom automaticamente ao trocar documento
+      // O salvamento só deve ocorrer quando o usuário sai do modo editor manualmente
 
       // Atualizar referência do documento anterior
       previousDocIdRef.current = currentDocId;
@@ -1204,18 +1194,8 @@ useEffect(() => {
       return;
     }
 
-    // 💾 SALVAR posição do documento anterior antes de trocar
-    if (previousDocIdRef.current && cardapioImageUrl) {
-      const scrollContainer = scrollableContentRef.current || containerRef.current;
-      if (scrollContainer) {
-        const scrollTop = scrollContainer.scrollTop;
-        const scrollLeft = scrollContainer.scrollLeft;
-        console.log(`💾 CARDÁPIO: Salvando posição do documento anterior: ${previousDocIdRef.current}`);
-        saveScrollToLocalStorage(previousDocIdRef.current, scrollTop, scrollLeft);
-        // Salvar zoom também
-        saveZoomToLocalStorage(previousDocIdRef.current, zoomLevel);
-      }
-    }
+    // ⚠️ NÃO salvar scroll/zoom automaticamente ao trocar documento
+    // O salvamento só deve ocorrer quando o usuário sai do modo editor manualmente
 
     // Atualizar referência do documento anterior
     previousDocIdRef.current = currentDocId;
