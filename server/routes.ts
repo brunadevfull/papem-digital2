@@ -20,6 +20,8 @@ import { promisify } from "util";
 import session from "express-session";
 import connectPgSimple from "connect-pg-simple";
 import crypto from "crypto";
+import { LRUCache } from "./utils/lru-cache";
+import { LIMITS } from "@shared/constants";
 
 // 🔥 NOVO: Sistema de classificação inteligente de documentos
 interface DocumentClassification {
@@ -29,8 +31,10 @@ interface DocumentClassification {
   tags: string[];
 }
 
-// Cache para classificações (otimização em runtime)
-const classificationCache = new Map<string, DocumentClassification>();
+// Cache LRU para classificações (previne memory leak)
+const classificationCache = new LRUCache<string, DocumentClassification>(
+  LIMITS.CLASSIFICATION_CACHE_MAX_SIZE
+);
 
 // Função para extrair o nome original do arquivo salvo
 function getOriginalFromSaved(savedFilename: string): string {

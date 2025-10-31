@@ -32,33 +32,52 @@ function getNetworkIPs(): string[] {
   return ips;
 }
 
-// CORS SUPER PERMISSIVO - PERMITE TUDO
+// CORS Configurável por Ambiente
 app.use((req, res, next) => {
   const origin = req.get('Origin') || req.get('Referer') || 'unknown';
   const clientIP = req.ip || req.connection.remoteAddress || req.headers['x-forwarded-for'];
-  
+
   console.log(`🌐 ACESSO: ${req.method} ${req.url} | Cliente: ${clientIP} | Origem: ${origin}`);
-  
-  // HEADERS SUPER PERMISSIVOS - PERMITE TUDO DE TODOS OS LUGARES
-  res.header('Access-Control-Allow-Origin', '*');
-  res.header('Access-Control-Allow-Methods', '*');
-  res.header('Access-Control-Allow-Headers', '*');
-  res.header('Access-Control-Expose-Headers', '*');
+
+  // Configuração de CORS baseada em variáveis de ambiente
+  const allowedOrigins = process.env.ALLOWED_ORIGINS
+    ? process.env.ALLOWED_ORIGINS.split(',').map(o => o.trim())
+    : ['http://localhost:5000', 'http://localhost:5001', 'http://127.0.0.1:5000'];
+
+  const requestOrigin = req.get('Origin');
+
+  // Em desenvolvimento, permite todas as origens localhost
+  if (process.env.NODE_ENV === 'development' || allowedOrigins.includes('*')) {
+    res.header('Access-Control-Allow-Origin', requestOrigin || '*');
+  } else if (requestOrigin && allowedOrigins.includes(requestOrigin)) {
+    // Em produção, apenas origens whitelisted
+    res.header('Access-Control-Allow-Origin', requestOrigin);
+  }
+
+  res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
+  res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Requested-With');
+  res.header('Access-Control-Expose-Headers', 'Content-Length, Content-Type');
   res.header('Access-Control-Allow-Credentials', 'true');
   res.header('Access-Control-Max-Age', '86400');
-  
-  // Headers de segurança permissivos
-  res.header('Cross-Origin-Resource-Policy', 'cross-origin');
-  res.header('Cross-Origin-Embedder-Policy', 'unsafe-none');
-  res.header('Cross-Origin-Opener-Policy', 'unsafe-none');
-  res.header('X-Frame-Options', 'ALLOWALL');
-  res.header('Content-Security-Policy', ''); // Remover CSP
-  
+
+  // Headers de segurança - Apenas em desenvolvimento permite cross-origin sem restrições
+  if (process.env.NODE_ENV === 'development') {
+    res.header('Cross-Origin-Resource-Policy', 'cross-origin');
+    res.header('Cross-Origin-Embedder-Policy', 'unsafe-none');
+    res.header('Cross-Origin-Opener-Policy', 'unsafe-none');
+  } else {
+    // Em produção, headers mais restritivos
+    res.header('Cross-Origin-Resource-Policy', 'same-origin');
+    res.header('X-Frame-Options', 'SAMEORIGIN');
+    res.header('X-Content-Type-Options', 'nosniff');
+    res.header('X-XSS-Protection', '1; mode=block');
+  }
+
   // Headers para cache
-  res.header('Cache-Control', 'public, max-age=0');
+  res.header('Cache-Control', 'no-cache, no-store, must-revalidate');
   res.header('Pragma', 'no-cache');
   res.header('Expires', '0');
-  
+
   if (req.method === 'OPTIONS') {
     console.log(`✅ CORS Preflight ACEITO: ${req.url} | Cliente: ${clientIP}`);
     res.sendStatus(200);

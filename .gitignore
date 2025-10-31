@@ -1,6 +1,49 @@
+# Dependências
 node_modules
 dist
+
+# Arquivos de configuração sensíveis
+.env
+.env.local
+.env.production
+.env.development
+
+# Sistema operacional
 .DS_Store
+Thumbs.db
+
+# Build
 server/public
 vite.config.ts.*
+
+# Logs
+logs
+*.log
+npm-debug.log*
+
+# Arquivos temporários e backup
+*.backup
+*.tmp
+*.swp
+*~
+
+# Uploads (contém dados sensíveis)
+uploads/*.pdf
+uploads/**/*.pdf
+
+# Arquivos compactados
 *.tar.gz
+*.zip
+
+# Cache
+.cache
+.parcel-cache
+
+# IDEs
+.vscode
+.idea
+*.sublime-*
+
+# Testes
+coverage
+.nyc_output
