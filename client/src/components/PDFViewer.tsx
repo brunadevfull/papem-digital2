@@ -1807,13 +1807,15 @@ useEffect(() => {
                     if (docId) {
                       const savedZoom = loadZoomFromLocalStorage(docId);
                       console.log(`🔍 CARDÁPIO: Restaurando zoom ${savedZoom} antes do scroll`);
-                      setZoomLevel(savedZoom);
-                      setZoomInputValue(Math.round(savedZoom * 100).toString());
 
-                      // Esperar o zoom ser aplicado antes de restaurar o scroll
-                      setTimeout(() => {
-                        restoreScrollPosition();
-                      }, 150);
+                      // Só atualizar zoom se for diferente do atual
+                      if (Math.abs(zoomLevel - savedZoom) > 0.01) {
+                        setZoomLevel(savedZoom);
+                        setZoomInputValue(Math.round(savedZoom * 100).toString());
+                      }
+
+                      // Restaurar scroll (internamente usa requestAnimationFrame)
+                      restoreScrollPosition(docId);
                     }
                   }}
                 />
