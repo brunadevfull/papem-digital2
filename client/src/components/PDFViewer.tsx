@@ -1937,43 +1937,18 @@ useEffect(() => {
 
 
 <CardHeader
-  className={`relative text-white border-b space-y-0 py-1.5 px-3 ${
-    documentType === "cardapio"
-      ? "bg-gradient-to-r from-orange-700 via-amber-600 to-orange-700 border-orange-400/40 shadow-lg"
-      : "bg-gradient-to-r from-slate-700 via-blue-800 to-slate-700 border-blue-400/30"
-  }`}
+  className="relative text-white border-b space-y-0 py-1.5 px-3 bg-gradient-to-r from-slate-700 via-blue-800 to-slate-700 border-blue-400/30"
   onMouseEnter={() => (documentType === "escala" || documentType === "cardapio") && setShowZoomControls(true)}
   onMouseLeave={() => setShowZoomControls(false)}
 >
-  {/* Efeito de brilho melhorado baseado no tipo */}
-  <div className={`absolute inset-0 ${
-    documentType === "cardapio" 
-      ? "bg-gradient-to-r from-orange-400/15 via-yellow-400/10 to-orange-400/15" 
-      : "bg-gradient-to-r from-transparent via-blue-400/10 to-transparent"
-  }`}></div>
-
-  {/* Elementos decorativos melhorados para cardápio */}
-  {documentType === "cardapio" && (
-    <>
-     
-      {/* Borda interna dupla para mais sofisticação */}
-      <div className="absolute inset-[1px] rounded border border-orange-300/20"></div>
-      <div className="absolute inset-1 rounded border border-orange-200/10"></div>
-      
-      {/* Textura sutil */}
-      <div className="absolute inset-0 opacity-10 bg-gradient-to-br from-orange-200/20 via-transparent to-amber-200/20"></div>
-    </>
-  )}
+  {/* Efeito de brilho uniforme */}
+  <div className="absolute inset-0 bg-gradient-to-r from-transparent via-blue-400/10 to-transparent"></div>
 
 <CardTitle className="relative z-10 flex items-center justify-between">
   <div className="flex items-center space-x-2">
-    {/* Ícone estilizado baseado no tipo */}
+    {/* Ícone estilizado uniforme */}
     <div className="relative w-6 h-6">
-      <div className={`w-full h-full rounded-lg flex items-center justify-center shadow-lg ${
-        documentType === "cardapio" 
-          ? "bg-gradient-to-br from-orange-500 to-amber-600" 
-          : "bg-gradient-to-br from-blue-500 to-blue-600"
-      }`}>
+      <div className="w-full h-full rounded-lg flex items-center justify-center shadow-lg bg-gradient-to-br from-blue-500 to-blue-600">
         {documentType === "plasa" ? (
           <span className="text-white text-base leading-none">📋</span>
         )  : documentType === "escala" ? (
@@ -1984,19 +1959,10 @@ useEffect(() => {
           <span className="text-white text-base leading-none">📄</span>
         )}
       </div>
-      
-      {/* Brilho extra para cardápio */}
-      {documentType === "cardapio" && (
-        <div className="absolute inset-0 rounded-lg bg-gradient-to-br from-orange-400/20 to-amber-400/20 blur-sm"></div>
-      )}
     </div>
     
     <div className="flex flex-col">
-      <span className={`font-bold text-xs sm:text-sm bg-clip-text text-transparent uppercase tracking-wide ${
-        documentType === "cardapio"
-          ? "bg-gradient-to-r from-orange-50 via-white to-amber-50 drop-shadow-sm"
-          : "bg-gradient-to-r from-white to-blue-100"
-      }`}>
+      <span className="font-bold text-xs sm:text-sm bg-clip-text text-transparent uppercase tracking-wide bg-gradient-to-r from-white to-blue-100">
         {documentType === "plasa" ? (
           activePlasaDoc?.title || "PLANO SEMANAL DE ATIVIDADES"
         ) : documentType === "cardapio" ? (
@@ -2016,20 +1982,12 @@ useEffect(() => {
       <div
         className={`flex items-center gap-1 transition-all duration-300 ${
           showZoomControls ? 'opacity-100 scale-100' : 'opacity-0 scale-90 pointer-events-none'
-        } ${
-          documentType === "cardapio"
-            ? "bg-orange-600/70 backdrop-blur-sm border-orange-400/40"
-            : "bg-slate-600/70 backdrop-blur-sm border-slate-400/40"
-        } rounded-lg px-2 py-1 border shadow-lg`}
+        } bg-slate-600/70 backdrop-blur-sm border-slate-400/40 rounded-lg px-2 py-1 border shadow-lg`}
       >
         <button
           onClick={handleZoomOut}
           disabled={zoomLevel <= 0.5}
-          className={`p-1 rounded transition-colors ${
-            documentType === "cardapio"
-              ? "hover:bg-orange-500/80 disabled:opacity-40"
-              : "hover:bg-slate-500/80 disabled:opacity-40"
-          } disabled:cursor-not-allowed`}
+          className="p-1 rounded transition-colors hover:bg-slate-500/80 disabled:opacity-40 disabled:cursor-not-allowed"
           title="Diminuir zoom"
         >
           <span className="text-white text-sm font-bold">−</span>
@@ -2042,45 +2000,31 @@ useEffect(() => {
             onChange={handleZoomInputChange}
             onKeyDown={handleZoomInputKeyDown}
             onBlur={handleZoomInputBlur}
-            className={`w-10 px-1 py-0.5 rounded text-[10px] font-bold text-center transition-colors ${
-              documentType === "cardapio"
-                ? "bg-orange-600/90 hover:bg-orange-500/80 text-orange-100 focus:bg-orange-500/90"
-                : "bg-slate-600/90 hover:bg-slate-500/80 text-slate-100 focus:bg-slate-500/90"
-            } border-none outline-none focus:ring-1 focus:ring-white/30`}
+            className="w-10 px-1 py-0.5 rounded text-[10px] font-bold text-center transition-colors bg-slate-600/90 hover:bg-slate-500/80 text-slate-100 focus:bg-slate-500/90 border-none outline-none focus:ring-1 focus:ring-white/30"
             title="Digite o zoom e pressione Enter (50-300%)"
           />
-          <span className={`text-[10px] font-bold ${
-            documentType === "cardapio" ? "text-orange-100" : "text-slate-100"
-          }`}>%</span>
+          <span className="text-[10px] font-bold text-slate-100">%</span>
         </div>
 
         <button
           onClick={handleZoomIn}
           disabled={zoomLevel >= 3}
-          className={`p-1 rounded transition-colors ${
-            documentType === "cardapio"
-              ? "hover:bg-orange-500/80 disabled:opacity-40"
-              : "hover:bg-slate-500/80 disabled:opacity-40"
-          } disabled:cursor-not-allowed`}
+          className="p-1 rounded transition-colors hover:bg-slate-500/80 disabled:opacity-40 disabled:cursor-not-allowed"
           title="Aumentar zoom"
         >
           <span className="text-white text-sm font-bold">+</span>
         </button>
 
         {/* Separador */}
-        <div className={`w-px h-5 ${
-          documentType === "cardapio" ? "bg-orange-400/40" : "bg-slate-400/40"
-        }`}></div>
+        <div className="w-px h-5 bg-slate-400/40"></div>
 
         {/* ✏️ Botão de modo editor (toggle pausar/salvar) */}
         <button
           onClick={handleToggleEditMode}
           className={`p-1 rounded transition-all relative ${
             isEditMode
-              ? "bg-blue-500 animate-pulse shadow-lg" // Visual diferente em modo editor
-              : documentType === "cardapio"
-                ? "hover:bg-orange-500/80"
-                : "hover:bg-slate-500/80"
+              ? "bg-blue-500 animate-pulse shadow-lg"
+              : "hover:bg-slate-500/80"
           }`}
           title={isEditMode ? "Clique para salvar e retomar alternância" : "Clique para pausar alternância e editar"}
         >
@@ -2090,11 +2034,7 @@ useEffect(() => {
 
           {/* Feedback visual de salvamento */}
           {scrollSavedFeedback && (
-            <span className={`absolute -top-8 left-1/2 transform -translate-x-1/2 text-[10px] font-bold whitespace-nowrap px-2 py-1 rounded shadow-lg ${
-              documentType === "cardapio"
-                ? "bg-green-500 text-white"
-                : "bg-green-600 text-white"
-            }`}>
+            <span className="absolute -top-8 left-1/2 transform -translate-x-1/2 text-[10px] font-bold whitespace-nowrap px-2 py-1 rounded shadow-lg bg-green-600 text-white">
               ✅ Salvo!
             </span>
           )}
@@ -2166,13 +2106,13 @@ useEffect(() => {
     })()}
 
 
-   {/* ADICIONAR AQUI: Indicador EAGM | 1DN para CARDÁPIO */}
+   {/* Indicador EAGM | 1DN para CARDÁPIO */}
     {documentType === "cardapio" && (() => {
       const currentCardapio = getCurrentCardapioDoc();
       const isEAGM = currentCardapio?.unit === "EAGM";
-      
+
       return (
-        <div className="bg-orange-600/50 backdrop-blur-sm rounded-lg px-2 py-0.5 border border-orange-400/30 flex items-center">
+        <div className="bg-slate-600/50 backdrop-blur-sm rounded-lg px-2 py-0.5 border border-slate-400/30 flex items-center">
           <div className="flex items-center gap-1.5">
             {/* EAGM */}
             <div className="flex items-center gap-1">
@@ -2180,26 +2120,26 @@ useEffect(() => {
                 isEAGM ? "opacity-100" : "opacity-40"
               }`}>🏢</span>
               <span className={`text-[10px] sm:text-xs font-bold transition-all duration-300 ${
-                isEAGM 
-                  ? "text-orange-200 drop-shadow-sm" 
-                  : "text-orange-400/60"
+                isEAGM
+                  ? "text-blue-200 drop-shadow-sm"
+                  : "text-slate-400"
               }`}>
                 EAGM
               </span>
             </div>
-            
+
             {/* Separador */}
-            <span className="text-orange-300 text-[10px] sm:text-xs mx-1">|</span>
-            
+            <span className="text-slate-300 text-[10px] sm:text-xs mx-1">|</span>
+
             {/* 1DN */}
             <div className="flex items-center gap-1">
               <span className={`text-xs transition-all duration-300 ${
                 !isEAGM ? "opacity-100" : "opacity-40"
               }`}>⚓</span>
               <span className={`text-[10px] sm:text-xs font-bold transition-all duration-300 ${
-                !isEAGM 
-                  ? "text-orange-200 drop-shadow-sm" 
-                  : "text-orange-400/60"
+                !isEAGM
+                  ? "text-blue-200 drop-shadow-sm"
+                  : "text-slate-400"
               }`}>
                 1DN
               </span>
