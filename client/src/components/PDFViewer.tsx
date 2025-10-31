@@ -349,35 +349,20 @@ const PDFViewer: React.FC<PDFViewerProps> = ({
     const newZoom = Math.min(zoomLevel + 0.1, 3); // Máximo 3x
     setZoomLevel(newZoom);
     setZoomInputValue(Math.round(newZoom * 100).toString());
-
-    // Salvar imediatamente
-    const docId = getCurrentDocumentId();
-    if (docId) {
-      saveZoomToLocalStorage(docId, newZoom);
-    }
+    // ⚠️ Não salvar automaticamente - só salva ao sair do modo editor
   };
 
   const handleZoomOut = () => {
     const newZoom = Math.max(zoomLevel - 0.1, 0.5); // Mínimo 0.5x
     setZoomLevel(newZoom);
     setZoomInputValue(Math.round(newZoom * 100).toString());
-
-    // Salvar imediatamente
-    const docId = getCurrentDocumentId();
-    if (docId) {
-      saveZoomToLocalStorage(docId, newZoom);
-    }
+    // ⚠️ Não salvar automaticamente - só salva ao sair do modo editor
   };
 
   const handleResetZoom = () => {
     setZoomLevel(1);
     setZoomInputValue("100");
-
-    // Salvar imediatamente
-    const docId = getCurrentDocumentId();
-    if (docId) {
-      saveZoomToLocalStorage(docId, 1);
-    }
+    // ⚠️ Não salvar automaticamente - só salva ao sair do modo editor
   };
 
   const handleZoomInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -414,12 +399,7 @@ const PDFViewer: React.FC<PDFViewerProps> = ({
     const newZoom = numericValue / 100;
     setZoomLevel(newZoom);
     setZoomInputValue(numericValue.toString());
-
-    // Salvar imediatamente
-    const docId = getCurrentDocumentId();
-    if (docId) {
-      saveZoomToLocalStorage(docId, newZoom);
-    }
+    // ⚠️ Não salvar automaticamente - só salva ao sair do modo editor
   };
 
   const handleZoomInputBlur = () => {
