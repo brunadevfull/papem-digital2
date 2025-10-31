@@ -349,17 +349,35 @@ const PDFViewer: React.FC<PDFViewerProps> = ({
     const newZoom = Math.min(zoomLevel + 0.1, 3); // Máximo 3x
     setZoomLevel(newZoom);
     setZoomInputValue(Math.round(newZoom * 100).toString());
+
+    // Salvar imediatamente
+    const docId = getCurrentDocumentId();
+    if (docId) {
+      saveZoomToLocalStorage(docId, newZoom);
+    }
   };
 
   const handleZoomOut = () => {
     const newZoom = Math.max(zoomLevel - 0.1, 0.5); // Mínimo 0.5x
     setZoomLevel(newZoom);
     setZoomInputValue(Math.round(newZoom * 100).toString());
+
+    // Salvar imediatamente
+    const docId = getCurrentDocumentId();
+    if (docId) {
+      saveZoomToLocalStorage(docId, newZoom);
+    }
   };
 
   const handleResetZoom = () => {
     setZoomLevel(1);
     setZoomInputValue("100");
+
+    // Salvar imediatamente
+    const docId = getCurrentDocumentId();
+    if (docId) {
+      saveZoomToLocalStorage(docId, 1);
+    }
   };
 
   const handleZoomInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -396,6 +414,12 @@ const PDFViewer: React.FC<PDFViewerProps> = ({
     const newZoom = numericValue / 100;
     setZoomLevel(newZoom);
     setZoomInputValue(numericValue.toString());
+
+    // Salvar imediatamente
+    const docId = getCurrentDocumentId();
+    if (docId) {
+      saveZoomToLocalStorage(docId, newZoom);
+    }
   };
 
   const handleZoomInputBlur = () => {
@@ -494,29 +518,28 @@ const PDFViewer: React.FC<PDFViewerProps> = ({
   // para garantir que o zoom seja aplicado ANTES do scroll ser restaurado
 
   // useEffect para salvar o zoom sempre que ele mudar (apenas escala e cardápio)
-  useEffect(() => {
-    const docId = getCurrentDocumentId();
-    if (docId) {
-      saveZoomToLocalStorage(docId, zoomLevel);
-    }
-  }, [zoomLevel, getCurrentDocumentId, saveZoomToLocalStorage]);
+  // ⚠️ REMOVIDO: Auto-save de zoom foi desabilitado
+  // O zoom agora só é salvo quando:
+  // 1. Usuário sai do modo editor
+  // 2. Documento muda (nos useEffects de troca de documento)
 
   // Função para restaurar scroll após imagem carregar (APÓS zoom ser aplicado)
-  const restoreScrollPosition = useCallback(() => {
+  const restoreScrollPosition = useCallback((docId: string) => {
     if (documentType === "plasa") return; // Não restaurar scroll para PLASA
 
-    const docId = getCurrentDocumentId();
     const scrollContainer = scrollableContentRef.current || containerRef.current;
     if (docId && scrollContainer) {
-      // ⏰ ESPERAR um frame para garantir que o DOM foi atualizado com o zoom
+      // ⏰ ESPERAR múltiplos frames para garantir que o DOM foi atualizado com o zoom
       requestAnimationFrame(() => {
-        const savedScroll = loadScrollFromLocalStorage(docId);
-        scrollContainer.scrollTop = savedScroll.scrollTop;
-        scrollContainer.scrollLeft = savedScroll.scrollLeft;
-        console.log(`🔄 Scroll restaurado para documento ${docId}: top=${savedScroll.scrollTop}, left=${savedScroll.scrollLeft} (zoom: ${zoomLevel})`);
+        requestAnimationFrame(() => {
+          const savedScroll = loadScrollFromLocalStorage(docId);
+          scrollContainer.scrollTop = savedScroll.scrollTop;
+          scrollContainer.scrollLeft = savedScroll.scrollLeft;
+          console.log(`🔄 Scroll restaurado para documento ${docId}: top=${savedScroll.scrollTop}, left=${savedScroll.scrollLeft}`);
+        });
       });
     }
-  }, [documentType, currentEscalaIndex, activeCardapioDoc?.id, getCurrentDocumentId, loadScrollFromLocalStorage, zoomLevel]);
+  }, [documentType, loadScrollFromLocalStorage]);
 
   // 💾 REMOVIDO: Auto-save de scroll foi DESABILITADO
   // O scroll agora só é salvo quando o usuário SAI do modo editor
@@ -1626,13 +1649,15 @@ useEffect(() => {
                     if (docId) {
                       const savedZoom = loadZoomFromLocalStorage(docId);
                       console.log(`🔍 ESCALA: Restaurando zoom ${savedZoom} antes do scroll`);
-                      setZoomLevel(savedZoom);
-                      setZoomInputValue(Math.round(savedZoom * 100).toString());
 
-                      // Esperar o zoom ser aplicado antes de restaurar o scroll
-                      setTimeout(() => {
-                        restoreScrollPosition();
-                      }, 150);
+                      // Só atualizar zoom se for diferente do atual
+                      if (Math.abs(zoomLevel - savedZoom) > 0.01) {
+                        setZoomLevel(savedZoom);
+                        setZoomInputValue(Math.round(savedZoom * 100).toString());
+                      }
+
+                      // Restaurar scroll (internamente usa requestAnimationFrame)
+                      restoreScrollPosition(docId);
                     }
                   }}
                 />
@@ -1670,13 +1695,15 @@ useEffect(() => {
                     if (docId) {
                       const savedZoom = loadZoomFromLocalStorage(docId);
                       console.log(`🔍 ESCALA: Restaurando zoom ${savedZoom} antes do scroll`);
-                      setZoomLevel(savedZoom);
-                      setZoomInputValue(Math.round(savedZoom * 100).toString());
 
-                      // Esperar o zoom ser aplicado antes de restaurar o scroll
-                      setTimeout(() => {
-                        restoreScrollPosition();
-                      }, 150);
+                      // Só atualizar zoom se for diferente do atual
+                      if (Math.abs(zoomLevel - savedZoom) > 0.01) {
+                        setZoomLevel(savedZoom);
+                        setZoomInputValue(Math.round(savedZoom * 100).toString());
+                      }
+
+                      // Restaurar scroll (internamente usa requestAnimationFrame)
+                      restoreScrollPosition(docId);
                     }
                   }}
                 />
@@ -1735,13 +1762,15 @@ useEffect(() => {
                     if (docId) {
                       const savedZoom = loadZoomFromLocalStorage(docId);
                       console.log(`🔍 CARDÁPIO: Restaurando zoom ${savedZoom} antes do scroll`);
-                      setZoomLevel(savedZoom);
-                      setZoomInputValue(Math.round(savedZoom * 100).toString());
 
-                      // Esperar o zoom ser aplicado antes de restaurar o scroll
-                      setTimeout(() => {
-                        restoreScrollPosition();
-                      }, 150);
+                      // Só atualizar zoom se for diferente do atual
+                      if (Math.abs(zoomLevel - savedZoom) > 0.01) {
+                        setZoomLevel(savedZoom);
+                        setZoomInputValue(Math.round(savedZoom * 100).toString());
+                      }
+
+                      // Restaurar scroll (internamente usa requestAnimationFrame)
+                      restoreScrollPosition(docId);
                     }
                   }}
                 />
