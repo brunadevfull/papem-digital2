@@ -1920,7 +1920,7 @@ useEffect(() => {
 
 
 <CardHeader
-  className="relative text-white border-b space-y-0 py-1.5 px-3 bg-gradient-to-r from-slate-700 via-blue-800 to-slate-700 border-blue-400/30"
+  className="relative text-white border-b space-y-0 py-1 px-3 bg-gradient-to-r from-slate-700 via-blue-800 to-slate-700 border-blue-400/30"
   onMouseEnter={() => (documentType === "escala" || documentType === "cardapio") && setShowZoomControls(true)}
   onMouseLeave={() => setShowZoomControls(false)}
 >
@@ -1930,20 +1930,20 @@ useEffect(() => {
 <CardTitle className="relative z-10 flex items-center justify-between">
   <div className="flex items-center space-x-2">
     {/* Ícone estilizado uniforme */}
-    <div className="relative w-6 h-6">
+    <div className="relative w-5 h-5">
       <div className="w-full h-full rounded-lg flex items-center justify-center shadow-lg bg-gradient-to-br from-blue-500 to-blue-600">
         {documentType === "plasa" ? (
-          <span className="text-white text-base leading-none">📋</span>
+          <span className="text-white text-sm leading-none">📋</span>
         )  : documentType === "escala" ? (
-          <span className="text-white text-base leading-none">📅</span>
+          <span className="text-white text-sm leading-none">📅</span>
         ) : documentType === "cardapio" ? (
-          <span className="text-white text-base leading-none">🍽️</span>
+          <span className="text-white text-sm leading-none">🍽️</span>
         ) : (
-          <span className="text-white text-base leading-none">📄</span>
+          <span className="text-white text-sm leading-none">📄</span>
         )}
       </div>
     </div>
-    
+
     <div className="flex flex-col">
       <span className="font-bold text-xs sm:text-sm bg-clip-text text-transparent uppercase tracking-wide bg-gradient-to-r from-white to-blue-100">
         {documentType === "plasa" ? (
@@ -1954,7 +1954,7 @@ useEffect(() => {
           getCurrentTitle() || "ESCALA DE SERVIÇO"
         )}
       </span>
-      
+
       {/* REMOVIDO: Subtítulo do cardápio */}
     </div>
   </div>
@@ -2049,14 +2049,14 @@ useEffect(() => {
             <div className="flex items-center gap-1">
               <span
                 className={`text-xs transition-all duration-300 ${
-                  isOficial ? "opacity-100" : inactiveOpacityClass
+                  isOficial ? "opacity-100 drop-shadow-[0_0_6px_rgba(255,215,0,0.8)]" : inactiveOpacityClass
                 }`}
               >
                 ⭐
               </span>
               <span
                 className={`text-[10px] sm:text-xs font-bold transition-all duration-300 ${
-                  isOficial ? "text-yellow-200 drop-shadow-sm" : inactiveTextClass
+                  isOficial ? "text-yellow-50 drop-shadow-[0_0_8px_rgba(255,215,0,0.9)] brightness-125" : inactiveTextClass
                 }`}
               >
                 OFICIAIS
@@ -2070,14 +2070,14 @@ useEffect(() => {
             <div className="flex items-center gap-1">
               <span
                 className={`text-xs transition-all duration-300 ${
-                  isPraca ? "opacity-100" : inactiveOpacityClass
+                  isPraca ? "opacity-100 drop-shadow-[0_0_6px_rgba(16,185,129,0.8)]" : inactiveOpacityClass
                 }`}
               >
                 🛡️
               </span>
               <span
                 className={`text-[10px] sm:text-xs font-bold transition-all duration-300 ${
-                  isPraca ? "text-green-200 drop-shadow-sm" : inactiveTextClass
+                  isPraca ? "text-emerald-50 drop-shadow-[0_0_8px_rgba(16,185,129,0.9)] brightness-125" : inactiveTextClass
                 }`}
               >
                 PRAÇAS
@@ -2100,11 +2100,11 @@ useEffect(() => {
             {/* EAGM */}
             <div className="flex items-center gap-1">
               <span className={`text-xs transition-all duration-300 ${
-                isEAGM ? "opacity-100" : "opacity-40"
+                isEAGM ? "opacity-100 drop-shadow-[0_0_6px_rgba(59,130,246,0.8)]" : "opacity-40"
               }`}>🏢</span>
               <span className={`text-[10px] sm:text-xs font-bold transition-all duration-300 ${
                 isEAGM
-                  ? "text-blue-200 drop-shadow-sm"
+                  ? "text-cyan-50 drop-shadow-[0_0_8px_rgba(59,130,246,0.9)] brightness-125"
                   : "text-slate-400"
               }`}>
                 EAGM
@@ -2117,11 +2117,11 @@ useEffect(() => {
             {/* 1DN */}
             <div className="flex items-center gap-1">
               <span className={`text-xs transition-all duration-300 ${
-                !isEAGM ? "opacity-100" : "opacity-40"
+                !isEAGM ? "opacity-100 drop-shadow-[0_0_6px_rgba(59,130,246,0.8)]" : "opacity-40"
               }`}>⚓</span>
               <span className={`text-[10px] sm:text-xs font-bold transition-all duration-300 ${
                 !isEAGM
-                  ? "text-blue-200 drop-shadow-sm"
+                  ? "text-cyan-50 drop-shadow-[0_0_8px_rgba(59,130,246,0.9)] brightness-125"
                   : "text-slate-400"
               }`}>
                 1DN
@@ -2136,8 +2136,8 @@ useEffect(() => {
 
 </CardTitle>
 </CardHeader>
-      
-      <CardContent className="p-0 h-[calc(100%-2.5rem)] bg-white">
+
+      <CardContent className="p-0 h-[calc(100%-2.25rem)] bg-white">
         {loading ? (
           <div className="flex flex-col items-center justify-center h-full">
             <div className="w-16 h-16 border-4 border-navy border-t-transparent rounded-full animate-spin"></div>
