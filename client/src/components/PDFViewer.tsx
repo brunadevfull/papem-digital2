@@ -1138,8 +1138,21 @@ const PDFViewer: React.FC<PDFViewerProps> = ({
         return;
       }
 
-      // ⚠️ NÃO salvar scroll/zoom automaticamente ao trocar documento
-      // O salvamento só deve ocorrer quando o usuário sai do modo editor manualmente
+      // 💾 SALVAR scroll/zoom do documento anterior antes de trocar
+      if (previousDocIdRef.current && previousDocIdRef.current !== currentDocId) {
+        const scrollContainer = scrollableContentRef.current || containerRef.current;
+        if (scrollContainer) {
+          const scrollTop = scrollContainer.scrollTop;
+          const scrollLeft = scrollContainer.scrollLeft;
+
+          console.log(`💾 ESCALA: Auto-salvando posição do documento anterior ${previousDocIdRef.current}:`);
+          console.log(`  - Scroll Top: ${scrollTop}, Scroll Left: ${scrollLeft}`);
+          console.log(`  - Zoom: ${zoomLevel}`);
+
+          saveScrollToLocalStorage(previousDocIdRef.current, scrollTop, scrollLeft);
+          saveZoomToLocalStorage(previousDocIdRef.current, zoomLevel);
+        }
+      }
 
       // Atualizar referência do documento anterior
       previousDocIdRef.current = currentDocId;
@@ -1194,8 +1207,21 @@ useEffect(() => {
       return;
     }
 
-    // ⚠️ NÃO salvar scroll/zoom automaticamente ao trocar documento
-    // O salvamento só deve ocorrer quando o usuário sai do modo editor manualmente
+    // 💾 SALVAR scroll/zoom do documento anterior antes de trocar
+    if (previousDocIdRef.current && previousDocIdRef.current !== currentDocId) {
+      const scrollContainer = scrollableContentRef.current || containerRef.current;
+      if (scrollContainer) {
+        const scrollTop = scrollContainer.scrollTop;
+        const scrollLeft = scrollContainer.scrollLeft;
+
+        console.log(`💾 CARDÁPIO: Auto-salvando posição do documento anterior ${previousDocIdRef.current}:`);
+        console.log(`  - Scroll Top: ${scrollTop}, Scroll Left: ${scrollLeft}`);
+        console.log(`  - Zoom: ${zoomLevel}`);
+
+        saveScrollToLocalStorage(previousDocIdRef.current, scrollTop, scrollLeft);
+        saveZoomToLocalStorage(previousDocIdRef.current, zoomLevel);
+      }
+    }
 
     // Atualizar referência do documento anterior
     previousDocIdRef.current = currentDocId;
