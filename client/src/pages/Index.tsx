@@ -159,7 +159,7 @@ const Index = () => {
 
   // Determinar qual documento principal mostrar
   const currentMainDoc = activePlasaDoc;
-  const mainDocTitle = currentMainDoc?.title || "PLASA - Plano de Serviço Semanal";
+  const mainDocTitle = "PLANO SEMANAL DE ATIVIDADES";
 
   console.log("🏠 Index: Renderizando página principal", {
     activePlasa: activePlasaDoc?.title || 'nenhum',
@@ -376,7 +376,7 @@ const Index = () => {
     <div className="h-full bg-gradient-to-br from-white/5 via-blue-900/20 to-white/5 backdrop-blur-sm rounded-lg border border-blue-400/25 shadow-xl hover:border-blue-400/40 transition-all duration-500 overflow-hidden">
       <PDFViewer
                 documentType="escala"
-                title={activeEscalaDoc?.title || "Escala de Serviço Semanal"}
+                title="ESCALA DE SERVIÇO"
               />
             </div>
           </div>
@@ -406,7 +406,7 @@ const Index = () => {
       
       <PDFViewer
         documentType="cardapio"
-        title="🍽️ Cardápio Semanal"
+        title="CARDÁPIO"
       />
     </div>
   </div>

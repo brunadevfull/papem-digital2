@@ -1918,11 +1918,11 @@ useEffect(() => {
 
  const getCurrentTitle = () => {
   if (documentType === "escala") {
-    return title; // ou "ESCALA DE SERVIÇO SEMANAL"
+    return title; // ou "ESCALA DE SERVIÇO"
   } else if (documentType === "cardapio") {
-    return "CARDÁPIO SEMANAL";
+    return "CARDÁPIO";
   }
-  
+
   return title;
 };
 
@@ -1998,11 +1998,11 @@ useEffect(() => {
           : "bg-gradient-to-r from-white to-blue-100"
       }`}>
         {documentType === "plasa" ? (
-          activePlasaDoc?.title || "📋 PLASA - PLANO DE SERVIÇO SEMANAL"
+          activePlasaDoc?.title || "PLANO SEMANAL DE ATIVIDADES"
         ) : documentType === "cardapio" ? (
-          "CARDÁPIO SEMANAL"
+          "CARDÁPIO"
         ) : (
-          getCurrentTitle() || "📅 ESCALA DE SERVIÇO SEMANAL"
+          getCurrentTitle() || "ESCALA DE SERVIÇO"
         )}
       </span>
       
