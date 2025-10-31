@@ -78,32 +78,85 @@ const Index = () => {
   }, []);
 
   useEffect(() => {
-    const url = resolveBackendUrl('/api/duty-officers/stream');
-    const eventSource = new EventSource(url);
+    let eventSource: EventSource | null = null;
+    let reconnectTimeout: NodeJS.Timeout | null = null;
+    let reconnectAttempts = 0;
+    const MAX_RECONNECT_ATTEMPTS = 5;
+    const BASE_RECONNECT_DELAY = 2000; // 2 segundos
 
-    eventSource.onmessage = (event) => {
+    const connectSSE = () => {
       try {
-        const payload = JSON.parse(event.data) as {
-          type?: 'snapshot' | 'update';
-          officers?: DutyOfficers | null;
-          timestamp?: string;
+        const url = resolveBackendUrl('/api/duty-officers/stream');
+        console.log('📡 Index - conectando ao SSE:', url);
+
+        eventSource = new EventSource(url);
+
+        eventSource.onopen = () => {
+          console.log('✅ Index - conexão SSE estabelecida');
+          reconnectAttempts = 0; // Reset contador ao conectar com sucesso
         };
 
-        if ('officers' in payload) {
-          setOfficers(payload.officers ?? null);
-          console.log('📡 Index recebeu atualização SSE de oficiais:', payload);
-        }
+        eventSource.onmessage = (event) => {
+          try {
+            const payload = JSON.parse(event.data) as {
+              type?: 'snapshot' | 'update';
+              officers?: DutyOfficers | null;
+              timestamp?: string;
+            };
+
+            if ('officers' in payload) {
+              setOfficers(payload.officers ?? null);
+              console.log('📡 Index recebeu atualização SSE de oficiais:', payload);
+            }
+          } catch (error) {
+            console.error('❌ Index - erro ao processar SSE de oficiais:', error);
+          }
+        };
+
+        eventSource.onerror = (event) => {
+          console.error('⚠️ Index - erro no stream SSE de oficiais:', event);
+
+          // Fechar conexão atual
+          if (eventSource) {
+            eventSource.close();
+            eventSource = null;
+          }
+
+          // Tentar reconectar com backoff exponencial
+          if (reconnectAttempts < MAX_RECONNECT_ATTEMPTS) {
+            const delay = BASE_RECONNECT_DELAY * Math.pow(2, reconnectAttempts);
+            reconnectAttempts++;
+
+            console.log(`🔄 Index - tentando reconectar SSE em ${delay}ms (tentativa ${reconnectAttempts}/${MAX_RECONNECT_ATTEMPTS})`);
+
+            reconnectTimeout = setTimeout(() => {
+              connectSSE();
+            }, delay);
+          } else {
+            console.error('❌ Index - máximo de tentativas de reconexão SSE atingido');
+          }
+        };
       } catch (error) {
-        console.error('❌ Index - erro ao processar SSE de oficiais:', error);
+        console.error('❌ Index - erro ao criar conexão SSE:', error);
       }
     };
 
-    eventSource.onerror = (event) => {
-      console.error('⚠️ Index - erro no stream SSE de oficiais:', event);
-    };
+    // Iniciar conexão
+    connectSSE();
 
+    // Cleanup
     return () => {
-      eventSource.close();
+      console.log('🧹 Index - limpando conexão SSE');
+
+      if (reconnectTimeout) {
+        clearTimeout(reconnectTimeout);
+        reconnectTimeout = null;
+      }
+
+      if (eventSource) {
+        eventSource.close();
+        eventSource = null;
+      }
     };
   }, []);
 
