@@ -662,9 +662,9 @@ const deleteDocument = async (id: string) => {
     ? activeEscalaDocuments[currentEscalaIndex % activeEscalaDocuments.length] 
     : null;
 
-const activeCardapioDocuments = cardapioDocuments.filter((doc: PDFDocument) => doc.active);
-const activeCardapioDoc = activeCardapioDocuments.length > 0
-  ? activeCardapioDocuments[currentCardapioIndex % activeCardapioDocuments.length]
+const totalCardapioDocs = cardapioDocuments.length;
+const activeCardapioDoc = totalCardapioDocs > 0
+  ? cardapioDocuments[currentCardapioIndex % totalCardapioDocs]
   : null;
   
 
@@ -708,18 +708,18 @@ useEffect(() => {
   }
 
   // ✏️ NOVO: Não iniciar timer se estiver em modo editor
-  if (activeCardapioDocuments.length > 1 && !isCardapioEditMode) {
-    console.log(`🍽️ Iniciando alternância de ${activeCardapioDocuments.length} cardápios`);
+  if (cardapioDocuments.length > 1 && !isCardapioEditMode) {
+    console.log(`🍽️ Iniciando alternância de ${cardapioDocuments.length} cardápios`);
 
     cardapioTimerRef.current = setInterval(() => {
       setCurrentCardapioIndex(prevIndex => {
-        const nextIndex = (prevIndex + 1) % activeCardapioDocuments.length;
-        const nextCardapio = activeCardapioDocuments[nextIndex];
-        console.log(`🍽️ Alternando para cardápio ${nextIndex + 1}/${activeCardapioDocuments.length}: ${nextCardapio?.unit || 'N/A'}`);
+        const nextIndex = (prevIndex + 1) % cardapioDocuments.length;
+        const nextCardapio = cardapioDocuments[nextIndex];
+        console.log(`🍽️ Alternando para cardápio ${nextIndex + 1}/${cardapioDocuments.length}: ${nextCardapio?.unit || 'N/A'}`);
         return nextIndex;
       });
     }, cardapioAlternateInterval);
-  } else if (activeCardapioDocuments.length === 1) {
+  } else if (cardapioDocuments.length === 1) {
     console.log(`🍽️ Apenas 1 cardápio ativo, mantendo fixo`);
     setCurrentCardapioIndex(0);
   } else {
@@ -732,16 +732,16 @@ useEffect(() => {
       cardapioTimerRef.current = null;
     }
   };
-}, [activeCardapioDocuments.length, cardapioAlternateInterval, isCardapioEditMode]);
+}, [cardapioDocuments, cardapioAlternateInterval, isCardapioEditMode]);
 
 // ✅ ADICIONAR: Effect para resetar índice de cardápios
 useEffect(() => {
-  if (activeCardapioDocuments.length === 0) {
+  if (cardapioDocuments.length === 0) {
     setCurrentCardapioIndex(0);
-  } else if (currentCardapioIndex >= activeCardapioDocuments.length) {
+  } else if (currentCardapioIndex >= cardapioDocuments.length) {
     setCurrentCardapioIndex(0);
   }
-}, [activeCardapioDocuments.length, currentCardapioIndex]);
+}, [cardapioDocuments.length, currentCardapioIndex]);
   // Log das mudanças importantes
   useEffect(() => {
     if (!isInitializingRef.current) {
