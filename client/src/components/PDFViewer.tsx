@@ -1243,59 +1243,6 @@ useEffect(() => {
   }
 }, [documentType, activeCardapioDoc?.id, isEditMode]);
 
-  // 💾 AUTO-SAVE do scroll com debounce (salvar automaticamente ao rolar)
-  useEffect(() => {
-    if (documentType === "plasa") return; // Não salvar para PLASA
-
-    const scrollContainer = scrollableContentRef.current || containerRef.current;
-    if (!scrollContainer) return;
-
-    let scrollTimeout: NodeJS.Timeout;
-
-    const handleScroll = () => {
-      // Limpar timeout anterior
-      clearTimeout(scrollTimeout);
-
-      // Aguardar 1 segundo após o usuário parar de rolar para salvar
-      scrollTimeout = setTimeout(() => {
-        const docId = getCurrentDocumentId();
-        if (docId && scrollContainer) {
-          saveScrollToLocalStorage(docId, scrollContainer.scrollTop, scrollContainer.scrollLeft);
-          console.log(`💾 [AUTO-SAVE] Scroll salvo automaticamente para ${docId}`);
-        }
-      }, 1000); // Debounce de 1 segundo
-    };
-
-    scrollContainer.addEventListener('scroll', handleScroll, { passive: true });
-
-    return () => {
-      clearTimeout(scrollTimeout);
-      scrollContainer.removeEventListener('scroll', handleScroll);
-    };
-  }, [documentType, getCurrentDocumentId, saveScrollToLocalStorage]);
-
-  // 💾 Salvar scroll antes de descarregar a página
-  useEffect(() => {
-    if (documentType === "plasa") return; // Não salvar para PLASA
-
-    const handleBeforeUnload = () => {
-      const docId = getCurrentDocumentId();
-      const scrollContainer = scrollableContentRef.current || containerRef.current;
-
-      if (docId && scrollContainer) {
-        saveScrollToLocalStorage(docId, scrollContainer.scrollTop, scrollContainer.scrollLeft);
-        saveZoomToLocalStorage(docId, zoomLevel);
-        console.log(`💾 [BEFOREUNLOAD] Posição salva antes de sair da página`);
-      }
-    };
-
-    window.addEventListener('beforeunload', handleBeforeUnload);
-
-    return () => {
-      window.removeEventListener('beforeunload', handleBeforeUnload);
-    };
-  }, [documentType, getCurrentDocumentId, saveScrollToLocalStorage, saveZoomToLocalStorage, zoomLevel]);
-
   // ✅ FUNÇÃO: Verificar se URL é imagem
   const checkIfImageFile = async (url: string): Promise<boolean> => {
     try {
