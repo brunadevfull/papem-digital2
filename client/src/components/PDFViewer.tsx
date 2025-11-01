@@ -413,8 +413,15 @@ const PDFViewer: React.FC<PDFViewerProps> = ({
 
   // ✏️ Função para alternar modo editor (pausa/retoma troca automática + salva)
   const handleToggleEditMode = useCallback(() => {
+    const currentDoc = documentType === "escala" ? getCurrentEscalaDoc() :
+                       documentType === "cardapio" ? getCurrentCardapioDoc() : null;
     const docId = getCurrentDocumentId();
-    console.log(`\n🔧 [MODO EDITOR] Estado atual: ${isEditMode ? 'ATIVO' : 'INATIVO'}, Documento: ${docId}`);
+
+    console.log(`\n🔧 [MODO EDITOR] ${documentType.toUpperCase()} - Estado: ${isEditMode ? 'SAINDO' : 'ENTRANDO'}`);
+    console.log(`  - Doc ID: ${docId}`);
+    console.log(`  - Doc Title: ${currentDoc?.title}`);
+    console.log(`  - Doc Unit: ${currentDoc?.unit || 'N/A'}`);
+    console.log(`  - Doc URL: ${currentDoc?.url}`);
 
     if (!isEditMode) {
       // ENTRANDO em modo editor
@@ -426,37 +433,59 @@ const PDFViewer: React.FC<PDFViewerProps> = ({
         console.log("✏️ [MODO EDITOR] CARDÁPIO: Pausando alternância automática");
       }
       setIsEditMode(true);
-      console.log("✅ [MODO EDITOR] ATIVADO - Scroll não será salvo automaticamente");
+      console.log("✅ [MODO EDITOR] ATIVADO - Ajuste zoom/scroll livremente");
     } else {
       // SAINDO do modo editor - SALVAR TUDO
       const scrollContainer = scrollableContentRef.current || containerRef.current;
+
+      console.log(`\n💾 [MODO EDITOR] Tentando salvar posição:`);
+      console.log(`  - scrollContainer existe: ${!!scrollContainer}`);
+      console.log(`  - docId: ${docId}`);
+      console.log(`  - documentType: ${documentType}`);
 
       if (docId && scrollContainer) {
         const scrollTop = scrollContainer.scrollTop;
         const scrollLeft = scrollContainer.scrollLeft;
 
-        console.log(`💾 [MODO EDITOR] SALVANDO posição final:`);
-        console.log(`  - Documento: ${docId}`);
+        console.log(`💾 [MODO EDITOR] SALVANDO posição final para ${docId}:`);
+        console.log(`  - Título: ${currentDoc?.title}`);
+        console.log(`  - Unit: ${currentDoc?.unit || 'N/A'}`);
         console.log(`  - Scroll Top: ${scrollTop}`);
         console.log(`  - Scroll Left: ${scrollLeft}`);
+        console.log(`  - Zoom Level: ${zoomLevel} (${Math.round(zoomLevel * 100)}%)`);
 
         // Salvar scroll
         saveScrollToLocalStorage(docId, scrollTop, scrollLeft);
+        console.log(`  ✓ Scroll salvo`);
 
         // Salvar zoom também
         saveZoomToLocalStorage(docId, zoomLevel);
-        console.log(`  - Zoom: ${zoomLevel} (${Math.round(zoomLevel * 100)}%)`);
+        console.log(`  ✓ Zoom salvo`);
 
-        // Verificar se salvou corretamente
+        // Verificar se salvou corretamente no localStorage
         const savedScroll = localStorage.getItem(`document-scroll-${docId}`);
         const savedZoom = localStorage.getItem(`document-zoom-${docId}`);
-        console.log(`✅ [MODO EDITOR] Verificação do salvamento:`);
-        console.log(`  - Scroll salvo: ${savedScroll}`);
-        console.log(`  - Zoom salvo: ${savedZoom}`);
+
+        console.log(`\n✅ [MODO EDITOR] Verificação do salvamento no localStorage:`);
+        console.log(`  - Key Scroll: document-scroll-${docId}`);
+        console.log(`  - Value Scroll: ${savedScroll}`);
+        console.log(`  - Key Zoom: document-zoom-${docId}`);
+        console.log(`  - Value Zoom: ${savedZoom}`);
+
+        // Validar se os valores foram realmente salvos
+        if (!savedScroll || !savedZoom) {
+          console.error(`❌ [MODO EDITOR] FALHA NO SALVAMENTO!`);
+          console.error(`  - Scroll foi salvo: ${!!savedScroll}`);
+          console.error(`  - Zoom foi salvo: ${!!savedZoom}`);
+        } else {
+          console.log(`✅ [MODO EDITOR] Salvamento confirmado no localStorage!`);
+        }
       } else {
-        console.warn(`⚠️ [MODO EDITOR] Não foi possível salvar:`);
-        console.warn(`  - docId: ${docId}`);
-        console.warn(`  - scrollContainer: ${!!scrollContainer}`);
+        console.error(`❌ [MODO EDITOR] NÃO FOI POSSÍVEL SALVAR!`);
+        console.error(`  - docId: ${docId}`);
+        console.error(`  - scrollContainer: ${!!scrollContainer}`);
+        console.error(`  - containerRef.current: ${!!containerRef.current}`);
+        console.error(`  - scrollableContentRef.current: ${!!scrollableContentRef.current}`);
       }
 
       // Retomar alternância automática
@@ -474,9 +503,9 @@ const PDFViewer: React.FC<PDFViewerProps> = ({
       setScrollSavedFeedback(true);
       setTimeout(() => setScrollSavedFeedback(false), 2000);
 
-      console.log("✅ [MODO EDITOR] DESATIVADO - Posição salva!");
+      console.log("✅ [MODO EDITOR] DESATIVADO\n");
     }
-  }, [isEditMode, documentType, getCurrentDocumentId, saveScrollToLocalStorage, saveZoomToLocalStorage, zoomLevel, setIsEscalaEditMode, setIsCardapioEditMode]);
+  }, [isEditMode, documentType, getCurrentDocumentId, getCurrentEscalaDoc, getCurrentCardapioDoc, saveScrollToLocalStorage, saveZoomToLocalStorage, zoomLevel, setIsEscalaEditMode, setIsCardapioEditMode]);
 
   // Função para salvar manualmente a posição atual do scroll
   const handleSaveScrollPosition = useCallback(() => {
