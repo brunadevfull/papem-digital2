@@ -257,6 +257,7 @@ const PDFViewer: React.FC<PDFViewerProps> = ({
   const containerRef = useRef<HTMLDivElement>(null);
   const scrollableContentRef = useRef<HTMLDivElement>(null); // ✅ Novo ref para container interno real
   const restartTimerRef = useRef<NodeJS.Timeout | null>(null);
+  const scrollSaveTimeoutRef = useRef<NodeJS.Timeout | null>(null); // ✅ Ref para timeout de salvamento de scroll
 
   // Estados para controle de zoom
   const [zoomLevel, setZoomLevel] = useState(1);
@@ -292,16 +293,18 @@ const PDFViewer: React.FC<PDFViewerProps> = ({
 
   // Função para salvar zoom no localStorage (apenas escala e cardápio)
   const saveZoomToLocalStorage = useCallback((docId: string, zoom: number) => {
+    if (documentType === "plasa") return; // Não salvar para PLASA
     try {
       localStorage.setItem(`document-zoom-${docId}`, zoom.toString());
       console.log(`💾 Zoom salvo para documento ${docId}: ${zoom}`);
     } catch (error) {
       console.warn("⚠️ Erro ao salvar zoom no localStorage:", error);
     }
-  }, []);
+  }, [documentType]);
 
   // Função para carregar zoom do localStorage (apenas escala e cardápio)
   const loadZoomFromLocalStorage = useCallback((docId: string): number => {
+    if (documentType === "plasa") return 1; // Não carregar para PLASA
     try {
       const saved = localStorage.getItem(`document-zoom-${docId}`);
       if (saved) {
@@ -315,7 +318,7 @@ const PDFViewer: React.FC<PDFViewerProps> = ({
       console.warn("⚠️ Erro ao carregar zoom do localStorage:", error);
     }
     return 1; // Valor padrão
-  }, []);
+  }, [documentType]);
 
   // Função para salvar posição do scroll no localStorage (apenas escala e cardápio)
   const saveScrollToLocalStorage = useCallback((docId: string, scrollTop: number, scrollLeft: number) => {
@@ -349,20 +352,17 @@ const PDFViewer: React.FC<PDFViewerProps> = ({
     const newZoom = Math.min(zoomLevel + 0.1, 3); // Máximo 3x
     setZoomLevel(newZoom);
     setZoomInputValue(Math.round(newZoom * 100).toString());
-    // ⚠️ Não salvar automaticamente - só salva ao sair do modo editor
   };
 
   const handleZoomOut = () => {
     const newZoom = Math.max(zoomLevel - 0.1, 0.5); // Mínimo 0.5x
     setZoomLevel(newZoom);
     setZoomInputValue(Math.round(newZoom * 100).toString());
-    // ⚠️ Não salvar automaticamente - só salva ao sair do modo editor
   };
 
   const handleResetZoom = () => {
     setZoomLevel(1);
     setZoomInputValue("100");
-    // ⚠️ Não salvar automaticamente - só salva ao sair do modo editor
   };
 
   const handleZoomInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -399,7 +399,6 @@ const PDFViewer: React.FC<PDFViewerProps> = ({
     const newZoom = numericValue / 100;
     setZoomLevel(newZoom);
     setZoomInputValue(numericValue.toString());
-    // ⚠️ Não salvar automaticamente - só salva ao sair do modo editor
   };
 
   const handleZoomInputBlur = () => {
@@ -414,8 +413,15 @@ const PDFViewer: React.FC<PDFViewerProps> = ({
 
   // ✏️ Função para alternar modo editor (pausa/retoma troca automática + salva)
   const handleToggleEditMode = useCallback(() => {
+    const currentDoc = documentType === "escala" ? getCurrentEscalaDoc() :
+                       documentType === "cardapio" ? getCurrentCardapioDoc() : null;
     const docId = getCurrentDocumentId();
-    console.log(`\n🔧 [MODO EDITOR] Estado atual: ${isEditMode ? 'ATIVO' : 'INATIVO'}, Documento: ${docId}`);
+
+    console.log(`\n🔧 [MODO EDITOR] ${documentType.toUpperCase()} - Estado: ${isEditMode ? 'SAINDO' : 'ENTRANDO'}`);
+    console.log(`  - Doc ID: ${docId}`);
+    console.log(`  - Doc Title: ${currentDoc?.title}`);
+    console.log(`  - Doc Unit: ${currentDoc?.unit || 'N/A'}`);
+    console.log(`  - Doc URL: ${currentDoc?.url}`);
 
     if (!isEditMode) {
       // ENTRANDO em modo editor
@@ -427,37 +433,59 @@ const PDFViewer: React.FC<PDFViewerProps> = ({
         console.log("✏️ [MODO EDITOR] CARDÁPIO: Pausando alternância automática");
       }
       setIsEditMode(true);
-      console.log("✅ [MODO EDITOR] ATIVADO - Scroll não será salvo automaticamente");
+      console.log("✅ [MODO EDITOR] ATIVADO - Ajuste zoom/scroll livremente");
     } else {
       // SAINDO do modo editor - SALVAR TUDO
       const scrollContainer = scrollableContentRef.current || containerRef.current;
+
+      console.log(`\n💾 [MODO EDITOR] Tentando salvar posição:`);
+      console.log(`  - scrollContainer existe: ${!!scrollContainer}`);
+      console.log(`  - docId: ${docId}`);
+      console.log(`  - documentType: ${documentType}`);
 
       if (docId && scrollContainer) {
         const scrollTop = scrollContainer.scrollTop;
         const scrollLeft = scrollContainer.scrollLeft;
 
-        console.log(`💾 [MODO EDITOR] SALVANDO posição final:`);
-        console.log(`  - Documento: ${docId}`);
+        console.log(`💾 [MODO EDITOR] SALVANDO posição final para ${docId}:`);
+        console.log(`  - Título: ${currentDoc?.title}`);
+        console.log(`  - Unit: ${currentDoc?.unit || 'N/A'}`);
         console.log(`  - Scroll Top: ${scrollTop}`);
         console.log(`  - Scroll Left: ${scrollLeft}`);
+        console.log(`  - Zoom Level: ${zoomLevel} (${Math.round(zoomLevel * 100)}%)`);
 
         // Salvar scroll
         saveScrollToLocalStorage(docId, scrollTop, scrollLeft);
+        console.log(`  ✓ Scroll salvo`);
 
         // Salvar zoom também
         saveZoomToLocalStorage(docId, zoomLevel);
-        console.log(`  - Zoom: ${zoomLevel} (${Math.round(zoomLevel * 100)}%)`);
+        console.log(`  ✓ Zoom salvo`);
 
-        // Verificar se salvou corretamente
+        // Verificar se salvou corretamente no localStorage
         const savedScroll = localStorage.getItem(`document-scroll-${docId}`);
         const savedZoom = localStorage.getItem(`document-zoom-${docId}`);
-        console.log(`✅ [MODO EDITOR] Verificação do salvamento:`);
-        console.log(`  - Scroll salvo: ${savedScroll}`);
-        console.log(`  - Zoom salvo: ${savedZoom}`);
+
+        console.log(`\n✅ [MODO EDITOR] Verificação do salvamento no localStorage:`);
+        console.log(`  - Key Scroll: document-scroll-${docId}`);
+        console.log(`  - Value Scroll: ${savedScroll}`);
+        console.log(`  - Key Zoom: document-zoom-${docId}`);
+        console.log(`  - Value Zoom: ${savedZoom}`);
+
+        // Validar se os valores foram realmente salvos
+        if (!savedScroll || !savedZoom) {
+          console.error(`❌ [MODO EDITOR] FALHA NO SALVAMENTO!`);
+          console.error(`  - Scroll foi salvo: ${!!savedScroll}`);
+          console.error(`  - Zoom foi salvo: ${!!savedZoom}`);
+        } else {
+          console.log(`✅ [MODO EDITOR] Salvamento confirmado no localStorage!`);
+        }
       } else {
-        console.warn(`⚠️ [MODO EDITOR] Não foi possível salvar:`);
-        console.warn(`  - docId: ${docId}`);
-        console.warn(`  - scrollContainer: ${!!scrollContainer}`);
+        console.error(`❌ [MODO EDITOR] NÃO FOI POSSÍVEL SALVAR!`);
+        console.error(`  - docId: ${docId}`);
+        console.error(`  - scrollContainer: ${!!scrollContainer}`);
+        console.error(`  - containerRef.current: ${!!containerRef.current}`);
+        console.error(`  - scrollableContentRef.current: ${!!scrollableContentRef.current}`);
       }
 
       // Retomar alternância automática
@@ -475,9 +503,9 @@ const PDFViewer: React.FC<PDFViewerProps> = ({
       setScrollSavedFeedback(true);
       setTimeout(() => setScrollSavedFeedback(false), 2000);
 
-      console.log("✅ [MODO EDITOR] DESATIVADO - Posição salva!");
+      console.log("✅ [MODO EDITOR] DESATIVADO\n");
     }
-  }, [isEditMode, documentType, getCurrentDocumentId, saveScrollToLocalStorage, saveZoomToLocalStorage, zoomLevel, setIsEscalaEditMode, setIsCardapioEditMode]);
+  }, [isEditMode, documentType, getCurrentDocumentId, getCurrentEscalaDoc, getCurrentCardapioDoc, saveScrollToLocalStorage, saveZoomToLocalStorage, zoomLevel, setIsEscalaEditMode, setIsCardapioEditMode]);
 
   // Função para salvar manualmente a posição atual do scroll
   const handleSaveScrollPosition = useCallback(() => {
@@ -494,14 +522,20 @@ const PDFViewer: React.FC<PDFViewerProps> = ({
     }
   }, [documentType, getCurrentDocumentId, saveScrollToLocalStorage]);
 
-  // 🔄 REMOVIDO: Restauração de zoom agora acontece no onLoad das imagens
-  // para garantir que o zoom seja aplicado ANTES do scroll ser restaurado
+  // ✅ AUTO-SAVE: Salvar zoom automaticamente quando mudar (com debounce)
+  useEffect(() => {
+    if (documentType === "plasa") return; // Não salvar para PLASA
 
-  // useEffect para salvar o zoom sempre que ele mudar (apenas escala e cardápio)
-  // ⚠️ REMOVIDO: Auto-save de zoom foi desabilitado
-  // O zoom agora só é salvo quando:
-  // 1. Usuário sai do modo editor
-  // 2. Documento muda (nos useEffects de troca de documento)
+    const docId = getCurrentDocumentId();
+    if (!docId) return;
+
+    // Debounce para não salvar a cada mudança imediata
+    const timeoutId = setTimeout(() => {
+      saveZoomToLocalStorage(docId, zoomLevel);
+    }, 500); // 500ms de debounce
+
+    return () => clearTimeout(timeoutId);
+  }, [zoomLevel, documentType, getCurrentDocumentId, saveZoomToLocalStorage]);
 
   // Função para restaurar scroll após imagem carregar (APÓS zoom ser aplicado)
   const restoreScrollPosition = useCallback((docId: string) => {
@@ -521,12 +555,38 @@ const PDFViewer: React.FC<PDFViewerProps> = ({
     }
   }, [documentType, loadScrollFromLocalStorage]);
 
-  // 💾 REMOVIDO: Auto-save de scroll foi DESABILITADO
-  // O scroll agora só é salvo quando o usuário SAI do modo editor
-  // ou clica manualmente em "Salvar Posição"
+  // ✅ AUTO-SAVE: Salvar scroll automaticamente quando mudar (com debounce)
+  useEffect(() => {
+    if (documentType === "plasa") return; // Não salvar para PLASA
 
-  // 🔄 REMOVIDO: Restauração de scroll agora acontece no onLoad das imagens
-  // após o zoom ser aplicado corretamente
+    const scrollContainer = scrollableContentRef.current || containerRef.current;
+    if (!scrollContainer) return;
+
+    const handleScroll = () => {
+      const docId = getCurrentDocumentId();
+      if (!docId) return;
+
+      // Debounce para não salvar a cada pixel
+      if (scrollSaveTimeoutRef.current) {
+        clearTimeout(scrollSaveTimeoutRef.current);
+      }
+
+      scrollSaveTimeoutRef.current = setTimeout(() => {
+        saveScrollToLocalStorage(docId, scrollContainer.scrollTop, scrollContainer.scrollLeft);
+        scrollSaveTimeoutRef.current = null;
+      }, 1000); // 1s de debounce
+    };
+
+    scrollContainer.addEventListener('scroll', handleScroll, { passive: true });
+
+    return () => {
+      scrollContainer.removeEventListener('scroll', handleScroll);
+      if (scrollSaveTimeoutRef.current) {
+        clearTimeout(scrollSaveTimeoutRef.current);
+        scrollSaveTimeoutRef.current = null;
+      }
+    };
+  }, [documentType, getCurrentDocumentId, saveScrollToLocalStorage]);
 
   // Configurações
   const getScrollSpeed = () => {
@@ -1146,8 +1206,15 @@ const PDFViewer: React.FC<PDFViewerProps> = ({
         return;
       }
 
-      // ⚠️ NÃO salvar scroll/zoom automaticamente ao trocar documento
-      // O salvamento só deve ocorrer quando o usuário sai do modo editor manualmente
+      // 💾 SALVAR posição do documento anterior ANTES de trocar
+      if (previousDocIdRef.current && currentDocId !== previousDocIdRef.current) {
+        const scrollContainer = scrollableContentRef.current || containerRef.current;
+        if (scrollContainer) {
+          console.log(`💾 ESCALA: Salvando posição do documento anterior: ${previousDocIdRef.current}`);
+          saveScrollToLocalStorage(previousDocIdRef.current, scrollContainer.scrollTop, scrollContainer.scrollLeft);
+          saveZoomToLocalStorage(previousDocIdRef.current, zoomLevel);
+        }
+      }
 
       // Atualizar referência do documento anterior
       previousDocIdRef.current = currentDocId;
@@ -1210,8 +1277,15 @@ useEffect(() => {
       return;
     }
 
-    // ⚠️ NÃO salvar scroll/zoom automaticamente ao trocar documento
-    // O salvamento só deve ocorrer quando o usuário sai do modo editor manualmente
+    // 💾 SALVAR posição do documento anterior ANTES de trocar
+    if (previousDocIdRef.current && currentDocId !== previousDocIdRef.current) {
+      const scrollContainer = scrollableContentRef.current || containerRef.current;
+      if (scrollContainer) {
+        console.log(`💾 CARDÁPIO: Salvando posição do documento anterior: ${previousDocIdRef.current}`);
+        saveScrollToLocalStorage(previousDocIdRef.current, scrollContainer.scrollTop, scrollContainer.scrollLeft);
+        saveZoomToLocalStorage(previousDocIdRef.current, zoomLevel);
+      }
+    }
 
     // Atualizar referência do documento anterior
     previousDocIdRef.current = currentDocId;
