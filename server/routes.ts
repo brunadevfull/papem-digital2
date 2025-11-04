@@ -316,14 +316,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   await ensureDefaultAdminUser();
 
-  const dutyOfficerSubscribers = new Set<Response>();
-
-  type DutyOfficersSseEvent = {
-    type: 'snapshot' | 'update';
-    officers: DutyOfficers | null;
-    timestamp: string;
-  };
-
   // 📄 SSE para documentos
   const documentSubscribers = new Set<Response>();
 
@@ -331,24 +323,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
     type: 'snapshot' | 'update';
     documents: any[] | null;
     timestamp: string;
-  };
-
-  const broadcastDutyOfficers = (event: DutyOfficersSseEvent) => {
-    const payload = `data: ${JSON.stringify(event)}\n\n`;
-
-    for (const subscriber of dutyOfficerSubscribers) {
-      try {
-        subscriber.write(payload);
-      } catch (error) {
-        console.error('❌ Erro ao enviar atualização de oficiais via SSE:', error);
-        dutyOfficerSubscribers.delete(subscriber);
-        try {
-          subscriber.end();
-        } catch (endError) {
-          console.error('❌ Erro ao encerrar conexão SSE com problema:', endError);
-        }
-      }
-    }
   };
 
   // 📄 Broadcast de atualizações de documentos via SSE
@@ -369,23 +343,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
     }
   };
-
-  await startDutyAssignmentsListener(async (payload) => {
-    console.log('📡 NOTIFY duty_assignments_changed recebido:', payload);
-
-    try {
-      const officers = await storage.getDutyOfficers();
-      const timestamp = new Date().toISOString();
-
-      broadcastDutyOfficers({
-        type: 'update',
-        officers,
-        timestamp,
-      });
-    } catch (error) {
-      console.error('❌ Falha ao atualizar oficiais após NOTIFY duty_assignments_changed:', error);
-    }
-  });
 
   // 📄 Listener PostgreSQL para mudanças em documentos
   await startDocumentsListener(async (payload) => {
@@ -1729,42 +1686,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
     });
   });
 
-  // 🔥 NOVO: System info com informações de cache
-  // Duty Officers API
-  app.get('/api/duty-officers/stream', async (req, res) => {
-    try {
-      res.setHeader('Content-Type', 'text/event-stream');
-      res.setHeader('Cache-Control', 'no-cache');
-      res.setHeader('Connection', 'keep-alive');
-
-      const heartbeat = setInterval(() => {
-        res.write(': heartbeat\n\n');
-      }, 30_000);
-
-      dutyOfficerSubscribers.add(res);
-
-      const snapshot = await storage.getDutyOfficers();
-      res.write(`data: ${JSON.stringify({
-        type: 'snapshot' as const,
-        officers: snapshot,
-        timestamp: new Date().toISOString(),
-      })}\n\n`);
-
-      req.on('close', () => {
-        clearInterval(heartbeat);
-        dutyOfficerSubscribers.delete(res);
-      });
-    } catch (error) {
-      console.error('❌ Erro ao iniciar stream de oficiais de serviço:', error);
-      dutyOfficerSubscribers.delete(res);
-      try {
-        res.status(500).end();
-      } catch {
-        // Ignore secondary errors ao encerrar stream
-      }
-    }
-  });
-
   // 📄 SSE para atualizações de documentos em tempo real
   app.get('/api/documents/stream', async (req, res) => {
     try {
@@ -1834,7 +1755,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const validatedData: DutyOfficersPayload = dutyOfficersPayloadSchema.parse(req.body);
       
       const updatedOfficers = await storage.updateDutyOfficers(validatedData);
-      
+
       const result = {
         success: true,
         officers: updatedOfficers,
@@ -1844,12 +1765,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       console.log('✅ Oficiais de serviço atualizados:', updatedOfficers);
       res.json(result);
-
-      broadcastDutyOfficers({
-        type: 'update',
-        officers: updatedOfficers,
-        timestamp: result.timestamp,
-      });
 
     } catch (error) {
       console.error('❌ Erro ao atualizar oficiais de serviço:', error);
