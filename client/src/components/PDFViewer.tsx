@@ -285,7 +285,8 @@ const PDFViewer: React.FC<PDFViewerProps> = ({
       return currentEscala?.id ? `escala-${currentEscala.id}` : null;
     } else if (documentType === "cardapio") {
       const currentCardapio = getCurrentCardapioDoc();
-      return currentCardapio?.id ? `cardapio-${currentCardapio.id}` : null;
+      // ✅ USAR UNIDADE (EAGM/1DN) EM VEZ DE ID para compartilhar zoom/scroll entre todos os cardápios da mesma unidade
+      return currentCardapio?.unit ? `cardapio-${currentCardapio.unit}` : null;
     }
     return null;
   }, [documentType, getCurrentEscalaDoc, getCurrentCardapioDoc]);
