@@ -1182,10 +1182,12 @@ const PDFViewer: React.FC<PDFViewerProps> = ({
 useEffect(() => {
   if (documentType === "cardapio") {
     const currentCardapio = getCurrentCardapioDoc();
-    const currentDocId = currentCardapio?.id ? `cardapio-${currentCardapio.id}` : null;
+    // ✅ FIX: Usar UNIT ao invés de ID para consistência com getCurrentDocumentId()
+    const currentDocId = currentCardapio?.unit ? `cardapio-${currentCardapio.unit}` : null;
 
     console.log("🔄 CARDÁPIO Effect triggered:", {
       currentCardapio: currentCardapio?.title,
+      unit: currentCardapio?.unit,
       currentDocId,
       previousDocId: previousDocIdRef.current,
       isEditMode,
