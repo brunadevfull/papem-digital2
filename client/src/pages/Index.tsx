@@ -50,10 +50,6 @@ const Index = () => {
     };
 
     fetchSunset();
-    
-    // Atualizar a cada hora
-    const interval = setInterval(fetchSunset, 60 * 60 * 1000);
-    return () => clearInterval(interval);
   }, []);
 
   // Buscar dados dos oficiais
@@ -73,91 +69,6 @@ const Index = () => {
     };
 
     fetchOfficers();
-    const interval = setInterval(fetchOfficers, 5 * 60 * 1000); // 5 minutos
-    return () => clearInterval(interval);
-  }, []);
-
-  useEffect(() => {
-    let eventSource: EventSource | null = null;
-    let reconnectTimeout: NodeJS.Timeout | null = null;
-    let reconnectAttempts = 0;
-    const MAX_RECONNECT_ATTEMPTS = 5;
-    const BASE_RECONNECT_DELAY = 2000; // 2 segundos
-
-    const connectSSE = () => {
-      try {
-        const url = resolveBackendUrl('/api/duty-officers/stream');
-        console.log('📡 Index - conectando ao SSE:', url);
-
-        eventSource = new EventSource(url);
-
-        eventSource.onopen = () => {
-          console.log('✅ Index - conexão SSE estabelecida');
-          reconnectAttempts = 0; // Reset contador ao conectar com sucesso
-        };
-
-        eventSource.onmessage = (event) => {
-          try {
-            const payload = JSON.parse(event.data) as {
-              type?: 'snapshot' | 'update';
-              officers?: DutyOfficers | null;
-              timestamp?: string;
-            };
-
-            if ('officers' in payload) {
-              setOfficers(payload.officers ?? null);
-              console.log('📡 Index recebeu atualização SSE de oficiais:', payload);
-            }
-          } catch (error) {
-            console.error('❌ Index - erro ao processar SSE de oficiais:', error);
-          }
-        };
-
-        eventSource.onerror = (event) => {
-          console.error('⚠️ Index - erro no stream SSE de oficiais:', event);
-
-          // Fechar conexão atual
-          if (eventSource) {
-            eventSource.close();
-            eventSource = null;
-          }
-
-          // Tentar reconectar com backoff exponencial
-          if (reconnectAttempts < MAX_RECONNECT_ATTEMPTS) {
-            const delay = BASE_RECONNECT_DELAY * Math.pow(2, reconnectAttempts);
-            reconnectAttempts++;
-
-            console.log(`🔄 Index - tentando reconectar SSE em ${delay}ms (tentativa ${reconnectAttempts}/${MAX_RECONNECT_ATTEMPTS})`);
-
-            reconnectTimeout = setTimeout(() => {
-              connectSSE();
-            }, delay);
-          } else {
-            console.error('❌ Index - máximo de tentativas de reconexão SSE atingido');
-          }
-        };
-      } catch (error) {
-        console.error('❌ Index - erro ao criar conexão SSE:', error);
-      }
-    };
-
-    // Iniciar conexão
-    connectSSE();
-
-    // Cleanup
-    return () => {
-      console.log('🧹 Index - limpando conexão SSE');
-
-      if (reconnectTimeout) {
-        clearTimeout(reconnectTimeout);
-        reconnectTimeout = null;
-      }
-
-      if (eventSource) {
-        eventSource.close();
-        eventSource = null;
-      }
-    };
   }, []);
 
   // Buscar dados da temperatura
@@ -174,8 +85,6 @@ const Index = () => {
     };
 
     fetchTemperature();
-    const interval = setInterval(fetchTemperature, 30 * 60 * 1000); // 30 minutos
-    return () => clearInterval(interval);
   }, []);
 
   // Atualizar horário e data em tempo real

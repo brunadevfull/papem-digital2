@@ -169,47 +169,6 @@ export const DutyOfficersDisplay = () => {
     loadOfficers();
   }, []);
 
-  useEffect(() => {
-    const url = resolveBackendUrl('/api/duty-officers/stream');
-    const eventSource = new EventSource(url);
-
-    eventSource.onmessage = (event) => {
-      try {
-        const payload = JSON.parse(event.data) as {
-          type?: 'snapshot' | 'update';
-          officers?: DutyOfficers | null;
-          timestamp?: string;
-        };
-
-        if ('officers' in payload) {
-          setOfficers(payload.officers ?? null);
-          setLoading(false);
-          setError(null);
-          console.log('📡 Atualização SSE de oficiais recebida:', payload);
-        }
-      } catch (err) {
-        console.error('❌ Erro ao processar evento SSE de oficiais:', err);
-      }
-    };
-
-    eventSource.onerror = (event) => {
-      console.error('⚠️ Erro no stream SSE de oficiais:', event);
-      void loadOfficers();
-    };
-
-    return () => {
-      eventSource.close();
-    };
-  }, []);
-
-  // Auto-refresh a cada 5 minutos
-  useEffect(() => {
-    const interval = setInterval(() => {
-      loadOfficers();
-    }, 5 * 60 * 1000); // 5 minutos
-
-    return () => clearInterval(interval);
-  }, []);
 
   if (loading) {
     return (

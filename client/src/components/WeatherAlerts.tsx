@@ -215,11 +215,6 @@ export const WeatherAlerts = () => {
   // Buscar dados ao carregar o componente
   useEffect(() => {
     fetchWeatherData();
-    
-    // Atualizar a cada 10 minutos
-    const interval = setInterval(fetchWeatherData, 10 * 60 * 1000);
-    
-    return () => clearInterval(interval);
   }, []);
 
   // Determinar cor do alerta baseado na severidade
