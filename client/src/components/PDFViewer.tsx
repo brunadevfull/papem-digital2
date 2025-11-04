@@ -1182,11 +1182,12 @@ const PDFViewer: React.FC<PDFViewerProps> = ({
 useEffect(() => {
   if (documentType === "cardapio") {
     const currentCardapio = getCurrentCardapioDoc();
-    // ✅ FIX: Usar UNIT ao invés de ID para consistência com getCurrentDocumentId()
-    const currentDocId = currentCardapio?.unit ? `cardapio-${currentCardapio.unit}` : null;
+    // ✅ Usar ID real do documento para detectar mudanças de imagem
+    const currentDocId = currentCardapio?.id || null;
 
     console.log("🔄 CARDÁPIO Effect triggered:", {
       currentCardapio: currentCardapio?.title,
+      id: currentCardapio?.id,
       unit: currentCardapio?.unit,
       currentDocId,
       previousDocId: previousDocIdRef.current,
@@ -1207,7 +1208,7 @@ useEffect(() => {
       return;
     }
 
-    // 🔍 VERIFICAR se realmente mudou de documento
+    // 🔍 VERIFICAR se realmente mudou de documento (usa ID real do documento)
     if (currentDocId === previousDocIdRef.current && cardapioImageUrl) {
       console.log("✅ CARDÁPIO: Mesmo documento, não recarregar");
       return;
@@ -1216,7 +1217,7 @@ useEffect(() => {
     // ⚠️ NÃO salvar scroll/zoom automaticamente ao trocar documento
     // O salvamento só deve ocorrer quando o usuário sai do modo editor manualmente
 
-    // Atualizar referência do documento anterior
+    // Atualizar referência do documento anterior (ID real, não UNIT)
     previousDocIdRef.current = currentDocId;
 
     setCardapioImageUrl(null);
