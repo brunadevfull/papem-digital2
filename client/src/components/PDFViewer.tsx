@@ -1947,9 +1947,9 @@ useEffect(() => {
     <div className="flex flex-col">
       <span className="font-bold text-xs sm:text-sm bg-clip-text text-transparent uppercase tracking-wide bg-gradient-to-r from-white to-blue-100">
         {documentType === "plasa" ? (
-          activePlasaDoc?.title || "PLANO SEMANAL DE ATIVIDADES"
+          "PLASA: Plano Semanal de atividades"
         ) : documentType === "cardapio" ? (
-          "CARDÁPIO"
+          "CARDÁPIO SEMANAL"
         ) : (
           getCurrentTitle() || "ESCALA DE SERVIÇO"
         )}
