@@ -20,6 +20,7 @@ import { promisify } from "util";
 import session from "express-session";
 import connectPgSimple from "connect-pg-simple";
 import crypto from "crypto";
+import { logger } from "./utils/logger";
 
 // 🔥 NOVO: Sistema de classificação inteligente de documentos
 interface DocumentClassification {
@@ -1058,17 +1059,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // Serve uploaded files with comprehensive CORS headers
   app.use('/uploads', (req, res, next) => {
-    console.log(`📁 Serving file: ${req.path} to ${req.get('Origin') || 'direct'}`);
-    
+    logger.file('Serving file', req.path);
+
     res.header('Access-Control-Allow-Origin', '*');
     res.header('Access-Control-Allow-Methods', 'GET, HEAD, OPTIONS');
     res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization, Cache-Control, Pragma, Expires, If-Modified-Since, If-None-Match, Range');
     res.header('Access-Control-Expose-Headers', 'Content-Length, Content-Range, Accept-Ranges, Content-Type, Cache-Control, Last-Modified, ETag, Accept-Ranges');
     res.header('Cache-Control', 'public, max-age=31536000');
     res.header('Access-Control-Max-Age', '86400');
-    
+
     if (req.method === 'OPTIONS') {
-      console.log(`✅ CORS Preflight for file: ${req.path}`);
+      logger.success(`CORS Preflight for file: ${req.path}`);
       res.sendStatus(200);
     } else {
       next();
@@ -1090,7 +1091,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     for (const subfolder of subfolders) {
       const subfolderFilePath = path.join(process.cwd(), 'uploads', subfolder, filePath);
       if (fs.existsSync(subfolderFilePath)) {
-        console.log(`📁 Redirecionando "${filePath}" de raiz para "${subfolder}/"`);
+        logger.file('Redirecionando', `"${filePath}" de raiz para "${subfolder}/"`);
         return res.redirect(301, `/uploads/${subfolder}/${filePath}`);
       }
     }
@@ -1101,7 +1102,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.use('/uploads', express.static(path.join(process.cwd(), 'uploads'), {
     setHeaders: (res, filePath) => {
-      console.log(`📄 Setting headers for: ${path.basename(filePath)}`);
+      logger.file('Setting headers for', path.basename(filePath));
       res.set('Cross-Origin-Resource-Policy', 'cross-origin');
       res.set('Cross-Origin-Embedder-Policy', 'unsafe-none');
     }
@@ -1110,20 +1111,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
   /// ✅ CORREÇÃO: Notice routes com melhor tratamento de erro
   app.get('/api/notices', async (req, res) => {
     try {
-      console.log('📢 GET /api/notices - Buscando avisos...');
       const notices = await storage.getNotices();
-      console.log(`📢 Encontrados ${notices.length} avisos`);
-      
-      res.json({ 
-        success: true, 
+
+      res.json({
+        success: true,
         notices: notices,
         count: notices.length,
         timestamp: new Date().toISOString()
       });
     } catch (error) {
-      console.error('❌ Erro ao buscar avisos:', error);
-      res.status(500).json({ 
-        success: false, 
+      logger.error('Erro ao buscar avisos', error);
+      res.status(500).json({
+        success: false,
         error: 'Failed to fetch notices',
         details: error instanceof Error ? error.message : 'Unknown error'
       });
@@ -1133,8 +1132,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
  // ✅ CORREÇÃO: POST notices com validação melhorada
   app.post('/api/notices', async (req, res) => {
     try {
-      console.log('📢 POST /api/notices - Dados recebidos:', req.body);
-      
       // ✅ Validação manual dos campos obrigatórios primeiro
       const { title, content, priority, startDate, endDate, active } = req.body;
       
@@ -1216,33 +1213,30 @@ export async function registerRoutes(app: Express): Promise<Server> {
         endDate: parsedEndDate,
         active: active !== false // Default para true se não especificado
       };
-      
-      console.log('📢 Dados validados:', validatedData);
-      
+
+
       // ✅ Tentar criar o aviso
       const notice = await storage.createNotice(validatedData);
-      console.log('✅ Aviso criado com sucesso:', notice);
-      
-      res.json({ 
-        success: true, 
+
+      res.json({
+        success: true,
         notice: notice,
         message: 'Notice created successfully'
       });
-      
+
     } catch (error) {
-      console.error('❌ Erro ao criar aviso:', error);
-      
+      logger.error('Erro ao criar aviso', error);
+
       if (error instanceof z.ZodError) {
-        console.error('❌ Erro de validação Zod:', error.errors);
-        res.status(400).json({ 
-          success: false, 
-          error: 'VALIDATION_ERROR: Invalid data format', 
+        res.status(400).json({
+          success: false,
+          error: 'VALIDATION_ERROR: Invalid data format',
           details: error.errors,
           zodError: true
         });
       } else {
-        res.status(500).json({ 
-          success: false, 
+        res.status(500).json({
+          success: false,
           error: 'SERVER_ERROR: Failed to create notice',
           details: error instanceof Error ? error.message : 'Unknown error'
         });
@@ -1254,20 +1248,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.put('/api/notices/:id', async (req, res) => {
     try {
       const id = parseInt(req.params.id);
-      console.log(`📝 PUT /api/notices/${id} - Atualizando aviso...`);
-      
+
       if (isNaN(id)) {
-        return res.status(400).json({ 
+        return res.status(400).json({
           success: false,
           error: 'VALIDATION_ERROR: Invalid notice ID',
           receivedId: req.params.id
         });
       }
-      
+
       const existingNotice = await storage.getNotice(id);
-      
+
       if (!existingNotice) {
-        return res.status(404).json({ 
+        return res.status(404).json({
           success: false,
           error: 'NOT_FOUND: Notice not found',
           id: id
@@ -1276,7 +1269,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       // ✅ Validar dados de atualização
       const updateData = { ...req.body };
-      
+
       // Converter datas se necessário
       if (updateData.startDate) {
         updateData.startDate = new Date(updateData.startDate);
@@ -1285,22 +1278,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
         updateData.endDate = new Date(updateData.endDate);
       }
 
-      const updatedNotice = await storage.updateNotice({ 
-        ...existingNotice, 
+      const updatedNotice = await storage.updateNotice({
+        ...existingNotice,
         ...updateData,
         id: id // Garantir que o ID não mude
       });
-      
-      console.log('✅ Aviso atualizado:', updatedNotice);
-      
+
       res.json({
         success: true,
         notice: updatedNotice,
         message: 'Notice updated successfully'
       });
     } catch (error) {
-      console.error(`❌ Erro ao atualizar aviso ${req.params.id}:`, error);
-      res.status(500).json({ 
+      logger.error(`Erro ao atualizar aviso ${req.params.id}`, error);
+      res.status(500).json({
         success: false,
         error: 'SERVER_ERROR: Failed to update notice',
         details: error instanceof Error ? error.message : 'Unknown error'
@@ -1312,36 +1303,33 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.delete('/api/notices/:id', async (req, res) => {
     try {
       const id = parseInt(req.params.id);
-      console.log(`🗑️ DELETE /api/notices/${id} - Deletando aviso...`);
-      
+
       if (isNaN(id)) {
-        return res.status(400).json({ 
+        return res.status(400).json({
           success: false,
           error: 'VALIDATION_ERROR: Invalid notice ID',
           receivedId: req.params.id
         });
       }
-      
+
       const deleted = await storage.deleteNotice(id);
-      
+
       if (!deleted) {
-        return res.status(404).json({ 
+        return res.status(404).json({
           success: false,
           error: 'NOT_FOUND: Notice not found',
           id: id
         });
       }
 
-      console.log(`✅ Aviso ${id} deletado com sucesso`);
-      
-      res.json({ 
+      res.json({
         success: true,
         message: 'Notice deleted successfully',
         deletedId: id
       });
     } catch (error) {
-      console.error(`❌ Erro ao deletar aviso ${req.params.id}:`, error);
-      res.status(500).json({ 
+      logger.error(`Erro ao deletar aviso ${req.params.id}`, error);
+      res.status(500).json({
         success: false,
         error: 'SERVER_ERROR: Failed to delete notice',
         details: error instanceof Error ? error.message : 'Unknown error'

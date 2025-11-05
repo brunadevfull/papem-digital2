@@ -8,6 +8,7 @@ import {
   type DutyOfficers, type InsertDutyOfficers,
   type MilitaryPersonnel, type InsertMilitaryPersonnel
 } from "@shared/schema";
+import { logger } from "./utils/logger";
 
 // Padrão que aceita APENAS patentes militares válidas seguidas de especialidade opcional
 // Patentes: 1T, 2T, CT, CC, CF, CMG, CA (oficiais) | 1SG, 2SG, 3SG, CB, SO, MN, SD (praças)
@@ -92,8 +93,8 @@ export class DatabaseStorage implements IStorage {
       connectionTimeoutMillis: 2000,
     });
 
-    console.log('🔗 PostgreSQL DatabaseStorage initialized');
-    console.log('📊 Connected to:', process.env.DATABASE_URL.replace(/:[^:]*@/, ':***@'));
+    logger.info('🔗 PostgreSQL DatabaseStorage initialized');
+    logger.info('📊 Connected to:', process.env.DATABASE_URL.replace(/:[^:]*@/, ':***@'));
   }
 
   // ===== USERS =====
@@ -132,11 +133,11 @@ export class DatabaseStorage implements IStorage {
 
   // ===== NOTICES =====
   async getNotices(): Promise<Notice[]> {
-    console.log('📢 PostgreSQL: Buscando avisos...');
-    
+    logger.database('Buscando avisos');
+
     try {
       const result = await this.pool.query('SELECT * FROM notices ORDER BY created_at DESC');
-      
+
       const notices: Notice[] = result.rows.map(row => ({
         id: row.id,
         title: row.title,
@@ -149,11 +150,11 @@ export class DatabaseStorage implements IStorage {
         updatedAt: row.updated_at ? new Date(row.updated_at) : null
       }));
 
-      console.log(`📢 PostgreSQL: ${notices.length} avisos encontrados`);
+      logger.database(`${notices.length} avisos encontrados`);
       return notices;
-      
+
     } catch (error) {
-      console.error('❌ PostgreSQL: Erro ao buscar avisos:', error);
+      logger.error('Erro ao buscar avisos', error);
       throw error;
     }
   }
@@ -162,7 +163,7 @@ export class DatabaseStorage implements IStorage {
     try {
       const result = await this.pool.query('SELECT * FROM notices WHERE id = $1', [id]);
       const row = result.rows[0];
-      
+
       return row ? {
         id: row.id,
         title: row.title,
@@ -174,20 +175,20 @@ export class DatabaseStorage implements IStorage {
         createdAt: row.created_at ? new Date(row.created_at) : null,
         updatedAt: row.updated_at ? new Date(row.updated_at) : null
       } : undefined;
-      
+
     } catch (error) {
-      console.error(`❌ PostgreSQL: Erro ao buscar aviso ${id}:`, error);
+      logger.error(`Erro ao buscar aviso ${id}`, error);
       return undefined;
     }
   }
 
   async createNotice(insertNotice: InsertNotice): Promise<Notice> {
-    console.log('📢 PostgreSQL: Criando aviso:', insertNotice.title);
-    
+    logger.database(`Criando aviso: ${insertNotice.title}`);
+
     try {
       const result = await this.pool.query(
-        `INSERT INTO notices (title, content, priority, start_date, end_date, active) 
-         VALUES ($1, $2, $3, $4, $5, $6) 
+        `INSERT INTO notices (title, content, priority, start_date, end_date, active)
+         VALUES ($1, $2, $3, $4, $5, $6)
          RETURNING *`,
         [
           insertNotice.title,
@@ -212,23 +213,23 @@ export class DatabaseStorage implements IStorage {
         updatedAt: row.updated_at ? new Date(row.updated_at) : null
       };
 
-      console.log(`✅ PostgreSQL: Aviso ${notice.id} criado com sucesso`);
+      logger.success(`Aviso ${notice.id} criado`);
       return notice;
-      
+
     } catch (error) {
-      console.error('❌ PostgreSQL: Erro ao criar aviso:', error);
+      logger.error('Erro ao criar aviso', error);
       throw error;
     }
   }
 
   async updateNotice(notice: Notice): Promise<Notice> {
-    console.log(`📝 PostgreSQL: Atualizando aviso ${notice.id}`);
-    
+    logger.database(`Atualizando aviso ${notice.id}`);
+
     try {
       const result = await this.pool.query(
-        `UPDATE notices 
+        `UPDATE notices
          SET title = $1, content = $2, priority = $3, start_date = $4, end_date = $5, active = $6, updated_at = NOW()
-         WHERE id = $7 
+         WHERE id = $7
          RETURNING *`,
         [
           notice.title,
@@ -258,32 +259,32 @@ export class DatabaseStorage implements IStorage {
         updatedAt: row.updated_at ? new Date(row.updated_at) : null
       };
 
-      console.log(`✅ PostgreSQL: Aviso ${notice.id} atualizado`);
+      logger.success(`Aviso ${notice.id} atualizado`);
       return updated;
-      
+
     } catch (error) {
-      console.error(`❌ PostgreSQL: Erro ao atualizar aviso ${notice.id}:`, error);
+      logger.error(`Erro ao atualizar aviso ${notice.id}`, error);
       throw error;
     }
   }
 
   async deleteNotice(id: number): Promise<boolean> {
-    console.log(`🗑️ PostgreSQL: Deletando aviso ${id}`);
-    
+    logger.database(`Deletando aviso ${id}`);
+
     try {
       const result = await this.pool.query('DELETE FROM notices WHERE id = $1', [id]);
       const deleted = (result.rowCount || 0) > 0;
-      
+
       if (deleted) {
-        console.log(`✅ PostgreSQL: Aviso ${id} deletado`);
+        logger.success(`Aviso ${id} deletado`);
       } else {
-        console.log(`⚠️ PostgreSQL: Aviso ${id} não encontrado`);
+        logger.warn(`Aviso ${id} não encontrado`);
       }
-      
+
       return deleted;
-      
+
     } catch (error) {
-      console.error(`❌ PostgreSQL: Erro ao deletar aviso ${id}:`, error);
+      logger.error(`Erro ao deletar aviso ${id}`, error);
       return false;
     }
   }
@@ -305,7 +306,7 @@ export class DatabaseStorage implements IStorage {
         tags: Array.isArray(row.tags) ? row.tags : []
       }));
     } catch (error) {
-      console.error('❌ PostgreSQL: Erro ao buscar documentos:', error);
+      logger.error('Erro ao buscar documentos', error);
       return [];
     }
   }
@@ -314,7 +315,7 @@ export class DatabaseStorage implements IStorage {
     try {
       const result = await this.pool.query('SELECT * FROM documents WHERE id = $1', [id]);
       const row = result.rows[0];
-      
+
       return row ? {
         id: row.id,
         title: row.title,
@@ -327,7 +328,7 @@ export class DatabaseStorage implements IStorage {
         tags: Array.isArray(row.tags) ? row.tags : []
       } : undefined;
     } catch (error) {
-      console.error(`❌ PostgreSQL: Erro ao buscar documento ${id}:`, error);
+      logger.error(`Erro ao buscar documento ${id}`, error);
       return undefined;
     }
   }
@@ -362,7 +363,7 @@ export class DatabaseStorage implements IStorage {
         tags: Array.isArray(row.tags) ? row.tags : []
       };
     } catch (error) {
-      console.error('❌ PostgreSQL: Erro ao criar documento:', error);
+      logger.error('Erro ao criar documento', error);
       throw error;
     }
   }
@@ -399,7 +400,7 @@ export class DatabaseStorage implements IStorage {
         tags: Array.isArray(row.tags) ? row.tags : []
       };
     } catch (error) {
-      console.error(`❌ PostgreSQL: Erro ao atualizar documento ${document.id}:`, error);
+      logger.error(`Erro ao atualizar documento ${document.id}`, error);
       throw error;
     }
   }
@@ -409,14 +410,14 @@ export class DatabaseStorage implements IStorage {
       const result = await this.pool.query('DELETE FROM documents WHERE id = $1', [id]);
       return (result.rowCount || 0) > 0;
     } catch (error) {
-      console.error(`❌ PostgreSQL: Erro ao deletar documento ${id}:`, error);
+      logger.error(`Erro ao deletar documento ${id}`, error);
       return false;
     }
   }
 
   // ===== DUTY OFFICERS =====
   async getDutyOfficers(): Promise<DutyOfficers | null> {
-    console.log('👮 PostgreSQL: Buscando oficiais de serviço (tabela dedicada)...');
+    logger.database('Buscando oficiais de serviço');
 
     try {
       const result = await this.pool.query(
@@ -427,7 +428,7 @@ export class DatabaseStorage implements IStorage {
       );
 
       if (result.rows.length === 0) {
-        console.log('👮 PostgreSQL: Nenhum registro de serviço encontrado');
+        logger.database('Nenhum registro de serviço encontrado');
         return null;
       }
 
@@ -442,16 +443,16 @@ export class DatabaseStorage implements IStorage {
         updatedAt: new Date(row.updated_at),
       };
 
-      console.log('👮 PostgreSQL: Registro atual de serviço localizado:', officers);
+      logger.database('Registro atual de serviço localizado');
       return officers;
     } catch (error) {
-      console.error('❌ PostgreSQL: Erro ao buscar oficiais de serviço:', error);
+      logger.error('Erro ao buscar oficiais de serviço', error);
       return null;
     }
   }
 
   async updateDutyOfficers(officers: InsertDutyOfficers): Promise<DutyOfficers> {
-    console.log('📝 PostgreSQL: Registrando oficial/contramestre do dia:', officers);
+    logger.database('Registrando oficial/contramestre do dia');
 
     try {
       const validFromDate = officers.validFrom ?? new Date();
@@ -492,10 +493,10 @@ export class DatabaseStorage implements IStorage {
         updatedAt: new Date(row.updated_at),
       };
 
-      console.log('✅ PostgreSQL: Registro de serviço criado:', updatedOfficers);
+      logger.success('Registro de serviço criado');
       return updatedOfficers;
     } catch (error) {
-      console.error('❌ PostgreSQL: Erro ao atualizar oficiais de serviço:', error);
+      logger.error('Erro ao atualizar oficiais de serviço', error);
       throw error;
     }
   }
@@ -503,9 +504,9 @@ export class DatabaseStorage implements IStorage {
   // ===== MILITARY PERSONNEL (implementação básica) =====
 async getMilitaryPersonnel(): Promise<MilitaryPersonnel[]> {
     try {
-      console.log('🎖️ PostgreSQL: Buscando pessoal militar...');
+      logger.database('Buscando pessoal militar');
       const result = await this.pool.query('SELECT * FROM military_personnel WHERE active = true ORDER BY type, rank, name');
-      
+
       const personnel = result.rows.map(row => ({
         id: row.id,
         name: row.name,
@@ -518,24 +519,24 @@ async getMilitaryPersonnel(): Promise<MilitaryPersonnel[]> {
         updatedAt: new Date(row.updated_at)
       }));
 
-      console.log(`🎖️ PostgreSQL: ${personnel.length} militares encontrados`);
+      logger.database(`${personnel.length} militares encontrados`);
       return personnel;
     } catch (error) {
-      console.error('❌ PostgreSQL: Erro ao buscar militares:', error);
+      logger.error('Erro ao buscar militares', error);
       return [];
     }
   }
 
 
- 
+
   async getMilitaryPersonnelByType(type: "officer" | "master"): Promise<MilitaryPersonnel[]> {
     try {
-      console.log(`🎖️ PostgreSQL: Buscando ${type}s...`);
+      logger.database(`Buscando ${type}s`);
       const result = await this.pool.query(
         'SELECT * FROM military_personnel WHERE type = $1 AND active = true ORDER BY rank, name',
         [type]
       );
-      
+
       const personnel = result.rows.map(row => ({
         id: row.id,
         name: row.name,
@@ -548,21 +549,21 @@ async getMilitaryPersonnel(): Promise<MilitaryPersonnel[]> {
         updatedAt: new Date(row.updated_at)
       }));
 
-      console.log(`🎖️ PostgreSQL: ${personnel.length} ${type}s encontrados`);
+      logger.database(`${personnel.length} ${type}s encontrados`);
       return personnel;
     } catch (error) {
-      console.error(`❌ PostgreSQL: Erro ao buscar ${type}s:`, error);
+      logger.error(`Erro ao buscar ${type}s`, error);
       return [];
     }
   }
 
  async createMilitaryPersonnel(personnel: InsertMilitaryPersonnel): Promise<MilitaryPersonnel> {
     try {
-      console.log(`🎖️ PostgreSQL: Criando ${personnel.type}:`, personnel.name);
-      
+      logger.database(`Criando ${personnel.type}: ${personnel.name}`);
+
       const result = await this.pool.query(
-        `INSERT INTO military_personnel (name, type, rank, specialty, full_rank_name, active) 
-         VALUES ($1, $2, $3, $4, $5, $6) 
+        `INSERT INTO military_personnel (name, type, rank, specialty, full_rank_name, active)
+         VALUES ($1, $2, $3, $4, $5, $6)
          RETURNING *`,
         [
           personnel.name,
@@ -587,22 +588,22 @@ async getMilitaryPersonnel(): Promise<MilitaryPersonnel[]> {
         updatedAt: new Date(row.updated_at)
       };
 
-      console.log(`✅ PostgreSQL: ${personnel.type} ${created.id} criado`);
+      logger.success(`${personnel.type} ${created.id} criado`);
       return created;
     } catch (error) {
-      console.error('❌ PostgreSQL: Erro ao criar militar:', error);
+      logger.error('Erro ao criar militar', error);
       throw error;
     }
   }
 
  async updateMilitaryPersonnel(personnel: MilitaryPersonnel): Promise<MilitaryPersonnel> {
     try {
-      console.log(`🎖️ PostgreSQL: Atualizando ${personnel.type} ${personnel.id}`);
-      
+      logger.database(`Atualizando ${personnel.type} ${personnel.id}`);
+
       const result = await this.pool.query(
-        `UPDATE military_personnel 
+        `UPDATE military_personnel
          SET name = $1, type = $2, rank = $3, specialty = $4, full_rank_name = $5, active = $6, updated_at = NOW()
-         WHERE id = $7 
+         WHERE id = $7
          RETURNING *`,
         [
           personnel.name,
@@ -632,35 +633,35 @@ async getMilitaryPersonnel(): Promise<MilitaryPersonnel[]> {
         updatedAt: new Date(row.updated_at)
       };
 
-      console.log(`✅ PostgreSQL: ${personnel.type} ${personnel.id} atualizado`);
+      logger.success(`${personnel.type} ${personnel.id} atualizado`);
       return updated;
     } catch (error) {
-      console.error(`❌ PostgreSQL: Erro ao atualizar militar ${personnel.id}:`, error);
+      logger.error(`Erro ao atualizar militar ${personnel.id}`, error);
       throw error;
     }
   }
 
    async deleteMilitaryPersonnel(id: number): Promise<boolean> {
     try {
-      console.log(`🎖️ PostgreSQL: Removendo militar ${id}`);
-      
+      logger.database(`Removendo militar ${id}`);
+
       // Soft delete - marcar como inativo em vez de deletar
       const result = await this.pool.query(
         'UPDATE military_personnel SET active = false, updated_at = NOW() WHERE id = $1',
         [id]
       );
-      
+
       const deleted = (result.rowCount || 0) > 0;
-      
+
       if (deleted) {
-        console.log(`✅ PostgreSQL: Militar ${id} removido (soft delete)`);
+        logger.success(`Militar ${id} removido (soft delete)`);
       } else {
-        console.log(`⚠️ PostgreSQL: Militar ${id} não encontrado`);
+        logger.warn(`Militar ${id} não encontrado`);
       }
-      
+
       return deleted;
     } catch (error) {
-      console.error(`❌ PostgreSQL: Erro ao remover militar ${id}:`, error);
+      logger.error(`Erro ao remover militar ${id}`, error);
       return false;
     }
   }
