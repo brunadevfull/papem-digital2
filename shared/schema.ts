@@ -128,14 +128,23 @@ const autoRestartDelaySchema = z
   })
   .refine((value): value is number => typeof value === "number", "Delay inválido");
 
+const scrollSpeedSchema = z.enum(["slow", "normal", "fast"]);
+
+const displaySettingsBaseShape = {
+  scrollSpeed: scrollSpeedSchema,
+  escalaAlternateInterval: positiveIntervalSchema,
+  cardapioAlternateInterval: positiveIntervalSchema,
+  autoRestartDelay: autoRestartDelaySchema,
+};
+
 export const displaySettingsPayloadSchema = z.object({
-  scrollSpeed: z.enum(["slow", "normal", "fast"]).default("normal"),
+  scrollSpeed: scrollSpeedSchema.default("normal"),
   escalaAlternateInterval: positiveIntervalSchema.default(30000),
   cardapioAlternateInterval: positiveIntervalSchema.default(30000),
   autoRestartDelay: autoRestartDelaySchema.default(3),
 });
 
-export const displaySettingsUpdateSchema = displaySettingsPayloadSchema.partial();
+export const displaySettingsUpdateSchema = z.object(displaySettingsBaseShape).partial();
 
 const dutyOfficerNameSchema = z
   .union([z.string(), z.null(), z.undefined()])
