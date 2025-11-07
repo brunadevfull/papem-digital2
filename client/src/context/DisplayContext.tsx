@@ -1,5 +1,10 @@
 import React, { createContext, useContext, useState, ReactNode, useEffect, useRef } from "react";
 import { resolveBackendUrl } from "@/utils/backend";
+import {
+  DEFAULT_DISPLAY_SETTINGS as DEFAULT_REMOTE_DISPLAY_SETTINGS,
+  fetchDisplaySettings as fetchDisplaySettingsApi,
+  updateDisplaySettings as persistDisplaySettings,
+} from "@/lib/displaySettings";
 
 export interface Notice {
   id: string;
@@ -51,10 +56,10 @@ interface DisplayContextType {
   addDocument: (document: Omit<PDFDocument, "id" | "uploadDate">, options?: AddDocumentOptions) => void;
   updateDocument: (document: PDFDocument) => void;
   deleteDocument: (id: string) => void;
-  setEscalaAlternateInterval: (interval: number) => void;
-  setCardapioAlternateInterval: (interval: number) => void;
-  setScrollSpeed: (speed: "slow" | "normal" | "fast") => void;
-  setAutoRestartDelay: (delay: number) => void;
+  setEscalaAlternateInterval: (interval: number) => Promise<boolean>;
+  setCardapioAlternateInterval: (interval: number) => Promise<boolean>;
+  setScrollSpeed: (speed: "slow" | "normal" | "fast") => Promise<boolean>;
+  setAutoRestartDelay: (delay: number) => Promise<boolean>;
   setIsEscalaEditMode: (isEditMode: boolean) => void; // ✏️ Alternar modo editor de escala
   setIsCardapioEditMode: (isEditMode: boolean) => void; // ✏️ Alternar modo editor de cardápio
   refreshNotices: () => Promise<void>;
@@ -76,6 +81,22 @@ interface DisplayProviderProps {
   children: ReactNode;
 }
 
+type DisplaySettingsState = {
+  scrollSpeed: "slow" | "normal" | "fast";
+  escalaAlternateInterval: number;
+  cardapioAlternateInterval: number;
+  autoRestartDelay: number;
+};
+
+const DEFAULT_DISPLAY_SETTINGS_STATE: DisplaySettingsState = {
+  scrollSpeed: DEFAULT_REMOTE_DISPLAY_SETTINGS.scrollSpeed,
+  escalaAlternateInterval: DEFAULT_REMOTE_DISPLAY_SETTINGS.escalaAlternateInterval,
+  cardapioAlternateInterval: DEFAULT_REMOTE_DISPLAY_SETTINGS.cardapioAlternateInterval,
+  autoRestartDelay: DEFAULT_REMOTE_DISPLAY_SETTINGS.autoRestartDelay,
+};
+
+const SETTINGS_SYNC_RETRY_INTERVAL = 10000;
+
 export const DisplayProvider: React.FC<DisplayProviderProps> = ({ children }) => {
   // Estados
   const [notices, setNotices] = useState<Notice[]>([]);
@@ -85,10 +106,18 @@ export const DisplayProvider: React.FC<DisplayProviderProps> = ({ children }) =>
   const [currentEscalaIndex, setCurrentEscalaIndex] = useState(0);
   const [currentCardapioIndex, setCurrentCardapioIndex] = useState(0); // ✅ ADICIONAR
   const cardapioTimerRef = useRef<NodeJS.Timeout | null>(null); // ✅ ADICIONAR
-  const [escalaAlternateInterval, setEscalaAlternateInterval] = useState(30000);
-  const [cardapioAlternateInterval, setCardapioAlternateInterval] = useState(30000);
-  const [scrollSpeed, setScrollSpeed] = useState<"slow" | "normal" | "fast">("normal");
-  const [autoRestartDelay, setAutoRestartDelay] = useState(3);
+  const [escalaAlternateInterval, setEscalaAlternateIntervalState] = useState(
+    DEFAULT_DISPLAY_SETTINGS_STATE.escalaAlternateInterval
+  );
+  const [cardapioAlternateInterval, setCardapioAlternateIntervalState] = useState(
+    DEFAULT_DISPLAY_SETTINGS_STATE.cardapioAlternateInterval
+  );
+  const [scrollSpeed, setScrollSpeedState] = useState<"slow" | "normal" | "fast">(
+    DEFAULT_DISPLAY_SETTINGS_STATE.scrollSpeed
+  );
+  const [autoRestartDelay, setAutoRestartDelayState] = useState(
+    DEFAULT_DISPLAY_SETTINGS_STATE.autoRestartDelay
+  );
   const [isLoading, setIsLoading] = useState(false);
   const [isEscalaEditMode, setIsEscalaEditMode] = useState(false); // ✏️ Modo editor de escala
   const [isCardapioEditMode, setIsCardapioEditMode] = useState(false); // ✏️ Modo editor de cardápio
@@ -97,6 +126,9 @@ export const DisplayProvider: React.FC<DisplayProviderProps> = ({ children }) =>
   const escalaTimerRef = useRef<NodeJS.Timeout | null>(null);
   const mainDocTimerRef = useRef<NodeJS.Timeout | null>(null);
   const isInitializingRef = useRef(true);
+  const displaySettingsRef = useRef<DisplaySettingsState>({ ...DEFAULT_DISPLAY_SETTINGS_STATE });
+  const hasServerDisplaySettingsRef = useRef(false);
+  const settingsSyncTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   
   // Callback para após completar scroll (apenas PLASA agora)
   const handleScrollComplete = () => {
@@ -106,6 +138,130 @@ export const DisplayProvider: React.FC<DisplayProviderProps> = ({ children }) =>
 
   // CORREÇÃO: Função para obter URL completa do backend - DETECTAR AMBIENTE
   const getBackendUrl = (path: string): string => resolveBackendUrl(path);
+
+  const applyDisplaySettingsState = (
+    patch: Partial<DisplaySettingsState>,
+    source: "local" | "cache" | "server" = "local"
+  ) => {
+    displaySettingsRef.current = {
+      ...displaySettingsRef.current,
+      ...patch,
+    };
+
+    const current = displaySettingsRef.current;
+    setEscalaAlternateIntervalState(current.escalaAlternateInterval);
+    setCardapioAlternateIntervalState(current.cardapioAlternateInterval);
+    setScrollSpeedState(current.scrollSpeed);
+    setAutoRestartDelayState(current.autoRestartDelay);
+
+    if (source === "server") {
+      hasServerDisplaySettingsRef.current = true;
+    }
+  };
+
+  const clearSettingsSyncTimeout = () => {
+    if (settingsSyncTimeoutRef.current) {
+      clearTimeout(settingsSyncTimeoutRef.current);
+      settingsSyncTimeoutRef.current = null;
+    }
+  };
+
+  const syncDisplaySettingsFromServer = async (): Promise<boolean> => {
+    try {
+      const remote = await fetchDisplaySettingsApi();
+      applyDisplaySettingsState(
+        {
+          scrollSpeed: remote.scrollSpeed,
+          escalaAlternateInterval: remote.escalaAlternateInterval,
+          cardapioAlternateInterval: remote.cardapioAlternateInterval,
+          autoRestartDelay: remote.autoRestartDelay,
+        },
+        "server"
+      );
+      clearSettingsSyncTimeout();
+      return true;
+    } catch (error) {
+      console.warn("⚠️ Falha ao sincronizar configurações com o servidor:", error);
+      return false;
+    }
+  };
+
+  const scheduleSettingsSyncRetry = () => {
+    if (settingsSyncTimeoutRef.current) {
+      return;
+    }
+
+    settingsSyncTimeoutRef.current = setTimeout(async () => {
+      settingsSyncTimeoutRef.current = null;
+      const success = await syncDisplaySettingsFromServer();
+      if (!success) {
+        scheduleSettingsSyncRetry();
+      }
+    }, SETTINGS_SYNC_RETRY_INTERVAL);
+  };
+
+  const persistDisplaySettingsWithServer = async (
+    patch: Partial<DisplaySettingsState>
+  ): Promise<boolean> => {
+    const sanitizedPatch: Partial<DisplaySettingsState> = {};
+
+    if (patch.scrollSpeed !== undefined) {
+      const normalizedSpeed = patch.scrollSpeed;
+      if (["slow", "normal", "fast"].includes(normalizedSpeed)) {
+        sanitizedPatch.scrollSpeed = normalizedSpeed;
+      }
+    }
+    if (patch.escalaAlternateInterval !== undefined) {
+      const numericInterval = Number(patch.escalaAlternateInterval);
+      if (Number.isFinite(numericInterval)) {
+        sanitizedPatch.escalaAlternateInterval = Math.max(1000, Math.trunc(numericInterval));
+      }
+    }
+    if (patch.cardapioAlternateInterval !== undefined) {
+      const numericInterval = Number(patch.cardapioAlternateInterval);
+      if (Number.isFinite(numericInterval)) {
+        sanitizedPatch.cardapioAlternateInterval = Math.max(1000, Math.trunc(numericInterval));
+      }
+    }
+    if (patch.autoRestartDelay !== undefined) {
+      const numericDelay = Number(patch.autoRestartDelay);
+      if (Number.isFinite(numericDelay)) {
+        sanitizedPatch.autoRestartDelay = Math.min(600, Math.max(1, Math.trunc(numericDelay)));
+      }
+    }
+
+    if (Object.keys(sanitizedPatch).length === 0) {
+      return true;
+    }
+
+    applyDisplaySettingsState(sanitizedPatch);
+
+    try {
+      const remote = await persistDisplaySettings({
+        scrollSpeed: sanitizedPatch.scrollSpeed,
+        escalaAlternateInterval: sanitizedPatch.escalaAlternateInterval,
+        cardapioAlternateInterval: sanitizedPatch.cardapioAlternateInterval,
+        autoRestartDelay: sanitizedPatch.autoRestartDelay,
+      });
+
+      applyDisplaySettingsState(
+        {
+          scrollSpeed: remote.scrollSpeed,
+          escalaAlternateInterval: remote.escalaAlternateInterval,
+          cardapioAlternateInterval: remote.cardapioAlternateInterval,
+          autoRestartDelay: remote.autoRestartDelay,
+        },
+        "server"
+      );
+
+      clearSettingsSyncTimeout();
+      return true;
+    } catch (error) {
+      console.warn("⚠️ Falha ao atualizar configurações no servidor:", error);
+      scheduleSettingsSyncRetry();
+      return false;
+    }
+  };
 
   // Função utilitária para tratar tags dos documentos
   const normalizeDocumentTags = (input: {
@@ -1073,7 +1229,11 @@ useEffect(() => {
 
       
       try {
-        // Carregar configurações do localStorage
+        const serverSettingsLoaded = await syncDisplaySettingsFromServer();
+        if (!serverSettingsLoaded) {
+          scheduleSettingsSyncRetry();
+        }
+
         const saved = localStorage.getItem('display-context');
         if (saved) {
           try {
@@ -1148,18 +1308,64 @@ useEffect(() => {
             if (typeof data.currentCardapioIndex === 'number') {
               setCurrentCardapioIndex(data.currentCardapioIndex);
             }
-            if (data.escalaAlternateInterval) {
-              setEscalaAlternateInterval(data.escalaAlternateInterval);
+            const readStoredNumber = (value: unknown): number | undefined => {
+              if (typeof value === 'number' && Number.isFinite(value)) {
+                return value;
+              }
+              if (typeof value === 'string' && value.trim()) {
+                const parsed = Number.parseInt(value, 10);
+                if (Number.isFinite(parsed)) {
+                  return parsed;
+                }
+              }
+              return undefined;
+            };
+
+            const cachedSettings: Partial<DisplaySettingsState> = {};
+
+            const escalaInterval = readStoredNumber(data.escalaAlternateInterval);
+            if (escalaInterval !== undefined) {
+              cachedSettings.escalaAlternateInterval = escalaInterval;
             }
-            if (data.cardapioAlternateInterval) {
-              setCardapioAlternateInterval(data.cardapioAlternateInterval);
+
+            const cardapioInterval = readStoredNumber(data.cardapioAlternateInterval);
+            if (cardapioInterval !== undefined) {
+              cachedSettings.cardapioAlternateInterval = cardapioInterval;
             }
-            if (data.documentAlternateInterval && !data.escalaAlternateInterval && !data.cardapioAlternateInterval) {
-              setEscalaAlternateInterval(data.documentAlternateInterval);
-              setCardapioAlternateInterval(data.documentAlternateInterval);
+
+            if (
+              cachedSettings.escalaAlternateInterval === undefined &&
+              cachedSettings.cardapioAlternateInterval === undefined
+            ) {
+              const legacyInterval = readStoredNumber(data.documentAlternateInterval);
+              if (legacyInterval !== undefined) {
+                cachedSettings.escalaAlternateInterval = legacyInterval;
+                cachedSettings.cardapioAlternateInterval = legacyInterval;
+              }
             }
-            if (data.scrollSpeed) setScrollSpeed(data.scrollSpeed);
-            if (data.autoRestartDelay) setAutoRestartDelay(data.autoRestartDelay);
+
+            if (typeof data.scrollSpeed === 'string') {
+              const normalizedSpeed = data.scrollSpeed.toLowerCase();
+              if (["slow", "normal", "fast"].includes(normalizedSpeed)) {
+                cachedSettings.scrollSpeed = normalizedSpeed as DisplaySettingsState['scrollSpeed'];
+              }
+            }
+
+            const autoRestart = readStoredNumber(data.autoRestartDelay);
+            if (autoRestart !== undefined) {
+              cachedSettings.autoRestartDelay = autoRestart;
+            }
+
+            if (Object.keys(cachedSettings).length > 0) {
+              if (!hasServerDisplaySettingsRef.current) {
+                applyDisplaySettingsState(cachedSettings, 'cache');
+              } else {
+                displaySettingsRef.current = {
+                  ...displaySettingsRef.current,
+                  ...cachedSettings,
+                };
+              }
+            }
           } catch (parseError) {
             console.warn("⚠️ Erro ao processar localStorage:", parseError);
             localStorage.removeItem('display-context');
@@ -1199,6 +1405,46 @@ useEffect(() => {
     
     initializeContext();
   }, []);
+
+  useEffect(() => () => {
+    clearSettingsSyncTimeout();
+  }, []);
+
+  const updateEscalaAlternateIntervalSetting = async (interval: number): Promise<boolean> => {
+    const numericValue = Number(interval);
+    const safeValue = Number.isFinite(numericValue)
+      ? numericValue
+      : displaySettingsRef.current.escalaAlternateInterval;
+
+    return persistDisplaySettingsWithServer({ escalaAlternateInterval: safeValue });
+  };
+
+  const updateCardapioAlternateIntervalSetting = async (interval: number): Promise<boolean> => {
+    const numericValue = Number(interval);
+    const safeValue = Number.isFinite(numericValue)
+      ? numericValue
+      : displaySettingsRef.current.cardapioAlternateInterval;
+
+    return persistDisplaySettingsWithServer({ cardapioAlternateInterval: safeValue });
+  };
+
+  const updateScrollSpeedSetting = async (speed: "slow" | "normal" | "fast"): Promise<boolean> => {
+    const allowedSpeeds: DisplaySettingsState["scrollSpeed"][] = ["slow", "normal", "fast"];
+    const safeSpeed = allowedSpeeds.includes(speed)
+      ? speed
+      : displaySettingsRef.current.scrollSpeed;
+
+    return persistDisplaySettingsWithServer({ scrollSpeed: safeSpeed });
+  };
+
+  const updateAutoRestartDelaySetting = async (delay: number): Promise<boolean> => {
+    const numericValue = Number(delay);
+    const safeValue = Number.isFinite(numericValue)
+      ? numericValue
+      : displaySettingsRef.current.autoRestartDelay;
+
+    return persistDisplaySettingsWithServer({ autoRestartDelay: safeValue });
+  };
 
   // Effect para resetar índice quando não há escalas ativas
   useEffect(() => {
@@ -1305,10 +1551,10 @@ const value: DisplayContextType = {
   addDocument,
   updateDocument,
   deleteDocument,
-  setEscalaAlternateInterval,
-  setCardapioAlternateInterval,
-  setScrollSpeed,
-  setAutoRestartDelay,
+  setEscalaAlternateInterval: updateEscalaAlternateIntervalSetting,
+  setCardapioAlternateInterval: updateCardapioAlternateIntervalSetting,
+  setScrollSpeed: updateScrollSpeedSetting,
+  setAutoRestartDelay: updateAutoRestartDelaySetting,
   setIsEscalaEditMode, // ✏️ Alternar modo editor de escala
   setIsCardapioEditMode, // ✏️ Alternar modo editor de cardápio
   refreshNotices,

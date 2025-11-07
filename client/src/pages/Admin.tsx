@@ -1337,7 +1337,7 @@ const handleDocumentSubmit = async (e: React.FormEvent) => {
     }
   };
   
-  const handleEscalaIntervalChange = (
+  const handleEscalaIntervalChange = async (
     e: React.ChangeEvent<HTMLInputElement>,
     min = 10,
     max = 300
@@ -1356,14 +1356,17 @@ const handleDocumentSubmit = async (e: React.FormEvent) => {
       return;
     }
 
-    setEscalaAlternateInterval(value * 1000);
+    const success = await setEscalaAlternateInterval(value * 1000);
     toast({
-      title: "Intervalo de escalas atualizado",
-      description: `Escalas agora alternam a cada ${value} segundos.`
+      title: success ? "Intervalo de escalas atualizado" : "Intervalo salvo localmente",
+      description: success
+        ? `Escalas agora alternam a cada ${value} segundos.`
+        : `Servidor indisponível. Escalas alternarão a cada ${value} segundos a partir do cache e a sincronização será retomada automaticamente quando o backend voltar.`,
+      variant: success ? undefined : "destructive",
     });
   };
 
-  const handleCardapioIntervalChange = (
+  const handleCardapioIntervalChange = async (
     e: React.ChangeEvent<HTMLInputElement>,
     min = 10,
     max = 300
@@ -1382,31 +1385,40 @@ const handleDocumentSubmit = async (e: React.FormEvent) => {
       return;
     }
 
-    setCardapioAlternateInterval(value * 1000);
+    const success = await setCardapioAlternateInterval(value * 1000);
     toast({
-      title: "Intervalo de cardápios atualizado",
-      description: `Cardápios agora alternam a cada ${value} segundos.`
+      title: success ? "Intervalo de cardápios atualizado" : "Intervalo salvo localmente",
+      description: success
+        ? `Cardápios agora alternam a cada ${value} segundos.`
+        : `Servidor indisponível. Cardápios alternarão a cada ${value} segundos com base no cache até que a sincronização seja restabelecida.`,
+      variant: success ? undefined : "destructive",
     });
   };
 
-  const handleScrollSpeedChange = (value: string) => {
-    setScrollSpeed(value as "slow" | "normal" | "fast");
+  const handleScrollSpeedChange = async (value: string) => {
+    const success = await setScrollSpeed(value as "slow" | "normal" | "fast");
     toast({
-      title: "Velocidade atualizada",
-      description: `Velocidade de rolagem do PLASA definida como: ${
-        value === "slow" ? "Lenta" : 
-        value === "normal" ? "Normal" : "Rápida"
-      }`
+      title: success ? "Velocidade atualizada" : "Velocidade salva localmente",
+      description: success
+        ? `Velocidade de rolagem do PLASA definida como: ${
+            value === "slow" ? "Lenta" :
+            value === "normal" ? "Normal" : "Rápida"
+          }`
+        : "Servidor indisponível. A velocidade de rolagem foi atualizada localmente e será sincronizada assim que possível.",
+      variant: success ? undefined : "destructive",
     });
   };
 
-  const handleAutoRestartChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleAutoRestartChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = parseInt(e.target.value);
     if (value >= 2 && value <= 10) {
-      setAutoRestartDelay(value);
+      const success = await setAutoRestartDelay(value);
       toast({
-        title: "Intervalo de reinício atualizado",
-        description: `PLASA aguardará ${value} segundos no final antes de reiniciar.`
+        title: success ? "Intervalo de reinício atualizado" : "Intervalo salvo localmente",
+        description: success
+          ? `PLASA aguardará ${value} segundos no final antes de reiniciar.`
+          : `Servidor indisponível. O PLASA aguardará ${value} segundos com base no cache até que a configuração seja sincronizada com o backend.`,
+        variant: success ? undefined : "destructive",
       });
     }
   };

@@ -11,6 +11,8 @@ import {
   type User,
   type DutyOfficersPayload,
   type DutyOfficers,
+  type DisplaySettings,
+  displaySettingsUpdateSchema,
 } from "@shared/schema";
 import { z } from "zod";
 import multer from "multer";
@@ -370,6 +372,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   };
 
+  const serializeDisplaySettings = (settings: DisplaySettings) => ({
+    id: settings.id,
+    scrollSpeed: settings.scrollSpeed,
+    escalaAlternateInterval: settings.escalaAlternateInterval,
+    cardapioAlternateInterval: settings.cardapioAlternateInterval,
+    autoRestartDelay: settings.autoRestartDelay,
+    updatedAt: settings.updatedAt instanceof Date
+      ? settings.updatedAt.toISOString()
+      : new Date(settings.updatedAt ?? Date.now()).toISOString(),
+  });
+
   await startDutyAssignmentsListener(async (payload) => {
     console.log('📡 NOTIFY duty_assignments_changed recebido:', payload);
 
@@ -503,6 +516,36 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       res.json({ success: true });
     });
+  });
+
+  app.get('/api/display-settings', async (_req, res) => {
+    try {
+      const settings = await storage.getDisplaySettings();
+      res.json(serializeDisplaySettings(settings));
+    } catch (error) {
+      console.error('❌ Falha ao buscar configurações de exibição:', error);
+      res.status(500).json({ error: 'Failed to load display settings' });
+    }
+  });
+
+  app.put('/api/display-settings', async (req, res) => {
+    try {
+      const payload = displaySettingsUpdateSchema.parse(req.body ?? {});
+      const shouldUpdate = Object.keys(payload).length > 0;
+      const updated = shouldUpdate
+        ? await storage.updateDisplaySettings(payload)
+        : await storage.getDisplaySettings();
+
+      res.json(serializeDisplaySettings(updated));
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        res.status(400).json({ error: 'Invalid display settings payload', details: error.issues });
+        return;
+      }
+
+      console.error('❌ Falha ao atualizar configurações de exibição:', error);
+      res.status(500).json({ error: 'Failed to update display settings' });
+    }
   });
 
   // Create uploads directory if it doesn't exist

@@ -1,5 +1,5 @@
 import { sql } from "drizzle-orm";
-import { pgTable, text, serial, boolean, timestamp, json, varchar } from "drizzle-orm/pg-core";
+import { pgTable, text, serial, boolean, timestamp, json, varchar, integer } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 
@@ -61,6 +61,24 @@ export const sessions = pgTable("session", {
   expire: timestamp("expire").notNull(),
 });
 
+export const displaySettings = pgTable("display_settings", {
+  id: serial("id").primaryKey(),
+  scrollSpeed: text("scroll_speed")
+    .notNull()
+    .$type<"slow" | "normal" | "fast">()
+    .default("normal"),
+  escalaAlternateInterval: integer("escala_alternate_interval")
+    .notNull()
+    .default(30000),
+  cardapioAlternateInterval: integer("cardapio_alternate_interval")
+    .notNull()
+    .default(30000),
+  autoRestartDelay: integer("auto_restart_delay")
+    .notNull()
+    .default(3),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+});
+
 export const insertUserSchema = createInsertSchema(users).pick({
   username: true,
   password: true,
@@ -87,6 +105,46 @@ export const insertMilitaryPersonnelSchema = createInsertSchema(militaryPersonne
   createdAt: true,
   updatedAt: true,
 });
+
+const positiveIntervalSchema = z
+  .union([z.number(), z.string()])
+  .transform(value => {
+    const numeric = typeof value === "string" ? Number.parseInt(value, 10) : value;
+    if (!Number.isFinite(numeric)) {
+      return undefined;
+    }
+    return Math.max(1000, Math.trunc(numeric));
+  })
+  .refine((value): value is number => typeof value === "number", "Intervalo inválido");
+
+const autoRestartDelaySchema = z
+  .union([z.number(), z.string()])
+  .transform(value => {
+    const numeric = typeof value === "string" ? Number.parseInt(value, 10) : value;
+    if (!Number.isFinite(numeric)) {
+      return undefined;
+    }
+    return Math.min(600, Math.max(1, Math.trunc(numeric)));
+  })
+  .refine((value): value is number => typeof value === "number", "Delay inválido");
+
+const scrollSpeedSchema = z.enum(["slow", "normal", "fast"]);
+
+const displaySettingsBaseShape = {
+  scrollSpeed: scrollSpeedSchema,
+  escalaAlternateInterval: positiveIntervalSchema,
+  cardapioAlternateInterval: positiveIntervalSchema,
+  autoRestartDelay: autoRestartDelaySchema,
+};
+
+export const displaySettingsPayloadSchema = z.object({
+  scrollSpeed: scrollSpeedSchema.default("normal"),
+  escalaAlternateInterval: positiveIntervalSchema.default(30000),
+  cardapioAlternateInterval: positiveIntervalSchema.default(30000),
+  autoRestartDelay: autoRestartDelaySchema.default(3),
+});
+
+export const displaySettingsUpdateSchema = z.object(displaySettingsBaseShape).partial();
 
 const dutyOfficerNameSchema = z
   .union([z.string(), z.null(), z.undefined()])
@@ -178,3 +236,6 @@ export type DutyOfficers = {
 };
 export type MilitaryPersonnel = typeof militaryPersonnel.$inferSelect;
 export type InsertMilitaryPersonnel = z.infer<typeof insertMilitaryPersonnelSchema>;
+export type DisplaySettings = typeof displaySettings.$inferSelect;
+export type DisplaySettingsUpdate = z.infer<typeof displaySettingsUpdateSchema>;
+export type DisplaySettingsPayload = z.infer<typeof displaySettingsPayloadSchema>;
