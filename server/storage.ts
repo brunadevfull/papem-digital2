@@ -1,4 +1,4 @@
-import { users, notices, documents, militaryPersonnel, type User, type InsertUser, type Notice, type InsertNotice, type PDFDocument, type InsertDocument, type DutyOfficers, type InsertDutyOfficers, type MilitaryPersonnel, type InsertMilitaryPersonnel } from "@shared/schema";
+import { users, notices, documents, militaryPersonnel, type User, type InsertUser, type Notice, type InsertNotice, type PDFDocument, type InsertDocument, type DutyOfficers, type InsertDutyOfficers, type MilitaryPersonnel, type InsertMilitaryPersonnel, type DisplaySettings, type DisplaySettingsUpdate } from "@shared/schema";
 import { DatabaseStorage } from "./db-storage";
 
 // Padrão que aceita APENAS patentes militares válidas seguidas de especialidade opcional
@@ -68,6 +68,13 @@ const normalizeDutyRank = (
   return undefined;
 };
 
+const DEFAULT_DISPLAY_SETTINGS: Omit<DisplaySettings, "id" | "updatedAt"> = {
+  scrollSpeed: "normal",
+  escalaAlternateInterval: 30000,
+  cardapioAlternateInterval: 30000,
+  autoRestartDelay: 3,
+};
+
 export interface IStorage {
   getUser(id: number): Promise<User | undefined>;
   getUserByUsername(username: string): Promise<User | undefined>;
@@ -97,6 +104,10 @@ export interface IStorage {
   createMilitaryPersonnel(personnel: InsertMilitaryPersonnel): Promise<MilitaryPersonnel>;
   updateMilitaryPersonnel(personnel: MilitaryPersonnel): Promise<MilitaryPersonnel>;
   deleteMilitaryPersonnel(id: number): Promise<boolean>;
+
+  // Display settings methods
+  getDisplaySettings(): Promise<DisplaySettings>;
+  updateDisplaySettings(settings: DisplaySettingsUpdate): Promise<DisplaySettings>;
 }
 
 export class MemStorage implements IStorage {
@@ -109,6 +120,7 @@ export class MemStorage implements IStorage {
   private currentNoticeId: number;
   private currentDocumentId: number;
   private currentMilitaryPersonnelId: number;
+  private displaySettings: DisplaySettings;
 
   constructor() {
     this.users = new Map();
@@ -120,7 +132,12 @@ export class MemStorage implements IStorage {
     this.currentNoticeId = 1;
     this.currentDocumentId = 1;
     this.currentMilitaryPersonnelId = 1;
-      console.log('💾 MemStorage initialized'); 
+    this.displaySettings = {
+      id: 1,
+      ...DEFAULT_DISPLAY_SETTINGS,
+      updatedAt: new Date(),
+    };
+      console.log('💾 MemStorage initialized');
   }
 
   async getUser(id: number): Promise<User | undefined> {
@@ -559,6 +576,26 @@ export class MemStorage implements IStorage {
 
   async deleteMilitaryPersonnel(id: number): Promise<boolean> {
     return this.militaryPersonnel.delete(id);
+  }
+
+  async getDisplaySettings(): Promise<DisplaySettings> {
+    return { ...this.displaySettings };
+  }
+
+  async updateDisplaySettings(settings: DisplaySettingsUpdate): Promise<DisplaySettings> {
+    const next: DisplaySettings = {
+      id: this.displaySettings.id ?? 1,
+      scrollSpeed: settings.scrollSpeed ?? this.displaySettings.scrollSpeed ?? DEFAULT_DISPLAY_SETTINGS.scrollSpeed,
+      escalaAlternateInterval:
+        settings.escalaAlternateInterval ?? this.displaySettings.escalaAlternateInterval ?? DEFAULT_DISPLAY_SETTINGS.escalaAlternateInterval,
+      cardapioAlternateInterval:
+        settings.cardapioAlternateInterval ?? this.displaySettings.cardapioAlternateInterval ?? DEFAULT_DISPLAY_SETTINGS.cardapioAlternateInterval,
+      autoRestartDelay: settings.autoRestartDelay ?? this.displaySettings.autoRestartDelay ?? DEFAULT_DISPLAY_SETTINGS.autoRestartDelay,
+      updatedAt: new Date(),
+    };
+
+    this.displaySettings = next;
+    return { ...this.displaySettings };
   }
 }
 

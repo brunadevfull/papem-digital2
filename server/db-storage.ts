@@ -6,7 +6,8 @@ import {
   type Notice, type InsertNotice,
   type PDFDocument, type InsertDocument,
   type DutyOfficers, type InsertDutyOfficers,
-  type MilitaryPersonnel, type InsertMilitaryPersonnel
+  type MilitaryPersonnel, type InsertMilitaryPersonnel,
+  type DisplaySettings, type DisplaySettingsUpdate
 } from "@shared/schema";
 
 // Padrão que aceita APENAS patentes militares válidas seguidas de especialidade opcional
@@ -76,6 +77,71 @@ const normalizeDutyRank = (
   return undefined;
 };
 
+const DEFAULT_DISPLAY_SETTINGS: Omit<DisplaySettings, "id" | "updatedAt"> = {
+  scrollSpeed: "normal",
+  escalaAlternateInterval: 30000,
+  cardapioAlternateInterval: 30000,
+  autoRestartDelay: 3,
+};
+
+const SCROLL_SPEED_VALUES = new Set<DisplaySettings["scrollSpeed"]>(["slow", "normal", "fast"]);
+
+const normalizeScrollSpeed = (value: unknown): DisplaySettings["scrollSpeed"] => {
+  if (typeof value === "string" && SCROLL_SPEED_VALUES.has(value as DisplaySettings["scrollSpeed"])) {
+    return value as DisplaySettings["scrollSpeed"];
+  }
+  return DEFAULT_DISPLAY_SETTINGS.scrollSpeed;
+};
+
+const parseInterval = (value: unknown, fallback: number): number => {
+  if (typeof value === "number" && Number.isFinite(value)) {
+    return Math.max(1000, Math.trunc(value));
+  }
+
+  if (typeof value === "string") {
+    const parsed = Number.parseInt(value, 10);
+    if (Number.isFinite(parsed)) {
+      return Math.max(1000, Math.trunc(parsed));
+    }
+  }
+
+  return fallback;
+};
+
+const parseAutoRestartDelay = (value: unknown, fallback: number): number => {
+  const numeric = parseInterval(value, fallback);
+  return Math.min(600, Math.max(1, numeric));
+};
+
+const mapDisplaySettingsRow = (row: any): DisplaySettings => {
+  const id = typeof row?.id === "number" && row.id > 0 ? row.id : 1;
+  const scrollSpeed = normalizeScrollSpeed(row?.scroll_speed ?? row?.scrollSpeed);
+  const escalaAlternateInterval = parseInterval(
+    row?.escala_alternate_interval ?? row?.escalaAlternateInterval,
+    DEFAULT_DISPLAY_SETTINGS.escalaAlternateInterval
+  );
+  const cardapioAlternateInterval = parseInterval(
+    row?.cardapio_alternate_interval ?? row?.cardapioAlternateInterval,
+    DEFAULT_DISPLAY_SETTINGS.cardapioAlternateInterval
+  );
+  const autoRestartDelay = parseAutoRestartDelay(
+    row?.auto_restart_delay ?? row?.autoRestartDelay,
+    DEFAULT_DISPLAY_SETTINGS.autoRestartDelay
+  );
+
+  const updatedAtRaw = row?.updated_at ?? row?.updatedAt;
+  const updatedAt = updatedAtRaw instanceof Date ? updatedAtRaw : new Date(updatedAtRaw ?? Date.now());
+
+  return {
+    id,
+    scrollSpeed,
+    escalaAlternateInterval,
+    cardapioAlternateInterval,
+    autoRestartDelay,
+    updatedAt,
+  };
+};
+
 export class DatabaseStorage implements IStorage {
   private pool: Pool;
 
@@ -94,6 +160,20 @@ export class DatabaseStorage implements IStorage {
 
     console.log('🔗 PostgreSQL DatabaseStorage initialized');
     console.log('📊 Connected to:', process.env.DATABASE_URL.replace(/:[^:]*@/, ':***@'));
+  }
+
+  private async ensureDisplaySettingsRow(): Promise<void> {
+    await this.pool.query(
+      `INSERT INTO display_settings (id, scroll_speed, escala_alternate_interval, cardapio_alternate_interval, auto_restart_delay)
+       VALUES (1, $1, $2, $3, $4)
+       ON CONFLICT (id) DO NOTHING`,
+      [
+        DEFAULT_DISPLAY_SETTINGS.scrollSpeed,
+        DEFAULT_DISPLAY_SETTINGS.escalaAlternateInterval,
+        DEFAULT_DISPLAY_SETTINGS.cardapioAlternateInterval,
+        DEFAULT_DISPLAY_SETTINGS.autoRestartDelay,
+      ]
+    );
   }
 
   // ===== USERS =====
@@ -640,28 +720,91 @@ async getMilitaryPersonnel(): Promise<MilitaryPersonnel[]> {
     }
   }
 
-   async deleteMilitaryPersonnel(id: number): Promise<boolean> {
+  async deleteMilitaryPersonnel(id: number): Promise<boolean> {
     try {
       console.log(`🎖️ PostgreSQL: Removendo militar ${id}`);
-      
+
       // Soft delete - marcar como inativo em vez de deletar
       const result = await this.pool.query(
         'UPDATE military_personnel SET active = false, updated_at = NOW() WHERE id = $1',
         [id]
       );
-      
+
       const deleted = (result.rowCount || 0) > 0;
-      
+
       if (deleted) {
         console.log(`✅ PostgreSQL: Militar ${id} removido (soft delete)`);
       } else {
         console.log(`⚠️ PostgreSQL: Militar ${id} não encontrado`);
       }
-      
+
       return deleted;
     } catch (error) {
       console.error(`❌ PostgreSQL: Erro ao remover militar ${id}:`, error);
       return false;
+    }
+  }
+
+  async getDisplaySettings(): Promise<DisplaySettings> {
+    await this.ensureDisplaySettingsRow();
+
+    try {
+      const result = await this.pool.query(
+        'SELECT * FROM display_settings WHERE id = 1 LIMIT 1'
+      );
+
+      if (result.rows.length === 0) {
+        return mapDisplaySettingsRow({ id: 1, ...DEFAULT_DISPLAY_SETTINGS, updated_at: new Date() });
+      }
+
+      return mapDisplaySettingsRow(result.rows[0]);
+    } catch (error) {
+      console.error('❌ PostgreSQL: Erro ao carregar configurações de exibição:', error);
+      throw error;
+    }
+  }
+
+  async updateDisplaySettings(settings: DisplaySettingsUpdate): Promise<DisplaySettings> {
+    await this.ensureDisplaySettingsRow();
+
+    const assignments: string[] = [];
+    const values: unknown[] = [];
+    let index = 1;
+
+    if (settings.scrollSpeed) {
+      assignments.push(`scroll_speed = $${index++}`);
+      values.push(settings.scrollSpeed);
+    }
+
+    if (settings.escalaAlternateInterval !== undefined) {
+      assignments.push(`escala_alternate_interval = $${index++}`);
+      values.push(settings.escalaAlternateInterval);
+    }
+
+    if (settings.cardapioAlternateInterval !== undefined) {
+      assignments.push(`cardapio_alternate_interval = $${index++}`);
+      values.push(settings.cardapioAlternateInterval);
+    }
+
+    if (settings.autoRestartDelay !== undefined) {
+      assignments.push(`auto_restart_delay = $${index++}`);
+      values.push(settings.autoRestartDelay);
+    }
+
+    if (assignments.length === 0) {
+      return this.getDisplaySettings();
+    }
+
+    assignments.push('updated_at = NOW()');
+
+    const query = `UPDATE display_settings SET ${assignments.join(', ')} WHERE id = 1 RETURNING *`;
+
+    try {
+      const result = await this.pool.query(query, values);
+      return mapDisplaySettingsRow(result.rows[0]);
+    } catch (error) {
+      console.error('❌ PostgreSQL: Erro ao atualizar configurações de exibição:', error);
+      throw error;
     }
   }
 }
