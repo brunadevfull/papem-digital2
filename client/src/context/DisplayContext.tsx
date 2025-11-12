@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, ReactNode, useEffect, useRef } from "react";
+import React, { createContext, useContext, useState, ReactNode, useEffect, useRef, useCallback } from "react";
 import { resolveBackendUrl } from "@/utils/backend";
 
 export interface Notice {
@@ -24,6 +24,86 @@ export interface PDFDocument {
   active: boolean;
   uploadDate: Date;
 }
+
+export interface DocumentViewState {
+  zoom?: number;
+  scrollTop?: number;
+  scrollLeft?: number;
+  updatedAt?: string;
+}
+
+type DocumentViewStateMap = Record<string, DocumentViewState>;
+
+const clampZoomValue = (value: unknown): number | undefined => {
+  const numeric = Number(value);
+  if (!Number.isFinite(numeric)) {
+    return undefined;
+  }
+
+  const clamped = Math.min(Math.max(numeric, 0.5), 3);
+  return clamped;
+};
+
+const clampScrollValue = (value: unknown): number | undefined => {
+  const numeric = Number(value);
+  if (!Number.isFinite(numeric)) {
+    return undefined;
+  }
+
+  return numeric >= 0 ? numeric : 0;
+};
+
+const sanitizeDocumentViewStateInput = (value: unknown): DocumentViewState | null => {
+  if (!value || typeof value !== "object") {
+    return null;
+  }
+
+  const record = value as Record<string, unknown>;
+  const sanitized: DocumentViewState = {};
+
+  const zoom = clampZoomValue(record.zoom);
+  if (typeof zoom === "number") {
+    sanitized.zoom = zoom;
+  }
+
+  const scrollTop = clampScrollValue(record.scrollTop);
+  if (typeof scrollTop === "number") {
+    sanitized.scrollTop = scrollTop;
+  }
+
+  const scrollLeft = clampScrollValue(record.scrollLeft);
+  if (typeof scrollLeft === "number") {
+    sanitized.scrollLeft = scrollLeft;
+  }
+
+  if (typeof record.updatedAt === "string" && record.updatedAt.trim()) {
+    sanitized.updatedAt = record.updatedAt;
+  }
+
+  return Object.keys(sanitized).length > 0 ? sanitized : null;
+};
+
+const parseDocumentViewStatesPayload = (input: unknown): DocumentViewStateMap => {
+  if (!input || typeof input !== "object") {
+    return {};
+  }
+
+  const entries = Object.entries(input as Record<string, unknown>);
+  const result: DocumentViewStateMap = {};
+
+  for (const [rawId, rawValue] of entries) {
+    if (typeof rawId !== "string" || !rawId.trim()) {
+      continue;
+    }
+
+    const sanitizedState = sanitizeDocumentViewStateInput(rawValue);
+    if (sanitizedState) {
+      result[rawId] = sanitizedState;
+    }
+  }
+
+  return result;
+};
 
 type AddDocumentOptions = {
   persist?: boolean;
@@ -59,6 +139,9 @@ interface DisplayContextType {
   setIsCardapioEditMode: (isEditMode: boolean) => void; // ✏️ Alternar modo editor de cardápio
   refreshNotices: () => Promise<void>;
   refreshDocuments: () => Promise<void>; // 🔄 Atualizar documentos manualmente
+  documentViewStates: DocumentViewStateMap;
+  updateDocumentViewState: (documentId: string, state: DocumentViewState | null) => void;
+  refreshDocumentViewStates: () => Promise<void>;
   handleScrollComplete: () => void;
 }
 
@@ -92,11 +175,13 @@ export const DisplayProvider: React.FC<DisplayProviderProps> = ({ children }) =>
   const [isLoading, setIsLoading] = useState(false);
   const [isEscalaEditMode, setIsEscalaEditMode] = useState(false); // ✏️ Modo editor de escala
   const [isCardapioEditMode, setIsCardapioEditMode] = useState(false); // ✏️ Modo editor de cardápio
+  const [documentViewStates, setDocumentViewStates] = useState<DocumentViewStateMap>({});
 
   // Ref para o timer de alternância
   const escalaTimerRef = useRef<NodeJS.Timeout | null>(null);
   const mainDocTimerRef = useRef<NodeJS.Timeout | null>(null);
   const isInitializingRef = useRef(true);
+  const refreshDocumentsRef = useRef<(() => Promise<void>) | null>(null);
   
   // Callback para após completar scroll (apenas PLASA agora)
   const handleScrollComplete = () => {
@@ -155,6 +240,90 @@ export const DisplayProvider: React.FC<DisplayProviderProps> = ({ children }) =>
 
     return baseTags;
   };
+
+  const applyDocumentViewStates = useCallback(
+    (incoming: DocumentViewStateMap, options?: { replace?: boolean }) => {
+      setDocumentViewStates(prev => {
+        const shouldReplace = options?.replace ?? false;
+        const base: DocumentViewStateMap = shouldReplace ? {} : { ...prev };
+        const keys = Object.keys(incoming);
+
+        if (keys.length === 0) {
+          return shouldReplace ? base : prev;
+        }
+
+        keys.forEach(id => {
+          const sanitized = sanitizeDocumentViewStateInput(incoming[id]);
+          if (!sanitized) {
+            return;
+          }
+
+          base[id] = {
+            ...(base[id] ?? {}),
+            ...sanitized,
+          };
+        });
+
+        return base;
+      });
+    },
+    []
+  );
+
+  const updateDocumentViewState = useCallback(
+    (documentId: string, state: DocumentViewState | null) => {
+      const normalizedId = typeof documentId === "string" ? documentId.trim() : "";
+      if (!normalizedId) {
+        return;
+      }
+
+      if (!state) {
+        setDocumentViewStates(prev => {
+          if (!(normalizedId in prev)) {
+            return prev;
+          }
+          const { [normalizedId]: _removed, ...rest } = prev;
+          return rest;
+        });
+        return;
+      }
+
+      const sanitized = sanitizeDocumentViewStateInput(state);
+      if (!sanitized) {
+        setDocumentViewStates(prev => {
+          if (!(normalizedId in prev)) {
+            return prev;
+          }
+          const { [normalizedId]: _removed, ...rest } = prev;
+          return rest;
+        });
+        return;
+      }
+
+      applyDocumentViewStates({ [normalizedId]: sanitized });
+    },
+    [applyDocumentViewStates]
+  );
+
+  const refreshDocumentViewStates = useCallback(async () => {
+    try {
+      const response = await fetch(getBackendUrl('/api/documents/view-state'));
+      if (!response.ok) {
+        const errorText = await response.text().catch(() => '');
+        console.warn(`⚠️ Falha ao carregar estado de visualização: ${response.status} ${errorText}`);
+        return;
+      }
+
+      const payload = await response.json();
+      const rawStates = payload && typeof payload === 'object'
+        ? (payload.viewStates ?? payload.states ?? payload.data ?? null)
+        : null;
+      const parsedStates = parseDocumentViewStatesPayload(rawStates);
+      applyDocumentViewStates(parsedStates, { replace: true });
+    } catch (error) {
+      console.warn('⚠️ Erro ao sincronizar estado de visualização dos documentos:', error);
+    }
+  }, [applyDocumentViewStates, getBackendUrl]);
 
   const persistDocumentMetadata = async (
     document: Omit<PDFDocument, "id" | "uploadDate"> & { url: string }
@@ -344,6 +513,10 @@ const convertLocalNoticeToServer = (localNotice: Omit<Notice, "id" | "createdAt"
     console.log('🔄 Atualizando documentos do servidor...');
     await loadDocumentsFromServer();
   };
+
+  useEffect(() => {
+    refreshDocumentsRef.current = refreshDocuments;
+  }, [refreshDocuments]);
 
   // CORREÇÃO: Criar aviso no servidor com melhor tratamento de erro
   const addNotice = async (noticeData: Omit<Notice, "id" | "createdAt" | "updatedAt">): Promise<boolean> => {
@@ -1065,6 +1238,8 @@ useEffect(() => {
     } catch (error) {
       console.warn("⚠️ Falha ao carregar documentos do servidor, usando dados locais:", error);
     }
+
+    await refreshDocumentViewStates();
   };
 
   // CORREÇÃO: Inicialização robusta com fallback para erros de documento
@@ -1236,11 +1411,33 @@ useEffect(() => {
             const data = JSON.parse(event.data);
             console.log('📡 Evento SSE de documentos recebido:', data.type);
 
-            if (data.type === 'snapshot' || data.type === 'update') {
-              // Atualizar documentos com os dados recebidos
-              refreshDocuments().catch(err => {
-                console.warn('⚠️ Erro ao atualizar documentos via SSE:', err);
-              });
+            if (data.type === 'snapshot') {
+              const parsedStates = parseDocumentViewStatesPayload(data.viewStates ?? {});
+              applyDocumentViewStates(parsedStates, { replace: true });
+
+              const refreshPromise = refreshDocumentsRef.current?.();
+              if (refreshPromise) {
+                refreshPromise.catch(err => {
+                  console.warn('⚠️ Erro ao atualizar documentos via SSE:', err);
+                });
+              }
+              return;
+            }
+
+            if (data.viewStates) {
+              const parsedStates = parseDocumentViewStatesPayload(data.viewStates);
+              if (Object.keys(parsedStates).length > 0) {
+                applyDocumentViewStates(parsedStates);
+              }
+            }
+
+            if (data.type === 'update') {
+              const refreshPromise = refreshDocumentsRef.current?.();
+              if (refreshPromise) {
+                refreshPromise.catch(err => {
+                  console.warn('⚠️ Erro ao atualizar documentos via SSE:', err);
+                });
+              }
             }
           } catch (error) {
             console.error('❌ Erro ao processar evento SSE de documentos:', error);
@@ -1279,7 +1476,7 @@ useEffect(() => {
         eventSource = null;
       }
     };
-  }, []);
+  }, [applyDocumentViewStates]);
 
 
 const value: DisplayContextType = {
@@ -1313,6 +1510,9 @@ const value: DisplayContextType = {
   setIsCardapioEditMode, // ✏️ Alternar modo editor de cardápio
   refreshNotices,
   refreshDocuments, // 🔄 Atualizar documentos manualmente
+  documentViewStates,
+  updateDocumentViewState,
+  refreshDocumentViewStates,
   handleScrollComplete,
 };
 

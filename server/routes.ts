@@ -32,6 +32,28 @@ interface DocumentClassification {
 // Cache para classificações (otimização em runtime)
 const classificationCache = new Map<string, DocumentClassification>();
 
+type DocumentViewState = {
+  zoom: number;
+  scrollTop: number;
+  scrollLeft: number;
+  updatedAt: string;
+};
+
+const documentViewStates = new Map<string, DocumentViewState>();
+
+const serializeDocumentViewStates = (
+  entries?: Array<[string, DocumentViewState]>
+): Record<string, DocumentViewState> => {
+  const result: Record<string, DocumentViewState> = {};
+  const source = entries ?? Array.from(documentViewStates.entries());
+
+  for (const [id, state] of source) {
+    result[id] = { ...state };
+  }
+
+  return result;
+};
+
 // Função para extrair o nome original do arquivo salvo
 function getOriginalFromSaved(savedFilename: string): string {
   // Formato: document-timestamp-random-originalname
@@ -328,15 +350,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
   const documentSubscribers = new Set<Response>();
 
   type DocumentsSseEvent = {
-    type: 'snapshot' | 'update';
+    type: 'snapshot' | 'update' | 'view-state';
     documents: any[] | null;
     timestamp: string;
+    viewStates?: Record<string, DocumentViewState>;
   };
 
   const broadcastDutyOfficers = (event: DutyOfficersSseEvent) => {
     const payload = `data: ${JSON.stringify(event)}\n\n`;
 
-    for (const subscriber of dutyOfficerSubscribers) {
+    for (const subscriber of Array.from(dutyOfficerSubscribers)) {
       try {
         subscriber.write(payload);
       } catch (error) {
@@ -355,7 +378,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   const broadcastDocuments = (event: DocumentsSseEvent) => {
     const payload = `data: ${JSON.stringify(event)}\n\n`;
 
-    for (const subscriber of documentSubscribers) {
+    for (const subscriber of Array.from(documentSubscribers)) {
       try {
         subscriber.write(payload);
       } catch (error) {
@@ -399,6 +422,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         type: 'update',
         documents,
         timestamp,
+        viewStates: serializeDocumentViewStates(),
       });
     } catch (error) {
       console.error('❌ Falha ao atualizar documentos após NOTIFY documents_changed:', error);
@@ -1455,7 +1479,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const id = parseInt(req.params.id);
       const deleted = await storage.deleteDocument(id);
-      
+
       if (!deleted) {
         return res.status(404).json({ error: 'Document not found' });
       }
@@ -1463,6 +1487,90 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json({ success: true });
     } catch (error) {
       res.status(500).json({ error: 'Failed to delete document' });
+    }
+  });
+
+  app.get('/api/documents/view-state', (req, res) => {
+    try {
+      const snapshot = serializeDocumentViewStates();
+      res.json({
+        success: true,
+        viewStates: snapshot,
+        timestamp: new Date().toISOString(),
+      });
+    } catch (error) {
+      console.error('❌ Erro ao obter estado de visualização dos documentos:', error);
+      res.status(500).json({
+        success: false,
+        error: 'Failed to get document view state',
+      });
+    }
+  });
+
+  app.post('/api/documents/view-state', (req, res) => {
+    try {
+      const { documentId, zoom, scrollTop, scrollLeft } = req.body ?? {};
+
+      if (typeof documentId !== 'string' || !documentId.trim()) {
+        res.status(400).json({
+          success: false,
+          error: 'INVALID_DOCUMENT_ID',
+        });
+        return;
+      }
+
+      const trimmedId = documentId.trim();
+      if (!/^[\w-]+$/.test(trimmedId)) {
+        res.status(400).json({
+          success: false,
+          error: 'INVALID_DOCUMENT_ID_FORMAT',
+        });
+        return;
+      }
+
+      const numericZoom = Number(zoom);
+      if (!Number.isFinite(numericZoom)) {
+        res.status(400).json({
+          success: false,
+          error: 'INVALID_ZOOM_VALUE',
+        });
+        return;
+      }
+
+      const numericScrollTop = Number(scrollTop);
+      const numericScrollLeft = Number(scrollLeft);
+
+      const safeZoom = Math.min(Math.max(numericZoom, 0.5), 3);
+      const safeScrollTop = Number.isFinite(numericScrollTop) && numericScrollTop >= 0 ? numericScrollTop : 0;
+      const safeScrollLeft = Number.isFinite(numericScrollLeft) && numericScrollLeft >= 0 ? numericScrollLeft : 0;
+      const updatedAt = new Date().toISOString();
+
+      const state: DocumentViewState = {
+        zoom: safeZoom,
+        scrollTop: safeScrollTop,
+        scrollLeft: safeScrollLeft,
+        updatedAt,
+      };
+
+      documentViewStates.set(trimmedId, state);
+
+      broadcastDocuments({
+        type: 'view-state',
+        documents: null,
+        timestamp: updatedAt,
+        viewStates: serializeDocumentViewStates([[trimmedId, state] as [string, DocumentViewState]]),
+      });
+
+      res.json({
+        success: true,
+        state,
+      });
+    } catch (error) {
+      console.error('❌ Erro ao salvar estado de visualização do documento:', error);
+      res.status(500).json({
+        success: false,
+        error: 'Failed to persist document view state',
+      });
     }
   });
 
@@ -1783,6 +1891,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         type: 'snapshot' as const,
         documents: snapshot,
         timestamp: new Date().toISOString(),
+        viewStates: serializeDocumentViewStates(),
       })}\n\n`);
 
       req.on('close', () => {
