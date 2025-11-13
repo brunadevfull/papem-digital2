@@ -735,28 +735,42 @@ const PDFViewer: React.FC<PDFViewerProps> = ({
   // ou clica manualmente em "Salvar Posição"
 
   // 🔥 NOVO: Aplicar zoom e scroll quando viewStates são carregados do banco
+  // Usa ref para garantir que executa apenas UMA VEZ por documento
+  const viewStatesAppliedRef = useRef(false);
+
   useEffect(() => {
-    if (!viewStatesLoaded) return; // Esperar os dados do banco serem carregados
-    if (documentType === "plasa") return; // PLASA não usa zoom/scroll salvos
+    // Só executar quando viewStatesLoaded mudar para true E ainda não foi aplicado
+    if (!viewStatesLoaded || viewStatesAppliedRef.current) return;
+    if (documentType === "plasa") {
+      viewStatesAppliedRef.current = true; // PLASA não precisa aplicar
+      return;
+    }
 
     const { docId, groupId } = getCurrentDocumentIdentifiers();
-    if (!docId && !groupId) return;
+    if (!docId && !groupId) return; // Ainda não há documento para aplicar
 
-    console.log('🔥 ViewStates carregados! Aplicando zoom e scroll...');
+    console.log('🔥 ViewStates carregados! Aplicando zoom e scroll inicial do banco...');
+    console.log(`  - docId: ${docId}`);
+    console.log(`  - groupId: ${groupId}`);
 
     // Aplicar zoom
     const savedZoom = getStoredZoomForDocument(docId, groupId);
-    if (Math.abs(zoomLevel - savedZoom) > 0.01) {
-      console.log(`🔍 Aplicando zoom inicial: ${savedZoom}`);
-      setZoomLevel(savedZoom);
-      setZoomInputValue(Math.round(savedZoom * 100).toString());
-    }
+    console.log(`🔍 Aplicando zoom inicial: ${savedZoom}`);
+    setZoomLevel(savedZoom);
+    setZoomInputValue(Math.round(savedZoom * 100).toString());
 
-    // Aplicar scroll (com delay para garantir que o zoom foi aplicado)
+    // Aplicar scroll (com delay para garantir que o zoom foi aplicado primeiro)
     setTimeout(() => {
+      console.log(`📜 Aplicando scroll inicial do banco...`);
       restoreScrollPosition(docId, groupId);
-    }, 100);
-  }, [viewStatesLoaded, documentType, getCurrentDocumentIdentifiers, getStoredZoomForDocument, restoreScrollPosition, zoomLevel]);
+      viewStatesAppliedRef.current = true; // Marcar como aplicado
+    }, 150);
+  }, [viewStatesLoaded, documentType, getCurrentDocumentIdentifiers, getStoredZoomForDocument, restoreScrollPosition]);
+
+  // 🔄 Resetar flag quando o documento muda
+  useEffect(() => {
+    viewStatesAppliedRef.current = false;
+  }, [activeEscalaDoc?.id, activeCardapioDoc?.id]);
 
   // 🔄 REMOVIDO: Restauração de scroll agora acontece no onLoad das imagens
   // após o zoom ser aplicado corretamente
