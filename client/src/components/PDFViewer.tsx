@@ -1620,6 +1620,69 @@ useEffect(() => {
     }
   }, [loading, savedPageUrls.length, isAutomationPaused, isScrolling, startContinuousScroll]);
 
+  // ✅ NOVO: Aplicar zoom e scroll vindos do SSE em tempo real
+  useEffect(() => {
+    // Só aplicar para escala e cardápio (não plasa)
+    if (documentType !== "escala" && documentType !== "cardapio") {
+      return;
+    }
+
+    // Não aplicar se estiver no modo editor (usuário está editando)
+    if (isEditMode) {
+      return;
+    }
+
+    const docId = getCurrentDocumentId();
+    if (!docId) {
+      return;
+    }
+
+    const contextState = documentViewStates[docId];
+    if (!contextState) {
+      return;
+    }
+
+    // Aplicar zoom se mudou
+    if (
+      typeof contextState.zoom === 'number' &&
+      Number.isFinite(contextState.zoom) &&
+      Math.abs(zoomLevel - contextState.zoom) > 0.01
+    ) {
+      const clampedZoom = Math.min(Math.max(contextState.zoom, 0.5), 3);
+      console.log(`📡 SSE: Aplicando zoom atualizado para ${docId}: ${clampedZoom}`);
+      setZoomLevel(clampedZoom);
+      setZoomInputValue(Math.round(clampedZoom * 100).toString());
+    }
+
+    // Aplicar scroll se mudou (com um pequeno delay para garantir que o zoom foi aplicado)
+    if (
+      typeof contextState.scrollTop === 'number' &&
+      typeof contextState.scrollLeft === 'number' &&
+      Number.isFinite(contextState.scrollTop) &&
+      Number.isFinite(contextState.scrollLeft)
+    ) {
+      requestAnimationFrame(() => {
+        const scrollContainer = scrollableContentRef.current;
+        if (scrollContainer) {
+          const currentScrollTop = scrollContainer.scrollTop;
+          const currentScrollLeft = scrollContainer.scrollLeft;
+
+          // Só aplicar se mudou significativamente (mais de 5px)
+          if (
+            Math.abs(currentScrollTop - contextState.scrollTop) > 5 ||
+            Math.abs(currentScrollLeft - contextState.scrollLeft) > 5
+          ) {
+            console.log(
+              `📡 SSE: Aplicando scroll atualizado para ${docId}: top=${contextState.scrollTop}, left=${contextState.scrollLeft}`
+            );
+            scrollContainer.scrollTop = contextState.scrollTop;
+            scrollContainer.scrollLeft = contextState.scrollLeft;
+          }
+        }
+      });
+    }
+  }, [documentViewStates, documentType, isEditMode, zoomLevel, getCurrentDocumentId]);
+
   // CORREÇÃO: Renderizar conteúdo com melhor tratamento de erros
   const renderContent = () => {
     if (documentType === "plasa" && savedPageUrls.length > 0) {
