@@ -1205,6 +1205,7 @@ useEffect(() => {
             .filter((doc): doc is PDFDocument => doc !== null);
 
           if (applyDocumentsFromSource(parsedDocs, 'database')) {
+            await refreshDocumentViewStates();
             return;
           }
 
