@@ -267,6 +267,7 @@ const PDFViewer: React.FC<PDFViewerProps> = ({
 
   // 🔒 REF para armazenar o ID do documento anterior
   const previousDocIdRef = useRef<string | null>(null);
+  const lastAppliedViewStateRef = useRef<string | null>(null);
 
   // CORREÇÃO: Obter documento da escala atual
   const getCurrentEscalaDoc = useCallback(() => {
@@ -625,6 +626,65 @@ const PDFViewer: React.FC<PDFViewerProps> = ({
       });
     }
   }, [documentType, getStoredScrollPosition]);
+
+  useEffect(() => {
+    if (documentType === "plasa") {
+      lastAppliedViewStateRef.current = null;
+      return;
+    }
+
+    const docId = getCurrentDocumentId();
+    if (!docId) {
+      lastAppliedViewStateRef.current = null;
+      return;
+    }
+
+    if (isEditMode) {
+      return;
+    }
+
+    const contextState = documentViewStates[docId];
+    if (!contextState) {
+      return;
+    }
+
+    const signatureParts = [
+      docId,
+      contextState.updatedAt ?? "",
+      Number.isFinite(contextState.zoom) ? String(contextState.zoom) : "",
+      Number.isFinite(contextState.scrollTop) ? String(contextState.scrollTop) : "",
+      Number.isFinite(contextState.scrollLeft) ? String(contextState.scrollLeft) : "",
+    ];
+    const signature = signatureParts.join("|");
+
+    if (lastAppliedViewStateRef.current === signature) {
+      return;
+    }
+
+    lastAppliedViewStateRef.current = signature;
+
+    const savedZoom = getStoredZoomForDocument(docId);
+    if (Math.abs(savedZoom - zoomLevel) > 0.01) {
+      setZoomLevel(savedZoom);
+      setZoomInputValue(Math.round(savedZoom * 100).toString());
+    }
+    saveZoomToLocalStorage(docId, savedZoom);
+
+    const savedScroll = getStoredScrollPosition(docId);
+    saveScrollToLocalStorage(docId, savedScroll.scrollTop, savedScroll.scrollLeft);
+    restoreScrollPosition(docId);
+  }, [
+    documentType,
+    documentViewStates,
+    getCurrentDocumentId,
+    getStoredScrollPosition,
+    getStoredZoomForDocument,
+    restoreScrollPosition,
+    saveScrollToLocalStorage,
+    saveZoomToLocalStorage,
+    zoomLevel,
+    isEditMode,
+  ]);
 
   // 💾 REMOVIDO: Auto-save de scroll foi DESABILITADO
   // O scroll agora só é salvo quando o usuário SAI do modo editor
