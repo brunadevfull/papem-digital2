@@ -1813,15 +1813,22 @@ useEffect(() => {
     }
 
     const { docId, groupId } = getCurrentDocumentIdentifiers();
+    console.log(`📊 PDFViewer (${documentType}): Verificando viewStates - docId: ${docId}, groupId: ${groupId}`);
+
     const candidateKeys = [docId, groupId].filter((key): key is string => typeof key === 'string' && key.length > 0);
     if (candidateKeys.length === 0) {
+      console.warn(`⚠️ PDFViewer (${documentType}): Nenhuma chave candidata para viewStates`);
       return;
     }
+
+    console.log(`📊 PDFViewer (${documentType}): Chaves candidatas:`, candidateKeys);
+    console.log(`📊 PDFViewer (${documentType}): Estados disponíveis no contexto:`, Object.keys(documentViewStates));
 
     let contextKey: string | null = null;
     let contextState: typeof documentViewStates[string] | undefined;
     for (const key of candidateKeys) {
       const state = documentViewStates[key];
+      console.log(`📊 PDFViewer (${documentType}): Verificando chave "${key}":`, state ? 'encontrado' : 'não encontrado');
       if (state) {
         contextKey = key;
         contextState = state;
@@ -1836,6 +1843,8 @@ useEffect(() => {
       );
       return;
     }
+
+    console.log(`✅ PDFViewer (${documentType}): Estado encontrado para "${contextKey}":`, contextState);
 
     // Aplicar zoom se mudou
     if (
