@@ -1347,7 +1347,17 @@ useEffect(() => {
         } catch (noticeError) {
           console.warn("⚠️ Falha ao carregar avisos do servidor:", noticeError);
         }
-        
+
+        // 🔥 CORREÇÃO: Carregar viewStates IMEDIATAMENTE do banco de dados
+        // Isso garante que os dados estejam disponíveis ANTES do PDFViewer renderizar
+        try {
+          console.log('📊 Carregando viewStates do banco na inicialização...');
+          await refreshDocumentViewStates();
+          console.log('✅ ViewStates carregados do banco:', Object.keys(documentViewStates).length);
+        } catch (viewStateError) {
+          console.warn("⚠️ Falha ao carregar viewStates do servidor:", viewStateError);
+        }
+
         // Carregar documentos do servidor (não bloqueante)
         setTimeout(() => {
           loadDocumentsFromServer().catch((error) => {
