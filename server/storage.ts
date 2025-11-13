@@ -97,6 +97,12 @@ export interface IStorage {
   createMilitaryPersonnel(personnel: InsertMilitaryPersonnel): Promise<MilitaryPersonnel>;
   updateMilitaryPersonnel(personnel: MilitaryPersonnel): Promise<MilitaryPersonnel>;
   deleteMilitaryPersonnel(id: number): Promise<boolean>;
+
+  // Document View States methods
+  runMigrations(): Promise<void>;
+  getDocumentViewState(documentId: string): Promise<{ zoom: number; scrollTop: number; scrollLeft: number; updatedAt: string } | undefined>;
+  getAllDocumentViewStates(): Promise<Record<string, { zoom: number; scrollTop: number; scrollLeft: number; updatedAt: string }>>;
+  setDocumentViewState(documentId: string, zoom: number, scrollTop: number, scrollLeft: number): Promise<boolean>;
 }
 
 export class MemStorage implements IStorage {
@@ -559,6 +565,26 @@ export class MemStorage implements IStorage {
 
   async deleteMilitaryPersonnel(id: number): Promise<boolean> {
     return this.militaryPersonnel.delete(id);
+  }
+
+  // Document View States methods (not implemented in MemStorage)
+  async runMigrations(): Promise<void> {
+    console.log('⚠️ MemStorage: runMigrations not implemented');
+  }
+
+  async getDocumentViewState(documentId: string): Promise<{ zoom: number; scrollTop: number; scrollLeft: number; updatedAt: string } | undefined> {
+    console.log('⚠️ MemStorage: getDocumentViewState not implemented');
+    return undefined;
+  }
+
+  async getAllDocumentViewStates(): Promise<Record<string, { zoom: number; scrollTop: number; scrollLeft: number; updatedAt: string }>> {
+    console.log('⚠️ MemStorage: getAllDocumentViewStates not implemented');
+    return {};
+  }
+
+  async setDocumentViewState(documentId: string, zoom: number, scrollTop: number, scrollLeft: number): Promise<boolean> {
+    console.log('⚠️ MemStorage: setDocumentViewState not implemented');
+    return false;
   }
 }
 

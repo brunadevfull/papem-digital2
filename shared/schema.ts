@@ -33,6 +33,15 @@ export const documents = pgTable("documents", {
   uploadDate: timestamp("upload_date").defaultNow(),
 });
 
+export const documentViewStates = pgTable("document_view_states", {
+  id: serial("id").primaryKey(),
+  documentId: text("document_id").notNull().unique(),
+  zoom: text("zoom").notNull(),
+  scrollTop: text("scroll_top").notNull(),
+  scrollLeft: text("scroll_left").notNull(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+});
+
 export const militaryPersonnel = pgTable("military_personnel", {
   id: serial("id").primaryKey(),
   name: text("name").notNull(),
@@ -81,6 +90,11 @@ export const insertDocumentSchema = createInsertSchema(documents)
     tags: z.array(z.string()).optional(),
     unit: z.enum(["EAGM", "1DN"]).optional(),
   });
+
+export const insertDocumentViewStateSchema = createInsertSchema(documentViewStates).omit({
+  id: true,
+  updatedAt: true,
+});
 
 export const insertMilitaryPersonnelSchema = createInsertSchema(militaryPersonnel).omit({
   id: true,
@@ -163,6 +177,8 @@ export type InsertDocument = Omit<z.infer<typeof insertDocumentSchema>, "tags" |
   tags?: string[];
   unit?: "EAGM" | "1DN";
 };
+export type DocumentViewState = typeof documentViewStates.$inferSelect;
+export type InsertDocumentViewState = z.infer<typeof insertDocumentViewStateSchema>;
 export type DutyOfficerRank = string;
 export type DutyMasterRank = string;
 export type DutyOfficersPayload = z.infer<typeof dutyOfficersPayloadSchema>;

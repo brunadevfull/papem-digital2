@@ -643,24 +643,138 @@ async getMilitaryPersonnel(): Promise<MilitaryPersonnel[]> {
    async deleteMilitaryPersonnel(id: number): Promise<boolean> {
     try {
       console.log(`🎖️ PostgreSQL: Removendo militar ${id}`);
-      
+
       // Soft delete - marcar como inativo em vez de deletar
       const result = await this.pool.query(
         'UPDATE military_personnel SET active = false, updated_at = NOW() WHERE id = $1',
         [id]
       );
-      
+
       const deleted = (result.rowCount || 0) > 0;
-      
+
       if (deleted) {
         console.log(`✅ PostgreSQL: Militar ${id} removido (soft delete)`);
       } else {
         console.log(`⚠️ PostgreSQL: Militar ${id} não encontrado`);
       }
-      
+
       return deleted;
     } catch (error) {
       console.error(`❌ PostgreSQL: Erro ao remover militar ${id}:`, error);
+      return false;
+    }
+  }
+
+  // ===== DOCUMENT VIEW STATES =====
+  async runMigrations(): Promise<void> {
+    try {
+      console.log('🔄 Running database migrations...');
+
+      // Check if document_view_states table exists
+      const tableCheck = await this.pool.query(`
+        SELECT EXISTS (
+          SELECT FROM information_schema.tables
+          WHERE table_name = 'document_view_states'
+        );
+      `);
+
+      const tableExists = tableCheck.rows[0]?.exists;
+
+      if (!tableExists) {
+        console.log('📊 Creating document_view_states table...');
+        await this.pool.query(`
+          CREATE TABLE IF NOT EXISTS "document_view_states" (
+            "id" SERIAL PRIMARY KEY,
+            "document_id" TEXT NOT NULL UNIQUE,
+            "zoom" TEXT NOT NULL,
+            "scroll_top" TEXT NOT NULL,
+            "scroll_left" TEXT NOT NULL,
+            "updated_at" TIMESTAMP NOT NULL DEFAULT NOW()
+          );
+
+          CREATE INDEX IF NOT EXISTS "IDX_document_view_states_document_id"
+            ON "document_view_states" ("document_id");
+
+          CREATE INDEX IF NOT EXISTS "IDX_document_view_states_updated_at"
+            ON "document_view_states" ("updated_at");
+        `);
+        console.log('✅ document_view_states table created successfully');
+      } else {
+        console.log('✅ document_view_states table already exists');
+      }
+    } catch (error) {
+      console.error('❌ Error running migrations:', error);
+      throw error;
+    }
+  }
+
+  async getDocumentViewState(documentId: string): Promise<{ zoom: number; scrollTop: number; scrollLeft: number; updatedAt: string } | undefined> {
+    try {
+      const result = await this.pool.query(
+        'SELECT * FROM document_view_states WHERE document_id = $1',
+        [documentId]
+      );
+
+      const row = result.rows[0];
+      if (!row) return undefined;
+
+      return {
+        zoom: parseFloat(row.zoom),
+        scrollTop: parseFloat(row.scroll_top),
+        scrollLeft: parseFloat(row.scroll_left),
+        updatedAt: new Date(row.updated_at).toISOString()
+      };
+    } catch (error) {
+      console.error(`❌ Error getting document view state for ${documentId}:`, error);
+      return undefined;
+    }
+  }
+
+  async getAllDocumentViewStates(): Promise<Record<string, { zoom: number; scrollTop: number; scrollLeft: number; updatedAt: string }>> {
+    try {
+      const result = await this.pool.query('SELECT * FROM document_view_states');
+
+      const states: Record<string, { zoom: number; scrollTop: number; scrollLeft: number; updatedAt: string }> = {};
+
+      for (const row of result.rows) {
+        states[row.document_id] = {
+          zoom: parseFloat(row.zoom),
+          scrollTop: parseFloat(row.scroll_top),
+          scrollLeft: parseFloat(row.scroll_left),
+          updatedAt: new Date(row.updated_at).toISOString()
+        };
+      }
+
+      return states;
+    } catch (error) {
+      console.error('❌ Error getting all document view states:', error);
+      return {};
+    }
+  }
+
+  async setDocumentViewState(
+    documentId: string,
+    zoom: number,
+    scrollTop: number,
+    scrollLeft: number
+  ): Promise<boolean> {
+    try {
+      await this.pool.query(
+        `INSERT INTO document_view_states (document_id, zoom, scroll_top, scroll_left, updated_at)
+         VALUES ($1, $2, $3, $4, NOW())
+         ON CONFLICT (document_id)
+         DO UPDATE SET
+           zoom = $2,
+           scroll_top = $3,
+           scroll_left = $4,
+           updated_at = NOW()`,
+        [documentId, zoom.toString(), scrollTop.toString(), scrollLeft.toString()]
+      );
+
+      console.log(`✅ Document view state saved for ${documentId}`);
+      return true;
+    } catch (error) {
+      console.error(`❌ Error saving document view state for ${documentId}:`, error);
       return false;
     }
   }

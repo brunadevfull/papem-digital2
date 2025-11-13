@@ -338,6 +338,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   await ensureDefaultAdminUser();
 
+  // Executar migrations do banco de dados
+  await storage.runMigrations();
+
   const dutyOfficerSubscribers = new Set<Response>();
 
   type DutyOfficersSseEvent = {
@@ -1490,8 +1493,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.get('/api/documents/view-state', (req, res) => {
+  app.get('/api/documents/view-state', async (req, res) => {
     try {
+      // Carregar estados do banco de dados
+      const dbStates = await storage.getAllDocumentViewStates();
+
+      // Atualizar cache em memória
+      for (const [docId, state] of Object.entries(dbStates)) {
+        documentViewStates.set(docId, state);
+      }
+
       const snapshot = serializeDocumentViewStates();
       res.json({
         success: true,
@@ -1507,7 +1518,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post('/api/documents/view-state', (req, res) => {
+  app.post('/api/documents/view-state', async (req, res) => {
     try {
       const { documentId, zoom, scrollTop, scrollLeft } = req.body ?? {};
 
@@ -1552,7 +1563,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
         updatedAt,
       };
 
+      // Salvar no cache em memória
       documentViewStates.set(trimmedId, state);
+
+      // Salvar no banco de dados
+      await storage.setDocumentViewState(trimmedId, safeZoom, safeScrollTop, safeScrollLeft);
 
       broadcastDocuments({
         type: 'view-state',
