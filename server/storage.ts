@@ -1,4 +1,18 @@
-import { users, notices, documents, militaryPersonnel, type User, type InsertUser, type Notice, type InsertNotice, type PDFDocument, type InsertDocument, type DutyOfficers, type InsertDutyOfficers, type MilitaryPersonnel, type InsertMilitaryPersonnel } from "@shared/schema";
+import {
+  defaultDisplaySettings,
+  type User,
+  type InsertUser,
+  type Notice,
+  type InsertNotice,
+  type PDFDocument,
+  type InsertDocument,
+  type DutyOfficers,
+  type InsertDutyOfficers,
+  type MilitaryPersonnel,
+  type InsertMilitaryPersonnel,
+  type DisplaySettings,
+  type DisplaySettingsPayload,
+} from "@shared/schema";
 import { DatabaseStorage } from "./db-storage";
 
 const RANK_PREFIX_PATTERN = /^([A-Z0-9]+)\s*(?:\([A-Z0-9-]+\))?\s+(.+)$/;
@@ -63,6 +77,10 @@ export interface IStorage {
   createMilitaryPersonnel(personnel: InsertMilitaryPersonnel): Promise<MilitaryPersonnel>;
   updateMilitaryPersonnel(personnel: MilitaryPersonnel): Promise<MilitaryPersonnel>;
   deleteMilitaryPersonnel(id: number): Promise<boolean>;
+
+  // Display settings methods
+  getDisplaySettings(): Promise<DisplaySettings>;
+  updateDisplaySettings(update: Partial<DisplaySettingsPayload>): Promise<DisplaySettings>;
 }
 
 export class MemStorage implements IStorage {
@@ -75,6 +93,7 @@ export class MemStorage implements IStorage {
   private currentNoticeId: number;
   private currentDocumentId: number;
   private currentMilitaryPersonnelId: number;
+  private displaySettings: DisplaySettings;
 
   constructor() {
     this.users = new Map();
@@ -86,7 +105,12 @@ export class MemStorage implements IStorage {
     this.currentNoticeId = 1;
     this.currentDocumentId = 1;
     this.currentMilitaryPersonnelId = 1;
-      console.log('💾 MemStorage initialized'); 
+    this.displaySettings = {
+      id: 1,
+      updatedAt: new Date(),
+      ...defaultDisplaySettings,
+    };
+    console.log('💾 MemStorage initialized');
   }
 
   async getUser(id: number): Promise<User | undefined> {
@@ -517,6 +541,20 @@ export class MemStorage implements IStorage {
 
   async deleteMilitaryPersonnel(id: number): Promise<boolean> {
     return this.militaryPersonnel.delete(id);
+  }
+
+  async getDisplaySettings(): Promise<DisplaySettings> {
+    return this.displaySettings;
+  }
+
+  async updateDisplaySettings(update: Partial<DisplaySettingsPayload>): Promise<DisplaySettings> {
+    this.displaySettings = {
+      ...this.displaySettings,
+      ...update,
+      id: 1,
+      updatedAt: new Date(),
+    };
+    return this.displaySettings;
   }
 }
 

@@ -2,11 +2,14 @@
 import { Pool } from 'pg';
 import { IStorage } from "./storage";
 import {
+  defaultDisplaySettings,
   type User, type InsertUser,
   type Notice, type InsertNotice,
   type PDFDocument, type InsertDocument,
   type DutyOfficers, type InsertDutyOfficers,
-  type MilitaryPersonnel, type InsertMilitaryPersonnel
+  type MilitaryPersonnel, type InsertMilitaryPersonnel,
+  type DisplaySettings,
+  type DisplaySettingsPayload,
 } from "@shared/schema";
 
 // Funções removidas - não são mais necessárias pois os dados agora são salvos
@@ -30,6 +33,25 @@ export class DatabaseStorage implements IStorage {
 
     console.log('🔗 PostgreSQL DatabaseStorage initialized');
     console.log('📊 Connected to:', process.env.DATABASE_URL.replace(/:[^:]*@/, ':***@'));
+  }
+
+  private mapDisplaySettingsRow(row: any): DisplaySettings {
+    return {
+      id: row.id,
+      scrollSpeed: (row.scroll_speed ?? defaultDisplaySettings.scrollSpeed) as DisplaySettings["scrollSpeed"],
+      escalaAlternateInterval: Number(
+        row.escala_alternate_interval ?? defaultDisplaySettings.escalaAlternateInterval,
+      ),
+      cardapioAlternateInterval: Number(
+        row.cardapio_alternate_interval ?? defaultDisplaySettings.cardapioAlternateInterval,
+      ),
+      autoRestartDelay: Number(row.auto_restart_delay ?? defaultDisplaySettings.autoRestartDelay),
+      globalZoom: Number(row.global_zoom ?? defaultDisplaySettings.globalZoom),
+      plasaZoom: Number(row.plasa_zoom ?? defaultDisplaySettings.plasaZoom),
+      escalaZoom: Number(row.escala_zoom ?? defaultDisplaySettings.escalaZoom),
+      cardapioZoom: Number(row.cardapio_zoom ?? defaultDisplaySettings.cardapioZoom),
+      updatedAt: row.updated_at ? new Date(row.updated_at) : new Date(),
+    };
   }
 
   // ===== USERS =====
@@ -592,9 +614,109 @@ async getMilitaryPersonnel(): Promise<MilitaryPersonnel[]> {
       }
       
       return deleted;
-    } catch (error) {
+   } catch (error) {
       console.error(`❌ PostgreSQL: Erro ao remover militar ${id}:`, error);
       return false;
+    }
+  }
+
+  async getDisplaySettings(): Promise<DisplaySettings> {
+    try {
+      const result = await this.pool.query('SELECT * FROM display_settings ORDER BY id ASC LIMIT 1');
+
+      if (result.rows.length > 0) {
+        return this.mapDisplaySettingsRow(result.rows[0]);
+      }
+
+      const insertResult = await this.pool.query(
+        `INSERT INTO display_settings (
+          id,
+          scroll_speed,
+          escala_alternate_interval,
+          cardapio_alternate_interval,
+          auto_restart_delay,
+          global_zoom,
+          plasa_zoom,
+          escala_zoom,
+          cardapio_zoom
+        ) VALUES (1, $1, $2, $3, $4, $5, $6, $7, $8)
+        RETURNING *`,
+        [
+          defaultDisplaySettings.scrollSpeed,
+          defaultDisplaySettings.escalaAlternateInterval,
+          defaultDisplaySettings.cardapioAlternateInterval,
+          defaultDisplaySettings.autoRestartDelay,
+          defaultDisplaySettings.globalZoom,
+          defaultDisplaySettings.plasaZoom,
+          defaultDisplaySettings.escalaZoom,
+          defaultDisplaySettings.cardapioZoom,
+        ],
+      );
+
+      return this.mapDisplaySettingsRow(insertResult.rows[0]);
+    } catch (error) {
+      console.error('❌ PostgreSQL: Erro ao buscar configurações de display:', error);
+      throw error;
+    }
+  }
+
+  async updateDisplaySettings(update: Partial<DisplaySettingsPayload>): Promise<DisplaySettings> {
+    try {
+      const current = await this.getDisplaySettings();
+      const merged: DisplaySettingsPayload = {
+        scrollSpeed: update.scrollSpeed ?? current.scrollSpeed,
+        escalaAlternateInterval:
+          update.escalaAlternateInterval ?? current.escalaAlternateInterval,
+        cardapioAlternateInterval:
+          update.cardapioAlternateInterval ?? current.cardapioAlternateInterval,
+        autoRestartDelay: update.autoRestartDelay ?? current.autoRestartDelay,
+        globalZoom: update.globalZoom ?? current.globalZoom,
+        plasaZoom: update.plasaZoom ?? current.plasaZoom,
+        escalaZoom: update.escalaZoom ?? current.escalaZoom,
+        cardapioZoom: update.cardapioZoom ?? current.cardapioZoom,
+      };
+
+      const result = await this.pool.query(
+        `INSERT INTO display_settings (
+          id,
+          scroll_speed,
+          escala_alternate_interval,
+          cardapio_alternate_interval,
+          auto_restart_delay,
+          global_zoom,
+          plasa_zoom,
+          escala_zoom,
+          cardapio_zoom,
+          updated_at
+        ) VALUES (1, $1, $2, $3, $4, $5, $6, $7, $8, NOW())
+        ON CONFLICT (id) DO UPDATE SET
+          scroll_speed = EXCLUDED.scroll_speed,
+          escala_alternate_interval = EXCLUDED.escala_alternate_interval,
+          cardapio_alternate_interval = EXCLUDED.cardapio_alternate_interval,
+          auto_restart_delay = EXCLUDED.auto_restart_delay,
+          global_zoom = EXCLUDED.global_zoom,
+          plasa_zoom = EXCLUDED.plasa_zoom,
+          escala_zoom = EXCLUDED.escala_zoom,
+          cardapio_zoom = EXCLUDED.cardapio_zoom,
+          updated_at = NOW()
+        RETURNING *`,
+        [
+          merged.scrollSpeed,
+          merged.escalaAlternateInterval,
+          merged.cardapioAlternateInterval,
+          merged.autoRestartDelay,
+          merged.globalZoom,
+          merged.plasaZoom,
+          merged.escalaZoom,
+          merged.cardapioZoom,
+        ],
+      );
+
+      console.log('✅ PostgreSQL: Configurações de display atualizadas:', merged);
+      return this.mapDisplaySettingsRow(result.rows[0]);
+    } catch (error) {
+      console.error('❌ PostgreSQL: Erro ao atualizar configurações de display:', error);
+      throw error;
     }
   }
 }
