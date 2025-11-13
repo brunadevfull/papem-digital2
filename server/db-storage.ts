@@ -732,11 +732,14 @@ async getMilitaryPersonnel(): Promise<MilitaryPersonnel[]> {
 
   async getAllDocumentViewStates(): Promise<Record<string, { zoom: number; scrollTop: number; scrollLeft: number; updatedAt: string }>> {
     try {
+      console.log('📊 DB: Consultando document_view_states...');
       const result = await this.pool.query('SELECT * FROM document_view_states');
+      console.log(`📊 DB: Encontrados ${result.rows.length} registros na tabela`);
 
       const states: Record<string, { zoom: number; scrollTop: number; scrollLeft: number; updatedAt: string }> = {};
 
       for (const row of result.rows) {
+        console.log(`  📄 DB: Processando registro: document_id=${row.document_id}, zoom=${row.zoom}, scroll_top=${row.scroll_top}`);
         states[row.document_id] = {
           zoom: parseFloat(row.zoom),
           scrollTop: parseFloat(row.scroll_top),
@@ -745,6 +748,7 @@ async getMilitaryPersonnel(): Promise<MilitaryPersonnel[]> {
         };
       }
 
+      console.log('📊 DB: Retornando estados para IDs:', Object.keys(states));
       return states;
     } catch (error) {
       console.error('❌ Error getting all document view states:', error);
