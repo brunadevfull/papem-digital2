@@ -284,7 +284,8 @@ const PDFViewer: React.FC<PDFViewerProps> = ({
   const getCurrentDocumentId = useCallback((): string | null => {
     if (documentType === "escala") {
       const currentEscala = getCurrentEscalaDoc();
-      return currentEscala?.id ? `escala-${currentEscala.id}` : null;
+      // ✅ USAR CATEGORIA (oficial/praca) EM VEZ DE ID para compartilhar zoom/scroll entre todas as escalas da mesma categoria
+      return currentEscala?.category ? `escala-${currentEscala.category}` : null;
     } else if (documentType === "cardapio") {
       const currentCardapio = getCurrentCardapioDoc();
       // ✅ USAR UNIDADE (EAGM/1DN) EM VEZ DE ID para compartilhar zoom/scroll entre todos os cardápios da mesma unidade
