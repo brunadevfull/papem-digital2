@@ -254,6 +254,9 @@ const PDFViewer: React.FC<PDFViewerProps> = ({
   const [escalaImageUrl, setEscalaImageUrl] = useState<string | null>(null);
   const [cardapioImageUrl, setCardapioImageUrl] = useState<string | null>(null);
   const [escalaError, setEscalaError] = useState<string | null>(null);
+  const [escalaRetryCount, setEscalaRetryCount] = useState(0);
+  const [cardapioRetryCount, setCardapioRetryCount] = useState(0);
+  const [backendHealthy, setBackendHealthy] = useState(true);
 
   const scrollerRef = useRef<ContinuousAutoScroller | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -758,57 +761,88 @@ const PDFViewer: React.FC<PDFViewerProps> = ({
     }
   };
 
-  // Função melhorada para obter dados do PDF com tratamento de CORS
-  const getPDFData = async (url: string): Promise<ArrayBuffer | Uint8Array> => {
+  // Função melhorada para obter dados do PDF com tratamento de CORS e retry
+  const getPDFData = async (url: string, maxRetries: number = 3): Promise<ArrayBuffer | Uint8Array> => {
     console.log("📥 Obtendo dados do PDF:", url);
-    
-    try {
-      if (url.startsWith('blob:')) {
-        console.log("🔗 URL blob detectada");
-        const response = await fetch(url);
-        if (!response.ok) throw new Error(`Erro blob: ${response.status}`);
-        const arrayBuffer = await response.arrayBuffer();
-        console.log(`✅ Blob convertido: ${arrayBuffer.byteLength} bytes`);
-        return arrayBuffer;
-      }
-      
-      // Primeira tentativa com headers melhorados
+
+    for (let attempt = 0; attempt < maxRetries; attempt++) {
       try {
-        const response = await fetch(url, {
-          method: 'GET',
-          headers: {
-            'Accept': 'application/pdf,*/*'
-          },
-          mode: 'cors',
-          cache: 'no-cache',
-          credentials: 'omit'
-        });
-        
-        if (!response.ok) throw new Error(`HTTP: ${response.status}`);
-        
-        const arrayBuffer = await response.arrayBuffer();
-        console.log(`✅ PDF carregado: ${arrayBuffer.byteLength} bytes`);
-        return arrayBuffer;
-        
-      } catch (corsError) {
-        console.warn("⚠️ Erro CORS, tentando proxy:", corsError);
-        
-        // Fallback: usar proxy
-        const proxyUrl = getBackendUrl(`/api/proxy-pdf?url=${encodeURIComponent(url)}`);
-        console.log("🔄 Usando proxy:", proxyUrl);
-        
-        const response = await fetch(proxyUrl);
-        if (!response.ok) throw new Error(`Proxy: ${response.status}`);
-        
-        const arrayBuffer = await response.arrayBuffer();
-        console.log(`✅ PDF via proxy: ${arrayBuffer.byteLength} bytes`);
-        return arrayBuffer;
+        if (attempt > 0) {
+          const delay = Math.min(1000 * Math.pow(2, attempt - 1), 8000);
+          console.log(`🔄 Tentativa ${attempt + 1}/${maxRetries} após ${delay}ms...`);
+          await new Promise(resolve => setTimeout(resolve, delay));
+        }
+
+        if (url.startsWith('blob:')) {
+          console.log("🔗 URL blob detectada");
+          const response = await fetch(url, {
+            signal: AbortSignal.timeout(30000) // 30 segundos timeout
+          });
+          if (!response.ok) throw new Error(`Erro blob: ${response.status}`);
+          const arrayBuffer = await response.arrayBuffer();
+          console.log(`✅ Blob convertido: ${arrayBuffer.byteLength} bytes`);
+          return arrayBuffer;
+        }
+
+        // Primeira tentativa com headers melhorados e timeout
+        try {
+          const response = await fetch(url, {
+            method: 'GET',
+            headers: {
+              'Accept': 'application/pdf,*/*'
+            },
+            mode: 'cors',
+            cache: 'no-cache',
+            credentials: 'omit',
+            signal: AbortSignal.timeout(30000) // 30 segundos timeout
+          });
+
+          if (!response.ok) {
+            console.warn(`⚠️ HTTP ${response.status} em tentativa ${attempt + 1}`);
+            if (response.status >= 500 && attempt < maxRetries - 1) {
+              continue; // Retry em erros de servidor
+            }
+            throw new Error(`HTTP: ${response.status}`);
+          }
+
+          const arrayBuffer = await response.arrayBuffer();
+          console.log(`✅ PDF carregado: ${arrayBuffer.byteLength} bytes`);
+          return arrayBuffer;
+
+        } catch (corsError: any) {
+          console.warn(`⚠️ Erro CORS em tentativa ${attempt + 1}, tentando proxy:`, corsError);
+
+          // Fallback: usar proxy com retry
+          const proxyUrl = getBackendUrl(`/api/proxy-pdf?url=${encodeURIComponent(url)}`);
+          console.log("🔄 Usando proxy:", proxyUrl);
+
+          const response = await fetch(proxyUrl, {
+            signal: AbortSignal.timeout(30000)
+          });
+
+          if (!response.ok) {
+            if (response.status >= 500 && attempt < maxRetries - 1) {
+              console.warn(`⚠️ Proxy retornou ${response.status}, tentando novamente...`);
+              continue;
+            }
+            throw new Error(`Proxy: ${response.status}`);
+          }
+
+          const arrayBuffer = await response.arrayBuffer();
+          console.log(`✅ PDF via proxy: ${arrayBuffer.byteLength} bytes`);
+          return arrayBuffer;
+        }
+
+      } catch (error: any) {
+        console.error(`❌ Tentativa ${attempt + 1}/${maxRetries} falhou:`, error);
+
+        if (attempt === maxRetries - 1) {
+          throw new Error(`Falha ao carregar PDF após ${maxRetries} tentativas: ${error.message}`);
+        }
       }
-      
-    } catch (error) {
-      console.error("❌ Erro ao obter PDF:", error);
-      throw error;
     }
+
+    throw new Error('Falha ao obter dados do PDF');
   };
 
   // Função para salvar página como imagem no servidor
@@ -1262,6 +1296,7 @@ const PDFViewer: React.FC<PDFViewerProps> = ({
       setLoading(false);
       setTotalPages(1);
       setEscalaError(null);
+      setEscalaRetryCount(0); // Reset retry count when document changes
 
       if (currentEscala?.url) {
         const docUrl = getBackendUrl(currentEscala.url);
@@ -1328,6 +1363,7 @@ useEffect(() => {
     setCardapioImageUrl(null);
     setLoading(false);
     setTotalPages(1);
+    setCardapioRetryCount(0); // Reset retry count when document changes
 
     if (currentCardapio?.url) {
       const docUrl = getBackendUrl(currentCardapio.url);
@@ -1358,6 +1394,56 @@ useEffect(() => {
       console.warn("⚠️ Erro ao verificar tipo de arquivo:", url, error);
       return false;
     }
+  };
+
+  // 🔄 FUNÇÃO: Verificar saúde do backend
+  const checkBackendHealth = async (): Promise<boolean> => {
+    try {
+      const healthUrl = getBackendUrl('/health');
+      const response = await fetch(healthUrl, {
+        method: 'GET',
+        signal: AbortSignal.timeout(5000) // 5 segundos timeout
+      });
+      return response.ok;
+    } catch (error) {
+      console.warn("⚠️ Backend não acessível:", error);
+      return false;
+    }
+  };
+
+  // 🔄 FUNÇÃO: Tentar carregar imagem com retry e exponential backoff
+  const retryImageLoad = async (
+    url: string,
+    maxRetries: number = 3,
+    onRetry?: (attempt: number) => void
+  ): Promise<boolean> => {
+    for (let attempt = 0; attempt < maxRetries; attempt++) {
+      try {
+        if (attempt > 0) {
+          const delay = Math.min(1000 * Math.pow(2, attempt - 1), 8000); // 1s, 2s, 4s, max 8s
+          console.log(`🔄 Tentativa ${attempt + 1}/${maxRetries} após ${delay}ms...`);
+          await new Promise(resolve => setTimeout(resolve, delay));
+          if (onRetry) onRetry(attempt);
+        }
+
+        const response = await fetch(url, {
+          method: 'HEAD',
+          signal: AbortSignal.timeout(10000) // 10 segundos timeout
+        });
+
+        if (response.ok) {
+          console.log(`✅ Imagem acessível na tentativa ${attempt + 1}`);
+          return true;
+        }
+
+        console.warn(`⚠️ Tentativa ${attempt + 1} falhou: HTTP ${response.status}`);
+      } catch (error) {
+        console.warn(`⚠️ Tentativa ${attempt + 1} falhou:`, error);
+      }
+    }
+
+    console.error(`❌ Falha após ${maxRetries} tentativas`);
+    return false;
   };
 
   // NOVA FUNÇÃO: Tentar renderizar PDF com fallback de qualidade
@@ -1741,12 +1827,24 @@ useEffect(() => {
               <div className="text-red-600 font-bold text-lg mb-2">Erro ao carregar escala</div>
               <div className="text-gray-600 text-sm mb-4">{escalaError}</div>
 
+              {!backendHealthy && (
+                <div className="bg-yellow-50 border border-yellow-300 rounded p-3 mb-4 text-sm">
+                  <div className="font-semibold text-yellow-800 mb-1">🔌 Servidor não acessível</div>
+                  <div className="text-yellow-700 text-xs">
+                    Verifique se o backend está rodando em: {getBackendUrl('')}
+                  </div>
+                </div>
+              )}
+
               {docUrl && (
                 <div className="space-y-2">
                   <button
                     onClick={() => {
+                      console.log('🔄 Botão: Resetando estado e tentando novamente...');
                       setEscalaError(null);
                       setEscalaImageUrl(null);
+                      setEscalaRetryCount(0);
+                      setBackendHealthy(true);
                       convertEscalaPDFToImage(docUrl);
                     }}
                     className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 text-sm"
@@ -1766,6 +1864,15 @@ useEffect(() => {
 
       return (
         <div className="w-full h-full flex items-center justify-center p-4">
+          {/* Retry indicator */}
+          {escalaRetryCount > 0 && !escalaError && (
+            <div className="absolute top-4 right-4 bg-blue-50 border border-blue-300 rounded px-4 py-2 text-sm z-50">
+              <div className="flex items-center gap-2">
+                <div className="animate-spin h-4 w-4 border-2 border-blue-500 border-t-transparent rounded-full"></div>
+                <span className="text-blue-700">Tentando reconectar ({escalaRetryCount}/3)...</span>
+              </div>
+            </div>
+          )}
           {escalaImageUrl ? (
             <div className="w-full h-full overflow-auto" ref={scrollableContentRef}>
               <div style={{
@@ -1786,13 +1893,43 @@ useEffect(() => {
                     objectFit: 'contain',
                     transition: 'width 0.2s'
                   }}
-                  onError={(e) => {
+                  onError={async (e) => {
                     console.error("❌ ESCALA: Erro ao carregar imagem:", escalaImageUrl);
-                    setEscalaError("Falha ao exibir a imagem da escala");
+
+                    // Tentar retry apenas se não excedeu o limite
+                    const MAX_RETRIES = 3;
+                    if (escalaRetryCount < MAX_RETRIES) {
+                      console.log(`🔄 ESCALA: Tentando novamente (${escalaRetryCount + 1}/${MAX_RETRIES})...`);
+                      setEscalaRetryCount(prev => prev + 1);
+
+                      // Verificar saúde do backend
+                      const isHealthy = await checkBackendHealth();
+                      setBackendHealthy(isHealthy);
+
+                      if (!isHealthy) {
+                        setEscalaError("Servidor indisponível. Verifique a conexão com o backend.");
+                      } else if (escalaImageUrl) {
+                        // Tentar recarregar após delay
+                        const delay = Math.min(1000 * Math.pow(2, escalaRetryCount), 8000);
+                        await new Promise(resolve => setTimeout(resolve, delay));
+
+                        // Forçar reload da imagem
+                        const img = e.target as HTMLImageElement;
+                        const timestamp = new Date().getTime();
+                        img.src = `${escalaImageUrl}${escalaImageUrl.includes('?') ? '&' : '?'}_retry=${timestamp}`;
+                        return;
+                      }
+                    }
+
+                    setEscalaError("Falha ao exibir a imagem da escala após múltiplas tentativas");
                     (e.target as HTMLImageElement).style.display = 'none';
                   }}
                   onLoad={() => {
                     console.log(`✅ ESCALA: Imagem carregada com sucesso`);
+                    // Reset retry count on successful load
+                    setEscalaRetryCount(0);
+                    setBackendHealthy(true);
+
                     // 🔄 Restaurar ZOOM primeiro, depois SCROLL
                     const docId = getCurrentDocumentId();
                     if (docId) {
@@ -1832,13 +1969,43 @@ useEffect(() => {
                     objectFit: 'contain',
                     transition: 'width 0.2s'
                   }}
-                  onError={(e) => {
+                  onError={async (e) => {
                     console.error("❌ ESCALA: Erro ao carregar arquivo original:", docUrl);
-                    setEscalaError("Falha ao carregar o arquivo da escala");
+
+                    // Tentar retry apenas se não excedeu o limite
+                    const MAX_RETRIES = 3;
+                    if (escalaRetryCount < MAX_RETRIES) {
+                      console.log(`🔄 ESCALA: Tentando novamente (${escalaRetryCount + 1}/${MAX_RETRIES})...`);
+                      setEscalaRetryCount(prev => prev + 1);
+
+                      // Verificar saúde do backend
+                      const isHealthy = await checkBackendHealth();
+                      setBackendHealthy(isHealthy);
+
+                      if (!isHealthy) {
+                        setEscalaError("Servidor indisponível. Verifique a conexão com o backend.");
+                      } else {
+                        // Tentar recarregar após delay
+                        const delay = Math.min(1000 * Math.pow(2, escalaRetryCount), 8000);
+                        await new Promise(resolve => setTimeout(resolve, delay));
+
+                        // Forçar reload da imagem
+                        const img = e.target as HTMLImageElement;
+                        const timestamp = new Date().getTime();
+                        img.src = `${docUrl}${docUrl.includes('?') ? '&' : '?'}_retry=${timestamp}`;
+                        return;
+                      }
+                    }
+
+                    setEscalaError("Falha ao carregar o arquivo da escala após múltiplas tentativas");
                     (e.target as HTMLImageElement).style.display = 'none';
                   }}
                   onLoad={() => {
                     console.log(`✅ ESCALA: Arquivo original carregado`);
+                    // Reset retry count on successful load
+                    setEscalaRetryCount(0);
+                    setBackendHealthy(true);
+
                     // 🔄 Restaurar ZOOM primeiro, depois SCROLL
                     const docId = getCurrentDocumentId();
                     if (docId) {
@@ -1880,6 +2047,15 @@ useEffect(() => {
 
       return (
         <div className="w-full h-full flex items-center justify-center p-4">
+          {/* Retry indicator */}
+          {cardapioRetryCount > 0 && (
+            <div className="absolute top-4 right-4 bg-blue-50 border border-blue-300 rounded px-4 py-2 text-sm z-50">
+              <div className="flex items-center gap-2">
+                <div className="animate-spin h-4 w-4 border-2 border-blue-500 border-t-transparent rounded-full"></div>
+                <span className="text-blue-700">Tentando reconectar ({cardapioRetryCount}/3)...</span>
+              </div>
+            </div>
+          )}
           {cardapioImageUrl ? (
             <div className="w-full h-full overflow-auto" ref={scrollableContentRef}>
               <div style={{
@@ -1900,12 +2076,41 @@ useEffect(() => {
                     objectFit: 'contain',
                     transition: 'width 0.2s'
                   }}
-                  onError={(e) => {
+                  onError={async (e) => {
                     console.error("❌ CARDÁPIO: Erro ao carregar imagem:", cardapioImageUrl);
+
+                    // Tentar retry apenas se não excedeu o limite
+                    const MAX_RETRIES = 3;
+                    if (cardapioRetryCount < MAX_RETRIES) {
+                      console.log(`🔄 CARDÁPIO: Tentando novamente (${cardapioRetryCount + 1}/${MAX_RETRIES})...`);
+                      setCardapioRetryCount(prev => prev + 1);
+
+                      // Verificar saúde do backend
+                      const isHealthy = await checkBackendHealth();
+                      setBackendHealthy(isHealthy);
+
+                      if (isHealthy && cardapioImageUrl) {
+                        // Tentar recarregar após delay
+                        const delay = Math.min(1000 * Math.pow(2, cardapioRetryCount), 8000);
+                        await new Promise(resolve => setTimeout(resolve, delay));
+
+                        // Forçar reload da imagem
+                        const img = e.target as HTMLImageElement;
+                        const timestamp = new Date().getTime();
+                        img.src = `${cardapioImageUrl}${cardapioImageUrl.includes('?') ? '&' : '?'}_retry=${timestamp}`;
+                        return;
+                      }
+                    }
+
+                    console.error(`❌ CARDÁPIO: Falha após ${cardapioRetryCount} tentativas`);
                     (e.target as HTMLImageElement).style.display = 'none';
                   }}
                   onLoad={() => {
                     console.log(`✅ CARDÁPIO: Imagem carregada com sucesso`);
+                    // Reset retry count on successful load
+                    setCardapioRetryCount(0);
+                    setBackendHealthy(true);
+
                     // 🔄 Restaurar ZOOM primeiro, depois SCROLL
                     const docId = getCurrentDocumentId();
                     if (docId) {
@@ -1945,12 +2150,41 @@ useEffect(() => {
                     objectFit: 'contain',
                     transition: 'width 0.2s'
                   }}
-                  onError={(e) => {
+                  onError={async (e) => {
                     console.error("❌ CARDÁPIO: Erro ao carregar arquivo original:", docUrl);
+
+                    // Tentar retry apenas se não excedeu o limite
+                    const MAX_RETRIES = 3;
+                    if (cardapioRetryCount < MAX_RETRIES) {
+                      console.log(`🔄 CARDÁPIO: Tentando novamente (${cardapioRetryCount + 1}/${MAX_RETRIES})...`);
+                      setCardapioRetryCount(prev => prev + 1);
+
+                      // Verificar saúde do backend
+                      const isHealthy = await checkBackendHealth();
+                      setBackendHealthy(isHealthy);
+
+                      if (isHealthy) {
+                        // Tentar recarregar após delay
+                        const delay = Math.min(1000 * Math.pow(2, cardapioRetryCount), 8000);
+                        await new Promise(resolve => setTimeout(resolve, delay));
+
+                        // Forçar reload da imagem
+                        const img = e.target as HTMLImageElement;
+                        const timestamp = new Date().getTime();
+                        img.src = `${docUrl}${docUrl.includes('?') ? '&' : '?'}_retry=${timestamp}`;
+                        return;
+                      }
+                    }
+
+                    console.error(`❌ CARDÁPIO: Falha após ${cardapioRetryCount} tentativas`);
                     (e.target as HTMLImageElement).style.display = 'none';
                   }}
                   onLoad={() => {
                     console.log(`✅ CARDÁPIO: Arquivo original carregado`);
+                    // Reset retry count on successful load
+                    setCardapioRetryCount(0);
+                    setBackendHealthy(true);
+
                     // 🔄 Restaurar ZOOM primeiro, depois SCROLL
                     const docId = getCurrentDocumentId();
                     if (docId) {
