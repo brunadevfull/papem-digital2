@@ -1622,25 +1622,36 @@ useEffect(() => {
 
   // ✅ NOVO: Aplicar zoom e scroll vindos do SSE em tempo real
   useEffect(() => {
+    console.log('🔍 [SSE APPLY] useEffect executado, documentType:', documentType);
+
     // Só aplicar para escala e cardápio (não plasa)
     if (documentType !== "escala" && documentType !== "cardapio") {
+      console.log('⏭️ [SSE APPLY] Pulando - documento não é escala/cardápio');
       return;
     }
 
     // Não aplicar se estiver no modo editor (usuário está editando)
     if (isEditMode) {
+      console.log('⏭️ [SSE APPLY] Pulando - modo editor ativo');
       return;
     }
 
     const docId = getCurrentDocumentId();
     if (!docId) {
+      console.log('⏭️ [SSE APPLY] Pulando - sem docId');
       return;
     }
 
+    console.log('🔍 [SSE APPLY] Procurando estado para docId:', docId);
+    console.log('🔍 [SSE APPLY] documentViewStates disponíveis:', Object.keys(documentViewStates));
+
     const contextState = documentViewStates[docId];
     if (!contextState) {
+      console.log('⏭️ [SSE APPLY] Pulando - sem contextState para', docId);
       return;
     }
+
+    console.log('✅ [SSE APPLY] Estado encontrado para', docId, ':', contextState);
 
     // Aplicar zoom se mudou
     if (

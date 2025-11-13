@@ -1366,12 +1366,14 @@ useEffect(() => {
         }
       } finally {
         setTimeout(() => {
+          console.log('✅ [INIT] Inicialização completa, isInitializingRef = false');
           isInitializingRef.current = false;
-    
+
         }, 2000);
       }
     };
-    
+
+    console.log('🚀 [INIT] Iniciando DisplayContext...');
     initializeContext();
   }, []);
 
@@ -1387,10 +1389,14 @@ useEffect(() => {
   // 📡 Effect para SSE (Server-Sent Events) de documentos em tempo real
   // Substitui o polling periódico por atualizações em tempo real mais eficientes
   useEffect(() => {
+    console.log('🔍 [SSE] useEffect executado. isInitializing:', isInitializingRef.current);
+
     if (isInitializingRef.current) {
+      console.log('⏳ [SSE] Aguardando inicialização, SSE não conectado ainda');
       return;
     }
 
+    console.log('✅ [SSE] Inicialização completa, iniciando conexão SSE...');
     let eventSource: EventSource | null = null;
     let reconnectTimer: NodeJS.Timeout | null = null;
     const RECONNECT_DELAY = 5000; // 5 segundos
@@ -1398,7 +1404,7 @@ useEffect(() => {
     const connectSSE = () => {
       try {
         const sseUrl = getBackendUrl('/api/documents/stream');
-        console.log('📡 Conectando ao SSE de documentos:', sseUrl);
+        console.log('📡 [SSE] Conectando ao SSE de documentos:', sseUrl);
 
         eventSource = new EventSource(sseUrl);
 
@@ -1409,10 +1415,12 @@ useEffect(() => {
         eventSource.onmessage = (event) => {
           try {
             const data = JSON.parse(event.data);
-            console.log('📡 Evento SSE de documentos recebido:', data.type);
+            console.log('📡 [SSE] Evento SSE de documentos recebido:', data.type, data);
 
             if (data.type === 'snapshot') {
+              console.log('📸 [SSE] Recebido snapshot com viewStates:', data.viewStates);
               const parsedStates = parseDocumentViewStatesPayload(data.viewStates ?? {});
+              console.log('📸 [SSE] ViewStates parseados:', parsedStates);
               applyDocumentViewStates(parsedStates, { replace: true });
 
               const refreshPromise = refreshDocumentsRef.current?.();
@@ -1425,9 +1433,14 @@ useEffect(() => {
             }
 
             if (data.viewStates) {
+              console.log('🔄 [SSE] Recebido viewStates:', data.viewStates);
               const parsedStates = parseDocumentViewStatesPayload(data.viewStates);
+              console.log('🔄 [SSE] ViewStates parseados:', parsedStates);
               if (Object.keys(parsedStates).length > 0) {
+                console.log('✅ [SSE] Aplicando viewStates parseados');
                 applyDocumentViewStates(parsedStates);
+              } else {
+                console.log('⚠️ [SSE] Nenhum viewState para aplicar');
               }
             }
 
