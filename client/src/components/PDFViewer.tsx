@@ -747,11 +747,25 @@ const PDFViewer: React.FC<PDFViewerProps> = ({
     }
 
     const { docId, groupId } = getCurrentDocumentIdentifiers();
-    if (!docId && !groupId) return; // Ainda não há documento para aplicar
+    if (!docId && !groupId) {
+      console.log('⚠️ ViewStates carregados mas ainda sem documento para aplicar');
+      return; // Ainda não há documento para aplicar
+    }
 
     console.log('🔥 ViewStates carregados! Aplicando zoom e scroll inicial do banco...');
     console.log(`  - docId: ${docId}`);
     console.log(`  - groupId: ${groupId}`);
+    console.log(`  - documentViewStates disponíveis:`, Object.keys(documentViewStates));
+    console.log(`  - Estado para docId (${docId}):`, documentViewStates[docId || '']);
+    console.log(`  - Estado para groupId (${groupId}):`, documentViewStates[groupId || '']);
+
+    // Verificar se há dados no contexto
+    const hasDataInContext = (groupId && documentViewStates[groupId]) || (docId && documentViewStates[docId]);
+    if (!hasDataInContext) {
+      console.warn('⚠️ documentViewStates ainda vazio! Aguardando próximo ciclo...');
+      // Não marcar como aplicado para tentar novamente
+      return;
+    }
 
     // Aplicar zoom
     const savedZoom = getStoredZoomForDocument(docId, groupId);
@@ -765,7 +779,7 @@ const PDFViewer: React.FC<PDFViewerProps> = ({
       restoreScrollPosition(docId, groupId);
       viewStatesAppliedRef.current = true; // Marcar como aplicado
     }, 150);
-  }, [viewStatesLoaded, documentType, getCurrentDocumentIdentifiers, getStoredZoomForDocument, restoreScrollPosition]);
+  }, [viewStatesLoaded, documentType, getCurrentDocumentIdentifiers, getStoredZoomForDocument, restoreScrollPosition, documentViewStates]);
 
   // 🔄 Resetar flag quando o documento muda
   useEffect(() => {
