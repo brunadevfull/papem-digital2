@@ -6,8 +6,11 @@ import {
   insertDocumentSchema,
   dutyOfficersPayloadSchema,
   insertMilitaryPersonnelSchema,
+  displaySettingsSchema,
+  updateDisplaySettingsSchema,
   type User,
   type DutyOfficersPayload,
+  type DisplaySettings,
 } from "@shared/schema";
 import { z } from "zod";
 import multer from "multer";
@@ -220,6 +223,56 @@ function normalizeUnitInput(value: unknown): 'EAGM' | '1DN' | undefined {
 const DEFAULT_ADMIN_USERNAME = 'admin';
 const DEFAULT_ADMIN_PASSWORD = 'tel@p@pem2025';
 
+type DisplaySettingsClient = {
+  res: Response;
+  heartbeat: NodeJS.Timeout;
+};
+
+const DISPLAY_SETTINGS_EVENT = 'display-settings:update';
+const DISPLAY_SETTINGS_HEARTBEAT_INTERVAL = 30000;
+const displaySettingsClients = new Map<string, DisplaySettingsClient>();
+
+const serializeDisplaySettings = (settings: DisplaySettings) => {
+  const normalized = displaySettingsSchema.parse({
+    scrollSpeed: settings.scrollSpeed,
+    escalaAlternateInterval: settings.escalaAlternateInterval,
+    cardapioAlternateInterval: settings.cardapioAlternateInterval,
+    autoRestartDelay: settings.autoRestartDelay,
+    globalZoom: settings.globalZoom,
+    plasaZoom: settings.plasaZoom,
+    escalaZoom: settings.escalaZoom,
+    cardapioZoom: settings.cardapioZoom,
+  });
+
+  return {
+    id: settings.id,
+    ...normalized,
+    updatedAt:
+      settings.updatedAt instanceof Date
+        ? settings.updatedAt.toISOString()
+        : new Date(settings.updatedAt ?? Date.now()).toISOString(),
+  };
+};
+
+const broadcastDisplaySettings = (settings: DisplaySettings) => {
+  if (displaySettingsClients.size === 0) {
+    return;
+  }
+
+  const payload = JSON.stringify(serializeDisplaySettings(settings));
+  for (const [clientId, client] of Array.from(displaySettingsClients.entries())) {
+    try {
+      client.res.write(`event: ${DISPLAY_SETTINGS_EVENT}\n`);
+      client.res.write(`data: ${payload}\n\n`);
+    } catch (error) {
+      console.error(`❌ SSE display-settings error for client ${clientId}:`, error);
+      client.res.end();
+      clearInterval(client.heartbeat);
+      displaySettingsClients.delete(clientId);
+    }
+  }
+};
+
 function hashPassword(password: string): Promise<string> {
   return new Promise((resolve, reject) => {
     const salt = crypto.randomBytes(16).toString('hex');
@@ -411,6 +464,90 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       res.json({ success: true });
     });
+  });
+
+  app.get('/api/display-settings', async (_req: Request, res: Response) => {
+    try {
+      const settings = await storage.getDisplaySettings();
+      res.json({
+        success: true,
+        settings: serializeDisplaySettings(settings),
+      });
+    } catch (error) {
+      console.error('❌ Erro ao obter configurações de exibição:', error);
+      res.status(500).json({
+        success: false,
+        message: 'Não foi possível carregar as configurações de exibição.',
+      });
+    }
+  });
+
+  app.put('/api/display-settings', async (req: Request, res: Response) => {
+    try {
+      const payload = updateDisplaySettingsSchema.parse(req.body ?? {});
+
+      if (Object.keys(payload).length === 0) {
+        res.status(400).json({
+          success: false,
+          message: 'Nenhuma configuração foi informada para atualização.',
+        });
+        return;
+      }
+
+      const updated = await storage.updateDisplaySettings(payload);
+      const serialized = serializeDisplaySettings(updated);
+      broadcastDisplaySettings(updated);
+      res.json({ success: true, settings: serialized });
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        res.status(400).json({
+          success: false,
+          message: 'Dados inválidos para atualização das configurações.',
+          issues: error.errors,
+        });
+        return;
+      }
+
+      console.error('❌ Erro ao atualizar configurações de exibição:', error);
+      res.status(500).json({
+        success: false,
+        message: 'Não foi possível atualizar as configurações de exibição.',
+      });
+    }
+  });
+
+  app.get('/api/display-settings/events', async (req: Request, res: Response) => {
+    res.setHeader('Content-Type', 'text/event-stream');
+    res.setHeader('Cache-Control', 'no-cache');
+    res.setHeader('Connection', 'keep-alive');
+    if (typeof res.flushHeaders === 'function') {
+      res.flushHeaders();
+    }
+
+    const clientId = crypto.randomUUID();
+    const heartbeat = setInterval(() => {
+      if (!res.writableEnded) {
+        res.write(': heartbeat\n\n');
+      }
+    }, DISPLAY_SETTINGS_HEARTBEAT_INTERVAL);
+
+    displaySettingsClients.set(clientId, { res, heartbeat });
+
+    req.on('close', () => {
+      clearInterval(heartbeat);
+      displaySettingsClients.delete(clientId);
+    });
+
+    try {
+      const settings = await storage.getDisplaySettings();
+      const payload = JSON.stringify(serializeDisplaySettings(settings));
+      res.write(`event: ${DISPLAY_SETTINGS_EVENT}\n`);
+      res.write(`data: ${payload}\n\n`);
+    } catch (error) {
+      console.error('❌ Erro ao enviar configurações iniciais via SSE:', error);
+      res.write(`event: ${DISPLAY_SETTINGS_EVENT}\n`);
+      res.write(`data: ${JSON.stringify({ error: 'failed-to-load' })}\n\n`);
+    }
   });
 
   // Create uploads directory if it doesn't exist

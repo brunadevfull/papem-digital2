@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, ReactNode, useEffect, useRef } from "react";
+import React, { createContext, useContext, useState, ReactNode, useEffect, useRef, useCallback } from "react";
 import { resolveBackendUrl } from "@/utils/backend";
 
 export interface Notice {
@@ -28,6 +28,106 @@ export interface PDFDocument {
 type AddDocumentOptions = {
   persist?: boolean;
 };
+
+type ScrollSpeed = "slow" | "normal" | "fast";
+
+interface DisplaySettingsState {
+  scrollSpeed: ScrollSpeed;
+  escalaAlternateInterval: number;
+  cardapioAlternateInterval: number;
+  autoRestartDelay: number;
+  globalZoom: number;
+  plasaZoom: number;
+  escalaZoom: number;
+  cardapioZoom: number;
+}
+
+const DISPLAY_SETTINGS_EVENT_NAME = "display-settings:update";
+
+const DEFAULT_DISPLAY_SETTINGS: DisplaySettingsState = {
+  scrollSpeed: "normal",
+  escalaAlternateInterval: 30000,
+  cardapioAlternateInterval: 30000,
+  autoRestartDelay: 3,
+  globalZoom: 1,
+  plasaZoom: 1,
+  escalaZoom: 1,
+  cardapioZoom: 1,
+};
+
+const isValidScrollSpeed = (value: unknown): value is ScrollSpeed =>
+  value === "slow" || value === "normal" || value === "fast";
+
+const toFiniteNumber = (value: unknown): number | undefined => {
+  if (typeof value === "number" && Number.isFinite(value)) {
+    return value;
+  }
+
+  if (typeof value === "string") {
+    const trimmed = value.trim();
+    if (!trimmed) {
+      return undefined;
+    }
+    const parsed = Number(trimmed);
+    if (Number.isFinite(parsed)) {
+      return parsed;
+    }
+  }
+
+  return undefined;
+};
+
+const normalizeDisplaySettingsPayload = (
+  raw: unknown,
+): Partial<DisplaySettingsState> | null => {
+  if (!raw || typeof raw !== "object") {
+    return null;
+  }
+
+  const record = raw as Record<string, unknown>;
+  const normalized: Partial<DisplaySettingsState> = {};
+
+  if (isValidScrollSpeed(record.scrollSpeed)) {
+    normalized.scrollSpeed = record.scrollSpeed;
+  }
+
+  const escalaInterval = toFiniteNumber(record.escalaAlternateInterval);
+  if (typeof escalaInterval === "number" && escalaInterval >= 0) {
+    normalized.escalaAlternateInterval = escalaInterval;
+  }
+
+  const cardapioInterval = toFiniteNumber(record.cardapioAlternateInterval);
+  if (typeof cardapioInterval === "number" && cardapioInterval >= 0) {
+    normalized.cardapioAlternateInterval = cardapioInterval;
+  }
+
+  const autoRestart = toFiniteNumber(record.autoRestartDelay);
+  if (typeof autoRestart === "number" && autoRestart >= 0) {
+    normalized.autoRestartDelay = Math.round(autoRestart);
+  }
+
+  const globalZoom = toFiniteNumber(record.globalZoom);
+  if (typeof globalZoom === "number" && globalZoom > 0) {
+    normalized.globalZoom = globalZoom;
+  }
+
+  const plasaZoom = toFiniteNumber(record.plasaZoom);
+  if (typeof plasaZoom === "number" && plasaZoom > 0) {
+    normalized.plasaZoom = plasaZoom;
+  }
+
+  const escalaZoom = toFiniteNumber(record.escalaZoom);
+  if (typeof escalaZoom === "number" && escalaZoom > 0) {
+    normalized.escalaZoom = escalaZoom;
+  }
+
+  const cardapioZoom = toFiniteNumber(record.cardapioZoom);
+  if (typeof cardapioZoom === "number" && cardapioZoom > 0) {
+    normalized.cardapioZoom = cardapioZoom;
+  }
+
+  return Object.keys(normalized).length > 0 ? normalized : null;
+};
 interface DisplayContextType {
   notices: Notice[];
   plasaDocuments: PDFDocument[];
@@ -40,8 +140,12 @@ interface DisplayContextType {
   currentCardapioIndex: number; // ✅ Adicionar
   escalaAlternateInterval: number;
   cardapioAlternateInterval: number;
-  scrollSpeed: "slow" | "normal" | "fast";
+  scrollSpeed: ScrollSpeed;
   autoRestartDelay: number;
+  globalZoom: number;
+  plasaZoom: number;
+  escalaZoom: number;
+  cardapioZoom: number;
   isLoading: boolean;
   addNotice: (notice: Omit<Notice, "id" | "createdAt" | "updatedAt">) => Promise<boolean>;
   updateNotice: (notice: Notice) => Promise<boolean>;
@@ -51,8 +155,12 @@ interface DisplayContextType {
   deleteDocument: (id: string) => void;
   setEscalaAlternateInterval: (interval: number) => void;
   setCardapioAlternateInterval: (interval: number) => void;
-  setScrollSpeed: (speed: "slow" | "normal" | "fast") => void;
+  setScrollSpeed: (speed: ScrollSpeed) => void;
   setAutoRestartDelay: (delay: number) => void;
+  setGlobalZoom: (zoom: number) => void;
+  setPlasaZoom: (zoom: number) => void;
+  setEscalaZoom: (zoom: number) => void;
+  setCardapioZoom: (zoom: number) => void;
   refreshNotices: () => Promise<void>;
   handleScrollComplete: () => void;
 }
@@ -80,10 +188,18 @@ export const DisplayProvider: React.FC<DisplayProviderProps> = ({ children }) =>
   const [currentEscalaIndex, setCurrentEscalaIndex] = useState(0);
   const [currentCardapioIndex, setCurrentCardapioIndex] = useState(0); // ✅ ADICIONAR
   const cardapioTimerRef = useRef<NodeJS.Timeout | null>(null); // ✅ ADICIONAR
-  const [escalaAlternateInterval, setEscalaAlternateInterval] = useState(30000);
-  const [cardapioAlternateInterval, setCardapioAlternateInterval] = useState(30000);
-  const [scrollSpeed, setScrollSpeed] = useState<"slow" | "normal" | "fast">("normal");
-  const [autoRestartDelay, setAutoRestartDelay] = useState(3);
+  const [escalaAlternateInterval, setEscalaAlternateInterval] = useState(
+    DEFAULT_DISPLAY_SETTINGS.escalaAlternateInterval,
+  );
+  const [cardapioAlternateInterval, setCardapioAlternateInterval] = useState(
+    DEFAULT_DISPLAY_SETTINGS.cardapioAlternateInterval,
+  );
+  const [scrollSpeed, setScrollSpeed] = useState<ScrollSpeed>(DEFAULT_DISPLAY_SETTINGS.scrollSpeed);
+  const [autoRestartDelay, setAutoRestartDelay] = useState(DEFAULT_DISPLAY_SETTINGS.autoRestartDelay);
+  const [globalZoom, setGlobalZoom] = useState(DEFAULT_DISPLAY_SETTINGS.globalZoom);
+  const [plasaZoom, setPlasaZoom] = useState(DEFAULT_DISPLAY_SETTINGS.plasaZoom);
+  const [escalaZoom, setEscalaZoom] = useState(DEFAULT_DISPLAY_SETTINGS.escalaZoom);
+  const [cardapioZoom, setCardapioZoom] = useState(DEFAULT_DISPLAY_SETTINGS.cardapioZoom);
   const [isLoading, setIsLoading] = useState(false);
 
   // Ref para o timer de alternância
@@ -98,7 +214,7 @@ export const DisplayProvider: React.FC<DisplayProviderProps> = ({ children }) =>
   };
 
   // CORREÇÃO: Função para obter URL completa do backend - DETECTAR AMBIENTE
-  const getBackendUrl = (path: string): string => resolveBackendUrl(path);
+  const getBackendUrl = useCallback((path: string): string => resolveBackendUrl(path), []);
 
   // Função utilitária para tratar tags dos documentos
   const normalizeDocumentTags = (input: {
@@ -148,6 +264,181 @@ export const DisplayProvider: React.FC<DisplayProviderProps> = ({ children }) =>
 
     return baseTags;
   };
+
+  const applyDisplaySettings = useCallback(
+    (raw: unknown) => {
+      const normalized = normalizeDisplaySettingsPayload(raw);
+      if (!normalized) {
+        return;
+      }
+
+      if (normalized.scrollSpeed) {
+        setScrollSpeed(normalized.scrollSpeed);
+      }
+
+      if (typeof normalized.escalaAlternateInterval === "number") {
+        setEscalaAlternateInterval(normalized.escalaAlternateInterval);
+      }
+
+      if (typeof normalized.cardapioAlternateInterval === "number") {
+        setCardapioAlternateInterval(normalized.cardapioAlternateInterval);
+      }
+
+      if (typeof normalized.autoRestartDelay === "number") {
+        setAutoRestartDelay(normalized.autoRestartDelay);
+      }
+
+      if (typeof normalized.globalZoom === "number") {
+        setGlobalZoom(normalized.globalZoom);
+      }
+
+      if (typeof normalized.plasaZoom === "number") {
+        setPlasaZoom(normalized.plasaZoom);
+      }
+
+      if (typeof normalized.escalaZoom === "number") {
+        setEscalaZoom(normalized.escalaZoom);
+      }
+
+      if (typeof normalized.cardapioZoom === "number") {
+        setCardapioZoom(normalized.cardapioZoom);
+      }
+    },
+    [
+      setScrollSpeed,
+      setEscalaAlternateInterval,
+      setCardapioAlternateInterval,
+      setAutoRestartDelay,
+      setGlobalZoom,
+      setPlasaZoom,
+      setEscalaZoom,
+      setCardapioZoom,
+    ],
+  );
+
+  const loadDisplaySettings = useCallback(
+    async (signal?: AbortSignal) => {
+      try {
+        const response = await fetch(getBackendUrl('/api/display-settings'), {
+          method: 'GET',
+          credentials: 'include',
+          signal,
+        });
+
+        if (!response.ok) {
+          throw new Error(`HTTP ${response.status}`);
+        }
+
+        const data = await response.json().catch(() => null);
+        if (signal?.aborted) {
+          return;
+        }
+
+        const payload = data?.settings ?? data;
+        applyDisplaySettings(payload);
+      } catch (error) {
+        if (signal?.aborted) {
+          return;
+        }
+
+        console.warn('⚠️ Falha ao carregar configurações de exibição:', error);
+      }
+    },
+    [applyDisplaySettings, getBackendUrl],
+  );
+
+  useEffect(() => {
+    const controller = new AbortController();
+    void loadDisplaySettings(controller.signal);
+
+    return () => {
+      controller.abort();
+    };
+  }, [loadDisplaySettings]);
+
+  useEffect(() => {
+    if (typeof window === 'undefined') {
+      return;
+    }
+
+    let eventSource: EventSource | null = null;
+    let reconnectTimer: number | null = null;
+
+    const handleUpdate = (event: MessageEvent<string>) => {
+      try {
+        if (!event.data) {
+          return;
+        }
+
+        const parsed = JSON.parse(event.data) as Record<string, unknown> | null;
+        if (!parsed) {
+          return;
+        }
+
+        if ('error' in parsed) {
+          void loadDisplaySettings();
+          return;
+        }
+
+        applyDisplaySettings(parsed);
+      } catch (error) {
+        console.warn('⚠️ Erro ao processar evento SSE de configurações:', error);
+      }
+    };
+
+    const connect = () => {
+      if (eventSource) {
+        eventSource.removeEventListener(
+          DISPLAY_SETTINGS_EVENT_NAME,
+          handleUpdate as EventListener,
+        );
+        eventSource.close();
+      }
+
+      const source = new EventSource(getBackendUrl('/api/display-settings/events'), {
+        withCredentials: true,
+      });
+
+      eventSource = source;
+      source.addEventListener(
+        DISPLAY_SETTINGS_EVENT_NAME,
+        handleUpdate as EventListener,
+      );
+
+      source.onerror = () => {
+        source.removeEventListener(
+          DISPLAY_SETTINGS_EVENT_NAME,
+          handleUpdate as EventListener,
+        );
+        source.close();
+
+        if (reconnectTimer !== null) {
+          window.clearTimeout(reconnectTimer);
+        }
+
+        reconnectTimer = window.setTimeout(() => {
+          connect();
+          void loadDisplaySettings();
+        }, 5000);
+      };
+    };
+
+    connect();
+
+    return () => {
+      if (eventSource) {
+        eventSource.removeEventListener(
+          DISPLAY_SETTINGS_EVENT_NAME,
+          handleUpdate as EventListener,
+        );
+        eventSource.close();
+      }
+
+      if (reconnectTimer !== null) {
+        window.clearTimeout(reconnectTimer);
+      }
+    };
+  }, [applyDisplaySettings, getBackendUrl, loadDisplaySettings]);
 
   const persistDocumentMetadata = async (
     document: Omit<PDFDocument, "id" | "uploadDate"> & { url: string }
@@ -1177,18 +1468,6 @@ useEffect(() => {
             if (typeof data.currentCardapioIndex === 'number') {
               setCurrentCardapioIndex(data.currentCardapioIndex);
             }
-            if (data.escalaAlternateInterval) {
-              setEscalaAlternateInterval(data.escalaAlternateInterval);
-            }
-            if (data.cardapioAlternateInterval) {
-              setCardapioAlternateInterval(data.cardapioAlternateInterval);
-            }
-            if (data.documentAlternateInterval && !data.escalaAlternateInterval && !data.cardapioAlternateInterval) {
-              setEscalaAlternateInterval(data.documentAlternateInterval);
-              setCardapioAlternateInterval(data.documentAlternateInterval);
-            }
-            if (data.scrollSpeed) setScrollSpeed(data.scrollSpeed);
-            if (data.autoRestartDelay) setAutoRestartDelay(data.autoRestartDelay);
           } catch (parseError) {
             console.warn("⚠️ Erro ao processar localStorage:", parseError);
             localStorage.removeItem('display-context');
@@ -1253,6 +1532,10 @@ const value: DisplayContextType = {
   cardapioAlternateInterval,
   scrollSpeed,
   autoRestartDelay,
+  globalZoom,
+  plasaZoom,
+  escalaZoom,
+  cardapioZoom,
   isLoading,
   addNotice,
   updateNotice,
@@ -1264,6 +1547,10 @@ const value: DisplayContextType = {
   setCardapioAlternateInterval,
   setScrollSpeed,
   setAutoRestartDelay,
+  setGlobalZoom,
+  setPlasaZoom,
+  setEscalaZoom,
+  setCardapioZoom,
   refreshNotices,
   handleScrollComplete,
 };

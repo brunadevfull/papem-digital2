@@ -1,5 +1,5 @@
 import { sql } from "drizzle-orm";
-import { pgTable, text, serial, boolean, timestamp } from "drizzle-orm/pg-core";
+import { pgTable, text, serial, boolean, timestamp, integer, doublePrecision } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 
@@ -52,6 +52,22 @@ export const dutyAssignments = pgTable("duty_assignments", {
   masterName: text("master_name").notNull(),
   masterRank: text("master_rank").$type<string | null>(),
   validFrom: timestamp("valid_from").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+});
+
+export const displaySettings = pgTable("display_settings", {
+  id: serial("id").primaryKey(),
+  scrollSpeed: text("scroll_speed")
+    .notNull()
+    .$type<"slow" | "normal" | "fast">()
+    .default("normal"),
+  escalaAlternateInterval: integer("escala_alternate_interval").notNull().default(30000),
+  cardapioAlternateInterval: integer("cardapio_alternate_interval").notNull().default(30000),
+  autoRestartDelay: integer("auto_restart_delay").notNull().default(3),
+  globalZoom: doublePrecision("global_zoom").notNull().default(1),
+  plasaZoom: doublePrecision("plasa_zoom").notNull().default(1),
+  escalaZoom: doublePrecision("escala_zoom").notNull().default(1),
+  cardapioZoom: doublePrecision("cardapio_zoom").notNull().default(1),
   updatedAt: timestamp("updated_at").notNull().defaultNow(),
 });
 
@@ -156,3 +172,31 @@ export type DutyOfficers = {
 };
 export type MilitaryPersonnel = typeof militaryPersonnel.$inferSelect;
 export type InsertMilitaryPersonnel = z.infer<typeof insertMilitaryPersonnelSchema>;
+export type DisplaySettings = typeof displaySettings.$inferSelect;
+export type InsertDisplaySettings = typeof displaySettings.$inferInsert;
+export type DisplaySettingsPayload = Omit<DisplaySettings, "id" | "updatedAt">;
+
+const displaySettingsBaseSchema = z.object({
+  scrollSpeed: z.enum(["slow", "normal", "fast"]).default("normal"),
+  escalaAlternateInterval: z.number().int().nonnegative().default(30000),
+  cardapioAlternateInterval: z.number().int().nonnegative().default(30000),
+  autoRestartDelay: z.number().int().nonnegative().default(3),
+  globalZoom: z.number().positive().default(1),
+  plasaZoom: z.number().positive().default(1),
+  escalaZoom: z.number().positive().default(1),
+  cardapioZoom: z.number().positive().default(1),
+});
+
+export const displaySettingsSchema = displaySettingsBaseSchema;
+export const updateDisplaySettingsSchema = displaySettingsBaseSchema.partial();
+
+export const defaultDisplaySettings: DisplaySettingsPayload = {
+  scrollSpeed: "normal",
+  escalaAlternateInterval: 30000,
+  cardapioAlternateInterval: 30000,
+  autoRestartDelay: 3,
+  globalZoom: 1,
+  plasaZoom: 1,
+  escalaZoom: 1,
+  cardapioZoom: 1,
+};
