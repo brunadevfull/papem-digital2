@@ -377,7 +377,9 @@ const PDFViewer: React.FC<PDFViewerProps> = ({
     docId: string | null,
     groupId: string | null
   ): number => {
-    const contextKeys = [docId, groupId].filter((key): key is string => typeof key === 'string' && key.length > 0);
+    // CORREÇÃO: Priorizar groupId (tipo/categoria) ao buscar no contexto
+    // Exemplo: buscar "escala-oficial" antes de "escala-doc-123"
+    const contextKeys = [groupId, docId].filter((key): key is string => typeof key === 'string' && key.length > 0);
 
     for (const key of contextKeys) {
       const contextState = documentViewStates[key];
@@ -403,7 +405,9 @@ const PDFViewer: React.FC<PDFViewerProps> = ({
     const storageKey = groupId ?? docId;
     const fallback = storageKey ? loadScrollFromLocalStorage(storageKey) : { scrollTop: 0, scrollLeft: 0 };
 
-    const contextKeys = [docId, groupId].filter((key): key is string => typeof key === 'string' && key.length > 0);
+    // CORREÇÃO: Priorizar groupId (tipo/categoria) ao buscar no contexto
+    // Exemplo: buscar "cardapio-1DN" antes de "cardapio-doc-456"
+    const contextKeys = [groupId, docId].filter((key): key is string => typeof key === 'string' && key.length > 0);
     for (const key of contextKeys) {
       const contextState = documentViewStates[key];
       if (!contextState) {
@@ -434,7 +438,9 @@ const PDFViewer: React.FC<PDFViewerProps> = ({
   ): Promise<boolean> => {
     const endpoint = resolveBackendUrl('/api/documents/view-state');
 
-    const targetId = docId ?? groupId;
+    // CORREÇÃO: Usar groupId primeiro (tipo/categoria) ao invés de docId individual
+    // Exemplo: "escala-oficial", "cardapio-1DN" ao invés de "escala-doc-123"
+    const targetId = groupId ?? docId;
     if (!targetId) {
       console.warn('⚠️ Nenhum identificador válido para persistir estado de visualização');
       return false;
