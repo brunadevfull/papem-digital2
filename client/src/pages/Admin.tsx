@@ -130,6 +130,10 @@ const Admin: React.FC = () => {
     setScrollSpeed,
     autoRestartDelay,
     setAutoRestartDelay,
+    setGlobalZoom,
+    setPlasaZoom,
+    setEscalaZoom,
+    setCardapioZoom,
     isLoading
   } = useDisplay();
   
@@ -142,6 +146,7 @@ const Admin: React.FC = () => {
   const [loginForm, setLoginForm] = useState({ username: "admin", password: "" });
   const [loginError, setLoginError] = useState<string | null>(null);
   const [isLoggingIn, setIsLoggingIn] = useState(false);
+  const [isSavingDisplaySettings, setIsSavingDisplaySettings] = useState(false);
 
 
   useEffect(() => {
@@ -778,7 +783,127 @@ const saveEditOfficer = async () => {
   const fetchBackend = (path: string, init?: RequestInit) => {
     return authorizedFetch(getBackendUrl(path), init);
   };
-  
+
+  const isServerScrollSpeed = (value: unknown): value is "slow" | "normal" | "fast" =>
+    value === "slow" || value === "normal" || value === "fast";
+
+  const toFiniteNumber = (value: unknown): number | undefined => {
+    if (typeof value === "number" && Number.isFinite(value)) {
+      return value;
+    }
+
+    if (typeof value === "string") {
+      const parsed = Number(value);
+      if (Number.isFinite(parsed)) {
+        return parsed;
+      }
+    }
+
+    return undefined;
+  };
+
+  const applyDisplaySettingsFromServer = (raw: unknown) => {
+    if (!raw || typeof raw !== 'object') {
+      return;
+    }
+
+    const record = raw as Record<string, unknown>;
+
+    if (isServerScrollSpeed(record.scrollSpeed)) {
+      setScrollSpeed(record.scrollSpeed);
+    }
+
+    const escalaInterval = toFiniteNumber(record.escalaAlternateInterval);
+    if (typeof escalaInterval === 'number') {
+      setEscalaAlternateInterval(escalaInterval);
+    }
+
+    const cardapioInterval = toFiniteNumber(record.cardapioAlternateInterval);
+    if (typeof cardapioInterval === 'number') {
+      setCardapioAlternateInterval(cardapioInterval);
+    }
+
+    const autoRestart = toFiniteNumber(record.autoRestartDelay);
+    if (typeof autoRestart === 'number') {
+      setAutoRestartDelay(Math.round(autoRestart));
+    }
+
+    const globalZoomValue = toFiniteNumber(record.globalZoom);
+    if (typeof globalZoomValue === 'number' && globalZoomValue > 0) {
+      setGlobalZoom(globalZoomValue);
+    }
+
+    const plasaZoomValue = toFiniteNumber(record.plasaZoom);
+    if (typeof plasaZoomValue === 'number' && plasaZoomValue > 0) {
+      setPlasaZoom(plasaZoomValue);
+    }
+
+    const escalaZoomValue = toFiniteNumber(record.escalaZoom);
+    if (typeof escalaZoomValue === 'number' && escalaZoomValue > 0) {
+      setEscalaZoom(escalaZoomValue);
+    }
+
+    const cardapioZoomValue = toFiniteNumber(record.cardapioZoom);
+    if (typeof cardapioZoomValue === 'number' && cardapioZoomValue > 0) {
+      setCardapioZoom(cardapioZoomValue);
+    }
+  };
+
+  const persistDisplaySettings = async (
+    update: Record<string, unknown>,
+    messages: { successTitle: string; successDescription?: string }
+  ): Promise<boolean> => {
+    setIsSavingDisplaySettings(true);
+    try {
+      const response = await fetchBackend('/api/display-settings', {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(update),
+      });
+
+      const data = await response.json().catch(() => null);
+
+      if (!response.ok || !data?.success) {
+        const message =
+          typeof data?.message === 'string'
+            ? data.message
+            : 'Não foi possível atualizar as configurações.';
+        throw new Error(message);
+      }
+
+      if (!data.settings || typeof data.settings !== 'object') {
+        throw new Error('Resposta inválida do servidor ao atualizar configurações.');
+      }
+
+      applyDisplaySettingsFromServer(data.settings);
+
+      toast({
+        title: messages.successTitle,
+        description: messages.successDescription,
+      });
+
+      return true;
+    } catch (error) {
+      const description = handleAsyncError(
+        error,
+        'Não foi possível atualizar as configurações.',
+      );
+
+      toast({
+        title: 'Erro ao atualizar configurações',
+        description,
+        variant: 'destructive',
+      });
+
+      console.error('❌ Erro ao atualizar configurações de exibição:', error);
+      return false;
+    } finally {
+      setIsSavingDisplaySettings(false);
+    }
+  };
+
   // Função para verificar status do servidor
   const checkServerStatus = async () => {
     try {
@@ -1336,7 +1461,7 @@ const handleDocumentSubmit = async (e: React.FormEvent) => {
     min = 10,
     max = 300
   ) => {
-    const value = parseInt(e.target.value);
+    const value = parseInt(e.target.value, 10);
     if (Number.isNaN(value)) {
       return;
     }
@@ -1350,11 +1475,13 @@ const handleDocumentSubmit = async (e: React.FormEvent) => {
       return;
     }
 
-    setEscalaAlternateInterval(value * 1000);
-    toast({
-      title: "Intervalo de escalas atualizado",
-      description: `Escalas agora alternam a cada ${value} segundos.`
-    });
+    void persistDisplaySettings(
+      { escalaAlternateInterval: value * 1000 },
+      {
+        successTitle: "Intervalo de escalas atualizado",
+        successDescription: `Escalas agora alternam a cada ${value} segundos.`,
+      }
+    );
   };
 
   const handleCardapioIntervalChange = (
@@ -1362,7 +1489,7 @@ const handleDocumentSubmit = async (e: React.FormEvent) => {
     min = 10,
     max = 300
   ) => {
-    const value = parseInt(e.target.value);
+    const value = parseInt(e.target.value, 10);
     if (Number.isNaN(value)) {
       return;
     }
@@ -1376,33 +1503,59 @@ const handleDocumentSubmit = async (e: React.FormEvent) => {
       return;
     }
 
-    setCardapioAlternateInterval(value * 1000);
-    toast({
-      title: "Intervalo de cardápios atualizado",
-      description: `Cardápios agora alternam a cada ${value} segundos.`
-    });
+    void persistDisplaySettings(
+      { cardapioAlternateInterval: value * 1000 },
+      {
+        successTitle: "Intervalo de cardápios atualizado",
+        successDescription: `Cardápios agora alternam a cada ${value} segundos.`,
+      }
+    );
   };
 
   const handleScrollSpeedChange = (value: string) => {
-    setScrollSpeed(value as "slow" | "normal" | "fast");
-    toast({
-      title: "Velocidade atualizada",
-      description: `Velocidade de rolagem do PLASA definida como: ${
-        value === "slow" ? "Lenta" : 
-        value === "normal" ? "Normal" : "Rápida"
-      }`
-    });
+    if (!isServerScrollSpeed(value)) {
+      toast({
+        title: "Valor inválido",
+        description: 'Selecione uma velocidade válida para rolagem.',
+        variant: 'destructive',
+      });
+      return;
+    }
+
+    const label =
+      value === 'slow' ? 'Lenta' : value === 'normal' ? 'Normal' : 'Rápida';
+
+    void persistDisplaySettings(
+      { scrollSpeed: value },
+      {
+        successTitle: 'Velocidade atualizada',
+        successDescription: `Velocidade de rolagem do PLASA definida como: ${label}`,
+      },
+    );
   };
 
   const handleAutoRestartChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = parseInt(e.target.value);
-    if (value >= 2 && value <= 10) {
-      setAutoRestartDelay(value);
-      toast({
-        title: "Intervalo de reinício atualizado",
-        description: `PLASA aguardará ${value} segundos no final antes de reiniciar.`
-      });
+    const value = parseInt(e.target.value, 10);
+    if (Number.isNaN(value)) {
+      return;
     }
+
+    if (value < 2 || value > 10) {
+      toast({
+        title: 'Valor inválido',
+        description: 'Informe um valor entre 2 e 10 segundos para reinício automático.',
+        variant: 'destructive',
+      });
+      return;
+    }
+
+    void persistDisplaySettings(
+      { autoRestartDelay: value },
+      {
+        successTitle: 'Intervalo de reinício atualizado',
+        successDescription: `PLASA aguardará ${value} segundos no final antes de reiniciar.`,
+      },
+    );
   };
 
  
@@ -2351,7 +2504,11 @@ const handleDocumentSubmit = async (e: React.FormEvent) => {
                           🏃‍♂️ Velocidade de Rolagem do PLASA
                         </Label>
                         <div className="flex items-center space-x-2">
-                          <Select value={scrollSpeed} onValueChange={handleScrollSpeedChange}>
+                          <Select
+                            value={scrollSpeed}
+                            onValueChange={handleScrollSpeedChange}
+                            disabled={isSavingDisplaySettings}
+                          >
                             <SelectTrigger className="w-32">
                               <SelectValue placeholder="Velocidade" />
                             </SelectTrigger>
@@ -2397,6 +2554,7 @@ const handleDocumentSubmit = async (e: React.FormEvent) => {
                               className="w-24"
                               value={Math.floor(escalaAlternateInterval / 1000)}
                               onChange={e => handleEscalaIntervalChange(e, 5, 60)}
+                              disabled={isSavingDisplaySettings}
                             />
                             <span className="text-sm text-muted-foreground">segundos</span>
                           </div>
@@ -2433,6 +2591,7 @@ const handleDocumentSubmit = async (e: React.FormEvent) => {
                               className="w-24"
                               value={Math.floor(cardapioAlternateInterval / 1000)}
                               onChange={e => handleCardapioIntervalChange(e, 5, 60)}
+                              disabled={isSavingDisplaySettings}
                             />
                             <span className="text-sm text-muted-foreground">segundos</span>
                           </div>
@@ -2454,14 +2613,15 @@ const handleDocumentSubmit = async (e: React.FormEvent) => {
                           🔄 Reinício Automático do PLASA
                         </Label>
                         <div className="flex items-center space-x-2">
-                          <Input 
-                            id="autoRestart" 
-                            type="number" 
-                            min="2" 
-                            max="10" 
+                          <Input
+                            id="autoRestart"
+                            type="number"
+                            min="2"
+                            max="10"
                             className="w-24"
                             value={autoRestartDelay}
                             onChange={handleAutoRestartChange}
+                            disabled={isSavingDisplaySettings}
                           />
                           <span className="text-sm text-muted-foreground">segundos no final</span>
                         </div>
@@ -2707,7 +2867,11 @@ const handleDocumentSubmit = async (e: React.FormEvent) => {
                       🏃‍♂️ Velocidade de Rolagem do PLASA
                     </Label>
                     <div className="flex items-center space-x-2">
-                      <Select value={scrollSpeed} onValueChange={handleScrollSpeedChange}>
+                      <Select
+                        value={scrollSpeed}
+                        onValueChange={handleScrollSpeedChange}
+                        disabled={isSavingDisplaySettings}
+                      >
                         <SelectTrigger className="w-32">
                           <SelectValue placeholder="Velocidade" />
                         </SelectTrigger>
@@ -2752,6 +2916,7 @@ const handleDocumentSubmit = async (e: React.FormEvent) => {
                           className="w-24"
                           value={escalaAlternateInterval / 1000}
                           onChange={e => handleEscalaIntervalChange(e, 10, 300)}
+                          disabled={isSavingDisplaySettings}
                         />
                         <span className="text-sm text-muted-foreground">segundos</span>
                       </div>
@@ -2787,6 +2952,7 @@ const handleDocumentSubmit = async (e: React.FormEvent) => {
                           className="w-24"
                           value={cardapioAlternateInterval / 1000}
                           onChange={e => handleCardapioIntervalChange(e, 10, 300)}
+                          disabled={isSavingDisplaySettings}
                         />
                         <span className="text-sm text-muted-foreground">segundos</span>
                       </div>
@@ -2801,14 +2967,15 @@ const handleDocumentSubmit = async (e: React.FormEvent) => {
                       🔄 Reinício Automático do PLASA
                     </Label>
                     <div className="flex items-center space-x-2">
-                      <Input 
-                        id="autoRestart" 
-                        type="number" 
-                        min="2" 
-                        max="10" 
+                      <Input
+                        id="autoRestart"
+                        type="number"
+                        min="2"
+                        max="10"
                         className="w-24"
                         value={autoRestartDelay}
                         onChange={handleAutoRestartChange}
+                        disabled={isSavingDisplaySettings}
                       />
                       <span className="text-sm text-muted-foreground">segundos no final</span>
                     </div>
