@@ -393,6 +393,56 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Executar migrations do banco de dados
   await storage.runMigrations();
 
+  // ✅ NOVO: Inicializar viewStates padrão no startup
+  const initializeViewStates = async () => {
+    try {
+      console.log('📊 Inicializando viewStates...');
+
+      // Carregar estados do banco de dados
+      const dbStates = await storage.getAllDocumentViewStates();
+      console.log('📊 Estados carregados do banco:', Object.keys(dbStates).length, 'documentos');
+
+      // Atualizar cache em memória com dados do banco
+      for (const [docId, state] of Object.entries(dbStates)) {
+        documentViewStates.set(docId, state);
+        console.log(`  ✅ Carregado do banco: ${docId}`);
+      }
+
+      // Inicializar viewStates padrão para IDs lógicos se não existirem
+      const defaultViewState = {
+        zoom: 1,
+        scrollTop: 0,
+        scrollLeft: 0,
+        updatedAt: new Date().toISOString(),
+      };
+
+      const logicalDocIds = [
+        'escala-oficial',
+        'escala-praca',
+        'cardapio-EAGM',
+        'cardapio-1DN',
+      ];
+
+      for (const logicalId of logicalDocIds) {
+        if (!documentViewStates.has(logicalId)) {
+          documentViewStates.set(logicalId, defaultViewState);
+          // Também salvar no banco de dados
+          await storage.setDocumentViewState(logicalId, 1, 0, 0);
+          console.log(`📊 Inicializado viewState padrão para: ${logicalId}`);
+        } else {
+          console.log(`✅ Estado já existe para: ${logicalId}`);
+        }
+      }
+
+      console.log('📊 Total de viewStates inicializados:', documentViewStates.size);
+      console.log('📊 IDs disponíveis:', Array.from(documentViewStates.keys()));
+    } catch (error) {
+      console.error('❌ Erro ao inicializar viewStates:', error);
+    }
+  };
+
+  await initializeViewStates();
+
   const dutyOfficerSubscribers = new Set<Response>();
 
   type DutyOfficersSseEvent = {
@@ -2005,43 +2055,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       documentSubscribers.add(res);
 
-      // ✅ CORREÇÃO: Carregar estados do banco de dados antes de enviar snapshot
-      const dbStates = await storage.getAllDocumentViewStates();
-      console.log('📊 SSE: Estados carregados do banco:', Object.keys(dbStates).length, 'documentos');
-      console.log('📊 SSE: IDs no banco:', Object.keys(dbStates));
-
-      // Atualizar cache em memória com dados do banco
-      for (const [docId, state] of Object.entries(dbStates)) {
-        documentViewStates.set(docId, state);
-        console.log(`  ✅ Carregado do banco: ${docId}`, state);
-      }
-
-      // ✅ NOVO: Inicializar viewStates padrão para IDs lógicos se não existirem
-      const defaultViewState = {
-        zoom: 1,
-        scrollTop: 0,
-        scrollLeft: 0,
-        updatedAt: new Date().toISOString(),
-      };
-
-      const logicalDocIds = [
-        'escala-oficial',
-        'escala-praca',
-        'cardapio-EAGM',
-        'cardapio-1DN',
-      ];
-
-      for (const logicalId of logicalDocIds) {
-        if (!documentViewStates.has(logicalId)) {
-          documentViewStates.set(logicalId, defaultViewState);
-          console.log(`📊 Inicializado viewState padrão para: ${logicalId}`);
-        } else {
-          console.log(`✅ Estado já existe para: ${logicalId}`);
-        }
-      }
-
-      console.log('📊 SSE: Total de viewStates a enviar:', documentViewStates.size);
-      console.log('📊 SSE: IDs finais:', Array.from(documentViewStates.keys()));
+      // ✅ CORREÇÃO: Enviar snapshot com viewStates já inicializados
+      console.log('📊 SSE: Enviando snapshot com', documentViewStates.size, 'viewStates');
+      console.log('📊 SSE: IDs disponíveis:', Array.from(documentViewStates.keys()));
 
       const snapshot = await storage.getDocuments();
       res.write(`data: ${JSON.stringify({
