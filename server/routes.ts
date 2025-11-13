@@ -2013,6 +2013,28 @@ export async function registerRoutes(app: Express): Promise<Server> {
         documentViewStates.set(docId, state);
       }
 
+      // ✅ NOVO: Inicializar viewStates padrão para IDs lógicos se não existirem
+      const defaultViewState = {
+        zoom: 1,
+        scrollTop: 0,
+        scrollLeft: 0,
+        updatedAt: new Date().toISOString(),
+      };
+
+      const logicalDocIds = [
+        'escala-oficial',
+        'escala-praca',
+        'cardapio-EAGM',
+        'cardapio-1DN',
+      ];
+
+      for (const logicalId of logicalDocIds) {
+        if (!documentViewStates.has(logicalId)) {
+          documentViewStates.set(logicalId, defaultViewState);
+          console.log(`📊 Inicializado viewState padrão para: ${logicalId}`);
+        }
+      }
+
       const snapshot = await storage.getDocuments();
       res.write(`data: ${JSON.stringify({
         type: 'snapshot' as const,
