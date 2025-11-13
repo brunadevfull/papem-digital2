@@ -1412,8 +1412,16 @@ useEffect(() => {
             console.log('📡 Evento SSE de documentos recebido:', data.type);
 
             if (data.type === 'snapshot') {
+              console.log('📊 SSE Snapshot - viewStates brutos recebidos:', data.viewStates);
+              console.log('📊 SSE Snapshot - tipo de viewStates:', typeof data.viewStates);
+              console.log('📊 SSE Snapshot - keys de viewStates:', data.viewStates ? Object.keys(data.viewStates) : 'null/undefined');
+
               const parsedStates = parseDocumentViewStatesPayload(data.viewStates ?? {});
+              console.log('📊 SSE Snapshot - viewStates parseados:', parsedStates);
+              console.log('📊 SSE Snapshot - total de estados:', Object.keys(parsedStates).length);
+
               applyDocumentViewStates(parsedStates, { replace: true });
+              console.log('✅ SSE Snapshot - viewStates aplicados ao contexto');
 
               const refreshPromise = refreshDocumentsRef.current?.();
               if (refreshPromise) {
