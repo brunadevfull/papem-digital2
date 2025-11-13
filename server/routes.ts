@@ -8,6 +8,7 @@ import {
   insertDocumentSchema,
   dutyOfficersPayloadSchema,
   insertMilitaryPersonnelSchema,
+  documentTypeEnum,
   type User,
   type DutyOfficersPayload,
   type DutyOfficers,
@@ -240,6 +241,57 @@ function normalizeUnitInput(value: unknown): 'EAGM' | '1DN' | undefined {
   }
 
   return undefined;
+}
+
+type DocumentType = z.infer<typeof documentTypeEnum>;
+
+const DOCUMENT_TYPE_VALUES = documentTypeEnum.options;
+
+function normalizeDocumentTypeInput(
+  value: unknown
+): { type?: DocumentType; unit?: 'EAGM' | '1DN' } {
+  if (typeof value !== 'string') {
+    return { type: undefined, unit: undefined };
+  }
+
+  const trimmed = value.trim();
+  if (!trimmed) {
+    return { type: undefined, unit: undefined };
+  }
+
+  const sanitized = trimmed
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .trim();
+
+  const lower = sanitized.toLowerCase();
+
+  for (const candidate of DOCUMENT_TYPE_VALUES) {
+    if (lower === candidate) {
+      return { type: candidate, unit: undefined };
+    }
+
+    if (lower.startsWith(candidate)) {
+      const nextChar = lower[candidate.length];
+      if (nextChar && /[a-z0-9]/i.test(nextChar)) {
+        continue;
+      }
+
+      const remainder = sanitized
+        .slice(candidate.length)
+        .replace(/^[^A-Za-z0-9]+/, '');
+
+      return {
+        type: candidate,
+        unit: remainder ? normalizeUnitInput(remainder) : undefined,
+      };
+    }
+  }
+
+  return {
+    type: undefined,
+    unit: normalizeUnitInput(sanitized),
+  };
 }
 
 const DEFAULT_ADMIN_USERNAME = 'admin';
@@ -1403,20 +1455,35 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const hasExplicitUnit = Object.prototype.hasOwnProperty.call(body, 'unit');
       const rawUnitValue = hasExplicitUnit ? body['unit'] : undefined;
       const classificationUnit = classification ? normalizeUnitInput(classification['unit']) : undefined;
+
+      const hasExplicitType = Object.prototype.hasOwnProperty.call(body, 'type');
+      const rawTypeValue = hasExplicitType ? body['type'] : undefined;
+      const normalizedTypeFromBody = normalizeDocumentTypeInput(rawTypeValue);
+      const normalizedTypeFromClassification = normalizeDocumentTypeInput(
+        classification ? classification['type'] : undefined
+      );
+      const finalType = normalizedTypeFromBody.type ?? normalizedTypeFromClassification.type;
+
       const normalizedUnit = hasExplicitUnit
         ? normalizeUnitInput(rawUnitValue)
-        : classificationUnit;
+        : normalizedTypeFromBody.unit ??
+          normalizedTypeFromClassification.unit ??
+          classificationUnit;
 
       const rest: Record<string, unknown> = { ...body };
       delete rest.classification;
       delete rest.tags;
       delete rest.unit;
+      delete rest.type;
 
-      const validatedData = insertDocumentSchema.parse({
+      const payloadForValidation: Record<string, unknown> = {
         ...rest,
+        type: finalType,
         unit: normalizedUnit ?? undefined,
         tags: normalizedTags,
-      });
+      };
+
+      const validatedData = insertDocumentSchema.parse(payloadForValidation);
 
       const document = await storage.createDocument({
         ...validatedData,
@@ -1459,16 +1526,53 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const rawUnitValue = hasExplicitUnit ? body['unit'] : undefined;
       const classificationUnit = classification ? normalizeUnitInput(classification['unit']) : undefined;
       const normalizedUnitFromBody = hasExplicitUnit ? normalizeUnitInput(rawUnitValue) : undefined;
+      const hasExplicitType = Object.prototype.hasOwnProperty.call(body, 'type');
+      const rawTypeValue = hasExplicitType ? body['type'] : undefined;
+      const normalizedTypeFromBody = normalizeDocumentTypeInput(rawTypeValue);
+      const normalizedTypeFromClassification = normalizeDocumentTypeInput(
+        classification ? classification['type'] : undefined
+      );
+
+      if (hasExplicitType && !normalizedTypeFromBody.type) {
+        return res.status(400).json({
+          error: 'Invalid data',
+          details: [
+            {
+              path: ['type'],
+              message: 'Invalid document type',
+            },
+          ],
+        });
+      }
+
+      const nextTypeCandidate =
+        normalizedTypeFromBody.type ??
+        normalizedTypeFromClassification.type ??
+        existingDoc.type;
+
+      const typeValidation = insertDocumentSchema.shape.type.safeParse(nextTypeCandidate);
+      if (!typeValidation.success) {
+        return res.status(400).json({ error: 'Invalid data', details: typeValidation.error.errors });
+      }
+
+      const nextType = typeValidation.data;
+
+      const normalizedUnitFromTypeSuffix =
+        normalizedTypeFromBody.unit ?? normalizedTypeFromClassification.unit;
       const nextUnit = hasExplicitUnit
         ? normalizedUnitFromBody
-        : classificationUnit ?? existingDoc.unit;
+        : normalizedUnitFromTypeSuffix ?? classificationUnit ?? existingDoc.unit;
 
       const { tags: _ignoredTags, classification: _ignoredClassification, ...restWithUnit } = body;
-      const { unit: _ignoredUnit, ...rest } = restWithUnit as Record<string, unknown> & { unit?: unknown };
+      const { unit: _ignoredUnit, type: _ignoredType, ...rest } = restWithUnit as Record<string, unknown> & {
+        unit?: unknown;
+        type?: unknown;
+      };
 
       const updatedDoc = await storage.updateDocument({
         ...existingDoc,
         ...rest,
+        type: nextType,
         unit: nextUnit ?? undefined,
         tags: normalizedTags,
       });

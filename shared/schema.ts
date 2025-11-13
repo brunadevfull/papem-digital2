@@ -33,6 +33,8 @@ export const documents = pgTable("documents", {
   uploadDate: timestamp("upload_date").defaultNow(),
 });
 
+export const documentTypeEnum = z.enum(["plasa", "escala", "cardapio"]);
+
 export const documentViewStates = pgTable("document_view_states", {
   id: serial("id").primaryKey(),
   documentId: text("document_id").notNull().unique(),
@@ -81,12 +83,27 @@ export const insertNoticeSchema = createInsertSchema(notices).omit({
   updatedAt: true,
 });
 
+const normalizeDocumentTypeInput = (value: unknown) => {
+  if (typeof value !== "string") {
+    return value;
+  }
+
+  const normalized = value
+    .trim()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase();
+
+  return normalized;
+};
+
 export const insertDocumentSchema = createInsertSchema(documents)
   .omit({
     id: true,
     uploadDate: true,
   })
   .extend({
+    type: z.preprocess(normalizeDocumentTypeInput, documentTypeEnum),
     tags: z.array(z.string()).optional(),
     unit: z.enum(["EAGM", "1DN"]).optional(),
   });
