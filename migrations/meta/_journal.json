@@ -43,6 +43,13 @@
       "when": 1761903228444,
       "tag": "0005_create_duty_assignments",
       "breakpoints": false
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1763045708675,
+      "tag": "0006_create_display_settings_table",
+      "breakpoints": false
     }
   ]
 }
