@@ -1901,6 +1901,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       documentSubscribers.add(res);
 
+      // ✅ CORREÇÃO: Carregar estados do banco de dados antes de enviar snapshot
+      const dbStates = await storage.getAllDocumentViewStates();
+
+      // Atualizar cache em memória com dados do banco
+      for (const [docId, state] of Object.entries(dbStates)) {
+        documentViewStates.set(docId, state);
+      }
+
       const snapshot = await storage.getDocuments();
       res.write(`data: ${JSON.stringify({
         type: 'snapshot' as const,
