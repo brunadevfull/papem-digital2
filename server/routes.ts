@@ -2007,10 +2007,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       // ✅ CORREÇÃO: Carregar estados do banco de dados antes de enviar snapshot
       const dbStates = await storage.getAllDocumentViewStates();
+      console.log('📊 SSE: Estados carregados do banco:', Object.keys(dbStates).length, 'documentos');
+      console.log('📊 SSE: IDs no banco:', Object.keys(dbStates));
 
       // Atualizar cache em memória com dados do banco
       for (const [docId, state] of Object.entries(dbStates)) {
         documentViewStates.set(docId, state);
+        console.log(`  ✅ Carregado do banco: ${docId}`, state);
       }
 
       // ✅ NOVO: Inicializar viewStates padrão para IDs lógicos se não existirem
@@ -2032,8 +2035,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
         if (!documentViewStates.has(logicalId)) {
           documentViewStates.set(logicalId, defaultViewState);
           console.log(`📊 Inicializado viewState padrão para: ${logicalId}`);
+        } else {
+          console.log(`✅ Estado já existe para: ${logicalId}`);
         }
       }
+
+      console.log('📊 SSE: Total de viewStates a enviar:', documentViewStates.size);
+      console.log('📊 SSE: IDs finais:', Array.from(documentViewStates.keys()));
 
       const snapshot = await storage.getDocuments();
       res.write(`data: ${JSON.stringify({
