@@ -283,18 +283,40 @@ const PDFViewer: React.FC<PDFViewerProps> = ({
     return activeCardapioDoc;
   }, [activeCardapioDoc]);
 
-  // Função para obter ID único do documento atual (somente escala e cardápio)
-  const getCurrentDocumentId = useCallback((): string | null => {
+  // Função para obter identificadores do documento atual (ID real + grupo lógico)
+  const getCurrentDocumentIdentifiers = useCallback((): {
+    docId: string | null;
+    groupId: string | null;
+  } => {
     if (documentType === "escala") {
       const currentEscala = getCurrentEscalaDoc();
-      // ✅ USAR CATEGORIA (oficial/praca) EM VEZ DE ID para compartilhar zoom/scroll entre todas as escalas da mesma categoria
-      return currentEscala?.category ? `escala-${currentEscala.category}` : null;
-    } else if (documentType === "cardapio") {
-      const currentCardapio = getCurrentCardapioDoc();
-      // ✅ USAR UNIDADE (EAGM/1DN) EM VEZ DE ID para compartilhar zoom/scroll entre todos os cardápios da mesma unidade
-      return currentCardapio?.unit ? `cardapio-${currentCardapio.unit}` : null;
+      if (!currentEscala) {
+        return { docId: null, groupId: null };
+      }
+
+      const docId = currentEscala.id ? `escala-${currentEscala.id}` : null;
+      const groupId = currentEscala.category
+        ? `escala-${currentEscala.category}`
+        : docId;
+
+      return { docId, groupId };
     }
-    return null;
+
+    if (documentType === "cardapio") {
+      const currentCardapio = getCurrentCardapioDoc();
+      if (!currentCardapio) {
+        return { docId: null, groupId: null };
+      }
+
+      const docId = currentCardapio.id ? `cardapio-${currentCardapio.id}` : null;
+      const groupId = currentCardapio.unit
+        ? `cardapio-${currentCardapio.unit}`
+        : docId;
+
+      return { docId, groupId };
+    }
+
+    return { docId: null, groupId: null };
   }, [documentType, getCurrentEscalaDoc, getCurrentCardapioDoc]);
 
   // Função para salvar zoom no localStorage (apenas escala e cardápio)
@@ -351,44 +373,72 @@ const PDFViewer: React.FC<PDFViewerProps> = ({
     return { scrollTop: 0, scrollLeft: 0 }; // Valor padrão
   }, []);
 
-  const getStoredZoomForDocument = useCallback((docId: string): number => {
-    const contextState = documentViewStates[docId];
-    if (contextState && typeof contextState.zoom === 'number' && Number.isFinite(contextState.zoom)) {
-      const clamped = Math.min(Math.max(contextState.zoom, 0.5), 3);
-      console.log(`📡 Zoom carregado do contexto para ${docId}: ${clamped}`);
-      return clamped;
+  const getStoredZoomForDocument = useCallback((
+    docId: string | null,
+    groupId: string | null
+  ): number => {
+    const contextKeys = [docId, groupId].filter((key): key is string => typeof key === 'string' && key.length > 0);
+
+    for (const key of contextKeys) {
+      const contextState = documentViewStates[key];
+      if (contextState && typeof contextState.zoom === 'number' && Number.isFinite(contextState.zoom)) {
+        const clamped = Math.min(Math.max(contextState.zoom, 0.5), 3);
+        console.log(`📡 Zoom carregado do contexto para ${key}: ${clamped}`);
+        return clamped;
+      }
     }
 
-    return loadZoomFromLocalStorage(docId);
+    const storageKey = groupId ?? docId;
+    if (storageKey) {
+      return loadZoomFromLocalStorage(storageKey);
+    }
+
+    return 1;
   }, [documentViewStates, loadZoomFromLocalStorage]);
 
-  const getStoredScrollPosition = useCallback((docId: string): { scrollTop: number; scrollLeft: number } => {
-    const fallback = loadScrollFromLocalStorage(docId);
-    const contextState = documentViewStates[docId];
+  const getStoredScrollPosition = useCallback((
+    docId: string | null,
+    groupId: string | null
+  ): { scrollTop: number; scrollLeft: number } => {
+    const storageKey = groupId ?? docId;
+    const fallback = storageKey ? loadScrollFromLocalStorage(storageKey) : { scrollTop: 0, scrollLeft: 0 };
 
-    if (!contextState) {
-      return fallback;
+    const contextKeys = [docId, groupId].filter((key): key is string => typeof key === 'string' && key.length > 0);
+    for (const key of contextKeys) {
+      const contextState = documentViewStates[key];
+      if (!contextState) {
+        continue;
+      }
+
+      const scrollTop = typeof contextState.scrollTop === 'number' && Number.isFinite(contextState.scrollTop)
+        ? Math.max(contextState.scrollTop, 0)
+        : fallback.scrollTop;
+      const scrollLeft = typeof contextState.scrollLeft === 'number' && Number.isFinite(contextState.scrollLeft)
+        ? Math.max(contextState.scrollLeft, 0)
+        : fallback.scrollLeft;
+
+      if (scrollTop !== fallback.scrollTop || scrollLeft !== fallback.scrollLeft) {
+        console.log(`📡 Scroll carregado do contexto para ${key}: top=${scrollTop}, left=${scrollLeft}`);
+      }
+
+      return { scrollTop, scrollLeft };
     }
 
-    const scrollTop = typeof contextState.scrollTop === 'number' && Number.isFinite(contextState.scrollTop)
-      ? Math.max(contextState.scrollTop, 0)
-      : fallback.scrollTop;
-    const scrollLeft = typeof contextState.scrollLeft === 'number' && Number.isFinite(contextState.scrollLeft)
-      ? Math.max(contextState.scrollLeft, 0)
-      : fallback.scrollLeft;
-
-    if (scrollTop !== fallback.scrollTop || scrollLeft !== fallback.scrollLeft) {
-      console.log(`📡 Scroll carregado do contexto para ${docId}: top=${scrollTop}, left=${scrollLeft}`);
-    }
-
-    return { scrollTop, scrollLeft };
+    return fallback;
   }, [documentViewStates, loadScrollFromLocalStorage]);
 
   const persistViewStateToServer = useCallback(async (
-    docId: string,
+    docId: string | null,
+    groupId: string | null,
     state: { zoom: number; scrollTop: number; scrollLeft: number }
   ): Promise<boolean> => {
     const endpoint = resolveBackendUrl('/api/documents/view-state');
+
+    const targetId = docId ?? groupId;
+    if (!targetId) {
+      console.warn('⚠️ Nenhum identificador válido para persistir estado de visualização');
+      return false;
+    }
 
     try {
       const response = await fetch(endpoint, {
@@ -397,7 +447,7 @@ const PDFViewer: React.FC<PDFViewerProps> = ({
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          documentId: docId,
+          documentId: targetId,
           zoom: state.zoom,
           scrollTop: state.scrollTop,
           scrollLeft: state.scrollLeft,
@@ -416,13 +466,13 @@ const PDFViewer: React.FC<PDFViewerProps> = ({
         return false;
       }
 
-      console.log(`✅ Estado de visualização enviado para o servidor (${docId})`);
+      console.log(`✅ Estado de visualização enviado para o servidor (${targetId})`);
       return true;
     } catch (error) {
       console.warn('⚠️ Erro ao enviar estado de visualização para o servidor:', error);
       return false;
     }
-  }, []);
+  }, [resolveBackendUrl]);
 
   // Funções de controle de zoom
   const handleZoomIn = () => {
@@ -494,8 +544,11 @@ const PDFViewer: React.FC<PDFViewerProps> = ({
 
   // ✏️ Função para alternar modo editor (pausa/retoma troca automática + salva)
   const handleToggleEditMode = useCallback(async () => {
-    const docId = getCurrentDocumentId();
-    console.log(`\n🔧 [MODO EDITOR] Estado atual: ${isEditMode ? 'ATIVO' : 'INATIVO'}, Documento: ${docId}`);
+    const { docId, groupId } = getCurrentDocumentIdentifiers();
+    const storageKey = groupId ?? docId;
+    console.log(
+      `\n🔧 [MODO EDITOR] Estado atual: ${isEditMode ? 'ATIVO' : 'INATIVO'}, Documento: ${docId ?? groupId}`
+    );
 
     if (!isEditMode) {
       // ENTRANDO em modo editor
@@ -512,38 +565,49 @@ const PDFViewer: React.FC<PDFViewerProps> = ({
       // SAINDO do modo editor - SALVAR TUDO
       const scrollContainer = scrollableContentRef.current || containerRef.current;
 
-      if (docId && scrollContainer) {
+      if (storageKey && scrollContainer) {
         const scrollTop = scrollContainer.scrollTop;
         const scrollLeft = scrollContainer.scrollLeft;
 
         console.log(`💾 [MODO EDITOR] SALVANDO posição final:`);
-        console.log(`  - Documento: ${docId}`);
+        console.log(`  - Documento (storage): ${storageKey}`);
+        if (docId && docId !== storageKey) {
+          console.log(`  - Documento (server): ${docId}`);
+        }
         console.log(`  - Scroll Top: ${scrollTop}`);
         console.log(`  - Scroll Left: ${scrollLeft}`);
 
         // Salvar scroll
-        saveScrollToLocalStorage(docId, scrollTop, scrollLeft);
+        saveScrollToLocalStorage(storageKey, scrollTop, scrollLeft);
 
         // Salvar zoom também
-        saveZoomToLocalStorage(docId, zoomLevel);
+        saveZoomToLocalStorage(storageKey, zoomLevel);
         console.log(`  - Zoom: ${zoomLevel} (${Math.round(zoomLevel * 100)}%)`);
 
         // Verificar se salvou corretamente
-        const savedScroll = localStorage.getItem(`document-scroll-${docId}`);
-        const savedZoom = localStorage.getItem(`document-zoom-${docId}`);
+        const savedScroll = localStorage.getItem(`document-scroll-${storageKey}`);
+        const savedZoom = localStorage.getItem(`document-zoom-${storageKey}`);
         console.log(`✅ [MODO EDITOR] Verificação do salvamento:`);
         console.log(`  - Scroll salvo: ${savedScroll}`);
         console.log(`  - Zoom salvo: ${savedZoom}`);
 
         const timestamp = new Date().toISOString();
-        updateDocumentViewState(docId, {
+        const statePayload = {
           zoom: zoomLevel,
           scrollTop,
           scrollLeft,
           updatedAt: timestamp,
-        });
+        } as const;
 
-        const persisted = await persistViewStateToServer(docId, {
+        if (docId) {
+          updateDocumentViewState(docId, statePayload);
+        }
+
+        if (groupId && groupId !== docId) {
+          updateDocumentViewState(groupId, statePayload);
+        }
+
+        const persisted = await persistViewStateToServer(docId, groupId, {
           zoom: zoomLevel,
           scrollTop,
           scrollLeft,
@@ -555,6 +619,7 @@ const PDFViewer: React.FC<PDFViewerProps> = ({
       } else {
         console.warn(`⚠️ [MODO EDITOR] Não foi possível salvar:`);
         console.warn(`  - docId: ${docId}`);
+        console.warn(`  - groupId: ${groupId}`);
         console.warn(`  - scrollContainer: ${!!scrollContainer}`);
       }
 
@@ -578,7 +643,7 @@ const PDFViewer: React.FC<PDFViewerProps> = ({
   }, [
     isEditMode,
     documentType,
-    getCurrentDocumentId,
+    getCurrentDocumentIdentifiers,
     saveScrollToLocalStorage,
     saveZoomToLocalStorage,
     zoomLevel,
@@ -592,16 +657,41 @@ const PDFViewer: React.FC<PDFViewerProps> = ({
   const handleSaveScrollPosition = useCallback(() => {
     if (documentType === "plasa") return; // Não salvar scroll para PLASA
 
-    const docId = getCurrentDocumentId();
+    const { docId, groupId } = getCurrentDocumentIdentifiers();
+    const storageKey = groupId ?? docId;
     const scrollContainer = scrollableContentRef.current || containerRef.current;
-    if (docId && scrollContainer) {
-      saveScrollToLocalStorage(docId, scrollContainer.scrollTop, scrollContainer.scrollLeft);
+    if (storageKey && scrollContainer) {
+      saveScrollToLocalStorage(storageKey, scrollContainer.scrollTop, scrollContainer.scrollLeft);
+      saveZoomToLocalStorage(storageKey, zoomLevel);
+
+      const timestamp = new Date().toISOString();
+      const payload = {
+        zoom: zoomLevel,
+        scrollTop: scrollContainer.scrollTop,
+        scrollLeft: scrollContainer.scrollLeft,
+        updatedAt: timestamp,
+      } as const;
+
+      if (docId) {
+        updateDocumentViewState(docId, payload);
+      }
+
+      if (groupId && groupId !== docId) {
+        updateDocumentViewState(groupId, payload);
+      }
 
       // Mostrar feedback visual
       setScrollSavedFeedback(true);
       setTimeout(() => setScrollSavedFeedback(false), 2000);
     }
-  }, [documentType, getCurrentDocumentId, saveScrollToLocalStorage]);
+  }, [
+    documentType,
+    getCurrentDocumentIdentifiers,
+    saveScrollToLocalStorage,
+    saveZoomToLocalStorage,
+    updateDocumentViewState,
+    zoomLevel,
+  ]);
 
   // 🔄 REMOVIDO: Restauração de zoom agora acontece no onLoad das imagens
   // para garantir que o zoom seja aplicado ANTES do scroll ser restaurado
@@ -613,18 +703,21 @@ const PDFViewer: React.FC<PDFViewerProps> = ({
   // 2. Documento muda (nos useEffects de troca de documento)
 
   // Função para restaurar scroll após imagem carregar (APÓS zoom ser aplicado)
-  const restoreScrollPosition = useCallback((docId: string) => {
+  const restoreScrollPosition = useCallback((docId: string | null, groupId: string | null) => {
     if (documentType === "plasa") return; // Não restaurar scroll para PLASA
 
     const scrollContainer = scrollableContentRef.current || containerRef.current;
-    if (docId && scrollContainer) {
+    if ((docId || groupId) && scrollContainer) {
       // ⏰ ESPERAR múltiplos frames para garantir que o DOM foi atualizado com o zoom
       requestAnimationFrame(() => {
         requestAnimationFrame(() => {
-          const savedScroll = getStoredScrollPosition(docId);
+          const savedScroll = getStoredScrollPosition(docId, groupId);
           scrollContainer.scrollTop = savedScroll.scrollTop;
           scrollContainer.scrollLeft = savedScroll.scrollLeft;
-          console.log(`🔄 Scroll restaurado para documento ${docId}: top=${savedScroll.scrollTop}, left=${savedScroll.scrollLeft}`);
+          const logId = docId ?? groupId ?? 'desconhecido';
+          console.log(
+            `🔄 Scroll restaurado para documento ${logId}: top=${savedScroll.scrollTop}, left=${savedScroll.scrollLeft}`
+          );
         });
       });
     }
@@ -1719,13 +1812,28 @@ useEffect(() => {
       return;
     }
 
-    const docId = getCurrentDocumentId();
-    if (!docId) {
+    const { docId, groupId } = getCurrentDocumentIdentifiers();
+    const candidateKeys = [docId, groupId].filter((key): key is string => typeof key === 'string' && key.length > 0);
+    if (candidateKeys.length === 0) {
       return;
     }
 
-    const contextState = documentViewStates[docId];
-    if (!contextState) {
+    let contextKey: string | null = null;
+    let contextState: typeof documentViewStates[string] | undefined;
+    for (const key of candidateKeys) {
+      const state = documentViewStates[key];
+      if (state) {
+        contextKey = key;
+        contextState = state;
+        break;
+      }
+    }
+
+    if (!contextState || !contextKey) {
+      console.warn(
+        `⚠️ SSE: Nenhum estado encontrado para ${docId ?? groupId}. Estados disponíveis:`,
+        Object.keys(documentViewStates)
+      );
       return;
     }
 
@@ -1736,7 +1844,7 @@ useEffect(() => {
       Math.abs(zoomLevel - contextState.zoom) > 0.01
     ) {
       const clampedZoom = Math.min(Math.max(contextState.zoom, 0.5), 3);
-      console.log(`📡 SSE: Aplicando zoom atualizado para ${docId}: ${clampedZoom}`);
+      console.log(`📡 SSE: Aplicando zoom atualizado para ${contextKey}: ${clampedZoom}`);
       setZoomLevel(clampedZoom);
       setZoomInputValue(Math.round(clampedZoom * 100).toString());
     }
@@ -1760,7 +1868,7 @@ useEffect(() => {
             Math.abs(currentScrollLeft - contextState.scrollLeft) > 5
           ) {
             console.log(
-              `📡 SSE: Aplicando scroll atualizado para ${docId}: top=${contextState.scrollTop}, left=${contextState.scrollLeft}`
+              `📡 SSE: Aplicando scroll atualizado para ${contextKey}: top=${contextState.scrollTop}, left=${contextState.scrollLeft}`
             );
             scrollContainer.scrollTop = contextState.scrollTop;
             scrollContainer.scrollLeft = contextState.scrollLeft;
@@ -1768,7 +1876,7 @@ useEffect(() => {
         }
       });
     }
-  }, [documentViewStates, documentType, isEditMode, zoomLevel, getCurrentDocumentId]);
+  }, [documentViewStates, documentType, isEditMode, zoomLevel, getCurrentDocumentIdentifiers]);
 
   // CORREÇÃO: Renderizar conteúdo com melhor tratamento de erros
   const renderContent = () => {
@@ -1931,9 +2039,9 @@ useEffect(() => {
                     setBackendHealthy(true);
 
                     // 🔄 Restaurar ZOOM primeiro, depois SCROLL
-                    const docId = getCurrentDocumentId();
-                    if (docId) {
-                      const savedZoom = getStoredZoomForDocument(docId);
+                    const { docId, groupId } = getCurrentDocumentIdentifiers();
+                    if (docId || groupId) {
+                      const savedZoom = getStoredZoomForDocument(docId, groupId);
                       console.log(`🔍 ESCALA: Restaurando zoom ${savedZoom} antes do scroll`);
 
                       // Só atualizar zoom se for diferente do atual
@@ -1943,7 +2051,7 @@ useEffect(() => {
                       }
 
                       // Restaurar scroll (internamente usa requestAnimationFrame)
-                      restoreScrollPosition(docId);
+                      restoreScrollPosition(docId, groupId);
                     }
                   }}
                 />
@@ -2007,9 +2115,9 @@ useEffect(() => {
                     setBackendHealthy(true);
 
                     // 🔄 Restaurar ZOOM primeiro, depois SCROLL
-                    const docId = getCurrentDocumentId();
-                    if (docId) {
-                      const savedZoom = getStoredZoomForDocument(docId);
+                    const { docId, groupId } = getCurrentDocumentIdentifiers();
+                    if (docId || groupId) {
+                      const savedZoom = getStoredZoomForDocument(docId, groupId);
                       console.log(`🔍 ESCALA: Restaurando zoom ${savedZoom} antes do scroll`);
 
                       // Só atualizar zoom se for diferente do atual
@@ -2019,7 +2127,7 @@ useEffect(() => {
                       }
 
                       // Restaurar scroll (internamente usa requestAnimationFrame)
-                      restoreScrollPosition(docId);
+                      restoreScrollPosition(docId, groupId);
                     }
                   }}
                 />
@@ -2112,9 +2220,9 @@ useEffect(() => {
                     setBackendHealthy(true);
 
                     // 🔄 Restaurar ZOOM primeiro, depois SCROLL
-                    const docId = getCurrentDocumentId();
-                    if (docId) {
-                      const savedZoom = getStoredZoomForDocument(docId);
+                    const { docId, groupId } = getCurrentDocumentIdentifiers();
+                    if (docId || groupId) {
+                      const savedZoom = getStoredZoomForDocument(docId, groupId);
                       console.log(`🔍 CARDÁPIO: Restaurando zoom ${savedZoom} antes do scroll`);
 
                       // Só atualizar zoom se for diferente do atual
@@ -2124,7 +2232,7 @@ useEffect(() => {
                       }
 
                       // Restaurar scroll (internamente usa requestAnimationFrame)
-                      restoreScrollPosition(docId);
+                      restoreScrollPosition(docId, groupId);
                     }
                   }}
                 />
@@ -2186,9 +2294,9 @@ useEffect(() => {
                     setBackendHealthy(true);
 
                     // 🔄 Restaurar ZOOM primeiro, depois SCROLL
-                    const docId = getCurrentDocumentId();
-                    if (docId) {
-                      const savedZoom = getStoredZoomForDocument(docId);
+                    const { docId, groupId } = getCurrentDocumentIdentifiers();
+                    if (docId || groupId) {
+                      const savedZoom = getStoredZoomForDocument(docId, groupId);
                       console.log(`🔍 CARDÁPIO: Restaurando zoom ${savedZoom} antes do scroll`);
 
                       // Só atualizar zoom se for diferente do atual
@@ -2198,7 +2306,7 @@ useEffect(() => {
                       }
 
                       // Restaurar scroll (internamente usa requestAnimationFrame)
-                      restoreScrollPosition(docId);
+                      restoreScrollPosition(docId, groupId);
                     }
                   }}
                 />
