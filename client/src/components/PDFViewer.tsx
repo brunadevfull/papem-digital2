@@ -1721,24 +1721,33 @@ useEffect(() => {
 
     const docId = getCurrentDocumentId();
     if (!docId) {
+      console.log('⚠️ SSE: docId não encontrado');
       return;
     }
 
     const contextState = documentViewStates[docId];
     if (!contextState) {
+      console.log(`⚠️ SSE: Nenhum estado encontrado para ${docId}. Estados disponíveis:`, Object.keys(documentViewStates));
       return;
     }
+
+    console.log(`📡 SSE: Estado encontrado para ${docId}:`, contextState);
 
     // Aplicar zoom se mudou
     if (
       typeof contextState.zoom === 'number' &&
-      Number.isFinite(contextState.zoom) &&
-      Math.abs(zoomLevel - contextState.zoom) > 0.01
+      Number.isFinite(contextState.zoom)
     ) {
       const clampedZoom = Math.min(Math.max(contextState.zoom, 0.5), 3);
-      console.log(`📡 SSE: Aplicando zoom atualizado para ${docId}: ${clampedZoom}`);
-      setZoomLevel(clampedZoom);
-      setZoomInputValue(Math.round(clampedZoom * 100).toString());
+      const zoomDifference = Math.abs(zoomLevel - clampedZoom);
+
+      console.log(`📡 SSE: Verificando zoom - atual: ${zoomLevel}, salvo: ${clampedZoom}, diferença: ${zoomDifference}`);
+
+      if (zoomDifference > 0.01) {
+        console.log(`📡 SSE: Aplicando zoom atualizado para ${docId}: ${clampedZoom}`);
+        setZoomLevel(clampedZoom);
+        setZoomInputValue(Math.round(clampedZoom * 100).toString());
+      }
     }
 
     // Aplicar scroll se mudou (com um pequeno delay para garantir que o zoom foi aplicado)
@@ -1754,6 +1763,8 @@ useEffect(() => {
           const currentScrollTop = scrollContainer.scrollTop;
           const currentScrollLeft = scrollContainer.scrollLeft;
 
+          console.log(`📡 SSE: Verificando scroll - atual: top=${currentScrollTop}, left=${currentScrollLeft}, salvo: top=${contextState.scrollTop}, left=${contextState.scrollLeft}`);
+
           // Só aplicar se mudou significativamente (mais de 5px)
           if (
             Math.abs(currentScrollTop - contextState.scrollTop) > 5 ||
@@ -1765,6 +1776,8 @@ useEffect(() => {
             scrollContainer.scrollTop = contextState.scrollTop;
             scrollContainer.scrollLeft = contextState.scrollLeft;
           }
+        } else {
+          console.log('⚠️ SSE: scrollContainer não encontrado');
         }
       });
     }
