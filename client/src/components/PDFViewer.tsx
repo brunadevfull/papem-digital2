@@ -242,6 +242,7 @@ const PDFViewer: React.FC<PDFViewerProps> = ({
     setIsEscalaEditMode,
     setIsCardapioEditMode,
     documentViewStates,
+    viewStatesLoaded, // 🔥 Novo: indica se viewStates foram carregados do banco
     updateDocumentViewState,
   } = useDisplay();
   const [totalPages, setTotalPages] = useState(0);
@@ -732,6 +733,30 @@ const PDFViewer: React.FC<PDFViewerProps> = ({
   // 💾 REMOVIDO: Auto-save de scroll foi DESABILITADO
   // O scroll agora só é salvo quando o usuário SAI do modo editor
   // ou clica manualmente em "Salvar Posição"
+
+  // 🔥 NOVO: Aplicar zoom e scroll quando viewStates são carregados do banco
+  useEffect(() => {
+    if (!viewStatesLoaded) return; // Esperar os dados do banco serem carregados
+    if (documentType === "plasa") return; // PLASA não usa zoom/scroll salvos
+
+    const { docId, groupId } = getCurrentDocumentIdentifiers();
+    if (!docId && !groupId) return;
+
+    console.log('🔥 ViewStates carregados! Aplicando zoom e scroll...');
+
+    // Aplicar zoom
+    const savedZoom = getStoredZoomForDocument(docId, groupId);
+    if (Math.abs(zoomLevel - savedZoom) > 0.01) {
+      console.log(`🔍 Aplicando zoom inicial: ${savedZoom}`);
+      setZoomLevel(savedZoom);
+      setZoomInputValue(Math.round(savedZoom * 100).toString());
+    }
+
+    // Aplicar scroll (com delay para garantir que o zoom foi aplicado)
+    setTimeout(() => {
+      restoreScrollPosition(docId, groupId);
+    }, 100);
+  }, [viewStatesLoaded, documentType, getCurrentDocumentIdentifiers, getStoredZoomForDocument, restoreScrollPosition, zoomLevel]);
 
   // 🔄 REMOVIDO: Restauração de scroll agora acontece no onLoad das imagens
   // após o zoom ser aplicado corretamente

@@ -140,6 +140,7 @@ interface DisplayContextType {
   refreshNotices: () => Promise<void>;
   refreshDocuments: () => Promise<void>; // 🔄 Atualizar documentos manualmente
   documentViewStates: DocumentViewStateMap;
+  viewStatesLoaded: boolean; // 🔥 Novo: indica se viewStates foram carregados do banco
   updateDocumentViewState: (documentId: string, state: DocumentViewState | null) => void;
   refreshDocumentViewStates: () => Promise<void>;
   handleScrollComplete: () => void;
@@ -176,6 +177,7 @@ export const DisplayProvider: React.FC<DisplayProviderProps> = ({ children }) =>
   const [isEscalaEditMode, setIsEscalaEditMode] = useState(false); // ✏️ Modo editor de escala
   const [isCardapioEditMode, setIsCardapioEditMode] = useState(false); // ✏️ Modo editor de cardápio
   const [documentViewStates, setDocumentViewStates] = useState<DocumentViewStateMap>({});
+  const [viewStatesLoaded, setViewStatesLoaded] = useState(false); // 🔥 Novo: indica se viewStates foram carregados
 
   // Ref para o timer de alternância
   const escalaTimerRef = useRef<NodeJS.Timeout | null>(null);
@@ -311,6 +313,7 @@ export const DisplayProvider: React.FC<DisplayProviderProps> = ({ children }) =>
       if (!response.ok) {
         const errorText = await response.text().catch(() => '');
         console.warn(`⚠️ Falha ao carregar estado de visualização: ${response.status} ${errorText}`);
+        setViewStatesLoaded(true); // Marcar como carregado mesmo em caso de erro
         return;
       }
 
@@ -320,8 +323,10 @@ export const DisplayProvider: React.FC<DisplayProviderProps> = ({ children }) =>
         : null;
       const parsedStates = parseDocumentViewStatesPayload(rawStates);
       applyDocumentViewStates(parsedStates, { replace: true });
+      setViewStatesLoaded(true); // 🔥 Marcar como carregado após aplicar os estados
     } catch (error) {
       console.warn('⚠️ Erro ao sincronizar estado de visualização dos documentos:', error);
+      setViewStatesLoaded(true); // Marcar como carregado mesmo em caso de erro
     }
   }, [applyDocumentViewStates, getBackendUrl]);
 
@@ -1529,6 +1534,7 @@ const value: DisplayContextType = {
   refreshNotices,
   refreshDocuments, // 🔄 Atualizar documentos manualmente
   documentViewStates,
+  viewStatesLoaded, // 🔥 Novo: indica se viewStates foram carregados do banco
   updateDocumentViewState,
   refreshDocumentViewStates,
   handleScrollComplete,
