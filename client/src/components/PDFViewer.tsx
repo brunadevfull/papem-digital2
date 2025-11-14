@@ -1784,7 +1784,21 @@ useEffect(() => {
       if (currentDoc?.url) {
         console.log(`⚠️ ${target.toUpperCase()}: Tentando usar arquivo original como fallback`);
         const directUrl = getBackendUrl(currentDoc.url);
-        setImageUrl(directUrl);
+        let canUseDirectImage = isImageFile(directUrl);
+
+        if (!canUseDirectImage) {
+          try {
+            canUseDirectImage = await checkIfImageFile(directUrl);
+          } catch (checkError) {
+            console.warn(`⚠️ ${target.toUpperCase()}: Falha ao verificar tipo de arquivo do fallback:`, checkError);
+          }
+        }
+
+        if (canUseDirectImage) {
+          setImageUrl(directUrl);
+        } else {
+          console.warn(`⚠️ ${target.toUpperCase()}: Arquivo original não é uma imagem, mantendo estado de erro`);
+        }
       }
 
       setLoading(false);
@@ -1892,6 +1906,39 @@ useEffect(() => {
       });
     }
   }, [documentViewStates, documentType, isEditMode, zoomLevel, getCurrentDocumentIdentifiers]);
+
+  const renderPdfWaitingState = (type: "escala" | "cardapio") => {
+    const isEscala = type === "escala";
+    const label = isEscala ? "escala" : "cardápio";
+    const title = isEscala ? "Escala de serviço" : "Cardápio";
+
+    return (
+      <div className="w-full h-full flex items-center justify-center p-6">
+        <div className="text-center text-gray-500 space-y-3">
+          <div className="flex justify-center">
+            {loading ? (
+              <div className="h-10 w-10 border-4 border-blue-200 border-t-blue-500 rounded-full animate-spin" />
+            ) : (
+              <div className="text-4xl">📄</div>
+            )}
+          </div>
+          <div className="font-semibold text-gray-700">
+            {loading
+              ? `Convertendo ${label} em imagem...`
+              : `${title} aguardando conversão`}
+          </div>
+          <div className="text-sm text-gray-500">
+            {loading
+              ? "Isso pode levar alguns instantes."
+              : "Assim que a conversão terminar, o documento será exibido automaticamente."}
+          </div>
+          {loading && loadingProgress > 0 && (
+            <div className="text-xs text-gray-400">Progresso: {loadingProgress}%</div>
+          )}
+        </div>
+      </div>
+    );
+  };
 
   // CORREÇÃO: Renderizar conteúdo com melhor tratamento de erros
   const renderContent = () => {
@@ -2072,7 +2119,7 @@ useEffect(() => {
                 />
               </div>
             </div>
-          ) : docUrl ? (
+          ) : docUrl && isImageFile(docUrl) ? (
             <div className="w-full h-full overflow-auto" ref={scrollableContentRef}>
               <div style={{
                 minHeight: `${100 * zoomLevel}%`,
@@ -2148,6 +2195,8 @@ useEffect(() => {
                 />
               </div>
             </div>
+          ) : docUrl ? (
+            renderPdfWaitingState("escala")
           ) : (
             <div className="text-center text-gray-500">
               <div className="text-4xl mb-4">📋</div>
@@ -2253,7 +2302,7 @@ useEffect(() => {
                 />
               </div>
             </div>
-          ) : docUrl ? (
+          ) : docUrl && isImageFile(docUrl) ? (
             <div className="w-full h-full overflow-auto" ref={scrollableContentRef}>
               <div style={{
                 minHeight: `${100 * zoomLevel}%`,
@@ -2327,6 +2376,8 @@ useEffect(() => {
                 />
               </div>
             </div>
+          ) : docUrl ? (
+            renderPdfWaitingState("cardapio")
           ) : (
             <div className="text-center text-gray-500">
               <div className="text-4xl mb-4">🍽️</div>
