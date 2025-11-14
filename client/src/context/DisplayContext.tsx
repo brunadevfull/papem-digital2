@@ -181,6 +181,7 @@ export const DisplayProvider: React.FC<DisplayProviderProps> = ({ children }) =>
   const escalaTimerRef = useRef<NodeJS.Timeout | null>(null);
   const mainDocTimerRef = useRef<NodeJS.Timeout | null>(null);
   const isInitializingRef = useRef(true);
+  const [isInitialized, setIsInitialized] = useState(false);
   const refreshDocumentsRef = useRef<(() => Promise<void>) | null>(null);
   
   // Callback para após completar scroll (apenas PLASA agora)
@@ -190,7 +191,7 @@ export const DisplayProvider: React.FC<DisplayProviderProps> = ({ children }) =>
   };
 
   // CORREÇÃO: Função para obter URL completa do backend - DETECTAR AMBIENTE
-  const getBackendUrl = (path: string): string => resolveBackendUrl(path);
+  const getBackendUrl = useCallback((path: string): string => resolveBackendUrl(path), []);
 
   // Função utilitária para tratar tags dos documentos
   const normalizeDocumentTags = (input: {
@@ -1368,7 +1369,7 @@ useEffect(() => {
       } finally {
         setTimeout(() => {
           isInitializingRef.current = false;
-    
+          setIsInitialized(true);
         }, 2000);
       }
     };
@@ -1388,7 +1389,7 @@ useEffect(() => {
   // 📡 Effect para SSE (Server-Sent Events) de documentos em tempo real
   // Substitui o polling periódico por atualizações em tempo real mais eficientes
   useEffect(() => {
-    if (isInitializingRef.current) {
+    if (!isInitialized) {
       return;
     }
 
@@ -1485,7 +1486,7 @@ useEffect(() => {
         eventSource = null;
       }
     };
-  }, [applyDocumentViewStates]);
+  }, [applyDocumentViewStates, getBackendUrl, isInitialized]);
 
 
 const value: DisplayContextType = {
