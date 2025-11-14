@@ -1415,7 +1415,7 @@ const PDFViewer: React.FC<PDFViewerProps> = ({
         setLoading(false);
       }
     }
-  }, [documentType, currentEscalaIndex, isEditMode]);
+  }, [documentType, currentEscalaIndex, getCurrentEscalaDoc, isEditMode]);
 
   // NOVO: Inicializar CARDÁPIO
 useEffect(() => {
